@@ -91,3 +91,4 @@ npm run build
 - Los datos se almacenan localmente en el navegador (IndexedDB)
 - No hay backend, no hay cuentas, no hay sincronización en la nube (v1)
 - Orientación general financiera — no constituye asesoría profesional certificada
+# financeos
