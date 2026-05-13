@@ -1,0 +1,88 @@
+/* src/styles/globals.css */
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Light theme */
+  --bg:        #f4f3ef;
+  --sur:       #ffffff;
+  --sur2:      #f9f8f5;
+  --sur3:      #f1f0eb;
+  --brd:       rgba(0,0,0,0.07);
+  --brd2:      rgba(0,0,0,0.13);
+  --tx:        #1a1a18;
+  --tm:        #6b6960;
+  --th:        #9a9890;
+  --grn:       #1a6b4a;
+  --grn-bg:    #e8f5ef;
+  --grn-lt:    #d0eddf;
+  --red:       #c0392b;
+  --red-bg:    #fdf0ee;
+  --amb:       #9a6500;
+  --amb-bg:    #fef8e8;
+  --blu:       #1a5a8a;
+  --blu-bg:    #e8f2fb;
+  --sans:      'Instrument Sans', sans-serif;
+  --mono:      'JetBrains Mono', monospace;
+  --r:         8px;
+  --rl:        12px;
+}
+
+[data-theme="dark"] {
+  --bg:        #111210;
+  --sur:       #1c1e1a;
+  --sur2:      #22241f;
+  --sur3:      #282b24;
+  --brd:       rgba(255,255,255,0.07);
+  --brd2:      rgba(255,255,255,0.14);
+  --tx:        #e8e6e0;
+  --tm:        #9a9890;
+  --th:        #5a5850;
+  --grn:       #3dbe7a;
+  --grn-bg:    #0f2218;
+  --grn-lt:    #163d26;
+  --red:       #e05a4a;
+  --red-bg:    #2a120f;
+  --amb:       #d4982a;
+  --amb-bg:    #261e08;
+  --blu:       #4a9ad4;
+  --blu-bg:    #0a1e30;
+}
+
+html, body, #root {
+  height: 100%;
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--tx);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--brd2); border-radius: 2px; }
+
+/* Focus */
+:focus-visible { outline: 2px solid var(--grn); outline-offset: 2px; }
+
+/* Form elements */
+input, select, textarea {
+  width: 100%;
+  background: var(--sur2);
+  border: 0.5px solid var(--brd2);
+  border-radius: var(--r);
+  padding: 7px 9px;
+  font-size: 12px;
+  font-family: var(--sans);
+  color: var(--tx);
+  outline: none;
+  transition: border-color 0.15s;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--grn); }
+select option { background: var(--sur); }
+
+/* Buttons */
+button { cursor: pointer; font-family: var(--sans); }

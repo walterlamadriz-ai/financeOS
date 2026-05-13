@@ -1,0 +1,91 @@
+FINANCEOS — LICENCIA DE USO COMERCIAL
+Versión 1.0 — Mayo 2025
+Copyright (c) 2025 MAGNOVA LLC / Walter [Apellido]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PLAN STARTER — USO PERSONAL ($29 pago único)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Se OTORGA permiso para:
+  ✓ Instalar y usar la app para uso personal
+  ✓ Modificar el código para adaptarlo a necesidades propias
+  ✓ Hacer deploy en un (1) dominio propio
+  ✓ Usar como base de aprendizaje y referencia técnica
+
+Se PROHÍBE expresamente:
+  ✗ Redistribuir o revender a terceros en cualquier forma
+  ✗ Usar como base para productos comerciales o de pago
+  ✗ Remover avisos de copyright del código fuente
+  ✗ Sublicenciar o transferir los derechos a terceros
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PLAN PRO — USO COMERCIAL ($79 pago único)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Se OTORGA permiso para:
+  ✓ Todo lo del plan Starter
+  ✓ Usar como producto entregable a clientes (hasta 20 instancias)
+  ✓ Personalizar branding: nombre, logo, colores, tipografía
+  ✓ Cobrar a clientes por setup, personalización o soporte
+  ✓ Incluir en servicios de consultoría financiera
+  ✓ Remover créditos de "FinanceOS" y reemplazar por tu marca
+  ✓ Deploy en múltiples dominios (hasta 20, uno por cliente)
+
+Se PROHÍBE expresamente:
+  ✗ Revender o redistribuir el código fuente sin modificaciones
+  ✗ Publicar en marketplaces de templates como ThemeForest, Envato, etc.
+  ✗ Ofrecer como SaaS público donde múltiples usuarios pagan acceso directo
+  ✗ Distribuir a más de 20 instancias/clientes sin upgrade a Enterprise
+  ✗ Sublicenciar los derechos a otros desarrolladores o agencias
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PLAN ENTERPRISE — WHITE-LABEL ($299 + desde $49/cliente)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Se OTORGA permiso para:
+  ✓ Todo lo del plan Pro sin límite de instancias
+  ✓ Distribución ilimitada a clientes y usuarios finales
+  ✓ Uso como SaaS comercial propio (cobrar por acceso)
+  ✓ Integración con backend propio (Supabase, Firebase, etc.)
+  ✓ Sublicenciamiento a clientes empresariales propios
+  ✓ Código fuente completo y editable sin restricciones técnicas
+  ✓ Prioridad en soporte técnico y acceso a actualizaciones
+
+Se PROHÍBE expresamente:
+  ✗ Revender la licencia Enterprise a terceros
+  ✗ Usar el nombre "FinanceOS" o la marca registrada sin autorización escrita
+  ✗ Publicar en marketplaces de templates o repositorios públicos
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+GARANTÍAS Y LIMITACIONES
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+EL SOFTWARE SE PROPORCIONA "TAL CUAL", SIN GARANTÍA DE NINGÚN TIPO, EXPRESA
+O IMPLÍCITA, INCLUYENDO PERO NO LIMITADO A GARANTÍAS DE COMERCIABILIDAD,
+IDONEIDAD PARA UN PROPÓSITO PARTICULAR Y NO INFRACCIÓN.
+
+EN NINGÚN CASO EL AUTOR SERÁ RESPONSABLE DE DAÑOS DIRECTOS, INDIRECTOS,
+INCIDENTALES, ESPECIALES, EJEMPLARES O CONSECUENTES QUE SURJAN DEL USO
+O IMPOSIBILIDAD DE USO DEL SOFTWARE.
+
+Las funcionalidades de análisis financiero de FinanceOS son de orientación
+general y no constituyen asesoría financiera, tributaria ni legal certificada.
+El usuario es responsable de sus decisiones financieras.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CONTACTO
+━━━━━━━━
+
+Para consultas sobre licencias, upgrade de plan o uso no contemplado:
+  Email:   hola@magnova.io
+  Web:     https://magnova.io
+
+Para reportar bugs o solicitar soporte técnico (planes Pro y Enterprise):
+  Email:   soporte@magnova.io
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
