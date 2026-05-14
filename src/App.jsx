@@ -11,6 +11,17 @@ import Terms from './pages/legal/Terms.jsx'
 import License from './pages/legal/License.jsx'
 import Disclaimer from './pages/legal/Disclaimer.jsx'
 import { Income, Expenses, Budgets, Debts, Goals, Reports, Settings } from './pages/index.jsx'
+import DemoShell from './demo/DemoShell.jsx'
+
+// ── Detectar modo demo ────────────────────────────────────────────────────────
+function isDemoMode() {
+  try {
+    const params = new URLSearchParams(window.location.search)
+    return params.get('demo') === 'true'
+  } catch {
+    return false
+  }
+}
 
 function renderPage(page) {
   switch (page) {
@@ -35,7 +46,6 @@ function Inner() {
   const [page, setPage] = useState('dashboard')
   const { settings, loading } = useApp()
 
-  // Mostrar onboarding solo si no se ha completado aún
   const showOnboarding = !loading && !settings.onboardingDone
 
   if (showOnboarding) {
@@ -51,10 +61,14 @@ function Inner() {
 }
 
 export default function App() {
+  // Si URL tiene ?demo=true, cargar DemoShell (sin AppProvider, sin IndexedDB)
+  if (isDemoMode()) {
+    return <DemoShell />
+  }
+
   return (
     <AppProvider>
       <Inner />
     </AppProvider>
   )
 }
-

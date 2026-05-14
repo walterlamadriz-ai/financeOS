@@ -15,7 +15,7 @@ import {
 } from '../core/db/index.js'
 import { uid, SEED_INCOMES, SEED_EXPENSES, SEED_BUDGETS, SEED_DEBTS, SEED_GOALS } from '../utils/index.js'
 
-const AppContext = createContext(null)
+export const AppContext = createContext(null)
 
 const initialState = {
   incomes:  [],
