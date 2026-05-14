@@ -8,6 +8,8 @@ import { useApp } from '../../context/AppContext.jsx'
 import { Card, CardHeader, Alert } from '../../components/ui/index.jsx'
 import { fmtMoney, fmtPct } from '../../utils/index.js'
 import { FinancialDisclaimer } from '../../components/legal/MicroCopy.jsx'
+import { downloadReportePDF } from './ReportePDF.jsx'
+import config from '../../config.js'
 
 const CURRENCY_SYMBOLS = { CLP: '$', USD: 'US$', EUR: '€', VES: 'Bs.', MXN: '$', ARS: '$' }
 
@@ -263,9 +265,37 @@ export default function Advisor() {
 
   // Leer y guardar notas del asesor en settings (local)
   const advisorNotes = settings.advisorNotes || {}
+  const [pdfLoading, setPdfLoading] = useState(false)
+  const [pdfError, setPdfError]     = useState(null)
 
   function saveNotes(notes) {
     updateSettings({ ...settings, advisorNotes: notes })
+  }
+
+  async function handleExportPDF() {
+    setPdfLoading(true)
+    setPdfError(null)
+    try {
+      const expByCat = {}
+      monthExpenses.forEach(e => { expByCat[e.category] = (expByCat[e.category] || 0) + e.amount })
+      await downloadReportePDF({
+        brandName:        config.app.name,
+        clientName:       advisorNotes.clientName || 'Cliente',
+        activeMonth,
+        sym,
+        mIncome, mExpense, mBalance, savingRate,
+        totalDebt, totalMinPayments,
+        signals, alerts, goals, debts,
+        overBudgetCount, score, scoreLabel, scoreColor,
+        advisorNotes,
+        expByCategory:    expByCat,
+      })
+    } catch (e) {
+      console.error('PDF error:', e)
+      setPdfError('Error al generar el PDF. Intenta de nuevo.')
+    } finally {
+      setPdfLoading(false)
+    }
   }
 
   // Mes activo
@@ -508,26 +538,37 @@ export default function Advisor() {
 
       {/* CTA reporte PDF */}
       <div style={{
-        padding: '16px 20px', background: 'var(--sur2)',
-        border: '0.5px solid var(--brd)', borderRadius: 8,
+        padding: '16px 20px', background: 'var(--grn-bg)',
+        border: '0.5px solid rgba(26,163,104,.2)', borderRadius: 8,
         display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',
       }}>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx)', marginBottom: 2 }}>
-            Exportar reporte PDF — Próximamente
+            Exportar reporte PDF profesional
           </div>
           <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)' }}>
-            La Fase 5 incluirá exportación de reporte profesional con semáforo, métricas y notas del asesor.
+            Genera un PDF con métricas, semáforo, alertas y notas del asesor. Listo para compartir con el cliente.
           </div>
+          {pdfError && (
+            <div style={{ fontSize: 11, color: '#e05a4a', fontFamily: 'var(--mono)', marginTop: 4 }}>
+              {pdfError}
+            </div>
+          )}
         </div>
-        <div style={{
-          fontSize: 10, fontFamily: 'var(--mono)', fontWeight: 600,
-          background: 'var(--sur)', color: 'var(--th)',
-          padding: '6px 14px', borderRadius: 20,
-          border: '0.5px solid var(--brd2)',
-        }}>
-          Fase 5
-        </div>
+        <button
+          onClick={handleExportPDF}
+          disabled={pdfLoading || noData}
+          style={{
+            background: pdfLoading ? 'var(--sur)' : 'var(--grn)',
+            color: pdfLoading ? 'var(--th)' : '#fff',
+            border: 'none', borderRadius: 6, padding: '10px 20px',
+            fontSize: 12, fontWeight: 600, cursor: pdfLoading || noData ? 'not-allowed' : 'pointer',
+            fontFamily: 'var(--syne, sans-serif)', flexShrink: 0, opacity: noData ? 0.5 : 1,
+            transition: 'all .15s',
+          }}
+        >
+          {pdfLoading ? 'Generando PDF…' : '↓ Exportar PDF'}
+        </button>
       </div>
 
       <FinancialDisclaimer />
