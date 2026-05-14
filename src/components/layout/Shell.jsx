@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
 import s from './shell.module.css'
+import { BackupStatusBadge } from '../backup/BackupManager.jsx'
 
 const NAV = [
   { sec: 'General',        items: [{ id: 'dashboard', ic: '◈', lb: 'Dashboard' }] },
@@ -57,6 +58,7 @@ export default function Shell({ page, setPage, children }) {
             FinanceOS v1.3 · MAGNOVA LLC<br/>
             <span style={{opacity:.5}}>🔒 Sin servidor · Sin cuentas</span>
           </div>
+          <div style={{marginTop:6}}><BackupStatusBadge compact /></div>
         </div>
       </nav>
 

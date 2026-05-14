@@ -5,6 +5,7 @@
 
 import { useState, useMemo } from 'react'
 import { BackupWarning, ReportsDisclaimer } from '../components/legal/MicroCopy.jsx'
+import BackupManager, { BackupStatusBadge } from '../components/backup/BackupManager.jsx'
 import { useApp } from '../context/AppContext.jsx'
 import { KPI, Card, CardHeader, TxRow, BarRow, FormGroup, FormRow, Btn, Badge, Alert, Empty, ProgressBar, PageHeader } from '../components/ui/index.jsx'
 import { fmtMoney, fmtPct, CAT_COLORS, CATS_INCOME, CATS_EXPENSE, METHODS, RECURRENCES, today } from '../utils/index.js'
@@ -685,21 +686,10 @@ export function Reports() {
 // ─── SETTINGS ─────────────────────────────────────────────────────────────────
 export function Settings() {
   const { settings, updateSettings, clearAll, loadDemo, exportData, exportCSV, importData } = useApp()
-  const [importing, setImporting] = useState(false)
-
   async function handleClear() {
     if (window.confirm('¿Borrar TODOS los datos? Esta acción no se puede deshacer.')) {
       await clearAll()
     }
-  }
-
-  async function handleImport(e) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setImporting(true)
-    try { await importData(file) }
-    catch {}
-    finally { setImporting(false); e.target.value = '' }
   }
 
   const srow = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 0', borderBottom: '0.5px solid var(--brd)' }
@@ -737,29 +727,25 @@ export function Settings() {
         </div>
       </Card>
 
+      {/* ── Respaldo y restauración ── */}
       <Card>
-        <CardHeader title="Gestión de datos" />
-        <div style={srow}>
-          <div><div style={slbl}>Cargar datos demo</div><div style={ssub}>Restaura datos de ejemplo</div></div>
-          <Btn variant="ghost" size="sm" onClick={loadDemo}>Cargar demo</Btn>
-        </div>
+        <CardHeader title="Respaldo y restauración" />
+        <BackupManager />
+      </Card>
+
+      {/* ── Otras acciones de datos ── */}
+      <Card>
+        <CardHeader title="Otras acciones" />
         <div style={srow}>
           <div><div style={slbl}>Exportar CSV</div><div style={ssub}>Ingresos y gastos · compatible Excel</div></div>
           <Btn variant="ghost" size="sm" onClick={exportCSV}>Descargar CSV</Btn>
         </div>
         <div style={srow}>
-          <div><div style={slbl}>Exportar JSON</div><div style={ssub}>Backup completo de todos los datos</div></div>
-          <Btn variant="ghost" size="sm" onClick={exportData}>Descargar JSON</Btn>
-        </div>
-        <div style={srow}>
-          <div><div style={slbl}>Importar JSON</div><div style={ssub}>Restaurar desde backup</div></div>
-          <label style={{ cursor: 'pointer' }}>
-            <Btn variant="ghost" size="sm">{importing ? 'Importando…' : 'Subir archivo'}</Btn>
-            <input type="file" accept=".json" style={{ display: 'none' }} onChange={handleImport} disabled={importing} />
-          </label>
+          <div><div style={slbl}>Cargar datos demo</div><div style={ssub}>Sobrescribe con datos de ejemplo</div></div>
+          <Btn variant="ghost" size="sm" onClick={loadDemo}>Cargar demo</Btn>
         </div>
         <div style={{ ...srow, borderBottom: 'none' }}>
-          <div><div style={slbl}>Borrar todos los datos</div><div style={ssub}>Acción irreversible</div></div>
+          <div><div style={slbl}>Borrar todos los datos</div><div style={ssub}>Acción irreversible · sin recuperación posible</div></div>
           <Btn variant="danger" size="sm" onClick={handleClear}>Borrar todo</Btn>
         </div>
       </Card>

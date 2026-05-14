@@ -277,16 +277,32 @@ export function AppProvider({ children }) {
   const exportData = useCallback(async () => {
     try {
       const data = await exportAllData()
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+      // Agregar metadata al respaldo
+      const backup = {
+        _meta: {
+          version:    '1.3',
+          app:        'FinanceOS',
+          createdAt:  new Date().toISOString(),
+          recordCount: {
+            incomes:  (data.incomes  || []).length,
+            expenses: (data.expenses || []).length,
+            budgets:  (data.budgets  || []).length,
+            debts:    (data.debts    || []).length,
+            goals:    (data.goals    || []).length,
+          },
+        },
+        ...data,
+      }
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' })
       const url  = URL.createObjectURL(blob)
       const a    = document.createElement('a')
       a.href     = url
       a.download = `financeos-backup-${new Date().toISOString().slice(0, 10)}.json`
       a.click()
       URL.revokeObjectURL(url)
-      showToast('Backup JSON exportado.', 'ok')
+      showToast('Respaldo creado correctamente.', 'ok')
     } catch (e) {
-      showToast('Error al exportar JSON.', 'error')
+      showToast('Error al crear el respaldo.', 'error')
     }
   }, [showToast])
 
