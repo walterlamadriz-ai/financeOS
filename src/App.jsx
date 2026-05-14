@@ -6,20 +6,28 @@ import Toast from './components/ui/Toast.jsx'
 import Onboarding from './components/Onboarding.jsx'
 import Dashboard from './pages/Dashboard/index.jsx'
 import CashFlow from './pages/CashFlow/index.jsx'
+import Privacy from './pages/legal/Privacy.jsx'
+import Terms from './pages/legal/Terms.jsx'
+import License from './pages/legal/License.jsx'
+import Disclaimer from './pages/legal/Disclaimer.jsx'
 import { Income, Expenses, Budgets, Debts, Goals, Reports, Settings } from './pages/index.jsx'
 
 function renderPage(page) {
   switch (page) {
-    case 'dashboard': return <Dashboard />
-    case 'income':    return <Income />
-    case 'expenses':  return <Expenses />
-    case 'budgets':   return <Budgets />
-    case 'debts':     return <Debts />
-    case 'goals':     return <Goals />
-    case 'cashflow':  return <CashFlow />
-    case 'reports':   return <Reports />
-    case 'settings':  return <Settings />
-    default:          return <Dashboard />
+    case 'dashboard':  return <Dashboard />
+    case 'income':     return <Income />
+    case 'expenses':   return <Expenses />
+    case 'budgets':    return <Budgets />
+    case 'debts':      return <Debts />
+    case 'goals':      return <Goals />
+    case 'cashflow':   return <CashFlow />
+    case 'reports':    return <Reports />
+    case 'settings':   return <Settings />
+    case 'privacy':    return <Privacy />
+    case 'terms':      return <Terms />
+    case 'license':    return <License />
+    case 'disclaimer': return <Disclaimer />
+    default:           return <Dashboard />
   }
 }
 

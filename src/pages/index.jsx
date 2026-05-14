@@ -4,6 +4,7 @@
 //        totalExpense filtrado en Budgets, validación saldo>inicial en Deudas
 
 import { useState, useMemo } from 'react'
+import { BackupWarning, ReportsDisclaimer } from '../components/legal/MicroCopy.jsx'
 import { useApp } from '../context/AppContext.jsx'
 import { KPI, Card, CardHeader, TxRow, BarRow, FormGroup, FormRow, Btn, Badge, Alert, Empty, ProgressBar, PageHeader } from '../components/ui/index.jsx'
 import { fmtMoney, fmtPct, CAT_COLORS, CATS_INCOME, CATS_EXPENSE, METHODS, RECURRENCES, today } from '../utils/index.js'
@@ -676,6 +677,7 @@ export function Reports() {
           )}
         </div>
       </Card>
+      <ReportsDisclaimer />
     </div>
   )
 }
@@ -762,8 +764,9 @@ export function Settings() {
         </div>
       </Card>
 
-      <div style={{ padding: '10px 12px', background: 'var(--sur2)', borderRadius: 'var(--r)', border: '0.5px solid var(--brd)', fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', lineHeight: 1.7 }}>
-        FinanceOS v1.1 · Datos almacenados en IndexedDB (localStorage como fallback) · Sin conexión a servidores · Orientación general, no asesoría financiera certificada
+      <BackupWarning />
+      <div style={{ padding: '10px 12px', background: 'var(--sur2)', borderRadius: 'var(--r)', border: '0.5px solid var(--brd)', fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', lineHeight: 1.7, marginTop: 8 }}>
+        FinanceOS v1.3 · MAGNOVA LLC · Datos en IndexedDB local · Sin servidor · No asesoría financiera certificada
       </div>
     </div>
   )

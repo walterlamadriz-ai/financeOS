@@ -24,7 +24,7 @@ export default function Shell({ page, setPage, children }) {
       <nav className={s.sb}>
         <div className={s.logo}>
           <div className={s.logoName}>FinanceOS</div>
-          <div className={s.logoSub}>v1.0 · personal</div>
+          <div className={s.logoSub}>v1.3</div>
         </div>
 
         {NAV.map(g => (
@@ -47,6 +47,15 @@ export default function Shell({ page, setPage, children }) {
           <button className={s.themeBtn} onClick={toggleTheme}>
             {isDark ? '☀ Claro' : '◑ Oscuro'}
           </button>
+          <div className={s.legalLinks}>
+            <span onClick={() => setPage('privacy')} className={s.legalLink}>Privacidad</span>
+            <span onClick={() => setPage('terms')} className={s.legalLink}>Términos</span>
+            <span onClick={() => setPage('disclaimer')} className={s.legalLink}>Aviso legal</span>
+          </div>
+          <div className={s.appVersion}>
+            FinanceOS v1.3 · MAGNOVA LLC<br/>
+            <span style={{opacity:.5}}>🔒 Sin servidor · Sin cuentas</span>
+          </div>
         </div>
       </nav>
 

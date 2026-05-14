@@ -259,8 +259,10 @@ export default function CashFlow() {
       )}
 
       <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', padding: '4px 0', lineHeight: 1.5 }}>
-        * Proyección calculada sobre ingresos y gastos marcados como recurrentes. No incluye gastos únicos futuros.
-        Orientación general — no constituye asesoría financiera.
+        * Proyección calculada sobre ingresos y gastos marcados como recurrentes. No incluye
+        gastos únicos futuros ni eventos imprevistos. Atención: no usar en modo incógnito —
+        los datos se borran al cerrar esa sesión. Orientación general — no constituye
+        asesoría financiera, tributaria ni de inversión.
       </div>
     </div>
   )

@@ -1,0 +1,198 @@
+/* src/pages/legal/legal.module.css */
+
+.legalWrap {
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Sections */
+.section {
+  padding: 20px 0;
+  border-bottom: 0.5px solid var(--brd);
+}
+.section:last-of-type {
+  border-bottom: none;
+}
+.section h2 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--tx);
+  margin-bottom: 10px;
+  letter-spacing: -0.2px;
+}
+.section p {
+  font-size: 13px;
+  color: var(--tm);
+  line-height: 1.7;
+  margin-bottom: 8px;
+}
+.section p:last-child {
+  margin-bottom: 0;
+}
+
+/* Lists */
+.list {
+  padding-left: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+.list li {
+  font-size: 12px;
+  color: var(--tm);
+  line-height: 1.5;
+  padding-left: 16px;
+  position: relative;
+}
+.list li::before {
+  content: '·';
+  position: absolute;
+  left: 4px;
+  color: var(--grn);
+  font-weight: 700;
+}
+
+.listWarn {
+  padding-left: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+.listWarn li {
+  font-size: 12px;
+  color: var(--tm);
+  line-height: 1.5;
+  padding-left: 16px;
+  position: relative;
+}
+.listWarn li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: var(--th);
+  font-size: 10px;
+}
+
+/* Highlight box — green */
+.highlight {
+  background: var(--grn-bg);
+  border: 0.5px solid rgba(26, 163, 104, 0.2);
+  border-radius: var(--r);
+  padding: 14px 16px;
+  font-size: 13px;
+  color: var(--grn);
+  line-height: 1.6;
+  margin-bottom: 4px;
+}
+
+/* Info box — blue tint */
+.infoBox {
+  background: var(--sur2);
+  border: 0.5px solid var(--brd2);
+  border-radius: var(--r);
+  padding: 12px 14px;
+  font-size: 12px;
+  color: var(--tm);
+  line-height: 1.6;
+  margin-top: 10px;
+}
+
+/* Warning box — amber */
+.warnBox {
+  background: #faeeda;
+  border: 0.5px solid rgba(133, 79, 11, 0.2);
+  border-radius: var(--r);
+  padding: 14px 16px;
+  font-size: 13px;
+  color: #854f0b;
+  line-height: 1.6;
+  margin-top: 10px;
+}
+
+/* Legal notice at bottom */
+.legalNotice {
+  margin-top: 16px;
+  padding: 14px 16px;
+  background: var(--sur2);
+  border: 0.5px solid var(--brd);
+  border-radius: var(--r);
+  font-size: 11px;
+  color: var(--th);
+  font-family: var(--mono);
+  line-height: 1.6;
+}
+
+/* Plan blocks for License page */
+.planBlock {
+  border: 0.5px solid var(--brd);
+  border-radius: var(--r);
+  padding: 20px;
+  margin-bottom: 12px;
+  background: var(--sur);
+}
+.planFeatured {
+  border-color: var(--grn);
+  background: var(--grn-bg);
+}
+.planName {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--tx);
+  margin-bottom: 16px;
+  letter-spacing: -0.3px;
+}
+.planCols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.planSectionTitle {
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 8px;
+}
+
+@media (max-width: 600px) {
+  .planCols {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+}
+
+/* Microcopy components — used inline in app */
+.microDisclaimer {
+  font-size: 11px;
+  color: var(--th);
+  font-family: var(--mono);
+  line-height: 1.5;
+  padding: 8px 10px;
+  background: var(--sur2);
+  border-radius: 4px;
+  border-left: 2px solid var(--brd2);
+}
+
+.backupWarning {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #faeeda;
+  border-radius: var(--r);
+  font-size: 12px;
+  color: #854f0b;
+  line-height: 1.5;
+}
+.backupWarningIcon {
+  flex-shrink: 0;
+  font-size: 14px;
+  margin-top: 1px;
+}
