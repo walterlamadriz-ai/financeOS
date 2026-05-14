@@ -14,6 +14,7 @@ import Privacy from '../pages/legal/Privacy.jsx'
 import Terms from '../pages/legal/Terms.jsx'
 import License from '../pages/legal/License.jsx'
 import Disclaimer from '../pages/legal/Disclaimer.jsx'
+import Advisor from '../pages/Advisor/index.jsx'
 import { AppContext } from '../context/AppContext.jsx'
 
 function renderPage(page) {
@@ -31,6 +32,7 @@ function renderPage(page) {
     case 'terms':      return <Terms />
     case 'license':    return <License />
     case 'disclaimer': return <Disclaimer />
+    case 'advisor':    return <Advisor />
     default:           return <Dashboard />
   }
 }
