@@ -53,6 +53,7 @@ export default function Shell({ page, setPage, children }) {
             <span onClick={() => setPage('privacy')} className={s.legalLink}>Privacidad</span>
             <span onClick={() => setPage('terms')} className={s.legalLink}>Términos</span>
             <span onClick={() => setPage('disclaimer')} className={s.legalLink}>Aviso legal</span>
+            <a href='https://financeos-landing-omega.vercel.app/docs/index.html' target='_blank' className={s.legalLink} style={{textDecoration:'none'}}>Docs</a>
           </div>
           <div className={s.appVersion}>
             FinanceOS v1.3 · MAGNOVA LLC<br/>
