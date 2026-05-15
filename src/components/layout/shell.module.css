@@ -101,3 +101,146 @@
   margin-top: 8px;
   line-height: 1.5;
 }
+
+/* ── TOPBAR IZQUIERDA ── */
+.topLeft {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── BOTÓN HAMBURGUESA — solo visible en móvil ── */
+.menuBtn {
+  display: none;
+  background: var(--sur2);
+  border: 0.5px solid var(--brd2);
+  border-radius: var(--r);
+  padding: 5px 10px;
+  font-size: 15px;
+  cursor: pointer;
+  color: var(--tx);
+  line-height: 1;
+  transition: background .15s;
+  flex-shrink: 0;
+}
+.menuBtn:hover { background: var(--sur); }
+
+/* ── BOTÓN ATRÁS — solo visible en móvil ── */
+.backBtn {
+  display: none;
+  background: transparent;
+  border: none;
+  font-size: 12px;
+  color: var(--grn2);
+  cursor: pointer;
+  font-family: var(--sans);
+  padding: 4px 6px;
+  border-radius: var(--r);
+  transition: background .15s;
+  flex-shrink: 0;
+}
+.backBtn:hover { background: var(--grn-bg); }
+
+/* ── OVERLAY ── */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 200;
+}
+
+/* ── DRAWER MÓVIL ── */
+.drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 260px;
+  height: 100vh;
+  background: var(--sur);
+  border-right: 0.5px solid var(--brd);
+  z-index: 201;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-100%);
+  transition: transform .25s ease;
+  overflow: hidden;
+}
+.drawerOpen {
+  transform: translateX(0);
+}
+.drawerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 14px 10px;
+  border-bottom: 0.5px solid var(--brd);
+  flex-shrink: 0;
+}
+.drawerClose {
+  background: var(--sur2);
+  border: 0.5px solid var(--brd2);
+  border-radius: var(--r);
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--tm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s;
+  flex-shrink: 0;
+}
+.drawerClose:hover { background: var(--sur); color: var(--tx); }
+.drawerNav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+.drawerFooter {
+  padding: 10px 14px;
+  border-top: 0.5px solid var(--brd);
+  flex-shrink: 0;
+}
+
+/* ── TIP DE ROTACIÓN — solo móvil ── */
+.rotationTip {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 6px 14px 0;
+  padding: 8px 10px;
+  background: var(--sur2);
+  border: 0.5px solid var(--brd);
+  border-radius: var(--r);
+  font-size: 11px;
+  color: var(--th);
+  font-family: var(--mono);
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+.tipClose {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--th);
+  font-size: 12px;
+  flex-shrink: 0;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: color .15s;
+}
+.tipClose:hover { color: var(--tx); }
+
+/* ── RESPONSIVE MÓVIL ── */
+@media (max-width: 700px) {
+  .shell { grid-template-columns: 1fr; }
+  .sb    { display: none; }
+  .menuBtn { display: flex; align-items: center; justify-content: center; }
+  .backBtn { display: inline-flex; align-items: center; }
+  .overlay { display: block; }
+  .rotationTip { display: flex; }
+  :global(.grid2), :global(.grid3), :global(.grid4) { grid-template-columns: 1fr; }
+}

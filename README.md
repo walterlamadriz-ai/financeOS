@@ -1,94 +1,75 @@
-# FinanceOS — Personal Finance Command Center
+# FinanceOS v1.3
 
-> App web progresiva para gestión de finanzas personales. Funciona offline, instala como app nativa, sin backend.
+App de finanzas personales PWA · React 18 + Vite · Offline · Sin backend
 
-## Stack
-- React 18 + Vite 5
-- IndexedDB (via `idb`) — persistencia local completa
-- CSS Modules + Variables CSS — tema claro/oscuro
-- Vite PWA Plugin — instalable, funciona offline
-- Export CSV + JSON / Import JSON
+**Demo:** https://financeos-hazel.vercel.app/app/?demo=true  
+**Docs:** https://financeos-landing-omega.vercel.app/docs/  
+**Soporte:** maxnovaluciglobal@gmail.com
 
-## Instalación
+---
 
+## Inicio rápido
+
+### Requisitos
+- Node.js 18+ → https://nodejs.org
+
+### Instalación
 ```bash
-# 1. Clonar o descomprimir el proyecto
-cd financeos
-
-# 2. Instalar dependencias
 npm install
-
-# 3. Iniciar en desarrollo
 npm run dev
-# → http://localhost:5173
-
-# 4. Build para producción
-npm run build
-
-# 5. Preview del build
-npm run preview
+# Abrí: http://localhost:5173/app/
 ```
 
-## Estructura
-
-```
-src/
-├── core/db/index.js          # IndexedDB — todos los stores y CRUD
-├── context/AppContext.jsx    # Estado global + sync con DB
-├── pages/
-│   ├── Dashboard/            # KPIs, movimientos recientes, metas
-│   └── index.jsx             # Income, Expenses, Budgets, Debts, Goals, Reports, Settings
-├── components/
-│   ├── layout/Shell.jsx      # Sidebar + layout principal
-│   └── ui/index.jsx          # Componentes reutilizables
-├── utils/index.js            # Formatters, constantes, seed data
-└── styles/globals.css        # Variables CSS, temas claro/oscuro
-```
-
-## IndexedDB — Stores
-
-| Store      | Descripción                          |
-|------------|--------------------------------------|
-| `incomes`  | Ingresos con categoría y recurrencia |
-| `expenses` | Gastos con tipo (necesidad/deseo)    |
-| `budgets`  | Límites mensuales por categoría      |
-| `debts`    | Deudas con progreso de pago          |
-| `goals`    | Metas de ahorro con progreso         |
-| `settings` | Configuración del usuario            |
-
-## Personalización rápida
-
-**Colores** → `src/styles/globals.css` → variables `:root` y `[data-theme="dark"]`
-
-**Categorías** → `src/utils/index.js` → `CATS_INCOME` y `CATS_EXPENSE`
-
-**Moneda** → Ajustes dentro de la app (persiste en IndexedDB)
-
-**Nombre/branding** → `src/components/layout/Shell.jsx` → `.logoName`
-
-## Deploy en Vercel
-
+### Build para producción
 ```bash
 npm run build
-# Subir carpeta dist/ a Vercel o usar Vercel CLI:
-npx vercel --prod
+# Genera dist/ listo para deploy
 ```
 
-## Deploy en Netlify
+---
 
-```bash
-npm run build
-# Drag & drop de dist/ en netlify.com/drop
-# O conectar repo de GitHub
+## Personalización (plan Pro)
+
+Abrí `src/config.js`:
+```js
+app: {
+  name: 'Tu nombre de app',
+  supportEmail: 'tu@email.com',
+},
+defaults: {
+  currency: 'CLP', // CLP, USD, EUR, VES, MXN, ARS, COP
+}
 ```
 
-## Fase 3 — Pendiente
-- [ ] Calendario financiero
-- [ ] Comparación entre meses
-- [ ] Categorías personalizables desde UI
+Colores en `src/styles/globals.css`:
+```css
+--grn: #tu-color;
+```
 
-## Notas
-- Los datos se almacenan localmente en el navegador (IndexedDB)
-- No hay backend, no hay cuentas, no hay sincronización en la nube (v1)
-- Orientación general financiera — no constituye asesoría profesional certificada
-# financeos
+---
+
+## Deploy
+
+**Vercel:** Build Command `node build.js` · Output Directory `dist`
+
+**Netlify Drop:** `npm run build` → arrastrá `dist/` a netlify.com/drop
+
+---
+
+## Documentación completa
+
+https://financeos-landing-omega.vercel.app/docs/
+
+---
+
+## Datos locales — importante
+
+Los datos se guardan en el navegador del usuario. Sin backup previo,
+los datos no se pueden recuperar — ni por el usuario ni por
+MAXNOVA & LUCI Global LLC.
+
+Exportá backup JSON desde Ajustes regularmente.
+
+---
+
+© 2026 MAXNOVA & LUCI Global LLC · Desarrollado por Walter La Madriz
