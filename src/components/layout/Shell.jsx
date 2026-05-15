@@ -56,7 +56,7 @@ export default function Shell({ page, setPage, children }) {
             <a href='https://financeos-landing-omega.vercel.app/docs/index.html' target='_blank' className={s.legalLink} style={{textDecoration:'none'}}>Docs</a>
           </div>
           <div className={s.appVersion}>
-            FinanceOS v1.3 · MAGNOVA LLC<br/>
+            FinanceOS v1.3 · MAXNOVA & LUCI Global LLC<br/>
             <span style={{opacity:.5}}>🔒 Sin servidor · Sin cuentas</span>
           </div>
           <div style={{marginTop:6}}><BackupStatusBadge compact /></div>

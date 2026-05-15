@@ -767,7 +767,7 @@ export function Settings() {
 
       <BackupWarning />
       <div style={{ padding: '10px 12px', background: 'var(--sur2)', borderRadius: 'var(--r)', border: '0.5px solid var(--brd)', fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', lineHeight: 1.7, marginTop: 8 }}>
-        FinanceOS v1.3 · MAGNOVA LLC · Datos en IndexedDB local · Sin servidor · No asesoría financiera certificada
+        FinanceOS v1.3 · MAXNOVA & LUCI Global LLC · Datos locales · Sin servidor · No asesoría financiera certificada
       </div>
     </div>
   )

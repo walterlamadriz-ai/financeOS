@@ -65,7 +65,7 @@ export default function Disclaimer() {
           <p>
             El usuario es responsable de la exactitud de los datos que ingresa y de las
             decisiones que toma basándose en la información que muestra la herramienta.
-            MAGNOVA LLC no asume responsabilidad por pérdidas o perjuicios derivados del
+            MAXNOVA & LUCI Global LLC no asume responsabilidad por pérdidas o perjuicios derivados del
             uso de FinanceOS.
           </p>
         </div>
@@ -85,8 +85,8 @@ export default function Disclaimer() {
         </div>
 
         <div className={s.legalNotice}>
-          Para consultas: <strong>hola@magnova.io</strong> ·
-          Revisado por MAGNOVA LLC · 2025
+          Para consultas: <strong>maxnovaluciglobal@gmail.com</strong> ·
+          Revisado por MAXNOVA & LUCI Global LLC · 2025
         </div>
 
       </div>

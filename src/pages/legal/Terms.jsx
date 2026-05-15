@@ -10,7 +10,7 @@ export default function Terms() {
     <div className="stack">
       <PageHeader
         title="Términos de Uso"
-        sub="Última actualización: 2025 · MAGNOVA LLC"
+        sub="Última actualización: 2025 · MAXNOVA & LUCI Global LLC"
       />
 
       <div className={s.legalWrap}>
@@ -68,7 +68,7 @@ export default function Terms() {
           <h2>4. Almacenamiento local y pérdida de datos</h2>
           <p>
             FinanceOS almacena todos los datos localmente en el navegador del usuario.
-            <strong> MAGNOVA LLC no almacena ni puede recuperar los datos del usuario.</strong>
+            <strong> MAXNOVA & LUCI Global LLC no almacena ni puede recuperar los datos del usuario.</strong>
           </p>
           <div className={s.warnBox}>
             <strong>Advertencia sobre pérdida de datos:</strong> Los datos pueden perderse
@@ -82,7 +82,7 @@ export default function Terms() {
         <div className={s.section}>
           <h2>5. Limitación de responsabilidad</h2>
           <p>
-            En la máxima medida permitida por la ley aplicable, MAGNOVA LLC no será
+            En la máxima medida permitida por la ley aplicable, MAXNOVA & LUCI Global LLC no será
             responsable por:
           </p>
           <ul className={s.list}>
@@ -97,7 +97,7 @@ export default function Terms() {
         <div className={s.section}>
           <h2>6. Propiedad intelectual</h2>
           <p>
-            El código fuente, diseño y contenido de FinanceOS son propiedad de MAGNOVA LLC
+            El código fuente, diseño y contenido de FinanceOS son propiedad de MAXNOVA & LUCI Global LLC
             y están protegidos por derechos de autor. El uso de FinanceOS está sujeto a los
             términos de la licencia adquirida (Starter, Pro o Enterprise), detallados en el
             documento de Licencia correspondiente.
@@ -120,14 +120,14 @@ export default function Terms() {
           <p>
             FinanceOS es una PWA (Progressive Web App) que funciona offline una vez cargada.
             La disponibilidad inicial depende de la plataforma de hosting utilizada.
-            MAGNOVA LLC no garantiza disponibilidad ininterrumpida del servicio de hosting.
+            MAXNOVA & LUCI Global LLC no garantiza disponibilidad ininterrumpida del servicio de hosting.
           </p>
         </div>
 
         <div className={s.section}>
           <h2>9. Modificaciones</h2>
           <p>
-            MAGNOVA LLC se reserva el derecho de modificar estos términos en cualquier
+            MAXNOVA & LUCI Global LLC se reserva el derecho de modificar estos términos en cualquier
             momento. Las modificaciones entran en vigencia al publicarse en esta página.
             El uso continuado implica aceptación de los términos actualizados.
           </p>
@@ -136,14 +136,14 @@ export default function Terms() {
         <div className={s.section}>
           <h2>10. Ley aplicable</h2>
           <p>
-            Estos términos se rigen por las leyes aplicables a MAGNOVA LLC. Cualquier
+            Estos términos se rigen por las leyes aplicables a MAXNOVA & LUCI Global LLC. Cualquier
             disputa se resolverá en la jurisdicción competente correspondiente.
           </p>
         </div>
 
         <div className={s.section}>
           <h2>11. Contacto</h2>
-          <p>Para consultas sobre estos términos: <strong>hola@magnova.io</strong></p>
+          <p>Para consultas sobre estos términos: <strong>maxnovaluciglobal@gmail.com</strong></p>
         </div>
 
         <div className={s.section}>
@@ -151,7 +151,7 @@ export default function Terms() {
           <p>
             El incumplimiento de estos términos o de los términos de licencia puede resultar
             en la revocación del derecho de uso sin reembolso. Para regularizar situaciones
-            fuera de los límites del plan adquirido, contactar <strong>hola@magnova.io</strong>{' '}
+            fuera de los límites del plan adquirido, contactar <strong>maxnovaluciglobal@gmail.com</strong>{' '}
             antes de que ocurra el incumplimiento.
           </p>
         </div>

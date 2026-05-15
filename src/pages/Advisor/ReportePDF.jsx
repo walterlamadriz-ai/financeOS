@@ -201,7 +201,7 @@ export function ReporteFinancieroPDF({ data }) {
       title={`Reporte Financiero — ${clientName || 'Cliente'} — ${monthLabel(activeMonth)}`}
       author={brandName}
       subject="Diagnóstico financiero personal"
-      creator="FinanceOS · MAGNOVA LLC"
+      creator="FinanceOS · MAXNOVA & LUCI Global LLC"
     >
       {/* ── PÁGINA 1 — Resumen ejecutivo ── */}
       <Page size="A4" style={s.page}>
@@ -456,7 +456,7 @@ export function ReporteFinancieroPDF({ data }) {
             Ha sido generado con FinanceOS a partir de los datos ingresados por el usuario. No constituye asesoría
             financiera, tributaria, contable ni de inversión. No reemplaza la consulta con profesionales certificados.
             Las señales, alertas y métricas presentadas son orientativas y se basan exclusivamente en los datos
-            registrados. {brandName !== 'FinanceOS' ? `Elaborado con FinanceOS · MAGNOVA LLC. ` : ''}
+            registrados. {brandName !== 'FinanceOS' ? `Elaborado con FinanceOS · MAXNOVA & LUCI Global LLC. ` : ''}
             Para consultas: {config.app.supportEmail}
           </Text>
         </View>

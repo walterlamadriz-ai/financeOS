@@ -67,7 +67,7 @@ export default function License() {
     <div className="stack">
       <PageHeader
         title="Términos de Licencia"
-        sub="Derechos y restricciones por plan · Revisado por MAGNOVA LLC · 2025"
+        sub="Derechos y restricciones por plan · Revisado por MAXNOVA & LUCI Global LLC · 2025"
       />
 
       <div className={s.legalWrap}>
@@ -102,7 +102,7 @@ export default function License() {
           <h2>Garantías y limitaciones</h2>
           <p>
             El software se proporciona "tal cual", sin garantía de ningún tipo, expresa
-            o implícita. En ningún caso MAGNOVA LLC será responsable de daños directos,
+            o implícita. En ningún caso MAXNOVA & LUCI Global LLC será responsable de daños directos,
             indirectos, incidentales o consecuentes que surjan del uso o imposibilidad
             de uso del software.
           </p>
@@ -116,7 +116,7 @@ export default function License() {
           <h2>Contacto para licencias</h2>
           <p>
             Para consultas sobre upgrade de plan, uso no contemplado o licencias
-            personalizadas: <strong>hola@magnova.io</strong>
+            personalizadas: <strong>maxnovaluciglobal@gmail.com</strong>
           </p>
         </div>
 

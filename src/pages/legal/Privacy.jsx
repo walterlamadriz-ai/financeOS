@@ -11,7 +11,7 @@ export default function Privacy() {
     <div className="stack">
       <PageHeader
         title="Política de Privacidad"
-        sub="Última actualización: 2025 · MAGNOVA LLC"
+        sub="Última actualización: 2025 · MAXNOVA & LUCI Global LLC"
       />
 
       <div className={s.legalWrap}>
@@ -25,7 +25,7 @@ export default function Privacy() {
         <div className={s.section}>
           <h2>1. Quién opera esta herramienta</h2>
           <p>
-            FinanceOS es desarrollado y distribuido por MAGNOVA LLC. Esta política describe
+            FinanceOS es desarrollado y distribuido por MAXNOVA & LUCI Global LLC. Esta política describe
             cómo funciona el almacenamiento de datos dentro de la herramienta y qué información,
             si alguna, puede ser recopilada en relación con su uso.
           </p>
@@ -41,7 +41,7 @@ export default function Privacy() {
           </p>
           <p>
             Estos datos <strong>no se transmiten a ningún servidor externo</strong>, no se
-            sincronizan con la nube y no son accesibles por MAGNOVA LLC ni por ningún tercero
+            sincronizan con la nube y no son accesibles por MAXNOVA & LUCI Global LLC ni por ningún tercero
             a través de la infraestructura de FinanceOS.
           </p>
           <div className={s.infoBox}>
@@ -134,7 +134,7 @@ export default function Privacy() {
         <div className={s.section}>
           <h2>9. Cambios a esta política</h2>
           <p>
-            MAGNOVA LLC puede actualizar esta política en cualquier momento. Los cambios
+            MAXNOVA & LUCI Global LLC puede actualizar esta política en cualquier momento. Los cambios
             se publicarán en esta página con la fecha de actualización. El uso continuado
             de la herramienta implica aceptación de la política vigente.
           </p>
@@ -143,7 +143,7 @@ export default function Privacy() {
         <div className={s.section}>
           <h2>10. Contacto</h2>
           <p>
-            Para consultas relacionadas con privacidad: <strong>hola@magnova.io</strong>
+            Para consultas relacionadas con privacidad: <strong>maxnovaluciglobal@gmail.com</strong>
           </p>
         </div>
 
