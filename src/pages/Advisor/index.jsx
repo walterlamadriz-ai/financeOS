@@ -9,6 +9,7 @@ import { Card, CardHeader, Alert } from '../../components/ui/index.jsx'
 import { fmtMoney, fmtPct } from '../../utils/index.js'
 import { FinancialDisclaimer } from '../../components/legal/MicroCopy.jsx'
 import { downloadReportePDF } from './ReportePDF.jsx'
+import TemplateSelector from '../../components/templates/TemplateSelector.jsx'
 import config from '../../config.js'
 
 const CURRENCY_SYMBOLS = { CLP: '$', USD: 'US$', EUR: '€', VES: 'Bs.', MXN: '$', ARS: '$' }
@@ -534,6 +535,12 @@ export default function Advisor() {
       <Card>
         <CardHeader title="Notas del asesor y próximos pasos" />
         <AdvisorNotes notes={advisorNotes} onSave={saveNotes} />
+      </Card>
+
+      {/* Plantilla del cliente */}
+      <Card>
+        <CardHeader title="Perfil del cliente" />
+        <TemplateSelector compact onApplied={(t) => showToast(`Plantilla "${t.name}" aplicada.`, 'ok')} />
       </Card>
 
       {/* CTA reporte PDF */}

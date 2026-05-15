@@ -6,6 +6,7 @@
 import { useState, useMemo } from 'react'
 import { BackupWarning, ReportsDisclaimer } from '../components/legal/MicroCopy.jsx'
 import BackupManager, { BackupStatusBadge } from '../components/backup/BackupManager.jsx'
+import TemplateSelector from '../components/templates/TemplateSelector.jsx'
 import { useApp } from '../context/AppContext.jsx'
 import { KPI, Card, CardHeader, TxRow, BarRow, FormGroup, FormRow, Btn, Badge, Alert, Empty, ProgressBar, PageHeader } from '../components/ui/index.jsx'
 import { fmtMoney, fmtPct, CAT_COLORS, CATS_INCOME, CATS_EXPENSE, METHODS, RECURRENCES, today } from '../utils/index.js'
@@ -725,6 +726,16 @@ export function Settings() {
             <Btn variant={settings.theme === 'dark'  ? 'primary' : 'ghost'} size="sm" onClick={() => updateSettings({ ...settings, theme: 'dark'  })}>Oscuro</Btn>
           </div>
         </div>
+      </Card>
+
+      {/* ── Plantillas por perfil ── */}
+      <Card>
+        <CardHeader title="Plantillas por perfil" />
+        <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', marginBottom: 12, lineHeight: 1.5 }}>
+          Selecciona un perfil para configurar categorías y presupuestos sugeridos según el tipo de cliente.
+          Tus datos registrados no se modifican.
+        </div>
+        <TemplateSelector />
       </Card>
 
       {/* ── Respaldo y restauración ── */}

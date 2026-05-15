@@ -9,8 +9,8 @@ const NAV = [
   { sec: 'General',        items: [{ id: 'dashboard', ic: '◈', lb: 'Dashboard' }] },
   { sec: 'Transacciones',  items: [{ id: 'income', ic: '↑', lb: 'Ingresos' }, { id: 'expenses', ic: '↓', lb: 'Gastos' }] },
   { sec: 'Planificación',  items: [{ id: 'budgets', ic: '▤', lb: 'Presupuestos' }, { id: 'debts', ic: '⊖', lb: 'Deudas' }, { id: 'goals', ic: '◎', lb: 'Metas' }] },
-  { sec: 'Análisis',       items: [{ id: 'cashflow', ic: '⟶', lb: 'Proyección' }, { id: 'reports', ic: '⊞', lb: 'Reportes' }, { id: 'settings', ic: '⊙', lb: 'Ajustes' }] },
-  { sec: 'Asesor',         items: [{ id: 'advisor', ic: '◑', lb: 'Modo Asesor' }] },
+  { sec: 'Análisis',       items: [{ id: 'cashflow', ic: '⟶', lb: 'Proyección' }, { id: 'reports', ic: '⊞', lb: 'Reportes' }] },
+  { sec: 'Asesor',         items: [{ id: 'advisor', ic: '◑', lb: 'Modo Asesor' }, { id: 'settings', ic: '⊙', lb: 'Ajustes' }] },
 ]
 
 export default function Shell({ page, setPage, children }) {

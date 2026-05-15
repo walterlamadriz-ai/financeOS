@@ -1,0 +1,220 @@
+// src/data/templates.js
+// Plantillas por perfil — FinanceOS Fase 7
+// Cada plantilla configura: categorías, presupuestos sugeridos, metas tipo y alertas
+// NUNCA borra transacciones reales sin confirmación explícita del usuario
+
+export const TEMPLATES = [
+  {
+    id: 'personal',
+    icon: '◈',
+    color: '#1aa368',
+    name: 'Persona natural',
+    tagline: 'Para quién controla sus finanzas personales por primera vez',
+    description: 'Ideal para comenzar. Cubre los gastos del día a día, una meta de ahorro y control básico del presupuesto mensual.',
+    bestFor: ['Primer usuario de FinanceOS', 'Personas sin deudas complejas', 'Quienes quieren orden básico'],
+    categoriesIncome: ['Salario', 'Bono', 'Freelance', 'Inversión', 'Otro'],
+    categoriesExpense: ['Vivienda', 'Alimentación', 'Transporte', 'Salud', 'Entretenimiento', 'Servicios', 'Ropa', 'Otro'],
+    suggestedBudgets: [
+      { category: 'Vivienda',        pct: 30, note: 'Regla 50/30/20: parte de necesidades' },
+      { category: 'Alimentación',    pct: 15, note: 'Supermercado + delivery' },
+      { category: 'Transporte',      pct: 10, note: 'Bencina, metro, apps' },
+      { category: 'Entretenimiento', pct: 10, note: 'Parte del 30% deseos' },
+      { category: 'Salud',           pct: 5,  note: 'Seguro, médicos, farmacia' },
+    ],
+    suggestedGoals: [
+      { name: 'Fondo de emergencia', note: '3-6 meses de gastos fijos', priority: 'Alta' },
+      { name: 'Ahorro mensual',      note: 'Meta mínima 20% del ingreso', priority: 'Alta' },
+    ],
+    alerts: [
+      'Tasa de ahorro por debajo del 20%',
+      'Gastos de entretenimiento sobre el 15% del ingreso',
+      'Sin fondo de emergencia definido',
+    ],
+    keyMetrics: ['Tasa de ahorro', 'Flujo neto mensual', 'Gastos por categoría'],
+    advisorTip: 'Empezar por el orden básico. El cliente necesita ver sus números reales antes de cualquier estrategia.',
+  },
+
+  {
+    id: 'pareja',
+    icon: '◑',
+    color: '#4a9ad4',
+    name: 'Pareja o familia',
+    tagline: 'Para dos personas con finanzas compartidas o mixtas',
+    description: 'Contempla ingresos múltiples, gastos del hogar compartidos y metas familiares como viaje, casa o educación de hijos.',
+    bestFor: ['Parejas que unen finanzas', 'Familias con hijos', 'Quienes planifican compras grandes conjuntas'],
+    categoriesIncome: ['Salario cónyuge 1', 'Salario cónyuge 2', 'Arriendo', 'Bono', 'Freelance', 'Otro'],
+    categoriesExpense: ['Vivienda', 'Alimentación', 'Transporte', 'Educación hijos', 'Salud', 'Entretenimiento', 'Servicios', 'Ropa', 'Mascotas', 'Otro'],
+    suggestedBudgets: [
+      { category: 'Vivienda',          pct: 28, note: 'Arriendo o dividendo' },
+      { category: 'Alimentación',      pct: 18, note: 'Hogares con hijos gastan más' },
+      { category: 'Educación hijos',   pct: 12, note: 'Colegio, útiles, actividades' },
+      { category: 'Transporte',        pct: 10, note: 'Dos personas, posiblemente dos autos' },
+      { category: 'Entretenimiento',   pct: 8,  note: 'Salidas familiares' },
+    ],
+    suggestedGoals: [
+      { name: 'Fondo de emergencia familiar', note: '6 meses de gastos del hogar', priority: 'Alta' },
+      { name: 'Vacaciones familiares',         note: 'Meta anual compartida',        priority: 'Media' },
+      { name: 'Educación futura hijos',        note: 'Ahorro de largo plazo',         priority: 'Alta' },
+    ],
+    alerts: [
+      'Gasto en educación sobre el 15% del ingreso combinado',
+      'Sin meta de emergencia familiar',
+      'Un solo ingreso cubre más del 70% del gasto total',
+    ],
+    keyMetrics: ['Ingreso combinado', 'Flujo neto del hogar', 'Ahorro compartido'],
+    advisorTip: 'Verificar si ambos tienen visibilidad de los gastos del otro. La transparencia financiera reduce conflictos.',
+  },
+
+  {
+    id: 'freelancer',
+    icon: '⟶',
+    color: '#7f77dd',
+    name: 'Freelancer',
+    tagline: 'Para quienes tienen ingresos variables o múltiples fuentes',
+    description: 'Diseñado para gestionar ingresos irregulares, separar gastos personales de profesionales y provisionar impuestos.',
+    bestFor: ['Trabajadores independientes', 'Consultores', 'Diseñadores, programadores, coaches', 'Personas con 2+ fuentes de ingreso'],
+    categoriesIncome: ['Proyecto cliente A', 'Proyecto cliente B', 'Retainer mensual', 'Consultoría', 'Plataforma digital', 'Bono', 'Otro'],
+    categoriesExpense: ['Vivienda', 'Alimentación', 'Transporte', 'Tecnología', 'Marketing propio', 'Educación / Cursos', 'Salud', 'Servicios', 'Provisión impuestos', 'Entretenimiento', 'Otro'],
+    suggestedBudgets: [
+      { category: 'Provisión impuestos', pct: 15, note: 'Reservar para obligaciones tributarias' },
+      { category: 'Tecnología',          pct: 8,  note: 'Software, hardware, suscripciones' },
+      { category: 'Educación / Cursos',  pct: 5,  note: 'Inversión en habilidades' },
+      { category: 'Vivienda',            pct: 25, note: 'Incluir coworking si aplica' },
+      { category: 'Marketing propio',    pct: 3,  note: 'Ads, web, materiales' },
+    ],
+    suggestedGoals: [
+      { name: 'Fondo de emergencia',     note: '6 meses (ingresos variables = más riesgo)', priority: 'Alta' },
+      { name: 'Provisión impuestos',     note: 'Reserva trimestral o anual',                priority: 'Alta' },
+      { name: 'Equipamiento profesional', note: 'Computador, cámara, herramientas',         priority: 'Media' },
+    ],
+    alerts: [
+      'Ingreso del mes por debajo del promedio de los últimos 3 meses',
+      'Sin provisión para impuestos registrada',
+      'Fondo de emergencia menor a 6 meses de gastos fijos',
+    ],
+    keyMetrics: ['Ingreso promedio mensual', 'Variabilidad de ingresos', 'Tasa de ahorro efectiva'],
+    advisorTip: 'El freelancer tiende a subestimar impuestos y sobreestimar ingresos recurrentes. Trabajar el hábito de provisión desde el primer mes.',
+  },
+
+  {
+    id: 'pyme',
+    icon: '▤',
+    color: '#d4982a',
+    name: 'Pyme o negocio pequeño',
+    tagline: 'Para dueños que mezclan finanzas personales y del negocio',
+    description: 'Ayuda a separar claramente lo personal de lo empresarial, controlar el "sueldo del dueño" y detectar fugas entre ambos mundos.',
+    bestFor: ['Dueños de negocio que usan una sola cuenta', 'Emprendedores en etapa temprana', 'Negocios familiares'],
+    categoriesIncome: ['Sueldo del dueño', 'Utilidad del negocio', 'Ventas directas', 'Servicios profesionales', 'Inversión', 'Otro'],
+    categoriesExpense: ['Vivienda personal', 'Alimentación', 'Transporte personal', 'Gastos operativos negocio', 'Proveedores', 'Salud', 'Servicios personales', 'Tecnología negocio', 'Impuestos negocio', 'Otro'],
+    suggestedBudgets: [
+      { category: 'Gastos operativos negocio', pct: 20, note: 'Separar de gastos personales' },
+      { category: 'Impuestos negocio',         pct: 12, note: 'Provisión mensual' },
+      { category: 'Vivienda personal',         pct: 25, note: 'Lo que el dueño se asigna para vivir' },
+      { category: 'Tecnología negocio',        pct: 5,  note: 'Herramientas y software' },
+    ],
+    suggestedGoals: [
+      { name: 'Separar cuentas personal/empresa', note: 'Primera prioridad del asesor', priority: 'Alta' },
+      { name: 'Fondo de emergencia personal',     note: '3 meses del sueldo del dueño', priority: 'Alta' },
+      { name: 'Reinversión en el negocio',         note: 'Meta de crecimiento anual',    priority: 'Media' },
+    ],
+    alerts: [
+      'El sueldo del dueño no está definido como categoría separada',
+      'Gastos del negocio mezclados con gastos personales',
+      'Sin provisión de impuestos registrada',
+    ],
+    keyMetrics: ['Sueldo real del dueño', 'Separación personal/empresa', 'Flujo neto personal'],
+    advisorTip: 'El primer trabajo es definir cuánto "se paga" el dueño. Sin eso, es imposible medir la salud financiera personal.',
+  },
+
+  {
+    id: 'deudas',
+    icon: '⊖',
+    color: '#e05a4a',
+    name: 'Cliente con deuda',
+    tagline: 'Para quienes priorizan salir de deudas de forma ordenada',
+    description: 'Enfocado en visibilizar la deuda total, los pagos mínimos, las tasas y el progreso de amortización. Incluye estrategia de bola de nieve o avalancha.',
+    bestFor: ['Personas con tarjetas de crédito al límite', 'Clientes con múltiples créditos', 'Quienes quieren un plan de salida de deudas'],
+    categoriesIncome: ['Salario', 'Ingreso extra', 'Freelance', 'Bono', 'Otro'],
+    categoriesExpense: ['Vivienda', 'Alimentación', 'Transporte', 'Servicios básicos', 'Pago tarjeta crédito', 'Pago crédito consumo', 'Pago crédito hipotecario', 'Salud', 'Otro'],
+    suggestedBudgets: [
+      { category: 'Pago tarjeta crédito',    pct: 15, note: 'Priorizar sobre el mínimo' },
+      { category: 'Pago crédito consumo',    pct: 10, note: 'Según plan de amortización' },
+      { category: 'Vivienda',                pct: 28, note: 'Incluye dividendo o arriendo' },
+      { category: 'Alimentación',            pct: 15, note: 'Reducir si es posible para liberar flujo' },
+      { category: 'Servicios básicos',       pct: 8,  note: 'Luz, agua, internet, gas' },
+    ],
+    suggestedGoals: [
+      { name: 'Pagar tarjeta crédito más cara', note: 'Estrategia avalancha — mayor TAE primero', priority: 'Alta' },
+      { name: 'Fondo mínimo de emergencia',      note: '$500K–$1M para no volver a endeudar',       priority: 'Alta' },
+      { name: 'Cero tarjetas en 24 meses',       note: 'Objetivo de mediano plazo',                 priority: 'Media' },
+    ],
+    alerts: [
+      'Pagos mínimos de deuda superan el 20% del ingreso mensual',
+      'Deuda con tasa superior al 15% sin plan de prepago',
+      'Fondo de emergencia menor a $500K — riesgo de nuevas deudas',
+    ],
+    keyMetrics: ['Deuda total', 'TAE promedio ponderada', 'Tiempo estimado de pago', 'Flujo disponible post-deudas'],
+    advisorTip: 'Antes de ahorrar, salir de deudas caras. La excepción es el fondo mínimo de emergencia para no volver a endeudarse.',
+  },
+
+  {
+    id: 'ahorro',
+    icon: '◎',
+    color: '#1aa368',
+    name: 'Cliente con meta de ahorro',
+    tagline: 'Para quienes tienen un objetivo de ahorro específico y concreto',
+    description: 'Centrado en alcanzar una meta concreta: viaje, pie de casa, educación, retiro anticipado. Calcula cuánto ahorrar por mes para lograrlo.',
+    bestFor: ['Quienes ahorran para un objetivo específico', 'Personas planificando compras grandes', 'Clientes con horizonte temporal definido'],
+    categoriesIncome: ['Salario', 'Bono', 'Ingreso extra', 'Inversión', 'Otro'],
+    categoriesExpense: ['Vivienda', 'Alimentación', 'Transporte', 'Salud', 'Servicios', 'Entretenimiento', 'Ahorro meta principal', 'Otro'],
+    suggestedBudgets: [
+      { category: 'Ahorro meta principal', pct: 25, note: 'Prioridad 1 — automatizar si es posible' },
+      { category: 'Vivienda',              pct: 28, note: 'Mantener bajo para liberar flujo de ahorro' },
+      { category: 'Alimentación',          pct: 15, note: 'Control sin sacrificar calidad de vida' },
+      { category: 'Entretenimiento',       pct: 8,  note: 'Reducir temporalmente para alcanzar meta' },
+    ],
+    suggestedGoals: [
+      { name: 'Meta principal de ahorro', note: 'Definir monto y fecha objetivo', priority: 'Alta' },
+      { name: 'Fondo de emergencia',      note: '3 meses antes de acelerar ahorro', priority: 'Alta' },
+    ],
+    alerts: [
+      'Ahorro mensual por debajo del necesario para alcanzar la meta a tiempo',
+      'Sin fecha objetivo definida para la meta principal',
+      'Gastos discrecionales impiden alcanzar el % de ahorro requerido',
+    ],
+    keyMetrics: ['Ahorro mensual real vs necesario', 'Tiempo estimado para la meta', 'Tasa de ahorro efectiva'],
+    advisorTip: 'Calcular primero cuánto necesita ahorrar por mes. Luego revisar el presupuesto para liberar ese flujo. No al revés.',
+  },
+
+  {
+    id: 'educador',
+    icon: '⊞',
+    color: '#7f77dd',
+    name: 'Educador financiero',
+    tagline: 'Para talleres y clases de educación financiera',
+    description: 'Plantilla para uso en contextos educativos. Categorías simples, conceptos básicos visibles, sin complejidad innecesaria. Ideal para primer contacto con finanzas personales.',
+    bestFor: ['Talleres grupales de finanzas', 'Cursos de educación financiera', 'Contextos con alumnos sin experiencia previa'],
+    categoriesIncome: ['Sueldo mensual', 'Ingreso extra', 'Emprendimiento', 'Ayuda familiar', 'Otro'],
+    categoriesExpense: ['Arriendo o vivienda', 'Comida', 'Transporte', 'Servicios (luz/agua/internet)', 'Salud', 'Educación', 'Ocio y entretenimiento', 'Ropa', 'Otro'],
+    suggestedBudgets: [
+      { category: 'Arriendo o vivienda',             pct: 30, note: 'Regla básica: no más del 30%' },
+      { category: 'Comida',                          pct: 20, note: 'Incluye delivery y alimentación fuera' },
+      { category: 'Transporte',                      pct: 10, note: 'Locomoción, bencina, app' },
+      { category: 'Servicios (luz/agua/internet)',   pct: 8,  note: 'Gastos fijos del hogar' },
+      { category: 'Ocio y entretenimiento',          pct: 10, note: 'Tiempo libre y recreación' },
+    ],
+    suggestedGoals: [
+      { name: 'Primer fondo de emergencia', note: 'Meta de entrada: 1 mes de gastos', priority: 'Alta' },
+      { name: 'Reducir una deuda',          note: 'Objetivo concreto y visible',       priority: 'Media' },
+    ],
+    alerts: [
+      'Sin ningún ahorro registrado en el mes',
+      'Gastos superan ingresos',
+      'Sin ninguna meta definida',
+    ],
+    keyMetrics: ['¿Gasto más de lo que gano?', 'Tasa de ahorro', '¿Cuánto me queda libre?'],
+    advisorTip: 'Usar lenguaje simple. El objetivo es que el alumno entienda sus números reales por primera vez, no optimizarlos.',
+  },
+]
+
+export default TEMPLATES
