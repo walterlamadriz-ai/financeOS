@@ -755,6 +755,10 @@ export function Settings() {
           <div><div style={slbl}>Cargar datos demo</div><div style={ssub}>Sobrescribe con datos de ejemplo</div></div>
           <Btn variant="ghost" size="sm" onClick={loadDemo}>Cargar demo</Btn>
         </div>
+        <div style={srow}>
+          <div><div style={slbl}>Reiniciar onboarding</div><div style={ssub}>Volver al asistente de configuración inicial</div></div>
+          <Btn variant="ghost" size="sm" onClick={() => updateSettings({ ...settings, onboardingDone: false })}>Reiniciar</Btn>
+        </div>
         <div style={{ ...srow, borderBottom: 'none' }}>
           <div><div style={slbl}>Borrar todos los datos</div><div style={ssub}>Acción irreversible · sin recuperación posible</div></div>
           <Btn variant="danger" size="sm" onClick={handleClear}>Borrar todo</Btn>
