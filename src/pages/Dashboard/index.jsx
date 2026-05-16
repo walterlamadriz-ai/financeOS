@@ -1,6 +1,8 @@
 // src/pages/Dashboard/index.jsx
-import { useMemo } from 'react'
+import { useMemo, useEffect, useState } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
+import { dbGetAll } from '../../core/db/index.js'
+import { toMonthly } from '../../pages/Subscriptions/index.jsx'
 import { KPI, Card, CardHeader, TxRow, BarRow, ProgressBar, Badge, Alert } from '../../components/ui/index.jsx'
 import { fmtMoney, fmtPct, CAT_COLORS } from '../../utils/index.js'
 
@@ -58,6 +60,13 @@ export default function Dashboard() {
     ...monthIncomes.map(r  => ({ ...r, _t: 'income' })),
     ...monthExpenses.map(r => ({ ...r, _t: 'expense' })),
   ].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 7), [monthIncomes, monthExpenses])
+
+  // Suscripciones — tarjeta resumen
+  const [subs, setSubs] = useState([])
+  useEffect(() => { dbGetAll('subscriptions').then(d => setSubs(d || [])) }, [])
+  const activeSubs    = subs.filter(s => s.status === 'active')
+  const subMonthly    = activeSubs.reduce((s, sub) => s + toMonthly(sub.amount, sub.frequency), 0)
+  const subPct        = mIncome > 0 ? subMonthly / mIncome : 0
 
   // Meses disponibles para el selector
   const allDates  = [...incomes.map(r => r.date), ...expenses.map(r => r.date)].filter(Boolean)
@@ -131,6 +140,19 @@ export default function Dashboard() {
           }
         </Card>
       </div>
+
+      {/* Tarjeta de suscripciones */}
+      {activeSubs.length > 0 && (
+        <div style={{ background: 'var(--sur)', border: '.5px solid var(--brd)', borderRadius: 'var(--r)', padding: '13px 15px', display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx)', flex: '0 0 auto' }}>↻ Suscripciones</div>
+          <div style={{ display: 'flex', gap: 20, flex: 1, flexWrap: 'wrap' }}>
+            <div><div style={{ fontSize: 9, fontFamily: 'var(--mono)', color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.5px' }}>Gasto mensual</div><div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'var(--mono)', color: subPct > 0.1 ? 'var(--amb)' : 'var(--tx)' }}>{fmtMoney(subMonthly, sym)}</div></div>
+            <div><div style={{ fontSize: 9, fontFamily: 'var(--mono)', color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.5px' }}>Activas</div><div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'var(--mono)', color: 'var(--tx)' }}>{activeSubs.length}</div></div>
+            {mIncome > 0 && <div><div style={{ fontSize: 9, fontFamily: 'var(--mono)', color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.5px' }}>% del ingreso</div><div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'var(--mono)', color: subPct > 0.1 ? 'var(--amb)' : 'var(--grn)' }}>{(subPct * 100).toFixed(1)}%</div></div>}
+          </div>
+          {subPct > 0.1 && <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--amb)', background: 'var(--amb-bg)', padding: '3px 9px', borderRadius: 20, border: '.5px solid var(--amb)', flex: '0 0 auto' }}>Revisá tus suscripciones →</div>}
+        </div>
+      )}
 
       <div className="grid2">
         <Card>

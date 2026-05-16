@@ -100,5 +100,17 @@ export const DEMO_STATE = {
   budgets:  DEMO_BUDGETS,
   debts:    DEMO_DEBTS,
   goals:    DEMO_GOALS,
+  subscriptions: DEMO_SUBSCRIPTIONS,
   settings: DEMO_SETTINGS,
 }
+
+// ── DEMO SUBSCRIPTIONS ─────────────────────────────────────────────────────────
+export const DEMO_SUBSCRIPTIONS = [
+  { id: 'sub1', name: 'Netflix',          category: 'Streaming',           amount: 13990, currency: 'CLP', frequency: 'monthly',  nextPaymentDate: '2026-06-05', paymentMethod: 'Tarjeta Visa', status: 'active', notes: '', createdAt: '2026-01-01', updatedAt: '2026-01-01' },
+  { id: 'sub2', name: 'Spotify',          category: 'Música',              amount: 5990,  currency: 'CLP', frequency: 'monthly',  nextPaymentDate: '2026-06-10', paymentMethod: 'Tarjeta Visa', status: 'active', notes: '', createdAt: '2026-01-01', updatedAt: '2026-01-01' },
+  { id: 'sub3', name: 'Disney+',          category: 'Streaming',           amount: 9990,  currency: 'CLP', frequency: 'monthly',  nextPaymentDate: '2026-06-12', paymentMethod: 'Tarjeta Visa', status: 'active', notes: '', createdAt: '2026-01-01', updatedAt: '2026-01-01' },
+  { id: 'sub4', name: 'YouTube Premium',  category: 'Streaming',           amount: 4990,  currency: 'CLP', frequency: 'monthly',  nextPaymentDate: '2026-06-20', paymentMethod: 'Google Pay',   status: 'active', notes: '', createdAt: '2026-01-01', updatedAt: '2026-01-01' },
+  { id: 'sub5', name: 'iCloud 200GB',     category: 'Almacenamiento',      amount: 1290,  currency: 'CLP', frequency: 'monthly',  nextPaymentDate: '2026-06-15', paymentMethod: 'Apple Pay',    status: 'active', notes: '', createdAt: '2026-01-01', updatedAt: '2026-01-01' },
+  { id: 'sub6', name: 'Microsoft 365',    category: 'Productividad',       amount: 62990, currency: 'CLP', frequency: 'annual',   nextPaymentDate: '2026-11-01', paymentMethod: 'Tarjeta Visa', status: 'active', notes: 'Plan familiar', createdAt: '2026-01-01', updatedAt: '2026-01-01' },
+  { id: 'sub7', name: 'Gimnasio Central', category: 'Salud / Gimnasio',    amount: 29900, currency: 'CLP', frequency: 'monthly',  nextPaymentDate: '2026-06-01', paymentMethod: 'Débito',       status: 'active', notes: '', createdAt: '2026-01-01', updatedAt: '2026-01-01' },
+]

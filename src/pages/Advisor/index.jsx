@@ -3,7 +3,9 @@
 // Vista profesional para diagnóstico, seguimiento y preparación de reuniones
 // AVISO: Las alertas y señales son orientativas. No constituyen asesoría financiera certificada.
 
-import { useState, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
+import { dbGetAll } from '../../core/db/index.js'
+import { toMonthly, toAnnual, generateAlerts as generateSubAlerts } from '../Subscriptions/index.jsx'
 import { useApp } from '../../context/AppContext.jsx'
 import { Card, CardHeader, Alert } from '../../components/ui/index.jsx'
 import { fmtMoney, fmtPct } from '../../utils/index.js'
@@ -341,6 +343,15 @@ export default function Advisor() {
 
   const noData = mIncome === 0 && mExpense === 0 && debts.length === 0
 
+  // Suscripciones
+  const [subs, setSubs] = useState([])
+  useEffect(() => { dbGetAll('subscriptions').then(d => setSubs(d || [])) }, [])
+  const activeSubs     = subs.filter(s => s.status === 'active')
+  const subMonthly     = activeSubs.reduce((s, sub) => s + toMonthly(sub.amount, sub.frequency), 0)
+  const subAnnual      = activeSubs.reduce((s, sub) => s + toAnnual(sub.amount, sub.frequency), 0)
+  const subPct         = mIncome > 0 ? subMonthly / mIncome : 0
+  const subAlerts      = useMemo(() => generateSubAlerts(subs, mIncome), [subs, mIncome])
+
   return (
     <div className="stack">
       {/* Header */}
@@ -577,6 +588,41 @@ export default function Advisor() {
           {pdfLoading ? 'Generando PDF…' : '↓ Exportar PDF'}
         </button>
       </div>
+
+      {/* ── SECCIÓN SUSCRIPCIONES EN MODO ASESOR ── */}
+      {activeSubs.length > 0 && (
+        <div style={{ background: 'var(--sur)', border: '.5px solid var(--brd)', borderRadius: 'var(--r)', padding: '16px', marginBottom: 0 }}>
+          <div style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.8px', marginBottom: 10 }}>
+            Revisión de Suscripciones
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px,1fr))', gap: 8, marginBottom: 12 }}>
+            {[
+              { label: 'Gasto mensual', value: `${sym}${subMonthly.toLocaleString('es-CL', {maximumFractionDigits:0})}` },
+              { label: 'Gasto anual',   value: `${sym}${subAnnual.toLocaleString('es-CL', {maximumFractionDigits:0})}` },
+              { label: 'Activas',       value: `${activeSubs.length}` },
+              { label: '% del ingreso', value: mIncome > 0 ? `${(subPct*100).toFixed(1)}%` : '—' },
+            ].map(m => (
+              <div key={m.label} style={{ background: 'var(--sur2)', borderRadius: 6, padding: '8px 10px', border: '.5px solid var(--brd)' }}>
+                <div style={{ fontSize: 9, fontFamily: 'var(--mono)', color: 'var(--th)', marginBottom: 2, textTransform: 'uppercase', letterSpacing: '.5px' }}>{m.label}</div>
+                <div style={{ fontSize: 15, fontWeight: 600, fontFamily: 'var(--mono)', color: 'var(--tx)' }}>{m.value}</div>
+              </div>
+            ))}
+          </div>
+          {/* Alertas de suscripciones */}
+          {subAlerts.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+              {subAlerts.map((a, i) => (
+                <div key={i} style={{ fontSize: 11, fontFamily: 'var(--mono)', color: a.type === 'duplicate' ? 'var(--amb)' : a.type === 'income' ? 'var(--amb)' : 'var(--th)', background: 'var(--sur2)', padding: '6px 10px', borderRadius: 6, borderLeft: `2px solid ${a.type === 'duplicate' || a.type === 'income' ? 'var(--amb)' : 'var(--brd)'}` }}>
+                  {a.msg}
+                </div>
+              ))}
+            </div>
+          )}
+          <div style={{ fontSize: 9, fontFamily: 'var(--mono)', color: 'var(--th)', marginTop: 10 }}>
+            Las sugerencias son orientativas y no constituyen asesoría financiera.
+          </div>
+        </div>
+      )}
 
       <FinancialDisclaimer />
     </div>

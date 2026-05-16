@@ -13,6 +13,7 @@ import Disclaimer from './pages/legal/Disclaimer.jsx'
 import { Income, Expenses, Budgets, Debts, Goals, Reports, Settings } from './pages/index.jsx'
 import DemoShell from './demo/DemoShell.jsx'
 import Advisor from './pages/Advisor/index.jsx'
+import Subscriptions from './pages/Subscriptions/index.jsx'
 
 // ── Detectar modo demo ────────────────────────────────────────────────────────
 function isDemoMode() {
@@ -40,6 +41,7 @@ function renderPage(page) {
     case 'license':    return <License />
     case 'disclaimer': return <Disclaimer />
     case 'advisor':    return <Advisor />
+    case 'subscriptions': return <Subscriptions />
     default:           return <Dashboard />
   }
 }

@@ -1,13 +1,13 @@
-// src/core/db/index.js — v1.1 (QA fixes)
+// src/core/db/index.js — v1.2 (+ subscriptions store)
 
 import { openDB } from 'idb'
 
 const DB_NAME    = 'financeos'
-const DB_VERSION = 1
+const DB_VERSION = 2          // ← bump para agregar subscriptions
 let _db = null
 let _useLocalStorage = false
 
-// ─── localStorage fallback (Safari privado / iOS bloqueado) ──────────────────
+// ─── localStorage fallback ────────────────────────────────────────────────────
 function lsGet(store)       { try { return JSON.parse(localStorage.getItem(`fos_${store}`) || '[]') } catch { return [] } }
 function lsSet(store, data) { try { localStorage.setItem(`fos_${store}`, JSON.stringify(data)) } catch {} }
 function lsPut(store, item) { const a = lsGet(store).filter(r => r.id !== item.id); lsSet(store, [...a, item]) }
@@ -20,7 +20,8 @@ export async function getDB() {
   if (_db) return _db
   try {
     _db = await openDB(DB_NAME, DB_VERSION, {
-      upgrade(db) {
+      upgrade(db, oldVersion) {
+        // v1 stores — crear si no existen
         if (!db.objectStoreNames.contains('incomes')) {
           const s = db.createObjectStore('incomes', { keyPath: 'id' })
           s.createIndex('date', 'date'); s.createIndex('category', 'category')
@@ -29,12 +30,13 @@ export async function getDB() {
           const s = db.createObjectStore('expenses', { keyPath: 'id' })
           s.createIndex('date', 'date'); s.createIndex('category', 'category')
         }
-        if (!db.objectStoreNames.contains('budgets'))  db.createObjectStore('budgets',  { keyPath: 'id' })
-        if (!db.objectStoreNames.contains('debts'))    db.createObjectStore('debts',    { keyPath: 'id' })
-        if (!db.objectStoreNames.contains('goals'))    db.createObjectStore('goals',    { keyPath: 'id' })
-        if (!db.objectStoreNames.contains('settings')) db.createObjectStore('settings')
+        if (!db.objectStoreNames.contains('budgets'))       db.createObjectStore('budgets',       { keyPath: 'id' })
+        if (!db.objectStoreNames.contains('debts'))         db.createObjectStore('debts',         { keyPath: 'id' })
+        if (!db.objectStoreNames.contains('goals'))         db.createObjectStore('goals',         { keyPath: 'id' })
+        if (!db.objectStoreNames.contains('settings'))      db.createObjectStore('settings')
+        // v2 — subscriptions
+        if (!db.objectStoreNames.contains('subscriptions')) db.createObjectStore('subscriptions', { keyPath: 'id' })
       },
-      // FIX: manejar eventos de versión para no bloquear otras tabs
       blocked()    { _db?.close(); _db = null },
       blocking()   { _db?.close(); _db = null },
       terminated() { _db = null },
@@ -95,30 +97,31 @@ export async function saveSettings(settings) {
   return settings
 }
 
-// ─── clearAllData — FIX: no mezclar tx.done en Promise.all ───────────────────
+// ─── clearAllData ─────────────────────────────────────────────────────────────
 export async function clearAllData() {
-  const stores = ['incomes', 'expenses', 'budgets', 'debts', 'goals']
+  const stores = ['incomes', 'expenses', 'budgets', 'debts', 'goals', 'subscriptions']
   const db = await getDB()
   if (!db) { stores.forEach(lsClear); return }
   const tx = db.transaction(stores, 'readwrite')
   await Promise.all(stores.map(s => tx.objectStore(s).clear()))
-  await tx.done  // awaited DESPUÉS de las operaciones, no dentro del array
+  await tx.done
 }
 
 // ─── Export / Import ──────────────────────────────────────────────────────────
 export async function exportAllData() {
-  const [incomes, expenses, budgets, debts, goals, settings] = await Promise.all([
+  const [incomes, expenses, budgets, debts, goals, subscriptions, settings] = await Promise.all([
     dbGetAll('incomes'), dbGetAll('expenses'), dbGetAll('budgets'),
-    dbGetAll('debts'),   dbGetAll('goals'),    getSettings(),
+    dbGetAll('debts'),   dbGetAll('goals'),   dbGetAll('subscriptions'), getSettings(),
   ])
-  return { incomes, expenses, budgets, debts, goals, settings, exportedAt: new Date().toISOString(), version: '1.1' }
+  return { incomes, expenses, budgets, debts, goals, subscriptions, settings,
+           exportedAt: new Date().toISOString(), version: '1.2' }
 }
 
 export async function importAllData(data) {
   if (!data || typeof data !== 'object') throw new Error('Formato inválido')
   await clearAllData()
-  const db  = await getDB()
-  const stores = ['incomes', 'expenses', 'budgets', 'debts', 'goals']
+  const db    = await getDB()
+  const stores = ['incomes', 'expenses', 'budgets', 'debts', 'goals', 'subscriptions']
   for (const store of stores) {
     if (!Array.isArray(data[store])) continue
     if (!db) { lsSet(store, data[store]); continue }
