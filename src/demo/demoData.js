@@ -93,17 +93,6 @@ export const DEMO_GOALS = [
   { id: d('g4'), name: 'Ahorro inicial depto propio',   target: 18_000_000, saved: 3_200_000, targetDate: '2027-12-31', priority: 'Alta', color: '#7f77dd', notes: 'Pie 10% + gastos notariales' },
 ]
 
-// Estado completo de demo para usar con useReducer HYDRATE
-export const DEMO_STATE = {
-  incomes:  DEMO_INCOMES,
-  expenses: DEMO_EXPENSES,
-  budgets:  DEMO_BUDGETS,
-  debts:    DEMO_DEBTS,
-  goals:    DEMO_GOALS,
-  subscriptions: DEMO_SUBSCRIPTIONS,
-  settings: DEMO_SETTINGS,
-}
-
 // ── DEMO SUBSCRIPTIONS ─────────────────────────────────────────────────────────
 export const DEMO_SUBSCRIPTIONS = [
   { id: 'sub1', name: 'Netflix',          category: 'Streaming',           amount: 13990, currency: 'CLP', frequency: 'monthly',  nextPaymentDate: '2026-06-05', paymentMethod: 'Tarjeta Visa', status: 'active', notes: '', createdAt: '2026-01-01', updatedAt: '2026-01-01' },
@@ -114,3 +103,14 @@ export const DEMO_SUBSCRIPTIONS = [
   { id: 'sub6', name: 'Microsoft 365',    category: 'Productividad',       amount: 62990, currency: 'CLP', frequency: 'annual',   nextPaymentDate: '2026-11-01', paymentMethod: 'Tarjeta Visa', status: 'active', notes: 'Plan familiar', createdAt: '2026-01-01', updatedAt: '2026-01-01' },
   { id: 'sub7', name: 'Gimnasio Central', category: 'Salud / Gimnasio',    amount: 29900, currency: 'CLP', frequency: 'monthly',  nextPaymentDate: '2026-06-01', paymentMethod: 'Débito',       status: 'active', notes: '', createdAt: '2026-01-01', updatedAt: '2026-01-01' },
 ]
+
+// Estado completo de demo para usar con useReducer HYDRATE
+export const DEMO_STATE = {
+  incomes:  DEMO_INCOMES,
+  expenses: DEMO_EXPENSES,
+  budgets:  DEMO_BUDGETS,
+  debts:    DEMO_DEBTS,
+  goals:    DEMO_GOALS,
+  subscriptions: DEMO_SUBSCRIPTIONS,
+  settings: DEMO_SETTINGS,
+}
