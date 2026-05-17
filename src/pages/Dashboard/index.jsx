@@ -147,7 +147,7 @@ export default function Dashboard({ setPage }) {
       {topSignals.length > 0 && (
         <div style={{ background: 'var(--sur)', border: '.5px solid var(--brd)', borderRadius: 'var(--r)', padding: '13px 15px', marginBottom: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx)' }}>◈ Coach — Señales del mes</div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx)' }}>◈ Señales del mes</div>
             <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--grn2)', cursor: 'pointer' }}
               onClick={() => setPage('coach')}>Ver todo →</div>
           </div>

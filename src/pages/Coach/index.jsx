@@ -117,20 +117,23 @@ export default function Coach() {
   // Score orientativo 0-100
   const score = Math.max(0, 100 - warnings.length * 20 - attentions.length * 8)
   const scoreColor = score >= 80 ? 'var(--grn)' : score >= 60 ? 'var(--amb)' : 'var(--red)'
-  const scoreLabel = score >= 80 ? 'Situación saludable' : score >= 60 ? 'Requiere atención' : 'Revisar prioridades'
+  const scoreLabel = score >= 80 ? 'Pocas señales activas' : score >= 60 ? 'Algunas señales para revisar' : 'Varias señales activas'
 
   return (
     <div>
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
         <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--grn)', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: 6 }}>
-          FinanceOS Coach
+          Diagnóstico financiero
         </div>
         <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--tx)', letterSpacing: '-.5px', marginBottom: 4 }}>
-          Revisión financiera
+          Señales del mes
         </h1>
-        <p style={{ fontSize: 12, color: 'var(--th)', fontFamily: 'var(--mono)' }}>
+        <p style={{ fontSize: 12, color: 'var(--th)', fontFamily: 'var(--mono)', marginBottom: 4 }}>
           Señales orientativas basadas en tus datos · {metrics.activeMonth}
+        </p>
+        <p style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', background: 'var(--sur2)', padding: '5px 9px', borderRadius: 6, display: 'inline-block' }}>
+          Generado localmente · sin IA externa · sin envío de datos
         </p>
       </div>
 
@@ -143,6 +146,7 @@ export default function Coach() {
           </div>
           <div style={{ fontSize: 9, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: 2 }}>/100</div>
           <div style={{ fontSize: 10, fontWeight: 600, color: scoreColor, marginTop: 4 }}>{scoreLabel}</div>
+          <div style={{ fontSize: 9, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: 3, lineHeight: 1.4, textAlign: 'center' }}>Basado en reglas<br/>configurables · orientativo</div>
         </div>
 
         {/* KPIs */}
@@ -238,9 +242,9 @@ export default function Coach() {
         </>
       )}
 
-      {/* Disclaimer */}
+      {/* Disclaimer completo al pie */}
       <div style={{ padding: '10px 12px', background: 'var(--sur2)', border: '.5px solid var(--brd)', borderRadius: 'var(--r)', fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', lineHeight: 1.6, marginTop: 8 }}>
-        Las sugerencias son orientativas y no constituyen asesoría financiera, tributaria ni de inversión. Se basan exclusivamente en los datos registrados en este dispositivo.
+        Este diagnóstico es generado localmente a partir de los datos que ingresaste. No constituye asesoría financiera, tributaria, contable ni de inversión. No reemplaza la consulta con profesionales certificados. Las señales y el score son orientativos y se basan en umbrales configurables. MAXNOVA &amp; LUCI Global LLC no asume responsabilidad por decisiones tomadas con base en este diagnóstico.
       </div>
     </div>
   )
