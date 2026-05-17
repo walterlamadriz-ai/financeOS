@@ -16,6 +16,7 @@ import License from '../pages/legal/License.jsx'
 import Disclaimer from '../pages/legal/Disclaimer.jsx'
 import Advisor from '../pages/Advisor/index.jsx'
 import Subscriptions from '../pages/Subscriptions/index.jsx'
+import Coach from '../pages/Coach/index.jsx'
 import { AppContext } from '../context/AppContext.jsx'
 
 function renderPage(page) {
@@ -35,6 +36,7 @@ function renderPage(page) {
     case 'disclaimer': return <Disclaimer />
     case 'advisor':       return <Advisor />
     case 'subscriptions': return <Subscriptions />
+    case 'coach':         return <Coach />
     default:              return <Dashboard />
   }
 }

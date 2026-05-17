@@ -14,6 +14,7 @@ import { Income, Expenses, Budgets, Debts, Goals, Reports, Settings } from './pa
 import DemoShell from './demo/DemoShell.jsx'
 import Advisor from './pages/Advisor/index.jsx'
 import Subscriptions from './pages/Subscriptions/index.jsx'
+import Coach from './pages/Coach/index.jsx'
 
 // ── Detectar modo demo ────────────────────────────────────────────────────────
 function isDemoMode() {
@@ -42,6 +43,7 @@ function renderPage(page) {
     case 'disclaimer': return <Disclaimer />
     case 'advisor':    return <Advisor />
     case 'subscriptions': return <Subscriptions />
+    case 'coach':         return <Coach />
     default:           return <Dashboard />
   }
 }

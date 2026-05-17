@@ -3,13 +3,14 @@ import { useMemo, useEffect, useState } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
 import { dbGetAll } from '../../core/db/index.js'
 import useSubscriptionMetrics from '../../hooks/useSubscriptionMetrics.js'
+import { useCoachSignals } from '../Coach/index.jsx'
 import { KPI, Card, CardHeader, TxRow, BarRow, ProgressBar, Badge, Alert } from '../../components/ui/index.jsx'
 import { fmtMoney, fmtPct, CAT_COLORS } from '../../utils/index.js'
 
 // FIX: mapa de símbolos por código de moneda
 const CURRENCY_SYMBOLS = { CLP: '$', USD: 'US$', EUR: '€', VES: 'Bs.' }
 
-export default function Dashboard() {
+export default function Dashboard({ setPage }) {
   const { incomes, expenses, debts, goals, settings, loading, updateSettings } = useApp()
   const sym = CURRENCY_SYMBOLS[settings.currency] || '$'
 
@@ -62,6 +63,9 @@ export default function Dashboard() {
   ].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 7), [monthIncomes, monthExpenses])
 
   // Suscripciones — hook compartido
+  const { signals: coachSignals } = useCoachSignals()
+  const topSignals = coachSignals.slice(0, 3)
+
   const { monthly: subMonthly, annual: subAnnual, count: subCount,
           pct: subPct, status: subStatus, alerts: subAlerts,
           nextPayment: subNext, activeSubs } = useSubscriptionMetrics()
@@ -138,6 +142,31 @@ export default function Dashboard() {
           }
         </Card>
       </div>
+
+      {/* ── TARJETA COACH — top señales ── */}
+      {topSignals.length > 0 && (
+        <div style={{ background: 'var(--sur)', border: '.5px solid var(--brd)', borderRadius: 'var(--r)', padding: '13px 15px', marginBottom: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx)' }}>◈ Coach — Señales del mes</div>
+            <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--grn2)', cursor: 'pointer' }}
+              onClick={() => setPage('coach')}>Ver todo →</div>
+          </div>
+          {topSignals.map(s => {
+            const color = { warning: 'var(--red)', attention: 'var(--amb)', info: 'var(--grn)' }[s.severity]
+            return (
+              <div key={s.id} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', padding: '6px 0', borderBottom: '.5px solid var(--brd)' }}>
+                <span style={{ color, fontSize: 11, flexShrink: 0, marginTop: 1 }}>
+                  {{ warning: '⊗', attention: '⚠', info: '◈' }[s.severity]}
+                </span>
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx)' }}>{s.title}</div>
+                  <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', lineHeight: 1.5 }}>{s.msg}</div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
 
       {/* ── TARJETA SUSCRIPCIONES MEJORADA ── */}
       {subCount > 0 && (
