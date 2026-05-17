@@ -118,16 +118,20 @@ const EMPTY_FORM = {
 
 // ── COMPONENTE PRINCIPAL ────────────────────────────────────────────────────────
 export default function Subscriptions() {
-  const { settings, incomes } = useApp()
+  const { settings, incomes, subscriptions: ctxSubs } = useApp()
   const currency = settings.currency || 'CLP'
   const fmt = n => (n || 0).toLocaleString('es-CL', { maximumFractionDigits: 0 })
+  const isDemo = !!settings.isDemo
 
-  const [subs,    setSubs]    = useState([])
-  const [loading, setLoading] = useState(true)
+  const [dbSubs,   setDbSubs]  = useState([])
+  const [loading,  setLoading] = useState(!isDemo)
   const [showForm, setShowForm] = useState(false)
   const [editing,  setEditing]  = useState(null)
   const [form,     setForm]     = useState(EMPTY_FORM)
-  const [filter,   setFilter]   = useState('all') // all | active | inactive
+  const [filter,   setFilter]   = useState('all')
+
+  // En demo: usar datos del contexto. En real: usar IndexedDB
+  const subs = isDemo ? (ctxSubs || []) : dbSubs
 
   // Ingreso mensual estimado del mes activo
   const monthlyIncome = useMemo(() => {
@@ -138,13 +142,14 @@ export default function Subscriptions() {
       .reduce((s, r) => s + (r.amount || 0), 0)
   }, [incomes, settings.activeMonth])
 
-  // Cargar
+  // Cargar desde IndexedDB solo en modo real
   useEffect(() => {
+    if (isDemo) return
     dbGetAll('subscriptions').then(data => {
-      setSubs(data || [])
+      setDbSubs(data || [])
       setLoading(false)
     })
-  }, [])
+  }, [isDemo])
 
   // Métricas
   const activeSubs   = subs.filter(s => s.status === 'active')
@@ -170,8 +175,8 @@ export default function Subscriptions() {
       createdAt: editing ? (subs.find(s => s.id === editing)?.createdAt || now) : now,
       updatedAt: now,
     }
-    await dbAdd('subscriptions', item)
-    setSubs(prev => editing
+    if (!isDemo) await dbAdd('subscriptions', item)
+    setDbSubs(prev => editing
       ? prev.map(s => s.id === editing ? item : s)
       : [...prev, item]
     )
@@ -180,13 +185,13 @@ export default function Subscriptions() {
 
   async function remove(id) {
     if (!confirm('¿Eliminar esta suscripción?')) return
-    await dbDelete('subscriptions', id)
-    setSubs(prev => prev.filter(s => s.id !== id))
+    if (!isDemo) await dbDelete('subscriptions', id)
+    setDbSubs(prev => prev.filter(s => s.id !== id))
   }
 
   async function toggleStatus(sub) {
     const updated = { ...sub, status: sub.status === 'active' ? 'inactive' : 'active', updatedAt: new Date().toISOString() }
-    await dbAdd('subscriptions', updated)
+    if (!isDemo) await dbAdd('subscriptions', updated)
     setSubs(prev => prev.map(s => s.id === updated.id ? updated : s))
   }
 
