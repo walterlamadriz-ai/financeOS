@@ -4,6 +4,7 @@
 //        totalExpense filtrado en Budgets, validación saldo>inicial en Deudas
 
 import { useState, useMemo } from 'react'
+import useSubscriptionMetrics from '../hooks/useSubscriptionMetrics.js'
 import { BackupWarning, ReportsDisclaimer } from '../components/legal/MicroCopy.jsx'
 import BackupManager, { BackupStatusBadge } from '../components/backup/BackupManager.jsx'
 import TemplateSelector from '../components/templates/TemplateSelector.jsx'
@@ -477,6 +478,7 @@ const ChartTooltip = ({ active, payload, label, sym }) => {
 export function Reports() {
   const { incomes, expenses, budgets, settings } = useApp()
   const sym = CURRENCY_SYMBOLS[settings.currency] || '$'
+  const subMetrics = useSubscriptionMetrics()
 
   const activeMonth  = settings.activeMonth || new Date().toISOString().slice(0, 7)
   const mIncomes     = useMemo(() => incomes.filter(r => r.date?.startsWith(activeMonth)),  [incomes,  activeMonth])
@@ -679,6 +681,43 @@ export function Reports() {
           )}
         </div>
       </Card>
+      {/* ── BLOQUE SUSCRIPCIONES EN REPORTES ── */}
+      {subMetrics.count > 0 && (
+        <Card>
+          <CardHeader title="Impacto de suscripciones" />
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
+            {[
+              { lb: 'Gasto mensual estimado', v: fmtMoney(subMetrics.monthly, sym) },
+              { lb: 'Gasto anual estimado',   v: fmtMoney(subMetrics.annual,  sym) },
+              { lb: 'Servicios activos',      v: `${subMetrics.count}` },
+              ...(subMetrics.monthlyIncome > 0 ? [{ lb: '% del ingreso', v: `${(subMetrics.pct * 100).toFixed(1)}%` }] : []),
+            ].map(m => (
+              <div key={m.lb} style={{ flex: '1 1 110px', background: 'var(--sur2)', borderRadius: 6, padding: '8px 10px', border: '.5px solid var(--brd)' }}>
+                <div style={{ fontSize: 9, fontFamily: 'var(--mono)', color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 2 }}>{m.lb}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'var(--mono)', color: 'var(--tx)' }}>{m.v}</div>
+              </div>
+            ))}
+          </div>
+          {subMetrics.byCategory.length > 0 && (
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ fontSize: 9, fontFamily: 'var(--mono)', color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 7 }}>Por categoría</div>
+              {subMetrics.byCategory.map(([cat, data]) => (
+                <div key={cat} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '.5px solid var(--brd)', fontSize: 12 }}>
+                  <span style={{ color: 'var(--tm)' }}>{cat}</span>
+                  <span style={{ fontFamily: 'var(--mono)', color: 'var(--tx)' }}>{fmtMoney(data.monthly, sym)}/mes · {data.count} servicio{data.count > 1 ? 's' : ''}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          {subMetrics.alerts.map((a, i) => (
+            <Alert key={i} type={a.type === 'duplicate' ? 'warn' : 'info'}>{a.msg}</Alert>
+          ))}
+          <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--th)', marginTop: 8 }}>
+            Las sugerencias son orientativas y no constituyen asesoría financiera.
+          </div>
+        </Card>
+      )}
+
       <ReportsDisclaimer />
     </div>
   )

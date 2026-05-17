@@ -2,7 +2,7 @@
 import { useMemo, useEffect, useState } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
 import { dbGetAll } from '../../core/db/index.js'
-import { toMonthly } from '../../pages/Subscriptions/index.jsx'
+import useSubscriptionMetrics from '../../hooks/useSubscriptionMetrics.js'
 import { KPI, Card, CardHeader, TxRow, BarRow, ProgressBar, Badge, Alert } from '../../components/ui/index.jsx'
 import { fmtMoney, fmtPct, CAT_COLORS } from '../../utils/index.js'
 
@@ -61,12 +61,10 @@ export default function Dashboard() {
     ...monthExpenses.map(r => ({ ...r, _t: 'expense' })),
   ].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 7), [monthIncomes, monthExpenses])
 
-  // Suscripciones — tarjeta resumen
-  const [subs, setSubs] = useState([])
-  useEffect(() => { dbGetAll('subscriptions').then(d => setSubs(d || [])) }, [])
-  const activeSubs    = subs.filter(s => s.status === 'active')
-  const subMonthly    = activeSubs.reduce((s, sub) => s + toMonthly(sub.amount, sub.frequency), 0)
-  const subPct        = mIncome > 0 ? subMonthly / mIncome : 0
+  // Suscripciones — hook compartido
+  const { monthly: subMonthly, annual: subAnnual, count: subCount,
+          pct: subPct, status: subStatus, alerts: subAlerts,
+          nextPayment: subNext, activeSubs } = useSubscriptionMetrics()
 
   // Meses disponibles para el selector
   const allDates  = [...incomes.map(r => r.date), ...expenses.map(r => r.date)].filter(Boolean)
@@ -141,16 +139,33 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* Tarjeta de suscripciones */}
-      {activeSubs.length > 0 && (
-        <div style={{ background: 'var(--sur)', border: '.5px solid var(--brd)', borderRadius: 'var(--r)', padding: '13px 15px', display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx)', flex: '0 0 auto' }}>↻ Suscripciones</div>
-          <div style={{ display: 'flex', gap: 20, flex: 1, flexWrap: 'wrap' }}>
-            <div><div style={{ fontSize: 9, fontFamily: 'var(--mono)', color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.5px' }}>Gasto mensual</div><div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'var(--mono)', color: subPct > 0.1 ? 'var(--amb)' : 'var(--tx)' }}>{fmtMoney(subMonthly, sym)}</div></div>
-            <div><div style={{ fontSize: 9, fontFamily: 'var(--mono)', color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.5px' }}>Activas</div><div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'var(--mono)', color: 'var(--tx)' }}>{activeSubs.length}</div></div>
-            {mIncome > 0 && <div><div style={{ fontSize: 9, fontFamily: 'var(--mono)', color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.5px' }}>% del ingreso</div><div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'var(--mono)', color: subPct > 0.1 ? 'var(--amb)' : 'var(--grn)' }}>{(subPct * 100).toFixed(1)}%</div></div>}
+      {/* ── TARJETA SUSCRIPCIONES MEJORADA ── */}
+      {subCount > 0 && (
+        <div style={{ background: 'var(--sur)', border: '.5px solid var(--brd)', borderRadius: 'var(--r)', padding: '14px 16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, gap: 8, flexWrap: 'wrap' }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx)' }}>↻ Suscripciones activas</div>
+            <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: subStatus.color, background: 'var(--sur2)', padding: '2px 8px', borderRadius: 20, border: '.5px solid var(--brd)' }}>
+              {subStatus.label}
+            </div>
           </div>
-          {subPct > 0.1 && <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--amb)', background: 'var(--amb-bg)', padding: '3px 9px', borderRadius: 20, border: '.5px solid var(--amb)', flex: '0 0 auto' }}>Revisá tus suscripciones →</div>}
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: subAlerts.length > 0 ? 10 : 0 }}>
+            {[
+              { lb: 'Gasto mensual estimado', v: fmtMoney(subMonthly, sym), c: subPct > 0.07 ? 'var(--amb)' : 'var(--tx)' },
+              { lb: 'Gasto anual estimado',   v: fmtMoney(subAnnual,  sym), c: 'var(--tx)' },
+              { lb: 'Servicios activos',      v: `${subCount}`,              c: 'var(--tx)' },
+              ...(mIncome > 0 ? [{ lb: '% del ingreso', v: `${(subPct*100).toFixed(1)}%`, c: subPct > 0.07 ? 'var(--amb)' : 'var(--grn)' }] : []),
+            ].map(m => (
+              <div key={m.lb} style={{ flex: '1 1 90px', background: 'var(--sur2)', borderRadius: 6, padding: '7px 10px', border: '.5px solid var(--brd)' }}>
+                <div style={{ fontSize: 9, fontFamily: 'var(--mono)', color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 2 }}>{m.lb}</div>
+                <div style={{ fontSize: 13, fontWeight: 700, fontFamily: 'var(--mono)', color: m.c }}>{m.v}</div>
+              </div>
+            ))}
+          </div>
+          {subAlerts.length > 0 && (
+            <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--amb)', lineHeight: 1.5 }}>
+              {subAlerts[0].msg}
+            </div>
+          )}
         </div>
       )}
 

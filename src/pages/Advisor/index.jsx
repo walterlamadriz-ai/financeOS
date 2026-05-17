@@ -3,9 +3,8 @@
 // Vista profesional para diagnóstico, seguimiento y preparación de reuniones
 // AVISO: Las alertas y señales son orientativas. No constituyen asesoría financiera certificada.
 
-import { useState, useEffect, useMemo } from 'react'
-import { dbGetAll } from '../../core/db/index.js'
-import { toMonthly, toAnnual, generateAlerts as generateSubAlerts } from '../Subscriptions/index.jsx'
+import { useState, useMemo } from 'react'
+import useSubscriptionMetrics from '../../hooks/useSubscriptionMetrics.js'
 import { useApp } from '../../context/AppContext.jsx'
 import { Card, CardHeader, Alert } from '../../components/ui/index.jsx'
 import { fmtMoney, fmtPct } from '../../utils/index.js'
@@ -343,14 +342,9 @@ export default function Advisor() {
 
   const noData = mIncome === 0 && mExpense === 0 && debts.length === 0
 
-  // Suscripciones
-  const [subs, setSubs] = useState([])
-  useEffect(() => { dbGetAll('subscriptions').then(d => setSubs(d || [])) }, [])
-  const activeSubs     = subs.filter(s => s.status === 'active')
-  const subMonthly     = activeSubs.reduce((s, sub) => s + toMonthly(sub.amount, sub.frequency), 0)
-  const subAnnual      = activeSubs.reduce((s, sub) => s + toAnnual(sub.amount, sub.frequency), 0)
-  const subPct         = mIncome > 0 ? subMonthly / mIncome : 0
-  const subAlerts      = useMemo(() => generateSubAlerts(subs, mIncome), [subs, mIncome])
+  // Suscripciones — hook compartido
+  const { monthly: subMonthly, annual: subAnnual, pct: subPct,
+          count: subCount, alerts: subAlerts, activeSubs } = useSubscriptionMetrics()
 
   return (
     <div className="stack">
@@ -590,7 +584,7 @@ export default function Advisor() {
       </div>
 
       {/* ── SECCIÓN SUSCRIPCIONES EN MODO ASESOR ── */}
-      {activeSubs.length > 0 && (
+      {subCount > 0 && (
         <div style={{ background: 'var(--sur)', border: '.5px solid var(--brd)', borderRadius: 'var(--r)', padding: '16px', marginBottom: 0 }}>
           <div style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.8px', marginBottom: 10 }}>
             Revisión de Suscripciones
