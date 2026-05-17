@@ -684,7 +684,10 @@ export function Reports() {
       {/* ── BLOQUE SUSCRIPCIONES EN REPORTES ── */}
       {subMetrics.count > 0 && (
         <Card>
-          <CardHeader title="Impacto de suscripciones" />
+          <CardHeader title="Suscripciones — gasto estimado" />
+          <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--th)', marginBottom: 12 }}>
+            Gasto proyectado · no incluido en los gastos registrados del mes
+          </div>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
             {[
               { lb: 'Gasto mensual estimado', v: fmtMoney(subMetrics.monthly, sym) },

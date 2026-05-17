@@ -166,6 +166,9 @@ export default function Dashboard() {
               {subAlerts[0].msg}
             </div>
           )}
+          <div style={{ fontSize: 9, fontFamily: 'var(--mono)', color: 'var(--th)', marginTop: 8, paddingTop: 8, borderTop: '.5px solid var(--brd)' }}>
+            Gasto estimado · no incluido en los gastos registrados del mes
+          </div>
         </div>
       )}
 

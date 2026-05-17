@@ -192,6 +192,7 @@ export function ReporteFinancieroPDF({ data }) {
     overBudgetCount, score, scoreLabel, scoreColor,
     advisorNotes,
     expByCategory,
+    subMonthly, subAnnual, subCount, subAlerts, subByCategory,
   } = data
 
   const steps = parseSteps(advisorNotes?.nextSteps || '')
@@ -446,6 +447,52 @@ export function ReporteFinancieroPDF({ data }) {
                 <Text style={s.stepText}>{step}</Text>
               </View>
             ))}
+          </View>
+        )}
+
+        {/* Suscripciones y gastos recurrentes */}
+        {subCount > 0 && (
+          <View style={[s.section, { marginBottom: 12 }]}>
+            <Text style={s.sectionTitle}>Suscripciones y gastos recurrentes</Text>
+            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
+              {[
+                { lb: 'Gasto mensual estimado', v: fmtMoney(subMonthly || 0, sym) },
+                { lb: 'Gasto anual estimado',   v: fmtMoney(subAnnual  || 0, sym) },
+                { lb: 'Servicios activos',      v: `${subCount || 0}` },
+                ...(mIncome > 0 ? [{ lb: '% del ingreso', v: fmtPct((subMonthly || 0) / mIncome) }] : []),
+              ].map(m => (
+                <View key={m.lb} style={{ flex: 1, backgroundColor: C.card, padding: 8, borderRadius: 4, border: '0.5 solid ' + C.brd }}>
+                  <Text style={{ fontSize: 7, color: C.ink3, marginBottom: 2, textTransform: 'uppercase', letterSpacing: 0.5 }}>{m.lb}</Text>
+                  <Text style={{ fontSize: 11, fontFamily: 'Helvetica-Bold', color: C.ink }}>{m.v}</Text>
+                </View>
+              ))}
+            </View>
+            {(subByCategory || []).length > 0 && (
+              <View style={s.table}>
+                <View style={s.tableHead}>
+                  <Text style={[s.thCell, { flex: 3 }]}>Categoría</Text>
+                  <Text style={[s.thCell, { flex: 2, textAlign: 'right' }]}>Mensual estimado</Text>
+                  <Text style={[s.thCell, { flex: 1, textAlign: 'right' }]}>Servicios</Text>
+                </View>
+                {(subByCategory || []).slice(0, 5).map(([cat, data], i, arr) => (
+                  <View key={cat} style={i === arr.length - 1 ? s.tableRowLast : s.tableRow}>
+                    <Text style={[s.tdCell, { flex: 3 }]}>{cat}</Text>
+                    <Text style={[s.tdCell, { flex: 2, textAlign: 'right' }]}>{fmtMoney(data.monthly || 0, sym)}</Text>
+                    <Text style={[s.tdCell, { flex: 1, textAlign: 'right', color: C.ink3 }]}>{data.count}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+            {(subAlerts || []).length > 0 && (
+              <View style={{ marginTop: 8, padding: 8, backgroundColor: C.ambL, borderRadius: 4 }}>
+                {(subAlerts || []).slice(0, 2).map((a, i) => (
+                  <Text key={i} style={{ fontSize: 8, color: C.amb, lineHeight: 1.5 }}>· {a.msg}</Text>
+                ))}
+              </View>
+            )}
+            <Text style={{ fontSize: 7, color: C.ink3, marginTop: 6 }}>
+              Gasto proyectado · no incluido en gastos registrados · estas sugerencias son orientativas y no constituyen asesoría financiera.
+            </Text>
           </View>
         )}
 

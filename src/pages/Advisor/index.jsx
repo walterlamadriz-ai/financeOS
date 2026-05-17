@@ -291,6 +291,9 @@ export default function Advisor() {
         overBudgetCount, score, scoreLabel, scoreColor,
         advisorNotes,
         expByCategory:    expByCat,
+        subMonthly, subAnnual, subCount,
+        subAlerts:        subAlerts.slice(0, 3),
+        subByCategory:    subMetrics?.byCategory || [],
       })
     } catch (e) {
       console.error('PDF error:', e)
@@ -343,8 +346,9 @@ export default function Advisor() {
   const noData = mIncome === 0 && mExpense === 0 && debts.length === 0
 
   // Suscripciones — hook compartido
+  const subMetrics = useSubscriptionMetrics()
   const { monthly: subMonthly, annual: subAnnual, pct: subPct,
-          count: subCount, alerts: subAlerts, activeSubs } = useSubscriptionMetrics()
+          count: subCount, alerts: subAlerts, activeSubs } = subMetrics
 
   return (
     <div className="stack">
@@ -586,8 +590,11 @@ export default function Advisor() {
       {/* ── SECCIÓN SUSCRIPCIONES EN MODO ASESOR ── */}
       {subCount > 0 && (
         <div style={{ background: 'var(--sur)', border: '.5px solid var(--brd)', borderRadius: 'var(--r)', padding: '16px', marginBottom: 0 }}>
-          <div style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.8px', marginBottom: 10 }}>
-            Revisión de Suscripciones
+          <div style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.8px', marginBottom: 2 }}>
+            Gastos recurrentes estimados
+          </div>
+          <div style={{ fontSize: 9, fontFamily: 'var(--mono)', color: 'var(--th)', marginBottom: 10 }}>
+            Gasto proyectado · no incluido en gastos registrados · orientativo
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px,1fr))', gap: 8, marginBottom: 12 }}>
             {[
