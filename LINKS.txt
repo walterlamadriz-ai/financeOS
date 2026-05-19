@@ -1,0 +1,38 @@
+FinanceOS v1.0 — Links oficiales
+=================================
+
+LANDING
+https://financeos-landing-omega.vercel.app
+
+APP
+https://financeos-hazel.vercel.app/app/
+
+DEMO INTERACTIVA
+https://financeos-hazel.vercel.app/app/?demo=true
+
+DOCUMENTACIÓN
+https://financeos-landing-omega.vercel.app/docs/
+
+INICIO RÁPIDO
+https://financeos-landing-omega.vercel.app/docs/getting-started.html
+
+GUÍA WHITE-LABEL
+https://financeos-landing-omega.vercel.app/docs/white-label.html
+
+GUÍA DEPLOY
+https://financeos-landing-omega.vercel.app/docs/deploy.html
+
+GUÍA BACKUPS
+https://financeos-landing-omega.vercel.app/docs/backups.html
+
+GUÍA MODO ASESOR
+https://financeos-landing-omega.vercel.app/docs/advisor.html
+
+SOPORTE
+maxnovaluciglobal@gmail.com
+
+EMPRESA
+MAXNOVA & LUCI Global LLC
+
+DESARROLLADO POR
+Walter La Madriz
