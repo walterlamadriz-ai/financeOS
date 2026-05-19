@@ -2,7 +2,7 @@
   "redirects": [
     {
       "source": "/",
-      "destination": "/app",
+      "destination": "https://financeos-landing-omega.vercel.app",
       "permanent": false
     }
   ],
