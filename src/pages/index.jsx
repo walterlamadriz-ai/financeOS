@@ -377,13 +377,10 @@ export function Debts() {
           </Card>
         )
       })}
-    </div>
-
-      {/* Visual Insights — Deudas */}
       {debts.length > 0 && (
         <DebtProgressList debts={debts} sym={sym} />
       )}
-
+    </div>
   )
 }
 
