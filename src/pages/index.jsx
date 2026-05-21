@@ -208,6 +208,8 @@ export function Expenses() {
 }
 
 // ─── BUDGETS ──────────────────────────────────────────────────────────────────
+import BudgetProgressList from '../components/charts/BudgetProgressList.jsx'
+
 export function Budgets() {
   const { budgets, addBudget, delBudget, expenses, settings } = useApp()
   const [f, setF]   = useState({ category: 'Vivienda', limit: '' })
@@ -283,6 +285,17 @@ export function Budgets() {
         </Card>
       </div>
     </div>
+
+      {/* Visual Insights — Presupuestos */}
+      {budgets.length > 0 && (
+        <div style={{ marginTop: 8 }}>
+          <div style={{ fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--grn2)', marginBottom: 12 }}>
+            Avance por presupuesto · {monthLabel(activeMonth)}
+          </div>
+          <BudgetProgressList budgets={budgets} expByCat={expByCat} sym={sym} />
+        </div>
+      )}
+
   )
 }
 
