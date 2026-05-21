@@ -36,6 +36,7 @@ export async function getDB() {
         if (!db.objectStoreNames.contains('settings'))      db.createObjectStore('settings')
         // v2 — subscriptions
         if (!db.objectStoreNames.contains('subscriptions')) db.createObjectStore('subscriptions', { keyPath: 'id' })
+        if (!db.objectStoreNames.contains('importBatches')) db.createObjectStore('importBatches', { keyPath: 'id' })
       },
       blocked()    { _db?.close(); _db = null },
       blocking()   { _db?.close(); _db = null },
@@ -99,7 +100,7 @@ export async function saveSettings(settings) {
 
 // ─── clearAllData ─────────────────────────────────────────────────────────────
 export async function clearAllData() {
-  const stores = ['incomes', 'expenses', 'budgets', 'debts', 'goals', 'subscriptions']
+  const stores = ['incomes', 'expenses', 'budgets', 'debts', 'goals', 'subscriptions', 'importBatches']
   const db = await getDB()
   if (!db) { stores.forEach(lsClear); return }
   const tx = db.transaction(stores, 'readwrite')
@@ -113,15 +114,17 @@ export async function exportAllData() {
     dbGetAll('incomes'), dbGetAll('expenses'), dbGetAll('budgets'),
     dbGetAll('debts'),   dbGetAll('goals'),   dbGetAll('subscriptions'), getSettings(),
   ])
-  return { incomes, expenses, budgets, debts, goals, subscriptions, settings,
-           exportedAt: new Date().toISOString(), version: '1.2' }
+  let importBatches = []
+  try { importBatches = await dbGetAll('importBatches') } catch {}
+  return { incomes, expenses, budgets, debts, goals, subscriptions, importBatches, settings,
+           exportedAt: new Date().toISOString(), version: '1.3' }
 }
 
 export async function importAllData(data) {
   if (!data || typeof data !== 'object') throw new Error('Formato inválido')
   await clearAllData()
   const db    = await getDB()
-  const stores = ['incomes', 'expenses', 'budgets', 'debts', 'goals', 'subscriptions']
+  const stores = ['incomes', 'expenses', 'budgets', 'debts', 'goals', 'subscriptions', 'importBatches']
   for (const store of stores) {
     if (!Array.isArray(data[store])) continue
     if (!db) { lsSet(store, data[store]); continue }
