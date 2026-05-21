@@ -385,6 +385,8 @@ export function Debts() {
 }
 
 // ─── GOALS ────────────────────────────────────────────────────────────────────
+import GoalProgressList from '../components/charts/GoalProgressList.jsx'
+
 export function Goals() {
   const { goals, addGoal, delGoal, updateGoal, settings } = useApp()
   const [show, setShow]         = useState(false)
@@ -416,10 +418,11 @@ export function Goals() {
   return (
     <div className="stack">
       <PageHeader title="Metas de ahorro" sub="Objetivos financieros con seguimiento visual" />
-      <div className="kpi-row" style={{ gridTemplateColumns: 'repeat(3,1fr)' }}>
-        <KPI label="Metas activas"  value={goals.length} />
-        <KPI label="Total objetivo" value={fmtMoney(totalTarget, sym)} />
-        <KPI label="Total ahorrado" value={fmtMoney(totalSaved, sym)} color="green" sub={totalTarget > 0 ? fmtPct(totalSaved / totalTarget) + ' del total' : '-'} />
+      <div className="kpi-row" style={{ gridTemplateColumns: 'repeat(4,1fr)' }}>
+        <KPI label="Metas activas"   value={goals.length} />
+        <KPI label="Total objetivo"  value={fmtMoney(totalTarget, sym)} />
+        <KPI label="Total ahorrado"  value={fmtMoney(totalSaved, sym)} color="green" sub={totalTarget > 0 ? fmtPct(totalSaved / totalTarget) + ' del total' : '-'} />
+        <KPI label="Completadas"     value={goals.filter(g => g.saved >= g.target).length} color="green" />
       </div>
       <div><Btn variant="primary" onClick={() => setShow(s => !s)}>{show ? '— Cerrar' : '+ Nueva meta'}</Btn></div>
       {show && (
@@ -503,6 +506,11 @@ const ChartTooltip = ({ active, payload, label, sym }) => {
           <span style={{ fontWeight: 500 }}>{sym}{Math.abs(p.value).toLocaleString('es-CL')}</span>
         </div>
       ))}
+
+      {/* Visual Insights — Metas */}
+      {goals.length > 0 && (
+        <GoalProgressList goals={goals} sym={sym} />
+      )}
     </div>
   )
 }
