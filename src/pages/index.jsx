@@ -286,7 +286,6 @@ export function Budgets() {
       </div>
     </div>
 
-      {/* Visual Insights — Presupuestos */}
       {budgets.length > 0 && (
         <div style={{ marginTop: 8 }}>
           <div style={{ fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--grn2)', marginBottom: 12 }}>
@@ -295,7 +294,7 @@ export function Budgets() {
           <BudgetProgressList budgets={budgets} expByCat={expByCat} sym={sym} />
         </div>
       )}
-
+    </div>
   )
 }
 
