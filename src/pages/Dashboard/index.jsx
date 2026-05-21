@@ -1,5 +1,5 @@
 // src/pages/Dashboard/index.jsx
-// Dashboard con Visual Insights — FinanceOS v1.0
+// Dashboard Visual Polish — FinanceOS v1.1.1
 
 import { useMemo } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
@@ -7,13 +7,16 @@ import ChartCard from '../../components/charts/ChartCard.jsx'
 import IncomeExpenseBar from '../../components/charts/IncomeExpenseBar.jsx'
 import CategoryDonut from '../../components/charts/CategoryDonut.jsx'
 
-const fmt = (n) => (Number(n) || 0).toLocaleString('es-CL', { maximumFractionDigits: 0 })
-const pct = (n) => ((Number(n) || 0) * 100).toFixed(1) + '%'
+const fmt  = (n) => (Number(n) || 0).toLocaleString('es-CL', { maximumFractionDigits: 0 })
+const pct  = (n) => ((Number(n) || 0) * 100).toFixed(1) + '%'
+const pct0 = (n) => ((Number(n) || 0) * 100).toFixed(0) + '%'
 
 export default function Dashboard({ setPage }) {
   const ctx      = useApp() || {}
   const incomes  = Array.isArray(ctx.incomes)       ? ctx.incomes       : []
   const expenses = Array.isArray(ctx.expenses)      ? ctx.expenses      : []
+  const budgets  = Array.isArray(ctx.budgets)       ? ctx.budgets       : []
+  const goals    = Array.isArray(ctx.goals)         ? ctx.goals         : []
   const settings = (ctx.settings && typeof ctx.settings === 'object') ? ctx.settings : {}
   const subs     = Array.isArray(ctx.subscriptions) ? ctx.subscriptions : []
 
@@ -34,14 +37,94 @@ export default function Dashboard({ setPage }) {
     [expenses, activeMonth]
   )
 
-  // Suscripciones — calcular mensual desde el array
   const subMonthly = useMemo(() => subs.reduce((s, sub) => {
     if (!sub) return s
     const amt  = Number(sub.amount) || 0
-    const freq = sub.frequency || sub.frecuencia || 'monthly'
+    const freq = sub.frequency || 'monthly'
     if (freq === 'annual' || freq === 'anual') return s + amt / 12
     return s + amt
   }, 0), [subs])
+
+  // ── Insight cards ─────────────────────────────────────────────────────────
+  const insights = useMemo(() => {
+    const cards = []
+
+    // Suscripciones anuales
+    if (subMonthly > 0) {
+      cards.push({
+        icon: '↻',
+        color: 'var(--amb)',
+        bg: 'rgba(245,166,35,.07)',
+        border: 'rgba(245,166,35,.22)',
+        text: `Tus suscripciones suman ${sym}${fmt(subMonthly * 12)} al año.`,
+        sub: 'Revisa si todas siguen siendo útiles.',
+      })
+    }
+
+    // Categoría principal de gasto
+    if (monthExpenses.length > 0) {
+      const catMap = {}
+      monthExpenses.forEach(e => {
+        const cat = e.category || 'Sin categoría'
+        catMap[cat] = (catMap[cat] || 0) + (Number(e.amount) || 0)
+      })
+      const totalExp = monthExpenses.reduce((s, e) => s + (Number(e.amount) || 0), 0)
+      const topCat = Object.entries(catMap).sort((a, b) => b[1] - a[1])[0]
+      if (topCat && totalExp > 0) {
+        const catPct = ((topCat[1] / totalExp) * 100).toFixed(0)
+        cards.push({
+          icon: '◑',
+          color: 'var(--accent2, #00b8d9)',
+          bg: 'rgba(0,184,217,.07)',
+          border: 'rgba(0,184,217,.2)',
+          text: `${topCat[0]} representa el ${catPct}% de tus gastos del mes.`,
+          sub: 'Es tu categoría de mayor gasto.',
+        })
+      }
+    }
+
+    // Presupuesto más usado
+    if (budgets.length > 0 && monthExpenses.length > 0) {
+      const expByCat = {}
+      monthExpenses.forEach(e => { expByCat[e.category] = (expByCat[e.category] || 0) + (Number(e.amount) || 0) })
+      const totalBudget = budgets.reduce((s, b) => s + (Number(b.limit) || 0), 0)
+      const totalUsed   = budgets.reduce((s, b) => s + Math.min(expByCat[b.category] || 0, Number(b.limit) || 0), 0)
+      if (totalBudget > 0) {
+        const budgetPct = ((totalUsed / totalBudget) * 100).toFixed(0)
+        const color = Number(budgetPct) > 90 ? 'var(--red)' : Number(budgetPct) > 70 ? 'var(--amb)' : 'var(--accent)'
+        cards.push({
+          icon: '⊞',
+          color,
+          bg: Number(budgetPct) > 90 ? 'rgba(255,77,106,.07)' : 'rgba(0,212,170,.07)',
+          border: Number(budgetPct) > 90 ? 'rgba(255,77,106,.22)' : 'rgba(0,212,170,.2)',
+          text: `Has usado el ${budgetPct}% de tu presupuesto mensual.`,
+          sub: Number(budgetPct) > 90 ? 'Cerca del límite — revisa tus gastos.' : 'Sigue así.',
+        })
+      }
+    }
+
+    // Meta principal
+    if (goals.length > 0) {
+      const top = [...goals].sort((a, b) => {
+        const pa = Number(a.target) > 0 ? Number(a.saved) / Number(a.target) : 0
+        const pb = Number(b.target) > 0 ? Number(b.saved) / Number(b.target) : 0
+        return pb - pa
+      })[0]
+      if (top && Number(top.target) > 0) {
+        const goalPct = Math.min((Number(top.saved) / Number(top.target)) * 100, 100).toFixed(0)
+        cards.push({
+          icon: '→',
+          color: 'var(--accent)',
+          bg: 'rgba(0,212,170,.07)',
+          border: 'rgba(0,212,170,.2)',
+          text: `"${top.name}" está al ${goalPct}% de tu objetivo.`,
+          sub: `${sym}${fmt(Number(top.target) - Number(top.saved))} restantes para completarla.`,
+        })
+      }
+    }
+
+    return cards.slice(0, 4)
+  }, [subMonthly, monthExpenses, budgets, goals, sym])
 
   const KPIS = [
     { label:'Ingresos',       value:`${sym}${fmt(kpis.totalInc)}`,  color:'var(--accent)', sub:`${kpis.incCount} registros` },
@@ -53,15 +136,19 @@ export default function Dashboard({ setPage }) {
 
   return (
     <div style={{ maxWidth:960, margin:'0 auto' }}>
-      <div style={{ marginBottom:24 }}>
+
+      {/* Header */}
+      <div style={{ marginBottom:20 }}>
         <div style={{ fontFamily:'var(--mono)', fontSize:11, letterSpacing:'1.2px', textTransform:'uppercase', color:'var(--grn2)', marginBottom:6 }}>Dashboard</div>
-        <h1 style={{ fontSize:22, fontWeight:700, color:'var(--tx)', letterSpacing:'-.5px', marginBottom:2 }}>Resumen financiero</h1>
+        <h1 style={{ fontSize:22, fontWeight:700, color:'var(--tx)', letterSpacing:'-.5px', marginBottom:2 }}>Tu mes en una mirada</h1>
         <p style={{ fontSize:13, color:'var(--th)', fontFamily:'var(--mono)' }}>// {activeMonth} · datos locales</p>
       </div>
 
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))', gap:12, marginBottom:20 }}>
+      {/* KPI Cards */}
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))', gap:12, marginBottom:16 }}>
         {KPIS.map((k, i) => (
-          <div key={i} style={{ background:'var(--sur)', border:'.5px solid var(--brd)', borderRadius:'var(--r)', padding:'14px 16px' }}>
+          <div key={i} style={{ background:'var(--sur)', border:'.5px solid var(--brd)', borderRadius:'var(--r)', padding:'14px 16px', position:'relative', overflow:'hidden' }}>
+            <div style={{ position:'absolute', top:-16, right:-16, width:56, height:56, borderRadius:'50%', background:`${k.color}`, opacity:.08 }}/>
             <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)', textTransform:'uppercase', letterSpacing:'.8px', marginBottom:6 }}>{k.label}</div>
             <div style={{ fontFamily:'var(--mono)', fontSize:18, fontWeight:700, color:k.color, marginBottom:3 }}>{k.value}</div>
             <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)' }}>{k.sub}</div>
@@ -69,6 +156,22 @@ export default function Dashboard({ setPage }) {
         ))}
       </div>
 
+      {/* Insight Cards */}
+      {insights.length > 0 && (
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))', gap:10, marginBottom:20 }}>
+          {insights.map((ins, i) => (
+            <div key={i} style={{ background:ins.bg, border:`.5px solid ${ins.border}`, borderRadius:'var(--r)', padding:'12px 14px', display:'flex', alignItems:'flex-start', gap:10 }}>
+              <span style={{ fontSize:16, color:ins.color, flexShrink:0, marginTop:1 }}>{ins.icon}</span>
+              <div>
+                <div style={{ fontSize:12, fontWeight:600, color:'var(--tx)', marginBottom:3, lineHeight:1.45 }}>{ins.text}</div>
+                <div style={{ fontSize:11, color:'var(--th)', fontFamily:'var(--mono)' }}>{ins.sub}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Gráficos */}
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16, marginBottom:16 }}>
         <ChartCard title="Ingresos vs Gastos" subtitle="últimos 6 meses" minHeight={220}>
           <IncomeExpenseBar incomes={incomes} expenses={expenses} sym={sym} months={6}/>
@@ -78,6 +181,7 @@ export default function Dashboard({ setPage }) {
         </ChartCard>
       </div>
 
+      {/* Link al Coach */}
       {setPage && (
         <div style={{ padding:'10px 14px', background:'var(--sur)', border:'.5px solid var(--brd)', borderRadius:'var(--r)', display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
           <span style={{ fontSize:12, color:'var(--th)', fontFamily:'var(--mono)' }}>◈ Revisa señales orientativas en FinanceOS Coach.</span>
