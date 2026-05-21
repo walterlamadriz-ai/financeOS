@@ -297,6 +297,8 @@ export function Budgets() {
 }
 
 // ─── DEBTS ────────────────────────────────────────────────────────────────────
+import DebtProgressList from '../components/charts/DebtProgressList.jsx'
+
 export function Debts() {
   const { debts, addDebt, delDebt, settings } = useApp()
   const [show, setShow] = useState(false)
@@ -321,10 +323,11 @@ export function Debts() {
   return (
     <div className="stack">
       <PageHeader title="Deudas" sub="Seguimiento de obligaciones financieras" />
-      <div className="kpi-row" style={{ gridTemplateColumns: 'repeat(3,1fr)' }}>
+      <div className="kpi-row" style={{ gridTemplateColumns: 'repeat(4,1fr)' }}>
         <KPI label="Deuda total"       value={fmtMoney(totalBalance, sym)} color="red" />
         <KPI label="Pago mín. mensual" value={fmtMoney(totalMin, sym)} />
         <KPI label="Deudas activas"    value={debts.length} />
+        <KPI label="Total pagado"      value={fmtMoney(debts.reduce((s,d)=>s+Math.max(0,(Number(d.initial)||Number(d.balance)||0)-Number(d.balance||0)),0), sym)} color="green" />
       </div>
       <div><Btn variant="primary" onClick={() => setShow(s => !s)}>{show ? '— Cerrar' : '+ Nueva deuda'}</Btn></div>
       {show && (
@@ -375,6 +378,12 @@ export function Debts() {
         )
       })}
     </div>
+
+      {/* Visual Insights — Deudas */}
+      {debts.length > 0 && (
+        <DebtProgressList debts={debts} sym={sym} />
+      )}
+
   )
 }
 
