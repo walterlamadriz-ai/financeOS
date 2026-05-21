@@ -6,8 +6,11 @@ import { useState, useEffect, useMemo } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
 import { dbGetAll, dbAdd, dbDelete } from '../../core/db/index.js'
 import { uid } from '../../utils/index.js'
+import ChartCard from '../../components/charts/ChartCard.jsx'
+import HorizontalBars from '../../components/charts/HorizontalBars.jsx'
+import CategoryDonut from '../../components/charts/CategoryDonut.jsx'
 
-// ── CONSTANTES ─────────────────────────────────────────────────────────────────
+// ── CONSTANTES ──────────────────────────────────────────────────────────────────
 export const SUB_CATEGORIES = [
   'Streaming', 'Música', 'Productividad', 'Almacenamiento',
   'Software', 'Educación', 'Salud / Gimnasio', 'Seguros',
@@ -42,41 +45,32 @@ export function toAnnual(amount, frequency) {
   }
 }
 
-// ── ALERTAS ORIENTATIVAS ────────────────────────────────────────────────────────
 export function generateAlerts(subs, monthlyIncome) {
   const alerts = []
-  const active = subs.filter(s => s.status === 'active')
-  if (!active.length) return alerts
+  const active = Array.isArray(subs) ? subs.filter(s => s.status === 'active') : []
 
-  // Agrupar por categoría
+  // Duplicados por categoría
   const byCat = {}
   active.forEach(s => {
     byCat[s.category] = (byCat[s.category] || [])
     byCat[s.category].push(s)
   })
-
-  // Más de 2 en la misma categoría
   Object.entries(byCat).forEach(([cat, items]) => {
     if (items.length >= 2) {
       alerts.push({
         type: 'duplicate',
-        msg: `Tenés ${items.length} suscripciones en "${cat}". Evaluá si todas siguen siendo necesarias.`,
+        msg: `Tienes ${items.length} suscripciones en "${cat}". Revisa si todas son necesarias.`,
       })
     }
   })
 
-  // Porcentaje del ingreso
+  // % del ingreso
   if (monthlyIncome > 0) {
     const totalMonthly = active.reduce((s, sub) => s + toMonthly(sub.amount, sub.frequency), 0)
     const pct = (totalMonthly / monthlyIncome) * 100
-    if (pct > 10) {
+    if (pct > 15) {
       alerts.push({
         type: 'income',
-        msg: `Tus suscripciones representan el ${pct.toFixed(1)}% de tus ingresos mensuales. Considera revisar si todas se usan realmente.`,
-      })
-    } else if (pct > 0) {
-      alerts.push({
-        type: 'info',
         msg: `Tus suscripciones representan el ${pct.toFixed(1)}% de tus ingresos mensuales.`,
       })
     }
@@ -109,7 +103,7 @@ export function generateAlerts(subs, monthlyIncome) {
   return alerts
 }
 
-// ── FORM vacío ─────────────────────────────────────────────────────────────────
+// ── FORM vacío ──────────────────────────────────────────────────────────────────
 const EMPTY_FORM = {
   name: '', category: 'Streaming', amount: '', currency: '',
   frequency: 'monthly', nextPaymentDate: '', paymentMethod: '',
@@ -130,10 +124,8 @@ export default function Subscriptions() {
   const [form,     setForm]     = useState(EMPTY_FORM)
   const [filter,   setFilter]   = useState('all')
 
-  // En demo: usar datos del contexto. En real: usar IndexedDB
   const subs = isDemo ? (ctxSubs || []) : dbSubs
 
-  // Ingreso mensual estimado del mes activo
   const monthlyIncome = useMemo(() => {
     if (!Array.isArray(incomes)) return 0
     const month = settings.activeMonth || new Date().toISOString().slice(0, 7)
@@ -142,7 +134,6 @@ export default function Subscriptions() {
       .reduce((s, r) => s + (r.amount || 0), 0)
   }, [incomes, settings.activeMonth])
 
-  // Cargar desde IndexedDB solo en modo real
   useEffect(() => {
     if (isDemo) return
     dbGetAll('subscriptions').then(data => {
@@ -151,10 +142,9 @@ export default function Subscriptions() {
     })
   }, [isDemo])
 
-  // Métricas
-  const activeSubs   = subs.filter(s => s.status === 'active')
-  const totalMonthly = activeSubs.reduce((s, sub) => s + toMonthly(sub.amount, sub.frequency), 0)
-  const totalAnnual  = activeSubs.reduce((s, sub) => s + toAnnual(sub.amount, sub.frequency), 0)
+  const activeSubs    = subs.filter(s => s.status === 'active')
+  const totalMonthly  = activeSubs.reduce((s, sub) => s + toMonthly(sub.amount, sub.frequency), 0)
+  const totalAnnual   = activeSubs.reduce((s, sub) => s + toAnnual(sub.amount, sub.frequency), 0)
   const mostExpensive = activeSubs.length
     ? activeSubs.reduce((a, b) => toMonthly(a.amount, a.frequency) > toMonthly(b.amount, b.frequency) ? a : b)
     : null
@@ -162,6 +152,23 @@ export default function Subscriptions() {
     .filter(s => s.nextPaymentDate)
     .sort((a, b) => new Date(a.nextPaymentDate) - new Date(b.nextPaymentDate))[0]
   const alerts = useMemo(() => generateAlerts(subs, monthlyIncome), [subs, monthlyIncome])
+
+  // Datos para gráficos
+  const topRecords = useMemo(() =>
+    activeSubs.map(s => ({
+      category: s.name,
+      amount: toMonthly(s.amount, s.frequency),
+    })),
+    [activeSubs]
+  )
+
+  const catRecords = useMemo(() =>
+    activeSubs.map(s => ({
+      category: s.category || 'Sin categoría',
+      amount: toMonthly(s.amount, s.frequency),
+    })),
+    [activeSubs]
+  )
 
   // CRUD
   async function save() {
@@ -192,7 +199,7 @@ export default function Subscriptions() {
   async function toggleStatus(sub) {
     const updated = { ...sub, status: sub.status === 'active' ? 'inactive' : 'active', updatedAt: new Date().toISOString() }
     if (!isDemo) await dbAdd('subscriptions', updated)
-    setSubs(prev => prev.map(s => s.id === updated.id ? updated : s))
+    setDbSubs(prev => prev.map(s => s.id === updated.id ? updated : s))
   }
 
   function openEdit(sub) {
@@ -221,24 +228,37 @@ export default function Subscriptions() {
           Suscripciones y gastos recurrentes
         </h2>
         <p style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)' }}>
-          Identificá pagos repetidos y calculá su impacto mensual y anual. Las sugerencias son orientativas y no constituyen asesoría financiera.
+          Identifica pagos repetidos y calcula su impacto mensual y anual. Las sugerencias son orientativas y no constituyen asesoría financiera.
         </p>
       </div>
 
       {/* KPIs */}
       <div className="kpi-row" style={{ marginBottom: 16 }}>
         {[
-          { label: 'Gasto mensual', value: `${currency} ${fmt(totalMonthly)}`, color: 'var(--grn)' },
-          { label: 'Gasto anual',   value: `${currency} ${fmt(totalAnnual)}`,  color: 'var(--tx)' },
-          { label: 'Activas',       value: activeSubs.length,                  color: 'var(--tx)' },
+          { label: 'Gasto mensual', value: `${currency} ${fmt(totalMonthly)}`,  color: 'var(--grn)' },
+          { label: 'Gasto anual',   value: `${currency} ${fmt(totalAnnual)}`,   color: 'var(--tx)' },
+          { label: 'Activas',       value: activeSubs.length,                   color: 'var(--tx)' },
           { label: 'Más costosa',   value: mostExpensive ? mostExpensive.name : '—', color: 'var(--amb)' },
+          { label: 'Próximo pago',  value: nextSub ? new Date(nextSub.nextPaymentDate).toLocaleDateString('es-CL') : '—', color: 'var(--tx)' },
         ].map(k => (
           <div key={k.label} style={{ background: 'var(--sur)', border: '.5px solid var(--brd)', borderRadius: 'var(--r)', padding: '12px 14px' }}>
             <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 4 }}>{k.label}</div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: k.color, fontFamily: 'var(--mono)', letterSpacing: '-.5px' }}>{k.value}</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: k.color, fontFamily: 'var(--mono)', letterSpacing: '-.5px' }}>{k.value}</div>
           </div>
         ))}
       </div>
+
+      {/* VISUAL INSIGHTS */}
+      {activeSubs.length > 0 && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+          <ChartCard title="Top suscripciones por costo mensual" minHeight={160}>
+            <HorizontalBars records={topRecords} sym={`${currency} `} maxItems={6} />
+          </ChartCard>
+          <ChartCard title="Distribución por categoría" minHeight={160}>
+            <CategoryDonut records={catRecords} sym={`${currency} `} maxCategories={6} />
+          </ChartCard>
+        </div>
+      )}
 
       {/* ALERTAS */}
       {alerts.length > 0 && (
@@ -273,11 +293,62 @@ export default function Subscriptions() {
         ))}
       </div>
 
+      {/* FORM */}
+      {showForm && (
+        <div style={{ background: 'var(--sur)', border: '.5px solid var(--brd)', borderRadius: 'var(--r)', padding: 16, marginBottom: 16 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx)', marginBottom: 12 }}>
+            {editing ? 'Editar suscripción' : 'Nueva suscripción'}
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+            {[
+              { label: 'Nombre', key: 'name', type: 'text', placeholder: 'Netflix, Spotify…' },
+              { label: 'Monto', key: 'amount', type: 'number', placeholder: '0' },
+            ].map(({ label, key, type, placeholder }) => (
+              <div key={key}>
+                <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 4 }}>{label}</div>
+                <input type={type} value={form[key]} placeholder={placeholder}
+                  onChange={e => setForm(p => ({ ...p, [key]: e.target.value }))}
+                  style={{ width: '100%', background: 'var(--sur2)', border: '.5px solid var(--brd2)', borderRadius: 6, padding: '7px 10px', color: 'var(--tx)', fontSize: 13, fontFamily: 'var(--mono)' }} />
+              </div>
+            ))}
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 10 }}>
+            <div>
+              <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 4 }}>Categoría</div>
+              <select value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))}
+                style={{ width: '100%', background: 'var(--sur2)', border: '.5px solid var(--brd2)', borderRadius: 6, padding: '7px 10px', color: 'var(--tx)', fontSize: 13, fontFamily: 'var(--mono)' }}>
+                {SUB_CATEGORIES.map(c => <option key={c}>{c}</option>)}
+              </select>
+            </div>
+            <div>
+              <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 4 }}>Frecuencia</div>
+              <select value={form.frequency} onChange={e => setForm(p => ({ ...p, frequency: e.target.value }))}
+                style={{ width: '100%', background: 'var(--sur2)', border: '.5px solid var(--brd2)', borderRadius: 6, padding: '7px 10px', color: 'var(--tx)', fontSize: 13, fontFamily: 'var(--mono)' }}>
+                {Object.entries(FREQ_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+              </select>
+            </div>
+            <div>
+              <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 4 }}>Próximo pago</div>
+              <input type="date" value={form.nextPaymentDate} onChange={e => setForm(p => ({ ...p, nextPaymentDate: e.target.value }))}
+                style={{ width: '100%', background: 'var(--sur2)', border: '.5px solid var(--brd2)', borderRadius: 6, padding: '7px 10px', color: 'var(--tx)', fontSize: 13, fontFamily: 'var(--mono)' }} />
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={save} style={{ background: 'var(--grn)', color: '#fff', border: 'none', borderRadius: 'var(--r)', padding: '7px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+              {editing ? 'Guardar cambios' : '+ Registrar'}
+            </button>
+            <button onClick={closeForm} style={{ background: 'var(--sur2)', color: 'var(--tx)', border: '.5px solid var(--brd2)', borderRadius: 'var(--r)', padding: '7px 14px', fontSize: 12, cursor: 'pointer' }}>
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* LISTA vacía */}
       {displayed.length === 0 && (
         <div style={{ padding: '32px 0', textAlign: 'center', color: 'var(--th)', fontSize: 12, fontFamily: 'var(--mono)' }}>
           {subs.length === 0
-            ? 'Aún no tenés suscripciones registradas. Agregá tus servicios recurrentes para ver su impacto mensual y anual.'
+            ? 'Aún no tienes suscripciones registradas. Agrega tus servicios recurrentes para ver su impacto mensual y anual.'
             : 'No hay suscripciones en esta categoría.'}
         </div>
       )}
@@ -296,8 +367,8 @@ export default function Subscriptions() {
               </thead>
               <tbody>
                 {displayed.map((sub, i) => {
-                  const monthly = toMonthly(sub.amount, sub.frequency)
-                  const annual  = toAnnual(sub.amount, sub.frequency)
+                  const monthly  = toMonthly(sub.amount, sub.frequency)
+                  const annual   = toAnnual(sub.amount, sub.frequency)
                   const isActive = sub.status === 'active'
                   return (
                     <tr key={sub.id} style={{ borderBottom: i < displayed.length - 1 ? '.5px solid var(--brd)' : 'none', opacity: isActive ? 1 : 0.5 }}>
@@ -320,9 +391,9 @@ export default function Subscriptions() {
                         }}>{isActive ? 'Activa' : 'Inactiva'}</button>
                       </td>
                       <td style={{ padding: '9px 12px' }}>
-                        <div style={{ display: 'flex', gap: 5 }}>
-                          <button onClick={() => openEdit(sub)} style={{ background: 'none', border: '.5px solid var(--brd)', borderRadius: 5, padding: '3px 8px', fontSize: 10, cursor: 'pointer', color: 'var(--tm)' }}>Editar</button>
-                          <button onClick={() => remove(sub.id)} style={{ background: 'none', border: '.5px solid var(--brd)', borderRadius: 5, padding: '3px 8px', fontSize: 10, cursor: 'pointer', color: 'var(--red)' }}>✕</button>
+                        <div style={{ display: 'flex', gap: 4 }}>
+                          <button onClick={() => openEdit(sub)} style={{ background: 'none', border: 'none', color: 'var(--th)', fontSize: 11, cursor: 'pointer' }}>✎</button>
+                          <button onClick={() => remove(sub.id)} style={{ background: 'none', border: 'none', color: 'var(--th)', fontSize: 11, cursor: 'pointer' }}>✕</button>
                         </div>
                       </td>
                     </tr>
@@ -334,94 +405,9 @@ export default function Subscriptions() {
         </div>
       )}
 
-      {/* BARRA DE IMPACTO */}
-      {activeSubs.length > 0 && monthlyIncome > 0 && (
-        <div style={{ background: 'var(--sur)', border: '.5px solid var(--brd)', borderRadius: 'var(--r)', padding: '14px 16px', marginBottom: 16 }}>
-          <div style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)', marginBottom: 8 }}>
-            Impacto sobre ingresos del mes — {currency} {fmt(monthlyIncome)} ingreso estimado
-          </div>
-          <div style={{ height: 6, background: 'var(--sur2)', borderRadius: 3, overflow: 'hidden', marginBottom: 6 }}>
-            <div style={{ height: '100%', width: Math.min((totalMonthly / monthlyIncome) * 100, 100) + '%', background: totalMonthly / monthlyIncome > 0.1 ? 'var(--amb)' : 'var(--grn)', borderRadius: 3 }} />
-          </div>
-          <div style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)' }}>
-            {((totalMonthly / monthlyIncome) * 100).toFixed(1)}% del ingreso mensual · Equivale a {currency} {fmt(totalAnnual)} al año
-          </div>
-        </div>
-      )}
-
-      {/* FORM MODAL */}
-      {showForm && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-          <div style={{ background: 'var(--sur)', border: '.5px solid var(--brd)', borderRadius: 12, padding: '22px 20px', width: '100%', maxWidth: 420, maxHeight: '90vh', overflowY: 'auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--tx)' }}>{editing ? 'Editar suscripción' : 'Nueva suscripción'}</h3>
-              <button onClick={closeForm} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--th)', fontSize: 16 }}>✕</button>
-            </div>
-
-            {[
-              { label: 'Nombre del servicio *', key: 'name', type: 'text', placeholder: 'ej. Netflix, Spotify, Gimnasio' },
-              { label: 'Monto *', key: 'amount', type: 'number', placeholder: '0' },
-            ].map(f => (
-              <div key={f.key} style={{ marginBottom: 10 }}>
-                <label style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)', display: 'block', marginBottom: 4 }}>{f.label}</label>
-                <input type={f.type} value={form[f.key]} placeholder={f.placeholder}
-                  onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
-                  style={{ width: '100%', padding: '8px 10px', background: 'var(--sur2)', border: '.5px solid var(--brd)', borderRadius: 'var(--r)', fontSize: 12, fontFamily: 'var(--mono)', color: 'var(--tx)' }} />
-              </div>
-            ))}
-
-            {/* Categoría */}
-            <div style={{ marginBottom: 10 }}>
-              <label style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)', display: 'block', marginBottom: 4 }}>Categoría</label>
-              <select value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))}
-                style={{ width: '100%', padding: '8px 10px', background: 'var(--sur2)', border: '.5px solid var(--brd)', borderRadius: 'var(--r)', fontSize: 12, fontFamily: 'var(--mono)', color: 'var(--tx)' }}>
-                {SUB_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
-
-            {/* Frecuencia */}
-            <div style={{ marginBottom: 10 }}>
-              <label style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)', display: 'block', marginBottom: 4 }}>Frecuencia de cobro</label>
-              <select value={form.frequency} onChange={e => setForm(p => ({ ...p, frequency: e.target.value }))}
-                style={{ width: '100%', padding: '8px 10px', background: 'var(--sur2)', border: '.5px solid var(--brd)', borderRadius: 'var(--r)', fontSize: 12, fontFamily: 'var(--mono)', color: 'var(--tx)' }}>
-                {Object.entries(FREQ_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-              </select>
-            </div>
-
-            {/* Próximo pago */}
-            <div style={{ marginBottom: 10 }}>
-              <label style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)', display: 'block', marginBottom: 4 }}>Próximo pago (opcional)</label>
-              <input type="date" value={form.nextPaymentDate}
-                onChange={e => setForm(p => ({ ...p, nextPaymentDate: e.target.value }))}
-                style={{ width: '100%', padding: '8px 10px', background: 'var(--sur2)', border: '.5px solid var(--brd)', borderRadius: 'var(--r)', fontSize: 12, fontFamily: 'var(--mono)', color: 'var(--tx)' }} />
-            </div>
-
-            {/* Método de pago y notas */}
-            {[
-              { label: 'Método de pago (opcional)', key: 'paymentMethod', placeholder: 'ej. Tarjeta Visa, débito' },
-              { label: 'Notas (opcional)', key: 'notes', placeholder: 'Observaciones...' },
-            ].map(f => (
-              <div key={f.key} style={{ marginBottom: 10 }}>
-                <label style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)', display: 'block', marginBottom: 4 }}>{f.label}</label>
-                <input type="text" value={form[f.key]} placeholder={f.placeholder}
-                  onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
-                  style={{ width: '100%', padding: '8px 10px', background: 'var(--sur2)', border: '.5px solid var(--brd)', borderRadius: 'var(--r)', fontSize: 12, fontFamily: 'var(--mono)', color: 'var(--tx)' }} />
-              </div>
-            ))}
-
-            <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-              <button onClick={closeForm} style={{ flex: 1, padding: '9px', background: 'var(--sur2)', border: '.5px solid var(--brd)', borderRadius: 'var(--r)', fontSize: 12, cursor: 'pointer', color: 'var(--tm)', fontFamily: 'var(--sans)' }}>Cancelar</button>
-              <button onClick={save} disabled={!form.name.trim() || !form.amount} style={{
-                flex: 2, padding: '9px', background: 'var(--grn)', border: 'none', borderRadius: 'var(--r)',
-                fontSize: 12, fontWeight: 600, cursor: 'pointer', color: '#fff', fontFamily: 'var(--sans)',
-                opacity: (!form.name.trim() || !form.amount) ? .5 : 1,
-              }}>
-                {editing ? 'Guardar cambios' : 'Agregar suscripción'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', lineHeight: 1.6 }}>
+        Las visualizaciones muestran el costo mensual equivalente de cada suscripción. No constituyen asesoría financiera, tributaria, legal ni de inversión.
+      </div>
     </div>
   )
 }
