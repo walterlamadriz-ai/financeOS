@@ -7,7 +7,7 @@ import ChartCard, { ChartEmpty } from '../../components/charts/ChartCard.jsx'
 import IncomeExpenseBar from '../../components/charts/IncomeExpenseBar.jsx'
 import CategoryDonut from '../../components/charts/CategoryDonut.jsx'
 import { useCoachSignals } from '../Coach/index.jsx'
-import useSubscriptionMetrics from '../../hooks/useSubscriptionMetrics.js'
+import { useSubscriptionMetrics } from '../../hooks/useSubscriptionMetrics.js'
 
 const fmt = (n) => (n || 0).toLocaleString('es-CL', { maximumFractionDigits: 0 })
 const pct = (n) => ((n || 0) * 100).toFixed(1) + '%'
