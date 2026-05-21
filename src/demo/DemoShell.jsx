@@ -17,6 +17,7 @@ import Disclaimer from '../pages/legal/Disclaimer.jsx'
 import Advisor from '../pages/Advisor/index.jsx'
 import Subscriptions from '../pages/Subscriptions/index.jsx'
 import Coach from '../pages/Coach/index.jsx'
+import ImportCSV from '../pages/Import/index.jsx'
 import { AppContext } from '../context/AppContext.jsx'
 
 function renderPage(page) {
@@ -37,6 +38,7 @@ function renderPage(page) {
     case 'advisor':       return <Advisor />
     case 'subscriptions': return <Subscriptions />
     case 'coach':         return <Coach />
+    case 'import':        return <ImportCSV />
     default:              return <Dashboard />
   }
 }

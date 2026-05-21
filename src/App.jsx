@@ -15,6 +15,7 @@ import DemoShell from './demo/DemoShell.jsx'
 import Advisor from './pages/Advisor/index.jsx'
 import Subscriptions from './pages/Subscriptions/index.jsx'
 import Coach from './pages/Coach/index.jsx'
+import ImportCSV from './pages/Import/index.jsx'
 
 // ── Detectar modo demo ────────────────────────────────────────────────────────
 function isDemoMode() {
@@ -44,6 +45,7 @@ function renderPage(page) {
     case 'advisor':    return <Advisor />
     case 'subscriptions': return <Subscriptions />
     case 'coach':         return <Coach />
+    case 'import':        return <ImportCSV />
     default:           return <Dashboard />
   }
 }
