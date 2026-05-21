@@ -1,20 +1,18 @@
 // src/pages/Import/fileParser.js
-// Parser unificado para CSV y Excel (.xlsx / .xls)
-// 100% local · sin APIs externas · sin envío de datos
+// Parser CSV — sin dependencias externas · 100% local · sin envío de datos
 
 export const MAX_ROWS = 1000
-export const SUPPORTED_TYPES = ['.csv', '.xlsx', '.xls']
+export const SUPPORTED_TYPES = ['.csv']
 
-// ── ENTRY POINT ───────────────────────────────────────────────────────────────
-// Devuelve el mismo shape que parseCSV: { headers, rows, totalLines }
 export async function parseFile(file) {
   const ext = file.name.split('.').pop().toLowerCase()
-  if (ext === 'csv') return parseCSV(await readAsText(file))
-  if (ext === 'xlsx' || ext === 'xls') return parseExcel(file)
-  throw new Error(`Formato no soportado: .${ext}`)
+  if (ext !== 'csv') {
+    throw new Error('Solo se aceptan archivos .csv. Si tienes un Excel, ábrelo y guárdalo como CSV.')
+  }
+  const text = await readAsText(file)
+  return parseCSV(text)
 }
 
-// ── READ HELPERS ──────────────────────────────────────────────────────────────
 function readAsText(file) {
   return new Promise((res, rej) => {
     const r = new FileReader()
@@ -24,36 +22,22 @@ function readAsText(file) {
   })
 }
 
-function readAsArrayBuffer(file) {
-  return new Promise((res, rej) => {
-    const r = new FileReader()
-    r.onload = e => res(e.target.result)
-    r.onerror = () => rej(new Error('No se pudo leer el archivo'))
-    r.readAsArrayBuffer(file)
-  })
-}
-
-// ── CSV PARSER ────────────────────────────────────────────────────────────────
 export function parseCSV(text) {
   const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n')
   if (lines.length < 2) return { headers: [], rows: [], totalLines: 0 }
-
   const delimiter = detectDelimiter(lines[0])
   const headers = splitLine(lines[0], delimiter).map(h => h.trim().replace(/^["']|["']$/g, ''))
-
   const rows = []
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i].trim()
     if (!line) continue
     const cells = splitLine(line, delimiter).map(c => c.trim().replace(/^["']|["']$/g, ''))
     if (cells.length >= 2) {
-      const row = {}
+      const row = { _rowIndex: i }
       headers.forEach((h, idx) => { row[h] = cells[idx] || '' })
-      row._rowIndex = i
       rows.push(row)
     }
   }
-
   return { headers, rows: rows.slice(0, MAX_ROWS), totalLines: lines.length - 1 }
 }
 
@@ -76,69 +60,20 @@ function splitLine(line, delimiter) {
   return result
 }
 
-// ── EXCEL PARSER ──────────────────────────────────────────────────────────────
-async function parseExcel(file) {
-  // Importación dinámica para no aumentar el bundle inicial
-  const XLSX = await import('xlsx')
-  const buffer = await readAsArrayBuffer(file)
-  const workbook = XLSX.read(buffer, { type: 'array', cellDates: true })
-
-  // Usar primera hoja por defecto
-  const sheetName = workbook.SheetNames[0]
-  const sheet = workbook.Sheets[sheetName]
-
-  // Convertir a JSON con header de fila
-  const raw = XLSX.utils.sheet_to_json(sheet, {
-    header: 1,       // array de arrays
-    defval: '',      // valor por defecto para celdas vacías
-    raw: false,      // convertir fechas a string legible
-    dateNF: 'yyyy-mm-dd',
-  })
-
-  if (raw.length < 2) return { headers: [], rows: [], totalLines: 0, sheetNames: workbook.SheetNames }
-
-  // Primera fila = headers
-  const headers = raw[0].map(h => String(h || '').trim())
-  const dataRows = raw.slice(1).filter(r => r.some(cell => cell !== ''))
-
-  const rows = dataRows.slice(0, MAX_ROWS).map((cells, i) => {
-    const row = { _rowIndex: i + 1 }
-    headers.forEach((h, idx) => {
-      let val = cells[idx] !== undefined ? String(cells[idx]) : ''
-      // Limpiar formato numérico de Excel (puede incluir símbolos de moneda)
-      row[h] = val.trim()
-    })
-    return row
-  })
-
-  return {
-    headers,
-    rows,
-    totalLines: dataRows.length,
-    sheetNames: workbook.SheetNames,
-    activeSheet: sheetName,
-  }
-}
-
-// ── DETECT COLUMNS ────────────────────────────────────────────────────────────
 export function detectColumns(headers) {
   const lower = headers.map(h => h.toLowerCase())
-  const find = (keywords) => {
-    const idx = lower.findIndex(h => keywords.some(k => h.includes(k)))
-    return idx >= 0 ? headers[idx] : null
-  }
+  const find = (kw) => { const i = lower.findIndex(h => kw.some(k => h.includes(k))); return i >= 0 ? headers[i] : null }
   return {
     date:        find(['fecha', 'date', 'día', 'dia', 'fec']),
-    description: find(['descripcion', 'descripción', 'concepto', 'detalle', 'desc', 'detail', 'name', 'nombre', 'glosa']),
+    description: find(['descripcion', 'descripción', 'concepto', 'detalle', 'desc', 'glosa', 'nombre']),
     amount:      find(['monto', 'importe', 'amount', 'valor', 'total', 'suma']),
-    debit:       find(['debito', 'débito', 'cargo', 'egreso', 'debit', 'out', 'retiro']),
-    credit:      find(['credito', 'crédito', 'abono', 'ingreso', 'credit', 'in', 'deposito', 'depósito']),
+    debit:       find(['debito', 'débito', 'cargo', 'egreso', 'debit', 'retiro']),
+    credit:      find(['credito', 'crédito', 'abono', 'ingreso', 'credit', 'deposito']),
     category:    find(['categoria', 'categoría', 'category', 'tipo', 'rubro']),
     account:     find(['cuenta', 'account', 'tarjeta', 'card']),
   }
 }
 
-// ── NORMALIZE DATE ────────────────────────────────────────────────────────────
 export function normalizeDate(str) {
   if (!str) return null
   const s = String(str).trim()
@@ -146,21 +81,15 @@ export function normalizeDate(str) {
   const dmy = s.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})/)
   if (dmy) return `${dmy[3]}-${dmy[2].padStart(2,'0')}-${dmy[1].padStart(2,'0')}`
   const dmy2 = s.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2})$/)
-  if (dmy2) {
-    const yr = parseInt(dmy2[3]) > 50 ? `19${dmy2[3]}` : `20${dmy2[3]}`
-    return `${yr}-${dmy2[2].padStart(2,'0')}-${dmy2[1].padStart(2,'0')}`
-  }
+  if (dmy2) { const yr = parseInt(dmy2[3]) > 50 ? `19${dmy2[3]}` : `20${dmy2[3]}`; return `${yr}-${dmy2[2].padStart(2,'0')}-${dmy2[1].padStart(2,'0')}` }
   return null
 }
 
-// ── NORMALIZE AMOUNT ──────────────────────────────────────────────────────────
 export function normalizeAmount(str) {
   if (!str && str !== 0) return null
   const s = String(str).trim()
   if (!s) return null
-  // Limpiar símbolos de moneda y espacios
   let clean = s.replace(/[^\d,.\-]/g, '')
-  // Detectar coma decimal: 1.234,56
   const commaDecimal = /^\-?\d{1,3}(\.\d{3})+(,\d+)?$/.test(clean) || /^\-?\d+(,\d{1,2})$/.test(clean)
   if (commaDecimal) clean = clean.replace(/\./g, '').replace(',', '.')
   else clean = clean.replace(/,/g, '')
@@ -168,7 +97,6 @@ export function normalizeAmount(str) {
   return isNaN(n) ? null : n
 }
 
-// ── DETECT TRANSACTION TYPE ───────────────────────────────────────────────────
 export function detectTransactionType(row, mapping, config) {
   const { mode, negativeIsExpense } = config
   if (mode === 'debit_credit') {
@@ -180,8 +108,7 @@ export function detectTransactionType(row, mapping, config) {
   }
   const amount = normalizeAmount(row[mapping.amount])
   if (amount === null) return null
-  if (negativeIsExpense) return amount < 0 ? 'expense' : 'income'
-  return amount > 0 ? 'income' : 'expense'
+  return negativeIsExpense ? (amount < 0 ? 'expense' : 'income') : (amount > 0 ? 'income' : 'expense')
 }
 
 export function getAmount(row, mapping, config) {
@@ -196,7 +123,6 @@ export function getAmount(row, mapping, config) {
   return a !== null ? Math.abs(a) : 0
 }
 
-// ── VALIDATE ROWS ─────────────────────────────────────────────────────────────
 export function validateRows(rows, mapping, config) {
   return rows.map(row => {
     const date = normalizeDate(row[mapping.date])
@@ -207,32 +133,16 @@ export function validateRows(rows, mapping, config) {
     if (!date) errors.push('Fecha no reconocida')
     if (!amount || amount === 0) errors.push('Monto inválido')
     if (!description) errors.push('Sin descripción')
-    return {
-      _rowIndex: row._rowIndex,
-      date: date || '',
-      description,
-      amount,
-      type,
-      category: row[mapping.category] || '',
-      account: row[mapping.account] || '',
-      originalDescription: description,
-      status: errors.length > 0 ? 'error' : 'valid',
-      errors,
-    }
+    return { _rowIndex: row._rowIndex, date: date || '', description, amount, type, category: row[mapping.category] || '', account: row[mapping.account] || '', originalDescription: description, status: errors.length > 0 ? 'error' : 'valid', errors }
   })
 }
 
-// ── DETECT DUPLICATES ─────────────────────────────────────────────────────────
 export function detectDuplicates(validatedRows, existingRecords) {
-  const existingKeys = new Set(
-    existingRecords.map(r =>
-      `${r.date}|${(r.description || r.concept || '').toLowerCase().trim()}|${Math.round((r.amount || 0) * 100)}`
-    )
-  )
+  const existingKeys = new Set(existingRecords.map(r => `${r.date}|${(r.description||r.concept||'').toLowerCase().trim()}|${Math.round((r.amount||0)*100)}`))
   const batchKeys = new Set()
   return validatedRows.map(row => {
     if (row.status === 'error') return row
-    const key = `${row.date}|${row.description.toLowerCase().trim()}|${Math.round(row.amount * 100)}`
+    const key = `${row.date}|${row.description.toLowerCase().trim()}|${Math.round(row.amount*100)}`
     const isDuplicateExternal = existingKeys.has(key)
     const isDuplicateBatch = batchKeys.has(key)
     batchKeys.add(key)
@@ -240,11 +150,8 @@ export function detectDuplicates(validatedRows, existingRecords) {
   })
 }
 
-// ── CREATE IMPORT BATCH ───────────────────────────────────────────────────────
 export function createImportBatch(fileName, rows) {
   const imported = rows.filter(r => r._include && r.status === 'valid')
-  const incomes  = imported.filter(r => r.type === 'income')
-  const expenses = imported.filter(r => r.type === 'expense')
   return {
     id: `batch_${Date.now()}`,
     fileName,
@@ -253,24 +160,17 @@ export function createImportBatch(fileName, rows) {
     importedRows: imported.length,
     skippedRows: rows.filter(r => !r._include || r.status === 'error').length,
     duplicateRows: rows.filter(r => r.status === 'duplicate').length,
-    totalIncome: incomes.reduce((s, r) => s + r.amount, 0),
-    totalExpense: expenses.reduce((s, r) => s + r.amount, 0),
+    totalIncome: imported.filter(r => r.type === 'income').reduce((s,r) => s+r.amount, 0),
+    totalExpense: imported.filter(r => r.type === 'expense').reduce((s,r) => s+r.amount, 0),
   }
 }
 
-// ── BUILD TRANSACTIONS ────────────────────────────────────────────────────────
 export function buildTransactions(rows, batchId, importedAt) {
   const incomes = [], expenses = []
   const now = importedAt || new Date().toISOString()
   rows.forEach(row => {
     if (!row._include || row.status !== 'valid') return
-    const base = {
-      date: row.date, description: row.description, concept: row.description,
-      amount: row.amount, category: row.category || 'Importado',
-      account: row.account || '', notes: '',
-      source: 'csv', importBatchId: batchId, importedAt: now,
-      originalDescription: row.originalDescription,
-    }
+    const base = { date: row.date, description: row.description, concept: row.description, amount: row.amount, category: row.category || 'Importado', account: row.account || '', notes: '', source: 'csv', importBatchId: batchId, importedAt: now, originalDescription: row.originalDescription }
     if (row.type === 'income') incomes.push(base)
     else expenses.push(base)
   })

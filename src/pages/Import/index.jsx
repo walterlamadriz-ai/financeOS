@@ -1,6 +1,6 @@
 // src/pages/Import/index.jsx
-// Importar movimientos — CSV y Excel · FinanceOS
-// 100% local · sin APIs externas · sin envío de datos
+// Importar movimientos — CSV · FinanceOS
+// 100% local · sin dependencias externas · sin envío de datos
 
 import { useState, useCallback, useMemo } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
@@ -8,7 +8,7 @@ import { dbGetAll, dbAdd } from '../../core/db/index.js'
 import { uid } from '../../utils/index.js'
 import {
   parseFile, detectColumns, validateRows, detectDuplicates,
-  createImportBatch, buildTransactions, MAX_ROWS, SUPPORTED_TYPES,
+  createImportBatch, buildTransactions, MAX_ROWS,
 } from './fileParser.js'
 
 const s = {
@@ -36,8 +36,14 @@ const s = {
   privacy: {
     display: 'flex', alignItems: 'flex-start', gap: 8,
     background: 'rgba(0,212,170,.06)', border: '.5px solid rgba(0,212,170,.2)',
-    borderRadius: 8, padding: '10px 12px', marginTop: 16,
+    borderRadius: 8, padding: '10px 12px', marginTop: 12,
     fontSize: 11, color: 'var(--accent)', fontFamily: 'var(--mono)', lineHeight: 1.5,
+  },
+  hint: {
+    display: 'flex', alignItems: 'flex-start', gap: 8,
+    background: 'var(--sur2)', border: '.5px solid var(--brd)',
+    borderRadius: 8, padding: '10px 12px', marginTop: 8,
+    fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', lineHeight: 1.5,
   },
   select: { width: '100%', background: 'var(--sur2)', border: '.5px solid var(--brd2)', borderRadius: 6, padding: '7px 10px', color: 'var(--tx)', fontSize: 13, fontFamily: 'var(--mono)' },
   label: { fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.5px' },
@@ -58,9 +64,10 @@ const s = {
   btnSecondary: { background: 'var(--sur2)', color: 'var(--tx)', border: '.5px solid var(--brd2)' },
   btnRow: { display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 16 },
   disclaimer: { fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', lineHeight: 1.6, marginTop: 16, padding: '10px 12px', background: 'var(--sur2)', borderRadius: 8, border: '.5px solid var(--brd)' },
+  warn: { background: 'rgba(245,166,35,.1)', border: '.5px solid var(--amb)', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: 'var(--amb)', fontFamily: 'var(--mono)', marginBottom: 16 },
 }
 
-const STEPS = ['Subir archivo', 'Mapear columnas', 'Revisar', 'Importar']
+const STEPS = ['Subir CSV', 'Mapear columnas', 'Revisar', 'Importar']
 const fmt = (n) => (n || 0).toLocaleString('es-CL', { maximumFractionDigits: 0 })
 
 export default function ImportMovements() {
@@ -77,9 +84,9 @@ export default function ImportMovements() {
   const [rows, setRows] = useState([])
   const [history, setHistory] = useState([])
   const [importing, setImporting] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
   const [warning, setWarning] = useState(null)
-  const [loading, setLoading] = useState(false)
 
   useState(() => {
     if (isDemo) return
@@ -88,8 +95,8 @@ export default function ImportMovements() {
 
   async function handleFile(f) {
     const ext = f.name.split('.').pop().toLowerCase()
-    if (!['csv', 'xlsx', 'xls'].includes(ext)) {
-      setWarning('Solo se aceptan archivos .csv, .xlsx o .xls')
+    if (ext !== 'csv') {
+      setWarning('Solo se aceptan archivos .csv. Si tienes un archivo de otro formato, expórtalo como CSV primero.')
       return
     }
     setWarning(null)
@@ -109,12 +116,8 @@ export default function ImportMovements() {
         category: suggested.category || '',
         account: suggested.account || '',
       })
-      if (suggested.debit && suggested.credit) {
-        setModeConfig({ mode: 'debit_credit', negativeIsExpense: true })
-      }
-      if (result.totalLines > MAX_ROWS) {
-        setWarning(`El archivo tiene ${result.totalLines} filas. Se procesarán solo las primeras ${MAX_ROWS}.`)
-      }
+      if (suggested.debit && suggested.credit) setModeConfig({ mode: 'debit_credit', negativeIsExpense: true })
+      if (result.totalLines > MAX_ROWS) setWarning(`El archivo tiene ${result.totalLines} filas. Se procesarán solo las primeras ${MAX_ROWS}.`)
       setStep(1)
     } catch (err) {
       setWarning('Error al leer el archivo: ' + err.message)
@@ -188,7 +191,7 @@ export default function ImportMovements() {
       <div style={s.header}>
         <div style={s.eyebrow}>Herramientas</div>
         <h1 style={s.h1}>Importar movimientos</h1>
-        <p style={s.sub}>Carga movimientos desde CSV o Excel descargados desde tu banco, sin conectar cuentas ni compartir claves.</p>
+        <p style={s.sub}>Carga movimientos en formato CSV descargados desde tu banco o exportados desde una planilla.</p>
       </div>
 
       <div style={s.steps}>
@@ -197,42 +200,38 @@ export default function ImportMovements() {
         ))}
       </div>
 
-      {warning && (
-        <div style={{ background: 'rgba(245,166,35,.1)', border: '.5px solid var(--amb)', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: 'var(--amb)', fontFamily: 'var(--mono)', marginBottom: 16 }}>
-          ⚠ {warning}
-        </div>
-      )}
+      {warning && <div style={s.warn}>⚠ {warning}</div>}
 
-      {/* STEP 0 */}
+      {/* STEP 0 — Subir CSV */}
       {step === 0 && (
         <>
           <div style={s.card}>
-            <div style={s.cardTitle}>Sube un archivo descargado desde tu banco</div>
+            <div style={s.cardTitle}>Sube un archivo CSV descargado desde tu banco</div>
             <div
               style={s.dropzone(drag)}
               onDragOver={e => { e.preventDefault(); setDrag(true) }}
               onDragLeave={() => setDrag(false)}
               onDrop={onDrop}
-              onClick={() => document.getElementById('file-input').click()}
+              onClick={() => document.getElementById('csv-input').click()}
             >
-              {loading ? (
-                <div style={{ color: 'var(--th)', fontFamily: 'var(--mono)', fontSize: 13 }}>Leyendo archivo…</div>
-              ) : (
-                <>
-                  <div style={{ fontSize: 28, marginBottom: 10, color: 'var(--th)' }}>↑</div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tx)', marginBottom: 4 }}>Arrastra el archivo aquí o haz clic para seleccionarlo</div>
-                  <div style={{ fontSize: 12, color: 'var(--th)', fontFamily: 'var(--mono)' }}>CSV · Excel (.xlsx, .xls) · máximo {MAX_ROWS} filas</div>
-                </>
-              )}
+              {loading
+                ? <div style={{ color: 'var(--th)', fontFamily: 'var(--mono)', fontSize: 13 }}>Leyendo archivo…</div>
+                : <>
+                    <div style={{ fontSize: 28, marginBottom: 10, color: 'var(--th)' }}>↑</div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tx)', marginBottom: 4 }}>Arrastra el archivo aquí o haz clic para seleccionarlo</div>
+                    <div style={{ fontSize: 12, color: 'var(--th)', fontFamily: 'var(--mono)' }}>Solo archivos .csv · máximo {MAX_ROWS} filas</div>
+                  </>
+              }
             </div>
-            <input id="file-input" type="file" accept=".csv,.xlsx,.xls" style={{ display: 'none' }}
+            <input id="csv-input" type="file" accept=".csv" style={{ display: 'none' }}
               onChange={e => e.target.files[0] && handleFile(e.target.files[0])} />
             <div style={s.privacy}>
               <span>◑</span>
               <span>El archivo se procesa localmente en tu navegador. FinanceOS no envía tus movimientos a servidores.</span>
             </div>
-            <div style={{ ...s.disclaimer, marginTop: 12 }}>
-              El soporte para PDF puede variar según el banco y se evaluará en una versión futura.
+            <div style={s.hint}>
+              <span>→</span>
+              <span>Si tu banco entrega el archivo en otro formato, ábrelo en una planilla y guárdalo como CSV antes de importarlo.</span>
             </div>
           </div>
 
@@ -242,21 +241,18 @@ export default function ImportMovements() {
               <div style={{ overflowX: 'auto' }}>
                 <table style={s.table}>
                   <thead><tr>
-                    <th style={s.th}>Archivo</th>
-                    <th style={s.th}>Fecha</th>
-                    <th style={s.th}>Importados</th>
-                    <th style={s.th}>Ingresos</th>
-                    <th style={s.th}>Gastos</th>
-                    <th style={s.th}>Omitidos</th>
+                    <th style={s.th}>Archivo</th><th style={s.th}>Fecha</th>
+                    <th style={s.th}>Importados</th><th style={s.th}>Ingresos</th>
+                    <th style={s.th}>Gastos</th><th style={s.th}>Omitidos</th>
                   </tr></thead>
                   <tbody>{history.map((b, i) => (
                     <tr key={i}>
                       <td style={{ ...s.td, color: 'var(--tx)', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.fileName}</td>
                       <td style={{ ...s.td, color: 'var(--th)' }}>{b.importedAt?.slice(0,10)}</td>
-                      <td style={{ ...s.td, color: 'var(--tx)', fontWeight: 600 }}>{b.importedRows}</td>
+                      <td style={{ ...s.td, fontWeight: 600 }}>{b.importedRows}</td>
                       <td style={{ ...s.td, color: 'var(--accent)' }}>{sym}{fmt(b.totalIncome)}</td>
                       <td style={{ ...s.td, color: 'var(--red)' }}>{sym}{fmt(b.totalExpense)}</td>
-                      <td style={{ ...s.td, color: 'var(--th)' }}>{(b.skippedRows||0) + (b.duplicateRows||0)}</td>
+                      <td style={{ ...s.td, color: 'var(--th)' }}>{(b.skippedRows||0)+(b.duplicateRows||0)}</td>
                     </tr>
                   ))}</tbody>
                 </table>
@@ -266,21 +262,16 @@ export default function ImportMovements() {
 
           {history.length === 0 && (
             <div style={{ textAlign: 'center', padding: 32, color: 'var(--th)', fontSize: 13, fontFamily: 'var(--mono)' }}>
-              Aún no has importado movimientos. Descarga un archivo desde tu banco y súbelo aquí para ahorrar tiempo de registro manual.
+              Aún no has importado movimientos. Descarga un CSV desde tu banco y súbelo aquí.
             </div>
           )}
         </>
       )}
 
-      {/* STEP 1 */}
+      {/* STEP 1 — Mapear columnas */}
       {step === 1 && parsed && (
         <div style={s.card}>
           <div style={s.cardTitle}>Indica qué columna corresponde a cada campo</div>
-          {parsed.sheetNames?.length > 1 && (
-            <div style={{ background: 'rgba(0,184,217,.08)', border: '.5px solid rgba(0,184,217,.3)', borderRadius: 8, padding: '8px 12px', fontSize: 12, color: 'var(--accent2)', fontFamily: 'var(--mono)', marginBottom: 14 }}>
-              Hoja activa: <strong>{parsed.activeSheet}</strong> · El archivo tiene {parsed.sheetNames.length} hojas. Se usa la primera por defecto.
-            </div>
-          )}
           <p style={{ fontSize: 12, color: 'var(--th)', fontFamily: 'var(--mono)', marginBottom: 16 }}>
             FinanceOS detectó las columnas automáticamente. Confirma o corrige el mapeo antes de continuar.
           </p>
@@ -382,7 +373,7 @@ export default function ImportMovements() {
         </div>
       )}
 
-      {/* STEP 2 */}
+      {/* STEP 2 — Revisar */}
       {step === 2 && (
         <>
           <div style={s.card}>
@@ -395,11 +386,11 @@ export default function ImportMovements() {
               <div style={s.summaryItem}><div style={s.summaryLabel}>Ingresos est.</div><div style={{ ...s.summaryVal, color: 'var(--accent)', fontSize: 13 }}>{sym}{fmt(stats.incomeAmt)}</div></div>
               <div style={s.summaryItem}><div style={s.summaryLabel}>Gastos est.</div><div style={{ ...s.summaryVal, color: 'var(--red)', fontSize: 13 }}>{sym}{fmt(stats.expenseAmt)}</div></div>
             </div>
-            <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
+            <div style={{ display: 'flex', gap: 10, marginBottom: 4 }}>
               {[
-                ['Incluir solo válidos', () => setRows(r => r.map(row => ({ ...row, _include: row.status === 'valid' })))],
+                ['Solo válidos', () => setRows(r => r.map(row => ({ ...row, _include: row.status === 'valid' })))],
                 ['Incluir todos', () => setRows(r => r.map(row => ({ ...row, _include: true })))],
-                ['Deseleccionar todos', () => setRows(r => r.map(row => ({ ...row, _include: false })))],
+                ['Ninguno', () => setRows(r => r.map(row => ({ ...row, _include: false })))],
               ].map(([label, fn]) => (
                 <button key={label} style={{ ...s.btn, ...s.btnSecondary, fontSize: 12 }} onClick={fn}>{label}</button>
               ))}
@@ -410,11 +401,8 @@ export default function ImportMovements() {
             <table style={s.table}>
               <thead><tr>
                 <th style={{ ...s.th, width: 32 }}></th>
-                <th style={s.th}>Fecha</th>
-                <th style={s.th}>Descripción</th>
-                <th style={s.th}>Monto</th>
-                <th style={s.th}>Tipo</th>
-                <th style={s.th}>Estado</th>
+                <th style={s.th}>Fecha</th><th style={s.th}>Descripción</th>
+                <th style={s.th}>Monto</th><th style={s.th}>Tipo</th><th style={s.th}>Estado</th>
               </tr></thead>
               <tbody>{rows.map((row, i) => (
                 <tr key={i} style={{ opacity: row._include ? 1 : .45 }}>
@@ -447,7 +435,7 @@ export default function ImportMovements() {
         </>
       )}
 
-      {/* STEP 3 */}
+      {/* STEP 3 — Resultado */}
       {step === 3 && (
         <div style={s.card}>
           {result?.demo ? (
