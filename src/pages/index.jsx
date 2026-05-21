@@ -118,6 +118,10 @@ export function Income() {
 }
 
 // ─── EXPENSES ─────────────────────────────────────────────────────────────────
+import ChartCard from '../components/charts/ChartCard.jsx'
+import CategoryDonut from '../components/charts/CategoryDonut.jsx'
+import HorizontalBars from '../components/charts/HorizontalBars.jsx'
+
 export function Expenses() {
   const { expenses, addExpense, delExpense, settings } = useApp()
   const [f, setF]         = useState({ description: '', amount: '', date: today(), category: 'Alimentación', method: 'Débito', type: 'Necesidad', recurrence: 'Único', notes: '' })
@@ -187,6 +191,18 @@ export function Expenses() {
           }
         </Card>
       </div>
+
+      {/* Visual Insights — Gastos */}
+      {filtered.length > 0 && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 8 }}>
+          <ChartCard title="Distribución por categoría" subtitle={monthLabel(activeMonth)} minHeight={160}>
+            <CategoryDonut records={filtered} sym={sym} maxCategories={6} />
+          </ChartCard>
+          <ChartCard title="Top categorías de gasto" subtitle={monthLabel(activeMonth)} minHeight={160}>
+            <HorizontalBars records={filtered} sym={sym} maxItems={6} />
+          </ChartCard>
+        </div>
+      )}
     </div>
   )
 }
