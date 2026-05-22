@@ -189,7 +189,7 @@ export default function Shell({ page, setPage, children }) {
             {/* Botón hamburguesa — solo móvil */}
             <button
               className={s.menuBtn}
-              onClick={() => setDrawerOpen(true)}
+              onClick={() => setDrawerOpen(true)} aria-label="Abrir menú"
               aria-label="Abrir menú"
             >
               <span style={{fontSize:18}}>☰</span><span style={{fontSize:10,fontFamily:"var(--mono)",display:"block",lineHeight:1,marginTop:2}}>Menú</span>
