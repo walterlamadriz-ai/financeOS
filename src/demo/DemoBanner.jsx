@@ -15,41 +15,34 @@ export default function DemoBanner({ onExitDemo }) {
       zIndex: 200,
       background: 'linear-gradient(135deg, #0a5c3e, #127a50)',
       color: '#fff',
-      padding: expanded ? '10px 20px 14px' : '0 20px',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 6,
       boxShadow: '0 2px 12px rgba(10,92,62,.3)',
-      transition: 'padding .2s',
     }}>
 
-      {/* Fila principal */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 40 }}>
+      {/* Fila principal — compacta en mobile */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', minHeight: 40 }}>
         {/* Badge demo */}
         <div style={{
           background: 'rgba(255,255,255,.2)',
           borderRadius: 20,
-          padding: '2px 10px',
+          padding: '2px 8px',
           fontSize: 10,
           fontFamily: 'var(--mono)',
           fontWeight: 600,
           letterSpacing: 1,
           flexShrink: 0,
           border: '1px solid rgba(255,255,255,.3)',
+          whiteSpace: 'nowrap',
         }}>
-          MODO DEMO
+          DEMO
         </div>
 
-        {/* Mensaje principal */}
-        <span style={{ fontSize: 12, color: 'rgba(255,255,255,.85)', flex: 1, lineHeight: 1.4 }}>
-          Estás explorando con datos ficticios de "María González".{' '}
-          <span style={{ color: 'rgba(255,255,255,.6)' }}>
-            Nada de esto se guardará en tu dispositivo.
-          </span>
+        {/* Mensaje principal — truncado en mobile */}
+        <span style={{ fontSize: 11, color: 'rgba(255,255,255,.85)', flex: 1, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          Datos ficticios · nada se guarda
         </span>
 
         {/* Botones */}
-        <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+        <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
           <button
             onClick={() => setExpanded(!expanded)}
             style={{
@@ -57,13 +50,14 @@ export default function DemoBanner({ onExitDemo }) {
               border: '1px solid rgba(255,255,255,.25)',
               color: '#fff',
               borderRadius: 6,
-              padding: '5px 12px',
-              fontSize: 11,
+              padding: '4px 10px',
+              fontSize: 10,
               cursor: 'pointer',
-              fontFamily: 'var(--syne, sans-serif)',
+              fontFamily: 'var(--mono)',
+              whiteSpace: 'nowrap',
             }}
           >
-            {expanded ? 'Ocultar' : '¿Qué es esto?'}
+            {expanded ? 'Ocultar' : 'Info'}
           </button>
           <button
             onClick={() => window.open('https://financeos-landing-omega.vercel.app/#pricing', '_blank')}
@@ -72,14 +66,14 @@ export default function DemoBanner({ onExitDemo }) {
               border: 'none',
               color: '#0a5c3e',
               borderRadius: 6,
-              padding: '5px 14px',
-              fontSize: 11,
+              padding: '4px 10px',
+              fontSize: 10,
               fontWeight: 700,
               cursor: 'pointer',
-              fontFamily: 'var(--syne, sans-serif)',
+              whiteSpace: 'nowrap',
             }}
           >
-            Obtener licencia →
+            Obtener →
           </button>
         </div>
       </div>
