@@ -6,27 +6,27 @@ import s from './shell.module.css'
 import { BackupStatusBadge } from '../backup/BackupManager.jsx'
 
 const NAV = [
-  { sec: 'Principal',    items: [{ id: 'dashboard',     ic: '◈',  lb: 'Dashboard' }] },
+  { sec: 'Principal',    items: [{ id: 'dashboard', ic: '◈', lb: 'Dashboard' }] },
   { sec: 'Movimientos',  items: [
-    { id: 'movements',   ic: '⇄',  lb: 'Movimientos' },
-    { id: 'income',      ic: '↑',  lb: 'Ingresos' },
-    { id: 'expenses',    ic: '↓',  lb: 'Gastos' },
+    { id: 'movements',     ic: '⇄', lb: 'Movimientos' },
+    { id: 'income',        ic: '↑', lb: 'Ingresos' },
+    { id: 'expenses',      ic: '↓', lb: 'Gastos' },
     { id: 'subscriptions', ic: '↻', lb: 'Suscripciones' },
-    { id: 'import',      ic: '↑',  lb: 'Importar CSV' },
+    { id: 'import',        ic: '↑', lb: 'Importar CSV' },
   ] },
   { sec: 'Planificación', items: [
-    { id: 'budgets',     ic: '▤',  lb: 'Presupuestos' },
-    { id: 'debts',       ic: '⊖',  lb: 'Deudas' },
-    { id: 'goals',       ic: '◎',  lb: 'Metas' },
+    { id: 'budgets', ic: '▤', lb: 'Presupuestos' },
+    { id: 'debts',   ic: '⊖', lb: 'Deudas' },
+    { id: 'goals',   ic: '◎', lb: 'Metas' },
   ] },
-  { sec: 'Análisis',     items: [
-    { id: 'coach',       ic: '◈',  lb: 'Coach' },
-    { id: 'reports',     ic: '⊞',  lb: 'Reportes' },
-    { id: 'cashflow',    ic: '⟶',  lb: 'Flujo de caja' },
+  { sec: 'Análisis', items: [
+    { id: 'coach',    ic: '◈', lb: 'Coach' },
+    { id: 'reports',  ic: '⊞', lb: 'Reportes' },
+    { id: 'cashflow', ic: '⟶', lb: 'Flujo de caja' },
   ] },
-  { sec: 'Pro',          items: [
-    { id: 'advisor',     ic: '◑',  lb: 'Modo Asesor' },
-    { id: 'settings',    ic: '⊙',  lb: 'Ajustes' },
+  { sec: 'Pro', items: [
+    { id: 'advisor',  ic: '◑', lb: 'Modo Asesor' },
+    { id: 'settings', ic: '⊙', lb: 'Ajustes' },
   ] },
 ] },
   { sec: 'Transacciones', items: [{ id: 'income', ic: '↑', lb: 'Ingresos' }, { id: 'expenses', ic: '↓', lb: 'Gastos' }] },
