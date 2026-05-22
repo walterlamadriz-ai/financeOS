@@ -152,8 +152,8 @@ export function Expenses() {
       <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
         <PageHeader title="Gastos" sub={`${monthLabel(activeMonth)} · ${filtered.length} registros`} />
         <MonthSelector incomes={[]} expenses={expenses} />
-        <p style={{fontSize:12,color:"var(--th)",fontFamily:"var(--mono)",marginBottom:8}}>Registra salidas y entiende tus categorías principales.</p>
       </div>
+      <p style={{fontSize:12,color:"var(--th)",fontFamily:"var(--mono)",marginBottom:12,marginTop:-8}}>Registra salidas y entiende tus categorías principales.</p>
       <div className="kpi-row" style={{ gridTemplateColumns: 'repeat(3,1fr)' }}>
         <KPI label="Total mes"   value={fmtMoney(total, sym)}           color="red" />
         <KPI label="Necesidades" value={fmtMoney(necesidad, sym)}       sub={total > 0 ? fmtPct(necesidad / total) + ' del gasto' : '-'} />
@@ -242,8 +242,8 @@ export function Budgets() {
       <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
         <PageHeader title="Presupuestos" sub={`Límites mensuales · ${monthLabel(activeMonth)}`} />
         <MonthSelector incomes={[]} expenses={expenses} />
-        <p style={{fontSize:12,color:"var(--th)",fontFamily:"var(--mono)",marginBottom:8}}>Compara gasto usado vs presupuesto disponible por categoría.</p>
       </div>
+      <p style={{fontSize:12,color:"var(--th)",fontFamily:"var(--mono)",marginBottom:12,marginTop:-8}}>Compara gasto usado vs presupuesto disponible por categoría.</p>
       <div className="kpi-row" style={{ gridTemplateColumns: 'repeat(3,1fr)' }}>
         <KPI label="Presupuesto total"    value={fmtMoney(totalBudget, sym)} />
         {/* FIX: gastado = solo categorías con presupuesto */}
@@ -325,8 +325,8 @@ export function Debts() {
   return (
     <div className="stack">
       <PageHeader title="Deudas" sub="Seguimiento de obligaciones financieras" />
+      <p style={{fontSize:12,color:"var(--th)",fontFamily:"var(--mono)",marginBottom:12,marginTop:-4}}>Sigue saldo pendiente y avance de pago por deuda.</p>
       <div className="kpi-row" style={{ gridTemplateColumns: 'repeat(4,1fr)' }}>
-        <p style={{fontSize:12,color:"var(--th)",fontFamily:"var(--mono)",marginBottom:8}}>Sigue saldo pendiente y avance de pago por deuda.</p>
         <KPI label="Deuda total"       value={fmtMoney(totalBalance, sym)} color="red" />
         <KPI label="Pago mín. mensual" value={fmtMoney(totalMin, sym)} />
         <KPI label="Deudas activas"    value={debts.length} />
@@ -421,8 +421,8 @@ export function Goals() {
   return (
     <div className="stack">
       <PageHeader title="Metas de ahorro" sub="Objetivos financieros con seguimiento visual" />
+      <p style={{fontSize:12,color:"var(--th)",fontFamily:"var(--mono)",marginBottom:12,marginTop:-4}}>Mide el progreso hacia tus objetivos de ahorro.</p>
       <div className="kpi-row" style={{ gridTemplateColumns: 'repeat(4,1fr)' }}>
-        <p style={{fontSize:12,color:"var(--th)",fontFamily:"var(--mono)",marginBottom:8}}>Mide el progreso hacia tus objetivos de ahorro.</p>
         <KPI label="Metas activas"   value={goals.length} />
         <KPI label="Total objetivo"  value={fmtMoney(totalTarget, sym)} />
         <KPI label="Total ahorrado"  value={fmtMoney(totalSaved, sym)} color="green" sub={totalTarget > 0 ? fmtPct(totalSaved / totalTarget) + ' del total' : '-'} />
