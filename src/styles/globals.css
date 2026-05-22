@@ -86,3 +86,11 @@ select option { background: var(--sur); }
 
 /* Buttons */
 button { cursor: pointer; font-family: var(--sans); }
+
+/* kpi-row responsive — mobile */
+@media (max-width: 600px) {
+  .kpi-row {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+}
