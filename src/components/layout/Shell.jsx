@@ -8,7 +8,6 @@ import { BackupStatusBadge } from '../backup/BackupManager.jsx'
 const NAV = [
   { sec: 'Principal',    items: [{ id: 'dashboard', ic: '◈', lb: 'Dashboard' }] },
   { sec: 'Movimientos',  items: [
-    { id: 'movements',     ic: '⇄', lb: 'Movimientos' },
     { id: 'income',        ic: '↑', lb: 'Ingresos' },
     { id: 'expenses',      ic: '↓', lb: 'Gastos' },
     { id: 'subscriptions', ic: '↻', lb: 'Suscripciones' },
