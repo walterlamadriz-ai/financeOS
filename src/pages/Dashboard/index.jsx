@@ -144,6 +144,31 @@ export default function Dashboard({ setPage }) {
         <p style={{ fontSize:13, color:'var(--th)', fontFamily:'var(--mono)' }}>// {activeMonth} · datos locales</p>
       </div>
 
+
+      {/* Acciones rápidas */}
+      {setPage && (
+        <div style={{ marginBottom:20 }}>
+          <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)', textTransform:'uppercase', letterSpacing:'.8px', marginBottom:10 }}>Acciones rápidas</div>
+          <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
+            {[
+              { label:'+ Ingreso',     page:'income',     color:'var(--accent)' },
+              { label:'+ Gasto',       page:'expenses',   color:'var(--red)' },
+              { label:'↑ Importar CSV',page:'import',     color:'#00b8d9' },
+              { label:'▤ Presupuesto', page:'budgets',    color:'var(--amb)' },
+              { label:'◎ Meta',        page:'goals',      color:'var(--accent)' },
+            ].map((a,i) => (
+              <button key={i} onClick={() => setPage(a.page)} style={{
+                background:'none', border:`.5px solid ${a.color}`, borderRadius:8,
+                padding:'7px 14px', fontSize:12, fontWeight:600, color:a.color,
+                cursor:'pointer', fontFamily:'var(--mono)', transition:'.15s',
+                whiteSpace:'nowrap',
+              }}>
+                {a.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       {/* KPI Cards */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))', gap:12, marginBottom:16 }}>
         {KPIS.map((k, i) => (

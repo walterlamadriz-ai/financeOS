@@ -165,7 +165,7 @@ export default function Shell({ page, setPage, children }) {
             <div className={s.logoName}>FinanceOS</div>
             <div className={s.logoSub}>v1.3</div>
           </div>
-          <button className={s.drawerClose} onClick={() => setDrawerOpen(false)} aria-label="Cerrar menú">✕</button>
+          <button className={s.drawerClose} onClick={() => setDrawerOpen(false)} aria-label="Cerrar menú"><span style={{fontSize:18}}>☰</span><span style={{fontSize:10,fontFamily:"var(--mono)",display:"block",lineHeight:1,marginTop:2}}>Menú</span></button>
         </div>
 
         <div className={s.drawerNav}>
@@ -192,7 +192,7 @@ export default function Shell({ page, setPage, children }) {
               onClick={() => setDrawerOpen(true)}
               aria-label="Abrir menú"
             >
-              ☰
+              <span style={{fontSize:18}}>☰</span><span style={{fontSize:10,fontFamily:"var(--mono)",display:"block",lineHeight:1,marginTop:2}}>Menú</span>
             </button>
             {/* Botón atrás — solo móvil, si no está en dashboard */}
             {page !== 'dashboard' && (
