@@ -16,6 +16,7 @@ import Advisor from './pages/Advisor/index.jsx'
 import Subscriptions from './pages/Subscriptions/index.jsx'
 import Coach from './pages/Coach/index.jsx'
 import ImportCSV from './pages/Import/index.jsx'
+import Movements from './pages/Movements/index.jsx'
 
 // ── Detectar modo demo ────────────────────────────────────────────────────────
 function isDemoMode() {
@@ -45,6 +46,7 @@ function renderPage(page) {
     case 'advisor':    return <Advisor />
     case 'subscriptions': return <Subscriptions />
     case 'coach':         return <Coach />
+    case 'movements': return <Movements setPage={setPage}/>
     case 'import':        return <ImportCSV />
     default:           return <Dashboard />
   }

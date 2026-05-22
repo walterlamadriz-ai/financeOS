@@ -18,6 +18,7 @@ import Advisor from '../pages/Advisor/index.jsx'
 import Subscriptions from '../pages/Subscriptions/index.jsx'
 import Coach from '../pages/Coach/index.jsx'
 import ImportCSV from '../pages/Import/index.jsx'
+import Movements from '../pages/Movements/index.jsx'
 import { AppContext } from '../context/AppContext.jsx'
 
 function renderPage(page) {
@@ -38,7 +39,8 @@ function renderPage(page) {
     case 'advisor':       return <Advisor />
     case 'subscriptions': return <Subscriptions />
     case 'coach':         return <Coach />
-    case 'import':        return <ImportCSV />
+    case 'movements': return <Movements setPage={p => setPage(p)}/>
+      case 'import':        return <ImportCSV />
     default:              return <Dashboard />
   }
 }
