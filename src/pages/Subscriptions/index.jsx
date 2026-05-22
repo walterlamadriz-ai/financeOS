@@ -228,7 +228,7 @@ export default function Subscriptions() {
           Suscripciones y gastos recurrentes
         </h2>
         <p style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)' }}>
-          Controla pagos recurrentes y su impacto anual · Controla pagos recurrentes y su impacto mensual y anual. Identifica pagos repetidos y calcula su impacto mensual y anual. Las sugerencias son orientativas y no constituyen asesoría financiera.
+          Controla pagos recurrentes y su impacto mensual y anual.
         </p>
       </div>
 
