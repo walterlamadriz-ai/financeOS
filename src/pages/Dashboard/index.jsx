@@ -145,6 +145,28 @@ export default function Dashboard({ setPage }) {
       </div>
 
 
+
+      {/* Empieza aquí */}
+      {setPage && kpis.incCount === 0 && kpis.expCount === 0 && (
+        <div style={{ background:'rgba(0,212,170,.06)', border:'.5px solid rgba(0,212,170,.25)', borderRadius:'var(--r)', padding:'18px 20px', marginBottom:20 }}>
+          <div style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--accent)', textTransform:'uppercase', letterSpacing:'1px', marginBottom:6 }}>Empieza aquí</div>
+          <p style={{ fontSize:13, color:'var(--th)', fontFamily:'var(--mono)', marginBottom:14 }}>Si es tu primera vez, sigue estos pasos para ordenar tu información.</p>
+          <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+            {[
+              { n:'1', txt:'Agrega tu primer ingreso.',   btn:'Agregar ingreso',    page:'income',   color:'var(--accent)' },
+              { n:'2', txt:'Registra un gasto.',          btn:'Agregar gasto',      page:'expenses', color:'var(--red)' },
+              { n:'3', txt:'Crea un presupuesto.',        btn:'Crear presupuesto',  page:'budgets',  color:'var(--amb)' },
+              { n:'4', txt:'Crea un backup de tus datos.',btn:'Ir a backups',       page:'settings', color:'#00b8d9' },
+            ].map((s,i) => (
+              <div key={i} style={{ display:'flex', alignItems:'center', gap:12 }}>
+                <div style={{ width:24, height:24, borderRadius:'50%', background:'var(--accent)', color:'#fff', fontSize:11, fontWeight:700, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>{s.n}</div>
+                <span style={{ flex:1, fontSize:13, color:'var(--tx)' }}>{s.txt}</span>
+                <button onClick={() => setPage?.(s.page)} style={{ background:'none', border:`.5px solid ${s.color}`, borderRadius:7, padding:'5px 12px', fontSize:12, fontWeight:600, color:s.color, cursor:'pointer', fontFamily:'var(--mono)', whiteSpace:'nowrap' }}>{s.btn}</button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       {/* Acciones rápidas */}
       {setPage && (
         <div style={{ marginBottom:20 }}>
@@ -216,6 +238,15 @@ export default function Dashboard({ setPage }) {
         </div>
       )}
 
+
+      {/* Backup recomendado */}
+      <div style={{ background:'var(--sur)', border:'.5px solid var(--brd)', borderRadius:'var(--r)', padding:'12px 16px', marginBottom:16, display:'flex', alignItems:'center', justifyContent:'space-between', gap:12, flexWrap:'wrap' }}>
+        <div>
+          <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)', textTransform:'uppercase', letterSpacing:'.8px', marginBottom:3 }}>Backup recomendado</div>
+          <div style={{ fontSize:12, color:'var(--th)', fontFamily:'var(--mono)' }}>FinanceOS guarda tus datos localmente. Crea backups periódicos para evitar pérdida de información.</div>
+        </div>
+        {setPage && <button onClick={() => setPage?.('settings')} style={{ background:'none', border:'.5px solid var(--brd2)', borderRadius:7, padding:'5px 12px', fontSize:11, color:'var(--tx)', cursor:'pointer', fontFamily:'var(--mono)', whiteSpace:'nowrap', flexShrink:0 }}>Ir a backups →</button>}
+      </div>
       <div style={{ fontSize:10, color:'var(--th)', fontFamily:'var(--mono)', lineHeight:1.6 }}>
         Los gráficos reflejan los datos registrados en FinanceOS. No constituyen asesoría financiera, tributaria, legal ni de inversión.
       </div>

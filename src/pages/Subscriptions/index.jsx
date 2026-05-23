@@ -346,10 +346,17 @@ export default function Subscriptions() {
 
       {/* LISTA vacía */}
       {displayed.length === 0 && (
-        <div style={{ padding: '32px 0', textAlign: 'center', color: 'var(--th)', fontSize: 12, fontFamily: 'var(--mono)' }}>
-          {subs.length === 0
-            ? 'Aún no tienes suscripciones registradas. Agrega tus servicios recurrentes para ver su impacto mensual y anual.'
-            : 'No hay suscripciones en esta categoría.'}
+        <div style={{ padding: '32px 0', textAlign: 'center' }}>
+          <div style={{ fontSize: 13, color: 'var(--th)', fontFamily: 'var(--mono)', marginBottom: 12 }}>
+            {subs.length === 0
+              ? 'Aún no tienes suscripciones registradas.'
+              : 'No hay suscripciones en esta categoría.'}
+          </div>
+          {subs.length === 0 && (
+            <button onClick={() => setShowForm(true)} style={{ background: 'var(--grn)', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+              + Agregar suscripción
+            </button>
+          )}
         </div>
       )}
 

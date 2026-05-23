@@ -104,7 +104,10 @@ export function Income() {
         </Card>
         <Card>
           <CardHeader title={`Historial (${filtered.length})`} />
-          {filtered.length === 0 ? <Empty text={`Sin ingresos en ${monthLabel(activeMonth)}`} /> :
+          {filtered.length === 0 ? <div style={{textAlign:'center',padding:'24px 0'}}>
+              <div style={{fontSize:13,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:12}}>Aún no tienes ingresos registrados.</div>
+              <button onClick={()=>{ setF({source:'',amount:'',date:today(),category:'Salario',recurrence:'Mensual',notes:''}); }} style={{background:'var(--grn)',color:'#fff',border:'none',borderRadius:8,padding:'8px 18px',fontSize:13,fontWeight:600,cursor:'pointer'}}>+ Agregar ingreso</button>
+            </div> :
             <div style={{ maxHeight: 280, overflowY: 'auto' }}>
               {filtered.map(r => <TxRow key={r.id} dot={CAT_COLORS[r.category] || '#888'} name={r.source}
                 meta={`${r.category} · ${r.date.slice(5).replace('-', '/')}${r.recurrence !== 'Único' ? ' · ' + r.recurrence : ''}`}
@@ -183,7 +186,12 @@ export function Expenses() {
         </Card>
         <Card>
           <CardHeader title={`Historial (${filtered.length})`} />
-          {filtered.length === 0 ? <Empty text={`Sin gastos en ${monthLabel(activeMonth)}`} /> :
+          {filtered.length === 0 ? <div style={{textAlign:'center',padding:'24px 0'}}>
+              <div style={{fontSize:13,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:12}}>Aún no tienes gastos registrados.</div>
+              <div style={{display:'flex',gap:8,justifyContent:'center',flexWrap:'wrap'}}>
+                <button onClick={()=>{ setF({description:'',amount:'',date:today(),category:'Alimentación',method:'Débito',type:'Necesidad',recurrence:'Único',notes:''}); }} style={{background:'var(--grn)',color:'#fff',border:'none',borderRadius:8,padding:'8px 18px',fontSize:13,fontWeight:600,cursor:'pointer'}}>+ Agregar gasto</button>
+              </div>
+            </div> :
             <div style={{ maxHeight: 280, overflowY: 'auto' }}>
               {filtered.map(r => <TxRow key={r.id} dot={CAT_COLORS[r.category] || '#888'} name={r.description}
                 meta={`${r.category} · ${r.date.slice(5).replace('-', '/')}${r.type === 'Deseo' ? ' · Deseo' : ''}`}
@@ -263,7 +271,10 @@ export function Budgets() {
         </Card>
         <Card>
           <CardHeader title={`Estado · ${monthLabel(activeMonth)}`} />
-          {budgets.length === 0 ? <Empty text="Sin presupuestos definidos" /> :
+          {budgets.length === 0 ? <div style={{textAlign:'center',padding:'24px 0'}}>
+              <div style={{fontSize:13,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:12}}>Aún no tienes presupuestos. Crea uno para controlar tus gastos por categoría.</div>
+              <button onClick={()=>setF({category:'Vivienda',limit:''})} style={{background:'var(--grn)',color:'#fff',border:'none',borderRadius:8,padding:'8px 18px',fontSize:13,fontWeight:600,cursor:'pointer'}}>+ Crear presupuesto</button>
+            </div> :
             budgets.map(b => {
               const spent = expByCat[b.category] || 0
               const over  = spent > b.limit
@@ -355,7 +366,10 @@ export function Debts() {
           </div>
         </Card>
       )}
-      {debts.length === 0 && !show && <Card><Empty text="Sin deudas registradas" /></Card>}
+      {debts.length === 0 && !show && <Card><div style={{textAlign:'center',padding:'24px 0'}}>
+              <div style={{fontSize:13,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:12}}>Aún no tienes deudas registradas.</div>
+              <button onClick={()=>setShow(true)} style={{background:'var(--grn)',color:'#fff',border:'none',borderRadius:8,padding:'8px 18px',fontSize:13,fontWeight:600,cursor:'pointer'}}>+ Agregar deuda</button>
+            </div></Card>}
       {debts.map(d => {
         // FIX: Math.max(0, ...) para evitar progreso negativo
         const paid = Math.max(0, d.initial - d.balance)
@@ -448,7 +462,10 @@ export function Goals() {
           </div>
         </Card>
       )}
-      {goals.length === 0 && !show && <Card><Empty text="Sin metas creadas" /></Card>}
+      {goals.length === 0 && !show && <Card><div style={{textAlign:'center',padding:'24px 0'}}>
+              <div style={{fontSize:13,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:12}}>Aún no tienes metas de ahorro. Crea una para hacer seguimiento de tus objetivos.</div>
+              <button onClick={()=>setShow(true)} style={{background:'var(--grn)',color:'#fff',border:'none',borderRadius:8,padding:'8px 18px',fontSize:13,fontWeight:600,cursor:'pointer'}}>+ Crear meta</button>
+            </div></Card>}
       {goals.map(g => {
         const p    = g.target > 0 ? Math.min(g.saved / g.target, 1) : 0
         const done = g.saved >= g.target
@@ -587,7 +604,12 @@ export function Reports() {
         <Card>
           <CardHeader title="Gastos por categoría" />
           {donutData.length === 0
-            ? <Empty text={`Sin gastos en ${monthLabel(activeMonth)}`} />
+            ? <div style={{textAlign:'center',padding:'24px 0'}}>
+              <div style={{fontSize:13,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:12}}>Aún no tienes gastos registrados.</div>
+              <div style={{display:'flex',gap:8,justifyContent:'center',flexWrap:'wrap'}}>
+                <button onClick={()=>{ setF({description:'',amount:'',date:today(),category:'Alimentación',method:'Débito',type:'Necesidad',recurrence:'Único',notes:''}); }} style={{background:'var(--grn)',color:'#fff',border:'none',borderRadius:8,padding:'8px 18px',fontSize:13,fontWeight:600,cursor:'pointer'}}>+ Agregar gasto</button>
+              </div>
+            </div>
             : (
               <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
                 <ResponsiveContainer width={160} height={160}>

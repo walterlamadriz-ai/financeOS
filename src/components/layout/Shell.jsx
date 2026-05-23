@@ -11,7 +11,7 @@ const NAV = [
     { id: 'income',        ic: '↑', lb: 'Ingresos' },
     { id: 'expenses',      ic: '↓', lb: 'Gastos' },
     { id: 'subscriptions', ic: '↻', lb: 'Suscripciones' },
-    { id: 'import',        ic: '↑', lb: 'Importar CSV' },
+    { id: 'import',        ic: '↑', lb: 'Importar movimientos' },
   ] },
   { sec: 'Planificación', items: [
     { id: 'budgets', ic: '▤', lb: 'Presupuestos' },
@@ -19,9 +19,9 @@ const NAV = [
     { id: 'goals',   ic: '◎', lb: 'Metas' },
   ] },
   { sec: 'Análisis', items: [
-    { id: 'coach',    ic: '◈', lb: 'Coach' },
+    { id: 'coach',    ic: '◈', lb: 'Señales' },
     { id: 'reports',  ic: '⊞', lb: 'Reportes' },
-    { id: 'cashflow', ic: '⟶', lb: 'Flujo de caja' },
+    { id: 'cashflow', ic: '⟶', lb: 'Proyección' },
   ] },
   { sec: 'Pro', items: [
     { id: 'advisor',  ic: '◑', lb: 'Modo Asesor' },
