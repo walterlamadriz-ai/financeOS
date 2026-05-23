@@ -689,10 +689,9 @@ export function Reports() {
               })()
           }
         </Card>
-      </div>
 
-      {/* Tendencia 6 meses — BarChart Recharts */}
-      <Card>
+        {/* Tendencia 6 meses */}
+        <Card>
         <CardHeader title="Tendencia 6 meses — Ingresos vs Gastos" />
         {trendData.every(d => d.Ingresos === 0 && d.Gastos === 0)
           ? <Empty text="Registra ingresos y gastos para ver la tendencia" />
@@ -713,6 +712,7 @@ export function Reports() {
         }
       </Card>
 
+      </div>
       {/* Evolución del ahorro — AreaChart */}
       <Card>
         <CardHeader title="Evolución del ahorro mensual" />
