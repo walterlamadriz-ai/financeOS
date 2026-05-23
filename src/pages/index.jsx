@@ -122,6 +122,7 @@ export function Income() {
 
 // ─── EXPENSES ─────────────────────────────────────────────────────────────────
 import ChartCard from '../components/charts/ChartCard.jsx'
+import MoneyFlow from '../components/charts/MoneyFlow.jsx'
 import CategoryDonut from '../components/charts/CategoryDonut.jsx'
 import HorizontalBars from '../components/charts/HorizontalBars.jsx'
 
@@ -537,7 +538,7 @@ const ChartTooltip = ({ active, payload, label, sym }) => {
 }
 
 export function Reports() {
-  const { incomes, expenses, budgets, settings } = useApp()
+  const { incomes, expenses, budgets, debts: allDebts, subscriptions: allSubs, settings } = useApp()
   const sym = CURRENCY_SYMBOLS[settings.currency] || '$'
   const subMetrics = useSubscriptionMetrics()
 
@@ -599,6 +600,18 @@ export function Reports() {
 
       {/* Gráficos principales */}
       <div className="grid2">
+
+        {/* Flujo de dinero del mes */}
+        <Card>
+          <CardHeader title="Flujo de dinero del mes" />
+          <MoneyFlow
+            incomes={mIncomes}
+            expenses={mExpenses}
+            subscriptions={Array.isArray(allSubs) ? allSubs : []}
+            debts={Array.isArray(allDebts) ? allDebts : []}
+            sym={sym}
+          />
+        </Card>
 
         {/* Donut — gastos por categoría */}
         <Card>

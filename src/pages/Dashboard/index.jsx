@@ -222,28 +222,19 @@ export default function Dashboard({ setPage }) {
 
       {/* Gráficos */}
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16, marginBottom:16 }}>
-        <ChartCard title="Ingresos vs Gastos" subtitle="últimos 6 meses" minHeight={220}>
-          <IncomeExpenseBar incomes={incomes} expenses={expenses} sym={sym} months={6}/>
+        <ChartCard title="Flujo de dinero del mes" subtitle="distribución orientativa" minHeight={220}>
+          <MoneyFlow incomes={incomes} expenses={monthExpenses} subscriptions={subs} debts={debts} sym={sym}/>
         </ChartCard>
         <ChartCard title="Gastos por categoría" subtitle={activeMonth} minHeight={160}>
           <CategoryDonut records={monthExpenses} sym={sym} maxCategories={6}/>
         </ChartCard>
       </div>
+      <ChartCard title="Ingresos vs Gastos" subtitle="últimos 6 meses" minHeight={180}>
+        <IncomeExpenseBar incomes={incomes} expenses={expenses} sym={sym} months={6}/>
+      </ChartCard>
 
 
-      {/* Flujo de dinero del mes */}
-      <div style={{ background:'var(--sur)', border:'.5px solid var(--brd)', borderRadius:'var(--r)', padding:'18px 20px', marginBottom:16 }}>
-        <div style={{ marginBottom:14 }}>
-          <div style={{ fontSize:13, fontWeight:600, color:'var(--tx)', display:'flex', alignItems:'center', gap:8 }}>
-            <span style={{ width:6, height:6, borderRadius:'50%', background:'var(--accent)', display:'inline-block' }}/>
-            Flujo de dinero del mes
-          </div>
-          <div style={{ fontSize:11, color:'var(--th)', fontFamily:'var(--mono)', marginTop:3, marginLeft:14 }}>
-            Distribución orientativa de ingresos hacia gastos, suscripciones, deudas y balance disponible.
-          </div>
-        </div>
-        <MoneyFlow incomes={incomes} expenses={monthExpenses} subscriptions={subs} debts={debts} goals={goals} sym={sym}/>
-      </div>
+
       {/* Link al Coach */}
       {setPage && (
         <div style={{ padding:'10px 14px', background:'var(--sur)', border:'.5px solid var(--brd)', borderRadius:'var(--r)', display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
