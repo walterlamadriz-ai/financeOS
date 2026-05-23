@@ -6,6 +6,7 @@ import { useApp } from '../../context/AppContext.jsx'
 import ChartCard from '../../components/charts/ChartCard.jsx'
 import IncomeExpenseBar from '../../components/charts/IncomeExpenseBar.jsx'
 import CategoryDonut from '../../components/charts/CategoryDonut.jsx'
+import MoneyFlow from '../../components/charts/MoneyFlow.jsx'
 
 const fmt  = (n) => (Number(n) || 0).toLocaleString('es-CL', { maximumFractionDigits: 0 })
 const pct  = (n) => ((Number(n) || 0) * 100).toFixed(1) + '%'
@@ -19,6 +20,8 @@ export default function Dashboard({ setPage }) {
   const goals    = Array.isArray(ctx.goals)         ? ctx.goals         : []
   const settings = (ctx.settings && typeof ctx.settings === 'object') ? ctx.settings : {}
   const subs     = Array.isArray(ctx.subscriptions) ? ctx.subscriptions : []
+  const debts    = Array.isArray(ctx.debts)  ? ctx.debts  : []
+  const goals    = Array.isArray(ctx.goals)  ? ctx.goals  : []
 
   const sym         = { CLP:'$', USD:'US$', EUR:'€', VES:'Bs.', MXN:'$', ARS:'$', COP:'$' }[settings.currency] || '$'
   const activeMonth = settings.activeMonth || new Date().toISOString().slice(0, 7)
@@ -228,6 +231,20 @@ export default function Dashboard({ setPage }) {
         </ChartCard>
       </div>
 
+
+      {/* Flujo de dinero del mes */}
+      <div style={{ background:'var(--sur)', border:'.5px solid var(--brd)', borderRadius:'var(--r)', padding:'18px 20px', marginBottom:16 }}>
+        <div style={{ marginBottom:14 }}>
+          <div style={{ fontSize:13, fontWeight:600, color:'var(--tx)', display:'flex', alignItems:'center', gap:8 }}>
+            <span style={{ width:6, height:6, borderRadius:'50%', background:'var(--accent)', display:'inline-block' }}/>
+            Flujo de dinero del mes
+          </div>
+          <div style={{ fontSize:11, color:'var(--th)', fontFamily:'var(--mono)', marginTop:3, marginLeft:14 }}>
+            Distribución orientativa de ingresos hacia gastos, suscripciones, deudas y balance disponible.
+          </div>
+        </div>
+        <MoneyFlow incomes={incomes} expenses={monthExpenses} subscriptions={subs} debts={debts} goals={goals} sym={sym}/>
+      </div>
       {/* Link al Coach */}
       {setPage && (
         <div style={{ padding:'10px 14px', background:'var(--sur)', border:'.5px solid var(--brd)', borderRadius:'var(--r)', display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
