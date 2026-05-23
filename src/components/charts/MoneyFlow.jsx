@@ -1,6 +1,6 @@
 // src/components/charts/MoneyFlow.jsx
-// Flujo de dinero del mes — FinanceOS
-// Visualización orientativa, sin recomendaciones financieras
+// Flujo de dinero del mes — visualización tipo Sankey con SVG
+// Sin librerías externas · datos reales · orientativo
 
 import { useMemo } from 'react'
 import { ChartEmpty } from './ChartCard.jsx'
@@ -12,121 +12,159 @@ function fmtV(v, sym) {
   return `${sym}${Math.round(n).toLocaleString('es-CL')}`
 }
 
-const FLOW_COLORS = {
-  gastos:        '#ff4d6a',
-  suscripciones: '#f5a623',
-  deudas:        '#00b8d9',
-  metas:         '#a78bfa',
-  disponible:    '#00d4aa',
+const COLORS = {
+  income:  { fill: '#00d4aa', stroke: '#00b896', text: '#004d3e' },
+  gastos:  { fill: '#ff4d6a', stroke: '#e03558', text: '#4a0010' },
+  subs:    { fill: '#f5a623', stroke: '#d48a0a', text: '#3d2200' },
+  deudas:  { fill: '#00b8d9', stroke: '#0099b8', text: '#002d3d' },
+  libre:   { fill: '#00d4aa', stroke: '#00b896', text: '#004d3e' },
 }
 
-export default function MoneyFlow({ incomes, expenses, subscriptions, debts, goals, sym = '$' }) {
-  const safeInc  = Array.isArray(incomes)       ? incomes       : []
-  const safeExp  = Array.isArray(expenses)       ? expenses      : []
-  const safeSubs = Array.isArray(subscriptions)  ? subscriptions : []
-  const safeDebt = Array.isArray(debts)          ? debts         : []
-  const safeGoal = Array.isArray(goals)          ? goals         : []
+function SankeyPath({ x1, y1, h1, x2, y2, h2, color, opacity = 0.22 }) {
+  const mx = (x1 + x2) / 2
+  const d = [
+    `M ${x1} ${y1}`,
+    `C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`,
+    `L ${x2} ${y2 + h2}`,
+    `C ${mx} ${y2 + h2}, ${mx} ${y1 + h1}, ${x1} ${y1 + h1}`,
+    'Z'
+  ].join(' ')
+  return <path d={d} fill={color} opacity={opacity} />
+}
 
-  const flow = useMemo(() => {
+export default function MoneyFlow({ incomes, expenses, subscriptions, debts, sym = '$' }) {
+  const safeInc  = Array.isArray(incomes)      ? incomes      : []
+  const safeExp  = Array.isArray(expenses)      ? expenses     : []
+  const safeSubs = Array.isArray(subscriptions) ? subscriptions: []
+  const safeDebt = Array.isArray(debts)         ? debts        : []
+
+  const data = useMemo(() => {
     const totalInc = safeInc.reduce((s, r) => s + (Number(r?.amount) || 0), 0)
     if (totalInc === 0) return null
 
-    const totalExp = safeExp.reduce((s, r) => s + (Number(r?.amount) || 0), 0)
-
-    // Suscripciones — costo mensual estimado
-    const totalSubs = safeSubs
-      .filter(s => s?.status === 'active')
-      .reduce((s, sub) => {
-        const amt  = Number(sub.amount) || 0
-        const freq = sub.frequency || 'monthly'
-        if (freq === 'annual' || freq === 'anual') return s + amt / 12
-        if (freq === 'quarterly') return s + amt / 3
-        if (freq === 'weekly') return s + amt * 4.33
-        return s + amt
-      }, 0)
-
-    // Deudas — pago mínimo mensual
+    const totalExp  = safeExp.reduce((s, r) => s + (Number(r?.amount) || 0), 0)
+    const totalSubs = safeSubs.filter(s => s?.status === 'active').reduce((s, sub) => {
+      const amt = Number(sub.amount) || 0
+      const f   = sub.frequency || 'monthly'
+      if (f === 'annual' || f === 'anual') return s + amt / 12
+      if (f === 'quarterly') return s + amt / 3
+      if (f === 'weekly') return s + amt * 4.33
+      return s + amt
+    }, 0)
     const totalDebt = safeDebt.reduce((s, d) => s + (Number(d?.minPayment) || 0), 0)
-
-    // Metas — ahorro mensual estimado (no calculable directamente, omitir si 0)
-    // Usamos 0 si no hay datos — no inventamos
-    const totalMetas = 0 // sin campo de aporte mensual en el modelo actual
-
-    const totalSalidas = totalExp + totalSubs + totalDebt
-    const disponible   = Math.max(0, totalInc - totalSalidas)
+    const libre     = Math.max(0, totalInc - totalExp - totalSubs - totalDebt)
 
     const items = [
-      { key: 'gastos',        label: 'Gastos',         amount: totalExp,   color: FLOW_COLORS.gastos },
-      totalSubs > 0 && { key: 'suscripciones', label: 'Suscripciones', amount: totalSubs, color: FLOW_COLORS.suscripciones },
-      totalDebt > 0 && { key: 'deudas',        label: 'Pagos deuda',   amount: totalDebt, color: FLOW_COLORS.deudas },
-      { key: 'disponible',    label: 'Disponible',     amount: disponible, color: FLOW_COLORS.disponible },
+      { key: 'gastos', label: 'Gastos',       amount: totalExp,   color: COLORS.gastos },
+      totalSubs > 0 && { key: 'subs',   label: 'Suscripciones', amount: totalSubs,  color: COLORS.subs },
+      totalDebt > 0 && { key: 'deudas', label: 'Pagos deuda',  amount: totalDebt,  color: COLORS.deudas },
+      { key: 'libre',  label: 'Disponible',   amount: libre,     color: COLORS.libre },
     ].filter(Boolean)
 
     return { totalInc, items }
   }, [safeInc, safeExp, safeSubs, safeDebt])
 
-  if (!flow) {
-    return <ChartEmpty msg="Agrega ingresos y gastos para ver el flujo de dinero del mes." />
-  }
+  if (!data) return <ChartEmpty msg="Agrega ingresos y gastos para ver el flujo de dinero del mes." />
 
-  const { totalInc, items } = flow
+  const { totalInc, items } = data
+
+  // ── Layout SVG ──────────────────────────────────────────────────────────────
+  const W = 520, H = 280, PAD = 20
+  const LEFT_X  = 30,  LEFT_W  = 90
+  const RIGHT_X = 400, RIGHT_W = 90
+  const MID_X   = 220, MID_W  = 80
+  const NODE_H  = H - PAD * 2
+
+  // Nodo ingreso central
+  const incH = NODE_H
+
+  // Nodos salida — altura proporcional al monto
+  const totalOut = items.reduce((s, it) => s + it.amount, 0) || totalInc
+  let rightY = PAD
+  const rightNodes = items.map(it => {
+    const h = Math.max(20, Math.round((it.amount / totalOut) * (NODE_H - items.length * 4)))
+    const node = { ...it, y: rightY, h }
+    rightY += h + 4
+    return node
+  })
 
   return (
-    <div>
-      {/* Mobile: lista vertical */}
-      <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-        {/* Ingresos — fuente */}
-        <div style={{ background:'rgba(0,212,170,.08)', border:'.5px solid rgba(0,212,170,.25)', borderRadius:8, padding:'10px 14px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-            <div style={{ width:10, height:10, borderRadius:'50%', background:'var(--accent)', flexShrink:0 }}/>
-            <span style={{ fontSize:13, fontWeight:600, color:'var(--tx)' }}>Ingresos</span>
-          </div>
-          <span style={{ fontFamily:'var(--mono)', fontSize:14, fontWeight:700, color:'var(--accent)' }}>{fmtV(totalInc, sym)}</span>
-        </div>
+    <div style={{ overflowX: 'auto' }}>
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        width="100%"
+        style={{ display:'block', maxWidth: W }}
+        role="img"
+        aria-label="Flujo de dinero del mes"
+      >
+        {/* Nodo izquierdo — Ingresos */}
+        <rect x={LEFT_X} y={PAD} width={LEFT_W} height={incH} rx="6"
+          fill={COLORS.income.fill} opacity={0.9} />
+        <text x={LEFT_X + LEFT_W/2} y={PAD + incH/2 - 10}
+          textAnchor="middle" dominantBaseline="middle"
+          style={{ fontFamily:'var(--mono, monospace)', fontSize:11, fontWeight:700, fill: COLORS.income.text }}>
+          Ingresos
+        </text>
+        <text x={LEFT_X + LEFT_W/2} y={PAD + incH/2 + 10}
+          textAnchor="middle" dominantBaseline="middle"
+          style={{ fontFamily:'var(--mono, monospace)', fontSize:11, fill: COLORS.income.text }}>
+          {fmtV(totalInc, sym)}
+        </text>
 
-        {/* Flecha */}
-        <div style={{ textAlign:'center', color:'var(--th)', fontSize:16, lineHeight:1 }}>↓</div>
+        {/* Paths Sankey + nodos derecha */}
+        {rightNodes.map((node, i) => {
+          const incFromY  = PAD + (node.y - PAD) * (incH / (rightY - PAD - 4 * items.length + 4 * items.length))
+          const incPropH  = Math.max(8, Math.round(node.h * (incH / (rightY - PAD))))
+          const startY    = PAD + Math.round(i * incH / items.length)
+          const sliceH    = Math.round(incH / items.length)
 
-        {/* Salidas */}
-        {items.map((item, i) => {
-          const pct = totalInc > 0 ? Math.min((item.amount / totalInc) * 100, 100) : 0
-          const isDisponible = item.key === 'disponible'
           return (
-            <div key={item.key}>
-              {!isDisponible && i > 0 && (
-                <div style={{ textAlign:'center', color:'var(--th)', fontSize:14, lineHeight:1, marginBottom:6 }}>↓</div>
+            <g key={node.key}>
+              {/* Flujo bezier */}
+              <SankeyPath
+                x1={LEFT_X + LEFT_W} y1={startY}       h1={sliceH}
+                x2={RIGHT_X}         y2={node.y}        h2={node.h}
+                color={node.color.fill}
+                opacity={node.key === 'libre' ? 0.28 : 0.22}
+              />
+              {/* Nodo derecha */}
+              <rect x={RIGHT_X} y={node.y} width={RIGHT_W} height={node.h} rx="5"
+                fill={node.color.fill} opacity={0.88} />
+              <text x={RIGHT_X + RIGHT_W/2} y={node.y + node.h/2 - (node.h > 36 ? 8 : 0)}
+                textAnchor="middle" dominantBaseline="middle"
+                style={{ fontFamily:'var(--mono, monospace)', fontSize:10, fontWeight:700, fill: node.color.text }}>
+                {node.label}
+              </text>
+              {node.h > 32 && (
+                <text x={RIGHT_X + RIGHT_W/2} y={node.y + node.h/2 + 9}
+                  textAnchor="middle" dominantBaseline="middle"
+                  style={{ fontFamily:'var(--mono, monospace)', fontSize:10, fill: node.color.text }}>
+                  {fmtV(node.amount, sym)}
+                </text>
               )}
-              {isDisponible && (
-                <div style={{ textAlign:'center', color:'var(--accent)', fontSize:14, lineHeight:1, marginBottom:6 }}>✓</div>
-              )}
-              <div style={{
-                background: isDisponible ? 'rgba(0,212,170,.06)' : 'var(--sur)',
-                border: `.5px solid ${isDisponible ? 'rgba(0,212,170,.2)' : 'var(--brd)'}`,
-                borderRadius:8, padding:'10px 14px',
-              }}>
-                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:6 }}>
-                  <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                    <div style={{ width:8, height:8, borderRadius:'50%', background:item.color, flexShrink:0 }}/>
-                    <span style={{ fontSize:12, color:'var(--tx)' }}>{item.label}</span>
-                  </div>
-                  <div style={{ display:'flex', gap:10, alignItems:'center' }}>
-                    <span style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--th)' }}>{pct.toFixed(0)}%</span>
-                    <span style={{ fontFamily:'var(--mono)', fontSize:13, fontWeight:600, color:item.color }}>{fmtV(item.amount, sym)}</span>
-                  </div>
-                </div>
-                {/* Barra proporcional */}
-                <div style={{ height:4, background:'var(--sur2)', borderRadius:2, overflow:'hidden' }}>
-                  <div style={{ height:'100%', width:`${pct}%`, background:item.color, borderRadius:2, transition:'width .4s ease' }}/>
-                </div>
-              </div>
-            </div>
+              {/* Porcentaje a la derecha */}
+              <text x={RIGHT_X + RIGHT_W + 8} y={node.y + node.h/2}
+                dominantBaseline="middle"
+                style={{ fontFamily:'var(--mono, monospace)', fontSize:10, fill:'var(--th, #888)' }}>
+                {totalInc > 0 ? ((node.amount/totalInc)*100).toFixed(0) : 0}%
+              </text>
+            </g>
           )
         })}
+      </svg>
+
+      {/* Mobile fallback — lista simple */}
+      <div style={{ marginTop:4, fontSize:10, color:'var(--th)', fontFamily:'var(--mono)', lineHeight:1.5, display:'flex', flexWrap:'wrap', gap:'4px 16px' }}>
+        {items.map(it => (
+          <span key={it.key} style={{ display:'flex', alignItems:'center', gap:4 }}>
+            <span style={{ width:8, height:8, borderRadius:'50%', background:it.color.fill, display:'inline-block' }}/>
+            {it.label}: {fmtV(it.amount, sym)} ({totalInc > 0 ? ((it.amount/totalInc)*100).toFixed(0) : 0}%)
+          </span>
+        ))}
       </div>
 
-      {/* Disclaimer */}
-      <div style={{ marginTop:12, fontSize:10, color:'var(--th)', fontFamily:'var(--mono)', lineHeight:1.5 }}>
-        Distribución orientativa basada en los datos del mes activo. No constituye asesoría financiera.
+      <div style={{ marginTop:8, fontSize:10, color:'var(--th)', fontFamily:'var(--mono)' }}>
+        Distribución orientativa. No constituye asesoría financiera.
       </div>
     </div>
   )
