@@ -2,7 +2,7 @@ FinanceOS v1.0 — Links oficiales
 =================================
 
 LANDING
-https://financeos-landing-omega.vercel.app
+https://financeospro.com
 
 APP
 https://financeos-hazel.vercel.app/app/
@@ -11,22 +11,22 @@ DEMO INTERACTIVA
 https://financeos-hazel.vercel.app/app/?demo=true
 
 DOCUMENTACIÓN
-https://financeos-landing-omega.vercel.app/docs/
+https://financeospro.com/docs/
 
 INICIO RÁPIDO
-https://financeos-landing-omega.vercel.app/docs/getting-started.html
+https://financeospro.com/docs/getting-started.html
 
 GUÍA WHITE-LABEL
-https://financeos-landing-omega.vercel.app/docs/white-label.html
+https://financeospro.com/docs/white-label.html
 
 GUÍA DEPLOY
-https://financeos-landing-omega.vercel.app/docs/deploy.html
+https://financeospro.com/docs/deploy.html
 
 GUÍA BACKUPS
-https://financeos-landing-omega.vercel.app/docs/backups.html
+https://financeospro.com/docs/backups.html
 
 GUÍA MODO ASESOR
-https://financeos-landing-omega.vercel.app/docs/advisor.html
+https://financeospro.com/docs/advisor.html
 
 SOPORTE
 maxnovaluciglobal@gmail.com

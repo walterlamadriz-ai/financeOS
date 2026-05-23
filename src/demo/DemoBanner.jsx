@@ -60,7 +60,7 @@ export default function DemoBanner({ onExitDemo }) {
             {expanded ? 'Ocultar' : 'Info'}
           </button>
           <button
-            onClick={() => window.open('https://financeos-landing-omega.vercel.app/#pricing', '_blank')}
+            onClick={() => window.open('https://financeospro.com/#pricing', '_blank')}
             style={{
               background: '#fff',
               border: 'none',
