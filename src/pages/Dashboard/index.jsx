@@ -20,6 +20,7 @@ export default function Dashboard({ setPage }) {
   const goals    = Array.isArray(ctx.goals)         ? ctx.goals         : []
   const settings = (ctx.settings && typeof ctx.settings === 'object') ? ctx.settings : {}
   const subs     = Array.isArray(ctx.subscriptions) ? ctx.subscriptions : []
+  const debts    = Array.isArray(ctx.debts) ? ctx.debts : []
 
   const sym         = { CLP:'$', USD:'US$', EUR:'€', VES:'Bs.', MXN:'$', ARS:'$', COP:'$' }[settings.currency] || '$'
   const activeMonth = settings.activeMonth || new Date().toISOString().slice(0, 7)
