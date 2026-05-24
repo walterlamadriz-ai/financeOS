@@ -617,8 +617,6 @@ export function Reports() {
         <Card>
           <CardHeader title="Gastos por categoría" />
           <CategoryDonut records={mExpenses} sym={sym} maxCategories={6} />
-            )
-          }
         </Card>
 
         {/* Regla 50/30/20 */}
