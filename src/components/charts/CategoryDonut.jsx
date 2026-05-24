@@ -54,10 +54,10 @@ export default function CategoryDonut({ records, sym = '$', maxCategories = 6 })
 
   return (
     <div style={{ display:'flex', alignItems:'center', gap:16, flexWrap:'wrap' }}>
-      <div style={{ position:'relative', flex:'0 0 160px', height:160 }}>
-        <ResponsiveContainer width="100%" height="100%">
+      <div style={{ position:'relative', flex:'0 0 auto', width:'45%', minWidth:140, maxWidth:220 }}>
+        <ResponsiveContainer width="100%" aspect={1}>
           <PieChart>
-            <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={48} outerRadius={72} strokeWidth={0} paddingAngle={2}>
+            <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={58} outerRadius={88} strokeWidth={0} paddingAngle={2}>
               {data.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} style={{ outline:'none' }}/>)}
             </Pie>
             <Tooltip content={<CustomTooltip sym={sym}/>}/>
