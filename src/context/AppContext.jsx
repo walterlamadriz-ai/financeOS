@@ -1,4 +1,4 @@
-// src/context/AppContext.jsx — v1.1 (QA fixes)
+// src/context/AppContext.jsx — v1.2 (QA fixes)
 // FIX aplicados:
 //   1. DB-first: await dbAdd() ANTES de dispatch() — garantiza persistencia
 //   2. Error handling con toast visible al usuario
@@ -280,7 +280,7 @@ export function AppProvider({ children }) {
       // Agregar metadata al respaldo
       const backup = {
         _meta: {
-          version:    '1.3',
+          version:    '1.2',
           app:        'FinanceOS',
           createdAt:  new Date().toISOString(),
           recordCount: {

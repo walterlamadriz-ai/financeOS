@@ -132,7 +132,7 @@ export default function Shell({ page, setPage, children }) {
       <nav className={s.sb}>
         <div className={s.logo}>
           <div className={s.logoName}>FinanceOS</div>
-          <div className={s.logoSub}>v1.3</div>
+          <div className={s.logoSub}>v1.2</div>
         </div>
 
         <NavItems onNavigate={navigate} />
@@ -148,7 +148,7 @@ export default function Shell({ page, setPage, children }) {
             <a href='https://financeos-landing-omega.vercel.app/docs/index.html' target='_blank' className={s.legalLink} style={{textDecoration:'none'}}>Docs</a>
           </div>
           <div className={s.appVersion}>
-            FinanceOS v1.3 · MAXNOVA & LUCI Global LLC<br/>
+            FinanceOS v1.2 · MAXNOVA & LUCI Global LLC<br/>
             <span style={{opacity:.5}}>🔒 Sin servidor · Sin cuentas</span>
           </div>
           <div style={{marginTop:6}}><BackupStatusBadge compact /></div>
@@ -163,7 +163,7 @@ export default function Shell({ page, setPage, children }) {
         <div className={s.drawerHeader}>
           <div className={s.logo} style={{border:'none', padding:0, margin:0}}>
             <div className={s.logoName}>FinanceOS</div>
-            <div className={s.logoSub}>v1.3</div>
+            <div className={s.logoSub}>v1.2</div>
           </div>
           <button className={s.drawerClose} onClick={() => setDrawerOpen(false)} aria-label="Cerrar menú"><span style={{fontSize:18}}>☰</span><span style={{fontSize:10,fontFamily:"var(--mono)",display:"block",lineHeight:1,marginTop:2}}>Menú</span></button>
         </div>

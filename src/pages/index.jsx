@@ -1,4 +1,4 @@
-// src/pages/index.jsx — v1.1 (QA fixes)
+// src/pages/index.jsx — v1.2 (QA fixes)
 // Fixes: filtro por mes, useMemo en todos los cálculos, prompt→modal,
 //        currency como código limpio, loading states, cálculo ahorro correcto,
 //        totalExpense filtrado en Budgets, validación saldo>inicial en Deudas
@@ -857,7 +857,7 @@ export function Settings() {
 
       <BackupWarning />
       <div style={{ padding: '10px 12px', background: 'var(--sur2)', borderRadius: 'var(--r)', border: '0.5px solid var(--brd)', fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', lineHeight: 1.7, marginTop: 8 }}>
-        FinanceOS v1.3 · MAXNOVA & LUCI Global LLC · Datos locales · Sin servidor · No asesoría financiera certificada
+        FinanceOS v1.2 · MAXNOVA & LUCI Global LLC · Datos locales · Sin servidor · No asesoría financiera certificada
       </div>
     </div>
   )

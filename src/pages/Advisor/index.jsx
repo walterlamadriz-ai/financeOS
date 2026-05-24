@@ -1,5 +1,5 @@
 // src/pages/Advisor/index.jsx
-// Modo Asesor — FinanceOS v1.3
+// Modo Asesor — FinanceOS v1.2
 // Vista profesional para diagnóstico, seguimiento y preparación de reuniones
 // AVISO: Las alertas y señales son orientativas. No constituyen asesoría financiera certificada.
 

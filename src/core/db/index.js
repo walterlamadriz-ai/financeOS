@@ -117,7 +117,7 @@ export async function exportAllData() {
   let importBatches = []
   try { importBatches = await dbGetAll('importBatches') } catch {}
   return { incomes, expenses, budgets, debts, goals, subscriptions, importBatches, settings,
-           exportedAt: new Date().toISOString(), version: '1.3' }
+           exportedAt: new Date().toISOString(), version: '1.2' }
 }
 
 export async function importAllData(data) {
