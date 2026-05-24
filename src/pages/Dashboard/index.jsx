@@ -221,7 +221,7 @@ export default function Dashboard({ setPage }) {
       )}
 
       {/* Gráficos */}
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16, marginBottom:16 }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))', gap:16, marginBottom:16 }}>
         <ChartCard title="Flujo de dinero del mes" subtitle="distribución orientativa" minHeight={220}>
           <MoneyFlow incomes={incomes} expenses={monthExpenses} subscriptions={subs} debts={debts} sym={sym}/>
         </ChartCard>

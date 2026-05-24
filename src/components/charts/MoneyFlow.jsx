@@ -89,11 +89,11 @@ export default function MoneyFlow({ incomes, expenses, subscriptions, debts, sym
   })
 
   return (
-    <div style={{ overflowX: 'auto' }}>
+    <div>
       <svg
         viewBox={`0 0 ${W} ${H}`}
         width="100%"
-        style={{ display:'block', maxWidth: W }}
+        style={{ display:'block', maxWidth:'100%' }}
         role="img"
         aria-label="Flujo de dinero del mes"
       >

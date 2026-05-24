@@ -1,5 +1,5 @@
 #!/bin/bash
-# generar-zips-v11.sh — FinanceOS v1.1
+# generar-zips-v11.sh — FinanceOS v1.2
 # ZIP Personal = solo documentación (sin código fuente)
 # ZIP Pro = código fuente + documentación completa
 # Ejecutar desde: ~/Downloads/financeos/financeos/
@@ -8,7 +8,7 @@ set -e
 
 PROJECT_DIR="$(pwd)"
 OUTPUT_DIR="$HOME/Downloads"
-VERSION="v1.1"
+VERSION="v1.2"
 
 echo "FinanceOS — Generando ZIPs limpios $VERSION..."
 

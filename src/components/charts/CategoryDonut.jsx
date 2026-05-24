@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import { ChartEmpty } from './ChartCard.jsx'
 
-const COLORS = ['var(--accent)','#00b8d9','#f5a623','#ff4d6a','#a78bfa','#34d399','#fb923c','#60a5fa']
+const COLORS = ['#00d4aa','#00b8d9','#f5a623','#ff4d6a','#a78bfa','#34d399','#fb923c','#60a5fa']
 
 function CustomTooltip({ active, payload, sym }) {
   if (!active || !payload?.length) return null
