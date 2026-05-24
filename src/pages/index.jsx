@@ -616,36 +616,7 @@ export function Reports() {
         {/* Donut — gastos por categoría */}
         <Card>
           <CardHeader title="Gastos por categoría" />
-          {donutData.length === 0
-            ? <div style={{textAlign:'center',padding:'24px 0'}}>
-              <div style={{fontSize:13,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:12}}>Aún no tienes gastos registrados.</div>
-              <div style={{display:'flex',gap:8,justifyContent:'center',flexWrap:'wrap'}}>
-                <button onClick={()=>{ setF({description:'',amount:'',date:today(),category:'Alimentación',method:'Débito',type:'Necesidad',recurrence:'Único',notes:''}); }} style={{background:'var(--grn)',color:'#fff',border:'none',borderRadius:8,padding:'8px 18px',fontSize:13,fontWeight:600,cursor:'pointer'}}>+ Agregar gasto</button>
-              </div>
-            </div>
-            : (
-              <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                <ResponsiveContainer width={160} height={160}>
-                  <PieChart>
-                    <Pie data={donutData} cx="50%" cy="50%" innerRadius={44} outerRadius={72}
-                      dataKey="value" paddingAngle={2} strokeWidth={0}>
-                      {donutData.map((d, i) => <Cell key={i} fill={d.color} />)}
-                    </Pie>
-                    <RTooltip {...tooltipProps} />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 5 }}>
-                  {donutData.map(d => (
-                    <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                      <div style={{ width: 8, height: 8, borderRadius: 2, background: d.color, flexShrink: 0 }} />
-                      <div style={{ flex: 1, fontSize: 11, color: 'var(--tx)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.name}</div>
-                      <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--th)' }}>
-                        {fmtPct(totalExpense > 0 ? d.value / totalExpense : 0)}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+          <CategoryDonut records={mExpenses} sym={sym} maxCategories={6} />
             )
           }
         </Card>
