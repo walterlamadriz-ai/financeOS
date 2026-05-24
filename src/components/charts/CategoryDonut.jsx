@@ -54,10 +54,10 @@ export default function CategoryDonut({ records, sym = '$', maxCategories = 6 })
 
   return (
     <div style={{ display:'flex', alignItems:'center', gap:16, flexWrap:'wrap' }}>
-      <div style={{ position:'relative', flex:'0 0 auto', width:'45%', minWidth:140, maxWidth:220 }}>
+      <div style={{ position:'relative', flex:'0 0 auto', width:'48%', minWidth:160, maxWidth:280 }}>
         <ResponsiveContainer width="100%" aspect={1}>
           <PieChart>
-            <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={58} outerRadius={88} strokeWidth={0} paddingAngle={2}>
+            <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={64} outerRadius={96} strokeWidth={0} paddingAngle={2}>
               {data.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} style={{ outline:'none' }}/>)}
             </Pie>
             <Tooltip content={<CustomTooltip sym={sym}/>}/>
@@ -65,7 +65,7 @@ export default function CategoryDonut({ records, sym = '$', maxCategories = 6 })
         </ResponsiveContainer>
         {/* Label central */}
         <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)', textAlign:'center', pointerEvents:'none' }}>
-          <div style={{ fontSize:13, fontWeight:700, color:'var(--tx)', fontFamily:'var(--mono)' }}>{fmtTotal}</div>
+          <div style={{ fontSize:15, fontWeight:700, color:'var(--tx)', fontFamily:'var(--mono)' }}>{fmtTotal}</div>
           <div style={{ fontSize:9, color:'var(--th)', fontFamily:'var(--mono)', textTransform:'uppercase', letterSpacing:'.5px' }}>total</div>
         </div>
       </div>
@@ -73,8 +73,8 @@ export default function CategoryDonut({ records, sym = '$', maxCategories = 6 })
         {data.map((d, i) => (
           <div key={i} style={{ display:'flex', alignItems:'center', gap:8 }}>
             <div style={{ width:8, height:8, borderRadius:'50%', background:COLORS[i % COLORS.length], flexShrink:0 }}/>
-            <div style={{ flex:1, fontSize:12, color:'var(--tx)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{d.name}</div>
-            <div style={{ fontSize:11, color:'var(--th)', fontFamily:'var(--mono)' }}>{d.pct}%</div>
+            <div style={{ flex:1, fontSize:13, color:'var(--tx)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{d.name}</div>
+            <div style={{ fontSize:12, color:'var(--th)', fontFamily:'var(--mono)' }}>{d.pct}%</div>
           </div>
         ))}
       </div>
