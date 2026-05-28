@@ -136,7 +136,7 @@ else
 fi
 
 echo ""
-echo "✅ ZIPs listos en ~/Downloads:"
+echo "✅ ZIPs listos en ~/Documents/FinanceOS-Releases/v1.2/:"
 echo "   FinanceOS-Personal-$VERSION.zip — solo docs, sin código fuente"
 echo "   FinanceOS-Pro-$VERSION.zip      — código fuente + documentación Pro"
 echo ""
