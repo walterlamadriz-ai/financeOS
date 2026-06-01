@@ -338,21 +338,6 @@ export function AppProvider({ children }) {
     })
   }, [showToast])
 
-  const value = {
-    ...state,
-    addIncome,  delIncome,
-    addExpense, delExpense,
-    addBudget,  delBudget,
-    addDebt,    delDebt,    updateDebt,
-    addGoal,    delGoal,    updateGoal,
-      addSubscription, deleteSubscription, updateSubscription,
-    updateSettings,
-    clearAll,   loadDemo,
-    exportData, exportCSV,  importData,
-    showToast,
-  }
-
-
   // ── Subscriptions ─────────────────────────────────────────────
   async function addSubscription(item) {
     try {
@@ -373,6 +358,22 @@ export function AppProvider({ children }) {
       dispatch({ type: 'UPDATE_SUB', item })
     } catch (e) { showToast('Error al actualizar suscripción.', 'error') }
   }
+
+  const value = {
+    ...state,
+    addIncome,  delIncome,
+    addExpense, delExpense,
+    addBudget,  delBudget,
+    addDebt,    delDebt,    updateDebt,
+    addGoal,    delGoal,    updateGoal,
+      addSubscription, deleteSubscription, updateSubscription,
+    updateSettings,
+    clearAll,   loadDemo,
+    exportData, exportCSV,  importData,
+    showToast,
+  }
+
+
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }
 
