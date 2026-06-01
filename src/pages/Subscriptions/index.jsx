@@ -112,7 +112,7 @@ const EMPTY_FORM = {
 
 // ── COMPONENTE PRINCIPAL ────────────────────────────────────────────────────────
 export default function Subscriptions() {
-  const { settings, incomes, subscriptions: ctxSubs } = useApp()
+  const { settings, incomes, subscriptions: ctxSubs, addSubscription, updateSubscription, deleteSubscription } = useApp()
   const currency = settings.currency || 'CLP'
   const fmt = n => (n || 0).toLocaleString('es-CL', { maximumFractionDigits: 0 })
   const isDemo = !!settings.isDemo
