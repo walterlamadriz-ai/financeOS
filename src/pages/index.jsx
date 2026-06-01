@@ -548,8 +548,10 @@ export function Reports() {
 
   const totalIncome  = useMemo(() => mIncomes.reduce((s, r)  => s + r.amount, 0), [mIncomes])
   const totalExpense = useMemo(() => mExpenses.reduce((s, r) => s + r.amount, 0), [mExpenses])
-  const balance      = totalIncome - totalExpense
-  const savingRate   = totalIncome > 0 ? balance / totalIncome : 0
+
+  const totalDebt    = useMemo(() => (Array.isArray(allDebts) ? allDebts : []).reduce((s, d) => s + (Number(d.minPayment) || 0), 0), [allDebts])
+  const balance      = totalIncome - totalExpense - totalDebt
+  const savingRate   = totalIncome > 0 ? Math.max(0, balance) / totalIncome : 0
   const necesidad    = useMemo(() => mExpenses.filter(r => r.type === 'Necesidad').reduce((s, r) => s + r.amount, 0), [mExpenses])
   const deseos       = useMemo(() => mExpenses.filter(r => r.type === 'Deseo').reduce((s, r)    => s + r.amount, 0), [mExpenses])
   const expByCat     = useMemo(() => { const m = {}; mExpenses.forEach(e => { m[e.category] = (m[e.category] || 0) + e.amount }); return m }, [mExpenses])
@@ -626,7 +628,7 @@ export function Reports() {
             ? <Empty text="Registra ingresos para ver el análisis" />
             : (() => {
                 const rules = [
-                  { label: 'Necesidades', actual: necesidad, ideal: totalIncome * 0.5, color: 'var(--grn)', max: 50 },
+                  { label: 'Necesidades + Deudas', actual: necesidad + totalDebt, ideal: totalIncome * 0.5, color: 'var(--grn)', max: 50 },
                   { label: 'Deseos',      actual: deseos,    ideal: totalIncome * 0.3, color: 'var(--amb)', max: 30 },
                   { label: 'Ahorro',      actual: Math.max(0, balance), ideal: totalIncome * 0.2, color: 'var(--blu)', max: 20 },
                 ]

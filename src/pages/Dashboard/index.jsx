@@ -30,9 +30,10 @@ export default function Dashboard({ setPage }) {
     const exp      = expenses.filter(r => r?.date?.startsWith(activeMonth))
     const totalInc = inc.reduce((s, r)  => s + (Number(r?.amount) || 0), 0)
     const totalExp = exp.reduce((s, r)  => s + (Number(r?.amount) || 0), 0)
-    const balance  = totalInc - totalExp
-    return { totalInc, totalExp, balance, savingRate: totalInc > 0 ? balance / totalInc : 0, incCount: inc.length, expCount: exp.length }
-  }, [incomes, expenses, activeMonth])
+    const totalDebt = debts.reduce((s, d) => s + (Number(d.minPayment) || 0), 0)
+    const balance   = totalInc - totalExp - totalDebt
+    return { totalInc, totalExp, totalDebt, balance, savingRate: totalInc > 0 ? balance / totalInc : 0, incCount: inc.length, expCount: exp.length }
+  }, [incomes, expenses, debts, activeMonth])
 
   const monthExpenses = useMemo(() =>
     expenses.filter(r => r?.date?.startsWith(activeMonth)),

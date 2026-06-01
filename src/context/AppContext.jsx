@@ -23,6 +23,7 @@ const initialState = {
   budgets:  [],
   debts:    [],
   goals:    [],
+  subscriptions: [],
   settings: DEFAULT_SETTINGS,
   loading:  true,
   toast:    null, // { msg, type } — 'ok' | 'error'
@@ -43,8 +44,11 @@ function reducer(state, action) {
     case 'ADD_GOAL':     return { ...state, goals:    [...state.goals, action.item] }
     case 'DEL_GOAL':     return { ...state, goals:    state.goals.filter(g => g.id !== action.id) }
     case 'UPDATE_GOAL':  return { ...state, goals:    state.goals.map(g => g.id === action.item.id ? action.item : g) }
+    case 'ADD_SUB':      return { ...state, subscriptions: [action.item, ...state.subscriptions] }
+    case 'DEL_SUB':      return { ...state, subscriptions: state.subscriptions.filter(s => s.id !== action.id) }
+    case 'UPDATE_SUB':   return { ...state, subscriptions: state.subscriptions.map(s => s.id === action.item.id ? action.item : s) }
     case 'SAVE_SETTINGS':return { ...state, settings: action.settings }
-    case 'CLEAR_ALL':    return { ...state, incomes: [], expenses: [], budgets: [], debts: [], goals: [] }
+    case 'CLEAR_ALL':    return { ...state, incomes: [], expenses: [], budgets: [], debts: [], goals: [], subscriptions: [] }
     case 'SET_TOAST':    return { ...state, toast: action.toast }
     default:             return state
   }
@@ -341,6 +345,7 @@ export function AppProvider({ children }) {
     addBudget,  delBudget,
     addDebt,    delDebt,    updateDebt,
     addGoal,    delGoal,    updateGoal,
+      addSubscription, deleteSubscription, updateSubscription,
     updateSettings,
     clearAll,   loadDemo,
     exportData, exportCSV,  importData,

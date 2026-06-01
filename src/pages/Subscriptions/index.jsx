@@ -179,21 +179,35 @@ export default function Subscriptions() {
       id:        editing || uid(),
       amount:    parseFloat(form.amount) || 0,
       currency:  form.currency || currency,
-      createdAt: editing ? (subs.find(s => s.id === editing)?.createdAt || now) : now,
+      createdAt: editing ? (dbSubs.find(s => s.id === editing)?.createdAt || now) : now,
       updatedAt: now,
+      status:    form.status || 'active',
     }
-    if (!isDemo) await dbAdd('subscriptions', item)
-    setDbSubs(prev => editing
-      ? prev.map(s => s.id === editing ? item : s)
-      : [...prev, item]
-    )
+    if (isDemo) {
+      setDbSubs(prev => editing
+        ? prev.map(s => s.id === editing ? item : s)
+        : [...prev, item]
+      )
+    } else {
+      if (editing) {
+        await updateSubscription(item)
+        setDbSubs(prev => prev.map(s => s.id === editing ? item : s))
+      } else {
+        await addSubscription(item)
+        setDbSubs(prev => [...prev, item])
+      }
+    }
     closeForm()
   }
 
   async function remove(id) {
     if (!confirm('¿Eliminar esta suscripción?')) return
-    if (!isDemo) await dbDelete('subscriptions', id)
-    setDbSubs(prev => prev.filter(s => s.id !== id))
+    if (isDemo) {
+      setDbSubs(prev => prev.filter(s => s.id !== id))
+    } else {
+      await deleteSubscription(id)
+      setDbSubs(prev => prev.filter(s => s.id !== id))
+    }
   }
 
   async function toggleStatus(sub) {
