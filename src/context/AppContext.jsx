@@ -71,10 +71,6 @@ export function AppProvider({ children }) {
           dbGetAll('incomes'), dbGetAll('expenses'), dbGetAll('budgets'),
           dbGetAll('debts'),   dbGetAll('goals'),    dbGetAll('subscriptions'), getSettings(),
         ])
-        const [incomes, expenses, budgets, debts, goals, subscriptions, settings] = await Promise.all([
-          dbGetAll('incomes'), dbGetAll('expenses'), dbGetAll('budgets'),
-          dbGetAll('debts'),   dbGetAll('goals'),    dbGetAll('subscriptions'), getSettings(),
-        ])
         dispatch({ type: 'HYDRATE', payload: { incomes, expenses, budgets, debts, goals, subscriptions, settings } })
         document.documentElement.setAttribute('data-theme', settings.theme || 'light')
         if (isUsingFallback()) {
