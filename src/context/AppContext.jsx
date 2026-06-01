@@ -67,11 +67,15 @@ export function AppProvider({ children }) {
   useEffect(() => {
     async function hydrate() {
       try {
-        const [incomes, expenses, budgets, debts, goals, settings] = await Promise.all([
+        const [incomes, expenses, budgets, debts, goals, subscriptions, settings] = await Promise.all([
           dbGetAll('incomes'), dbGetAll('expenses'), dbGetAll('budgets'),
-          dbGetAll('debts'),   dbGetAll('goals'),    getSettings(),
+          dbGetAll('debts'),   dbGetAll('goals'),    dbGetAll('subscriptions'), getSettings(),
         ])
-        dispatch({ type: 'HYDRATE', payload: { incomes, expenses, budgets, debts, goals, settings } })
+        const [incomes, expenses, budgets, debts, goals, subscriptions, settings] = await Promise.all([
+          dbGetAll('incomes'), dbGetAll('expenses'), dbGetAll('budgets'),
+          dbGetAll('debts'),   dbGetAll('goals'),    dbGetAll('subscriptions'), getSettings(),
+        ])
+        dispatch({ type: 'HYDRATE', payload: { incomes, expenses, budgets, debts, goals, subscriptions, settings } })
         document.documentElement.setAttribute('data-theme', settings.theme || 'light')
         if (isUsingFallback()) {
           showToast('Modo compatibilidad activo (localStorage). Los datos se guardan localmente.', 'ok')
@@ -318,11 +322,11 @@ export function AppProvider({ children }) {
         try {
           const data = JSON.parse(e.target.result)
           await importAllData(data)
-          const [incomes, expenses, budgets, debts, goals, settings] = await Promise.all([
+          const [incomes, expenses, budgets, debts, goals, subscriptions, settings] = await Promise.all([
             dbGetAll('incomes'), dbGetAll('expenses'), dbGetAll('budgets'),
-            dbGetAll('debts'),   dbGetAll('goals'),    getSettings(),
+            dbGetAll('debts'),   dbGetAll('goals'),    dbGetAll('subscriptions'), getSettings(),
           ])
-          dispatch({ type: 'HYDRATE', payload: { incomes, expenses, budgets, debts, goals, settings } })
+          dispatch({ type: 'HYDRATE', payload: { incomes, expenses, budgets, debts, goals, subscriptions, settings } })
           showToast('Datos importados correctamente.', 'ok')
           resolve()
         } catch (err) {
