@@ -31,9 +31,17 @@ export default function Dashboard({ setPage }) {
     const totalInc = inc.reduce((s, r)  => s + (Number(r?.amount) || 0), 0)
     const totalExp = exp.reduce((s, r)  => s + (Number(r?.amount) || 0), 0)
     const totalDebt = debts.reduce((s, d) => s + (Number(d.minPayment) || 0), 0)
-    const balance   = totalInc - totalExp - totalDebt
-    return { totalInc, totalExp, totalDebt, balance, savingRate: totalInc > 0 ? balance / totalInc : 0, incCount: inc.length, expCount: exp.length }
-  }, [incomes, expenses, debts, activeMonth])
+    const totalSubs = subs.filter(s => s?.status === 'active').reduce((s, sub) => {
+      const amt = Number(sub.amount) || 0
+      const f   = sub.frequency || 'monthly'
+      if (f === 'annual' || f === 'anual') return s + amt / 12
+      if (f === 'quarterly') return s + amt / 3
+      if (f === 'weekly') return s + amt * 4.33
+      return s + amt
+    }, 0)
+    const balance   = totalInc - totalExp - totalDebt - totalSubs
+    return { totalInc, totalExp, totalDebt, totalSubs, balance, savingRate: totalInc > 0 ? Math.max(0, balance) / totalInc : 0, incCount: inc.length, expCount: exp.length }
+  }, [incomes, expenses, debts, subs, activeMonth])
 
   const monthExpenses = useMemo(() =>
     expenses.filter(r => r?.date?.startsWith(activeMonth)),
