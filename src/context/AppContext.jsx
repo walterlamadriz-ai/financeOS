@@ -352,6 +352,27 @@ export function AppProvider({ children }) {
     showToast,
   }
 
+
+  // ── Subscriptions ─────────────────────────────────────────────
+  async function addSubscription(item) {
+    try {
+      const newItem = { ...item, id: item.id || uid(), createdAt: item.createdAt || new Date().toISOString() }
+      await dbAdd('subscriptions', newItem)
+      dispatch({ type: 'ADD_SUB', item: newItem })
+    } catch (e) { showToast('Error al guardar suscripción. Intenta de nuevo.', 'error') }
+  }
+  async function deleteSubscription(id) {
+    try {
+      await dbDelete('subscriptions', id)
+      dispatch({ type: 'DEL_SUB', id })
+    } catch (e) { showToast('Error al eliminar suscripción.', 'error') }
+  }
+  async function updateSubscription(item) {
+    try {
+      await dbAdd('subscriptions', item)
+      dispatch({ type: 'UPDATE_SUB', item })
+    } catch (e) { showToast('Error al actualizar suscripción.', 'error') }
+  }
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }
 
