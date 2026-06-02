@@ -426,94 +426,107 @@ export default function Movements({ setPage }) {
         </div>
       )}
 
-      {/* Lista unificada */}
-      <div style={{ background:'var(--sur)', border:'.5px solid var(--brd)',
-        borderRadius:'var(--r)', overflow:'hidden', marginBottom:16 }}>
-        <div style={{ padding:'10px 14px', borderBottom:'.5px solid var(--brd)',
-          display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-          <div style={{ fontSize:11, fontWeight:600, color:'var(--tx)', fontFamily:'var(--mono)',
-            textTransform:'uppercase', letterSpacing:'.5px' }}>
-            Todas las salidas ({unifiedList.length})
-          </div>
-          <div style={{ display:'flex', gap:12, fontSize:10, fontFamily:'var(--mono)',
-            color:'var(--th)' }}>
-            <span>💳 Gasto único</span>
-            <span>🔄 Recurrente</span>
-          </div>
-        </div>
+      {/* Dos secciones compactas separadas */}
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16, marginBottom:16 }}>
 
-        {unifiedList.length === 0 ? (
-          <div style={{ padding:'32px', textAlign:'center' }}>
-            <div style={{ fontSize:13, color:'var(--th)', fontFamily:'var(--mono)',
-              marginBottom:12 }}>No hay salidas registradas este mes.</div>
-            <button onClick={() => setShowAdd(true)} style={{
-              background:'var(--grn)', color:'#fff', border:'none', borderRadius:8,
-              padding:'8px 16px', fontSize:12, fontWeight:600, cursor:'pointer' }}>
-              + Agregar primera salida
-            </button>
+        {/* Gastos únicos */}
+        <div style={{ background:'var(--sur)', border:'.5px solid var(--brd)',
+          borderRadius:'var(--r)', overflow:'hidden' }}>
+          <div style={{ padding:'10px 14px', borderBottom:'.5px solid var(--brd)',
+            display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+            <div style={{ fontSize:11, fontWeight:600, color:'var(--red)',
+              fontFamily:'var(--mono)', textTransform:'uppercase', letterSpacing:'.5px' }}>
+              💳 Gastos únicos ({monthExp.length})
+            </div>
+            <div style={{ fontSize:11, fontWeight:700, color:'var(--red)',
+              fontFamily:'var(--mono)' }}>{fmtM(totalExp, sym)}</div>
           </div>
-        ) : (
-          unifiedList.map((item, i) => {
-            const isRec = item._type === 'recurrente'
-            const color = CAT_COLORS[item.category] || '#888'
-            return (
-              <div key={item.id} style={{ display:'flex', alignItems:'center', gap:12,
-                padding:'10px 14px',
-                borderBottom: i < unifiedList.length-1 ? '.5px solid var(--brd)' : 'none',
-                background: isRec ? 'rgba(245,166,35,.02)' : 'transparent' }}>
-                {/* Dot categoría */}
-                <div style={{ width:8, height:8, borderRadius:'50%', flexShrink:0, background:color }}/>
-                {/* Info */}
+          <div style={{ maxHeight:320, overflowY:'auto' }}>
+            {monthExp.length === 0 ? (
+              <div style={{ padding:'20px', textAlign:'center', fontSize:12,
+                color:'var(--th)', fontFamily:'var(--mono)' }}>
+                Sin gastos este mes
+              </div>
+            ) : monthExp.slice(0,10).map((e,i) => (
+              <div key={e.id} style={{ display:'flex', alignItems:'center', gap:8,
+                padding:'8px 14px',
+                borderBottom: i < Math.min(monthExp.length,10)-1 ? '.5px solid var(--brd)' : 'none' }}>
+                <div style={{ width:6, height:6, borderRadius:'50%', flexShrink:0,
+                  background: CAT_COLORS[e.category]||'#888' }}/>
                 <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ fontSize:13, color:'var(--tx)', fontWeight:500,
-                    display:'flex', alignItems:'center', gap:6,
+                  <div style={{ fontSize:12, color:'var(--tx)', fontWeight:500,
                     overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
-                    {isRec ? item.name : (item.description || item.category)}
-                    {/* Badge tipo */}
-                    <span style={{ fontSize:9, padding:'1px 5px', borderRadius:4, flexShrink:0,
-                      background: isRec ? 'rgba(245,166,35,.15)' : 'rgba(255,77,106,.12)',
-                      color: isRec ? 'var(--amb,#f5a623)' : 'var(--red)',
-                      fontFamily:'var(--mono)' }}>
-                      {isRec ? `🔄 ${item._freq}` : '💳 único'}
-                    </span>
+                    {e.description || e.category}
                   </div>
-                  <div style={{ fontSize:10, color:'var(--th)', fontFamily:'var(--mono)', marginTop:1 }}>
-                    {item.category}
-                    {isRec
-                      ? ` · anual: ${fmtM(item._annual, sym)}`
-                      : ` · ${item.date?.slice(5)}`}
+                  <div style={{ fontSize:10, color:'var(--th)', fontFamily:'var(--mono)' }}>
+                    {e.category} · {e.date?.slice(5)}
                   </div>
                 </div>
-                {/* Monto */}
-                <div style={{ fontFamily:'var(--mono)', fontSize:13, fontWeight:600,
-                  color: isRec ? 'var(--amb,#f5a623)' : 'var(--red)', flexShrink:0 }}>
-                  -{fmtM(item._monthly, sym)}
-                  {isRec && <span style={{ fontSize:9, color:'var(--th)' }}>/mes</span>}
+                <div style={{ fontSize:12, fontWeight:600, color:'var(--red)',
+                  fontFamily:'var(--mono)', flexShrink:0 }}>
+                  -{fmtM(e.amount, sym)}
                 </div>
               </div>
-            )
-          })
-        )}
+            ))}
+            {monthExp.length > 10 && (
+              <div style={{ padding:'8px 14px', fontSize:11, color:'var(--th)',
+                fontFamily:'var(--mono)', textAlign:'center', borderTop:'.5px solid var(--brd)' }}>
+                +{monthExp.length - 10} gastos más este mes
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Recurrentes */}
+        <div style={{ background:'var(--sur)', border:'.5px solid var(--brd)',
+          borderRadius:'var(--r)', overflow:'hidden' }}>
+          <div style={{ padding:'10px 14px', borderBottom:'.5px solid var(--brd)',
+            display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+            <div style={{ fontSize:11, fontWeight:600, color:'var(--amb,#f5a623)',
+              fontFamily:'var(--mono)', textTransform:'uppercase', letterSpacing:'.5px' }}>
+              🔄 Recurrentes ({activeSubs.length})
+            </div>
+            <div style={{ fontSize:11, fontWeight:700, color:'var(--amb,#f5a623)',
+              fontFamily:'var(--mono)' }}>{fmtM(totalSubs, sym)}/mes</div>
+          </div>
+          <div style={{ maxHeight:320, overflowY:'auto' }}>
+            {activeSubs.length === 0 ? (
+              <div style={{ padding:'20px', textAlign:'center', fontSize:12,
+                color:'var(--th)', fontFamily:'var(--mono)' }}>
+                Sin recurrentes activos
+              </div>
+            ) : [...activeSubs]
+              .sort((a,b) => toMonthly(Number(b.amount)||0,b.frequency) - toMonthly(Number(a.amount)||0,a.frequency))
+              .map((sub,i,arr) => {
+                const monthly = toMonthly(Number(sub.amount)||0, sub.frequency)
+                const freq = FREQS.find(f => f.value === sub.frequency)?.label || sub.frequency
+                return (
+                  <div key={sub.id} style={{ display:'flex', alignItems:'center', gap:8,
+                    padding:'8px 14px',
+                    borderBottom: i < arr.length-1 ? '.5px solid var(--brd)' : 'none' }}>
+                    <div style={{ width:6, height:6, borderRadius:'50%', flexShrink:0,
+                      background: CAT_COLORS[sub.category]||'#00b8d9' }}/>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div style={{ fontSize:12, color:'var(--tx)', fontWeight:500,
+                        overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                        {sub.name}
+                      </div>
+                      <div style={{ fontSize:10, color:'var(--th)', fontFamily:'var(--mono)' }}>
+                        {sub.category} · {freq}
+                      </div>
+                    </div>
+                    <div style={{ fontSize:12, fontWeight:600, color:'var(--amb,#f5a623)',
+                      fontFamily:'var(--mono)', flexShrink:0 }}>
+                      {fmtM(monthly, sym)}/mes
+                    </div>
+                  </div>
+                )
+              })}
+          </div>
+        </div>
       </div>
 
-      {/* MoneyFlow */}
-      <div style={{ background:'var(--sur)', border:'.5px solid var(--brd)',
-        borderRadius:'var(--r)', padding:'16px', marginBottom:16 }}>
-        <div style={{ fontSize:11, fontWeight:600, color:'var(--tx)', marginBottom:12,
-          fontFamily:'var(--mono)', textTransform:'uppercase', letterSpacing:'.5px',
-          display:'flex', alignItems:'center', gap:6 }}>
-          <span style={{ width:6, height:6, borderRadius:'50%',
-            background:'var(--accent,#00d4aa)', display:'inline-block' }}/>
-          Flujo de dinero del mes
-        </div>
-        <MoneyFlow
-          incomes={incomes}
-          expenses={expenses.filter(e => e?.date?.startsWith(activeMonth))}
-          subscriptions={subscriptions}
-          debts={debts}
-          sym={sym}
-        />
-      </div>
+
 
       {/* Disclaimer */}
       <div style={{ fontSize:10, color:'var(--th)', fontFamily:'var(--mono)', marginTop:4 }}>
