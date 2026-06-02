@@ -3,7 +3,6 @@
 
 import { useState, useMemo } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
-import MoneyFlow from '../../components/charts/MoneyFlow.jsx'
 import ChartCard from '../../components/charts/ChartCard.jsx'
 import HorizontalBars from '../../components/charts/HorizontalBars.jsx'
 import CategoryDonut from '../../components/charts/CategoryDonut.jsx'
