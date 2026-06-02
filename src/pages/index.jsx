@@ -316,7 +316,7 @@ import DebtProgressList from '../components/charts/DebtProgressList.jsx'
 export function Debts() {
   const { debts, addDebt, delDebt, settings } = useApp()
   const [show, setShow] = useState(false)
-  const [f, setF]       = useState({ creditor: '', initial: '', balance: '', minPayment: '', dueDate: '', rate: '' })
+  const [f, setF]       = useState({ creditor: '', initial: '', balance: '', minPayment: '', dueDate: '', rate: '', totalInstallments: '', paidInstallments: '' })
   const [err, setErr]   = useState('')
   const sym = CURRENCY_SYMBOLS[settings.currency] || '$'
 
@@ -329,8 +329,8 @@ export function Debts() {
     // FIX: validar que saldo no supere inicial (evita progreso negativo)
     if (Number(f.balance) > init) { setErr('El saldo actual no puede superar el monto inicial'); return }
     setErr('')
-    await addDebt({ ...f, initial: init, balance: Number(f.balance), minPayment: Number(f.minPayment) || 0, rate: Number(f.rate) || 0 })
-    setF({ creditor: '', initial: '', balance: '', minPayment: '', dueDate: '', rate: '' })
+    await addDebt({ ...f, initial: init, balance: Number(f.balance), minPayment: Number(f.minPayment) || 0, rate: Number(f.rate) || 0, totalInstallments: Number(f.totalInstallments) || 0, paidInstallments: Number(f.paidInstallments) || 0 })
+    setF({ creditor: '', initial: '', balance: '', minPayment: '', dueDate: '', rate: '', totalInstallments: '', paidInstallments: '' })
     setShow(false)
   }
 
@@ -361,6 +361,10 @@ export function Debts() {
             <FormGroup label="Fecha vencimiento"><input type="date" value={f.dueDate} onChange={e => setF(p => ({ ...p, dueDate: e.target.value }))} /></FormGroup>
             <FormGroup label="Tasa anual % (TAE)"><input type="number" min="0" max="200" value={f.rate} placeholder="0" onChange={e => setF(p => ({ ...p, rate: e.target.value }))} /></FormGroup>
           </FormRow>
+          <FormRow>
+            <FormGroup label="Cuotas totales"><input type="number" min="0" value={f.totalInstallments} placeholder="ej. 36" onChange={e => setF(p => ({ ...p, totalInstallments: e.target.value }))} /></FormGroup>
+            <FormGroup label="Cuotas pagadas"><input type="number" min="0" value={f.paidInstallments} placeholder="ej. 12" onChange={e => setF(p => ({ ...p, paidInstallments: e.target.value }))} /></FormGroup>
+          </FormRow>
           <div style={{ display: 'flex', gap: 8 }}>
             <Btn variant="primary" onClick={submit}>+ Registrar deuda</Btn>
             <Btn variant="ghost" onClick={() => setShow(false)}>Cancelar</Btn>
@@ -373,25 +377,108 @@ export function Debts() {
             </div></Card>}
       {debts.map(d => {
         // FIX: Math.max(0, ...) para evitar progreso negativo
-        const paid = Math.max(0, d.initial - d.balance)
-        const prog = d.initial > 0 ? paid / d.initial : 0
+        const paid        = Math.max(0, d.initial - d.balance)
+        const prog        = d.initial > 0 ? paid / d.initial : 0
+        const totalInst   = Number(d.totalInstallments) || 0
+        const paidInst    = Number(d.paidInstallments)  || 0
+        const pendInst    = totalInst > 0 ? Math.max(0, totalInst - paidInst) : 0
+        const instProg    = totalInst > 0 ? paidInst / totalInst : 0
+        // Simulador: meses restantes y fecha estimada fin
+        const monthsLeft  = d.minPayment > 0 && d.balance > 0
+          ? Math.ceil(d.balance / d.minPayment)
+          : pendInst > 0 ? pendInst : 0
+        const finDate     = monthsLeft > 0
+          ? new Date(Date.now() + monthsLeft * 30 * 24 * 60 * 60 * 1000)
+              .toLocaleDateString('es-CL', { month:'short', year:'numeric' })
+          : null
         return (
           <Card key={d.id}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
-              <div style={{ fontSize: 13, fontWeight: 500 }}>{d.creditor}</div>
-              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            {/* Header */}
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:6 }}>
+              <div style={{ fontSize:13, fontWeight:600, color:'var(--tx)' }}>{d.creditor}</div>
+              <div style={{ display:'flex', gap:6, alignItems:'center' }}>
                 {d.rate > 0 && <Badge color="red">{d.rate}% TAE</Badge>}
-                <button onClick={() => delDebt(d.id)} style={{ background: 'none', border: 'none', color: 'var(--th)', fontSize: 11, cursor: 'pointer' }}>✕</button>
+                <button onClick={() => delDebt(d.id)} style={{ background:'none', border:'none', color:'var(--th)', fontSize:11, cursor:'pointer' }}>✕</button>
               </div>
             </div>
-            <div style={{ fontSize: 11, color: 'var(--tm)', fontFamily: 'var(--mono)', marginBottom: 6 }}>
-              Saldo: {fmtMoney(d.balance, sym)}{d.minPayment ? ` · Pago mín: ${fmtMoney(d.minPayment, sym)}` : ''}{d.dueDate ? ` · Vence: ${d.dueDate.slice(5).replace('-', '/')}` : ''}
+
+            {/* Info básica */}
+            <div style={{ fontSize:11, color:'var(--th)', fontFamily:'var(--mono)', marginBottom:8 }}>
+              Saldo: {fmtMoney(d.balance, sym)}
+              {d.minPayment ? ` · Cuota: ${fmtMoney(d.minPayment, sym)}/mes` : ''}
+              {d.dueDate ? ` · Vence: ${d.dueDate.slice(5).replace('-','/')}` : ''}
             </div>
-            <ProgressBar value={paid} max={d.initial} color="green" height={5} />
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4, fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--th)' }}>
-              <span>Pagado: {fmtMoney(paid, sym)} ({fmtPct(prog)})</span>
-              <span>Inicial: {fmtMoney(d.initial, sym)}</span>
+
+            {/* Progreso por monto */}
+            <div style={{ marginBottom:8 }}>
+              <div style={{ display:'flex', justifyContent:'space-between', fontSize:10,
+                fontFamily:'var(--mono)', color:'var(--th)', marginBottom:3 }}>
+                <span>Progreso por monto</span>
+                <span>{fmtPct(prog)} pagado</span>
+              </div>
+              <ProgressBar value={paid} max={d.initial} color="green" height={5}/>
+              <div style={{ display:'flex', justifyContent:'space-between', marginTop:3,
+                fontSize:10, fontFamily:'var(--mono)', color:'var(--th)' }}>
+                <span>Pagado: {fmtMoney(paid, sym)}</span>
+                <span>Inicial: {fmtMoney(d.initial, sym)}</span>
+              </div>
             </div>
+
+            {/* Progreso por cuotas */}
+            {totalInst > 0 && (
+              <div style={{ marginBottom:8 }}>
+                <div style={{ display:'flex', justifyContent:'space-between', fontSize:10,
+                  fontFamily:'var(--mono)', color:'var(--th)', marginBottom:3 }}>
+                  <span>Cuotas</span>
+                  <span>{paidInst}/{totalInst}</span>
+                </div>
+                <div style={{ height:5, background:'var(--brd)', borderRadius:3, overflow:'hidden' }}>
+                  <div style={{ height:'100%', width:`${Math.min(instProg*100,100)}%`,
+                    background:'var(--accent,#00d4aa)', borderRadius:3, transition:'.3s' }}/>
+                </div>
+                <div style={{ display:'flex', justifyContent:'space-between', marginTop:3,
+                  fontSize:10, fontFamily:'var(--mono)' }}>
+                  <span style={{ color:'var(--accent,#00d4aa)' }}>✅ Pagadas: {paidInst}</span>
+                  <span style={{ color:'var(--amb,#f5a623)' }}>⏳ Pendientes: {pendInst}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Simulador — tiempo restante */}
+            {monthsLeft > 0 && (
+              <div style={{ marginTop:6, padding:'8px 10px', borderRadius:6,
+                background:'rgba(0,212,170,.06)', border:'.5px solid rgba(0,212,170,.2)',
+                display:'flex', gap:16, flexWrap:'wrap' }}>
+                <div>
+                  <div style={{ fontSize:9, color:'var(--th)', fontFamily:'var(--mono)',
+                    textTransform:'uppercase', letterSpacing:'.5px', marginBottom:2 }}>
+                    Meses restantes
+                  </div>
+                  <div style={{ fontSize:14, fontWeight:700, color:'var(--tx)',
+                    fontFamily:'var(--mono)' }}>{monthsLeft}</div>
+                </div>
+                {finDate && (
+                  <div>
+                    <div style={{ fontSize:9, color:'var(--th)', fontFamily:'var(--mono)',
+                      textTransform:'uppercase', letterSpacing:'.5px', marginBottom:2 }}>
+                      Fin estimado
+                    </div>
+                    <div style={{ fontSize:14, fontWeight:700, color:'var(--accent,#00d4aa)',
+                      fontFamily:'var(--mono)' }}>📅 {finDate}</div>
+                  </div>
+                )}
+                {d.minPayment > 0 && (
+                  <div>
+                    <div style={{ fontSize:9, color:'var(--th)', fontFamily:'var(--mono)',
+                      textTransform:'uppercase', letterSpacing:'.5px', marginBottom:2 }}>
+                      Total restante a pagar
+                    </div>
+                    <div style={{ fontSize:14, fontWeight:700, color:'var(--red)',
+                      fontFamily:'var(--mono)' }}>{fmtMoney(d.balance, sym)}</div>
+                  </div>
+                )}
+              </div>
+            )}
           </Card>
         )
       })}
