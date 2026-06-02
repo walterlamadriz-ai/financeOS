@@ -12,7 +12,7 @@ import License from './pages/legal/License.jsx'
 import Disclaimer from './pages/legal/Disclaimer.jsx'
 import { Income, Expenses, Budgets, Debts, Goals, Reports, Settings } from './pages/index.jsx'
 import DemoShell from './demo/DemoShell.jsx'
-import Advisor from './pages/Advisor/index.jsx'
+const Advisor = lazy(() => import('./pages/Advisor/index.jsx'))
 import Subscriptions from './pages/Subscriptions/index.jsx'
 import Coach from './pages/Coach/index.jsx'
 import ImportCSV from './pages/Import/index.jsx'
