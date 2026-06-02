@@ -1,5 +1,5 @@
 // src/App.jsx
-import { useState, lazy, Suspense } from 'react'
+import { useState } from 'react'
 import { AppProvider, useApp } from './context/AppContext.jsx'
 import Shell from './components/layout/Shell.jsx'
 import Toast from './components/ui/Toast.jsx'
@@ -12,7 +12,7 @@ import License from './pages/legal/License.jsx'
 import Disclaimer from './pages/legal/Disclaimer.jsx'
 import { Income, Expenses, Budgets, Debts, Goals, Reports, Settings } from './pages/index.jsx'
 import DemoShell from './demo/DemoShell.jsx'
-const Advisor = lazy(() => import('./pages/Advisor/index.jsx'))
+import Advisor from './pages/Advisor/index.jsx'
 import Subscriptions from './pages/Subscriptions/index.jsx'
 import Coach from './pages/Coach/index.jsx'
 import ImportCSV from './pages/Import/index.jsx'
@@ -30,7 +30,7 @@ function isDemoMode() {
 
 function renderPage(page) {
   switch (page) {
-    case 'dashboard':  return <Dashboard setPage={setPage}/>
+    case 'dashboard':  return <Dashboard />
     case 'income':     return <Income />
     case 'expenses':   return <Expenses />
     case 'budgets':    return <Budgets />
@@ -48,7 +48,7 @@ function renderPage(page) {
     case 'coach':         return <Coach />
     case 'movements': return <Movements setPage={setPage}/>
     case 'import':        return <ImportCSV />
-    default:           return <Dashboard setPage={setPage}/>
+    default:           return <Dashboard />
   }
 }
 
@@ -82,4 +82,3 @@ export default function App() {
     </AppProvider>
   )
 }
-// cache bust Mon Jun  1 23:47:33 -04 2026
