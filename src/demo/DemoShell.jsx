@@ -2,7 +2,7 @@
 // Shell para modo demo — envuelve la app con DemoProvider
 // Bridge: hace que useApp() en todos los módulos use los datos demo (sin IndexedDB)
 
-import { useState, useContext } from 'react'
+import { useState, useContext, lazy, Suspense } from 'react'
 import { DemoProvider, useDemo, DemoContext } from './DemoContext.jsx'
 import DemoBanner from './DemoBanner.jsx'
 import Shell from '../components/layout/Shell.jsx'
@@ -14,36 +14,13 @@ import Privacy from '../pages/legal/Privacy.jsx'
 import Terms from '../pages/legal/Terms.jsx'
 import License from '../pages/legal/License.jsx'
 import Disclaimer from '../pages/legal/Disclaimer.jsx'
-import Advisor from '../pages/Advisor/index.jsx'
 import Subscriptions from '../pages/Subscriptions/index.jsx'
 import Coach from '../pages/Coach/index.jsx'
 import ImportCSV from '../pages/Import/index.jsx'
 import Movements from '../pages/Movements/index.jsx'
 import { AppContext } from '../context/AppContext.jsx'
 
-function renderPage(page) {
-  switch (page) {
-    case 'dashboard':  return <Dashboard />
-    case 'income':     return <Income />
-    case 'expenses':   return <Expenses />
-    case 'budgets':    return <Budgets />
-    case 'debts':      return <Debts />
-    case 'goals':      return <Goals />
-    case 'cashflow':   return <CashFlow />
-    case 'reports':    return <Reports />
-    case 'settings':   return <Settings />
-    case 'privacy':    return <Privacy />
-    case 'terms':      return <Terms />
-    case 'license':    return <License />
-    case 'disclaimer': return <Disclaimer />
-    case 'advisor':       return <Advisor />
-    case 'subscriptions': return <Subscriptions />
-    case 'coach':         return <Coach />
-    case 'movements': return <Movements setPage={p => setPage(p)}/>
-      case 'import':        return <ImportCSV />
-    default:              return <Dashboard />
-  }
-}
+const Advisor = lazy(() => import('../pages/Advisor/index.jsx'))
 
 // Bridge: inyecta el valor de DemoContext en AppContext
 // → todos los módulos que llaman useApp() reciben los datos demo
@@ -58,6 +35,31 @@ function DemoBridge({ children }) {
 
 function DemoInner() {
   const [page, setPage] = useState('dashboard')
+
+  function renderPage(page) {
+    switch (page) {
+      case 'dashboard':     return <Dashboard setPage={setPage}/>
+      case 'income':        return <Income />
+      case 'expenses':      return <Expenses />
+      case 'budgets':       return <Budgets />
+      case 'debts':         return <Debts />
+      case 'goals':         return <Goals />
+      case 'cashflow':      return <CashFlow />
+      case 'reports':       return <Reports />
+      case 'settings':      return <Settings />
+      case 'privacy':       return <Privacy />
+      case 'terms':         return <Terms />
+      case 'license':       return <License />
+      case 'disclaimer':    return <Disclaimer />
+      case 'advisor':       return <Suspense fallback={<div style={{padding:24,color:'var(--th)',fontFamily:'var(--mono)',fontSize:12}}>Cargando...</div>}><Advisor /></Suspense>
+      case 'subscriptions': return <Subscriptions />
+      case 'coach':         return <Coach />
+      case 'movements':     return <Movements setPage={setPage}/>
+      case 'import':        return <ImportCSV />
+      default:              return <Dashboard setPage={setPage}/>
+    }
+  }
+
   return (
     <>
       <DemoBanner />
