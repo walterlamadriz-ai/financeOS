@@ -28,33 +28,33 @@ function isDemoMode() {
   }
 }
 
-function renderPage(page) {
-  switch (page) {
-    case 'dashboard':  return <Dashboard />
-    case 'income':     return <Income />
-    case 'expenses':   return <Expenses />
-    case 'budgets':    return <Budgets />
-    case 'debts':      return <Debts />
-    case 'goals':      return <Goals />
-    case 'cashflow':   return <CashFlow />
-    case 'reports':    return <Reports />
-    case 'settings':   return <Settings />
-    case 'privacy':    return <Privacy />
-    case 'terms':      return <Terms />
-    case 'license':    return <License />
-    case 'disclaimer': return <Disclaimer />
-    case 'advisor':    return <Advisor />
-    case 'subscriptions': return <Subscriptions />
-    case 'coach':         return <Coach />
-    case 'movements': return <Movements setPage={setPage}/>
-    case 'import':        return <ImportCSV />
-    default:           return <Dashboard />
-  }
-}
-
 function Inner() {
   const [page, setPage] = useState('dashboard')
   const { settings, loading } = useApp()
+
+  function renderPage(page) {
+    switch (page) {
+      case 'dashboard':  return <Dashboard setPage={setPage}/>
+      case 'income':     return <Income />
+      case 'expenses':   return <Expenses />
+      case 'budgets':    return <Budgets />
+      case 'debts':      return <Debts />
+      case 'goals':      return <Goals />
+      case 'cashflow':   return <CashFlow />
+      case 'reports':    return <Reports />
+      case 'settings':   return <Settings />
+      case 'privacy':    return <Privacy />
+      case 'terms':      return <Terms />
+      case 'license':    return <License />
+      case 'disclaimer': return <Disclaimer />
+      case 'advisor':    return <Advisor />
+      case 'subscriptions': return <Subscriptions />
+      case 'coach':         return <Coach />
+      case 'movements': return <Movements setPage={setPage}/>
+      case 'import':        return <ImportCSV />
+      default:           return <Dashboard setPage={setPage}/>
+    }
+  }
 
   const showOnboarding = !loading && !settings.onboardingDone
 
