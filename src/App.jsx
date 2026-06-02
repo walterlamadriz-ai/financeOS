@@ -1,5 +1,5 @@
 // src/App.jsx
-import { useState } from 'react'
+import { useState, lazy, Suspense } from 'react'
 import { AppProvider, useApp } from './context/AppContext.jsx'
 import Shell from './components/layout/Shell.jsx'
 import Toast from './components/ui/Toast.jsx'
@@ -12,7 +12,7 @@ import License from './pages/legal/License.jsx'
 import Disclaimer from './pages/legal/Disclaimer.jsx'
 import { Income, Expenses, Budgets, Debts, Goals, Reports, Settings } from './pages/index.jsx'
 import DemoShell from './demo/DemoShell.jsx'
-import Advisor from './pages/Advisor/index.jsx'
+const Advisor = lazy(() => import('./pages/Advisor/index.jsx'))
 import Subscriptions from './pages/Subscriptions/index.jsx'
 import Coach from './pages/Coach/index.jsx'
 import ImportCSV from './pages/Import/index.jsx'
@@ -47,7 +47,7 @@ function Inner() {
       case 'terms':      return <Terms />
       case 'license':    return <License />
       case 'disclaimer': return <Disclaimer />
-      case 'advisor':    return <Advisor />
+      case 'advisor':    return <Suspense fallback={<div style={{padding:24,color:'var(--th)',fontFamily:'var(--mono)',fontSize:12}}>Cargando...</div>}><Advisor /></Suspense>
       case 'subscriptions': return <Subscriptions />
       case 'coach':         return <Coach />
       case 'movements': return <Movements setPage={setPage}/>
