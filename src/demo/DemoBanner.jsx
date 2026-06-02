@@ -38,7 +38,7 @@ export default function DemoBanner({ onExitDemo }) {
 
         {/* Mensaje principal — truncado en mobile */}
         <span style={{ fontSize: 11, color: 'rgba(255,255,255,.85)', flex: 1, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          Datos ficticios · nada se guarda
+          Demo · Datos ficticios · ¿Te gustó? Obtené tu versión completa desde US$29.99
         </span>
 
         {/* Botones */}
@@ -60,20 +60,21 @@ export default function DemoBanner({ onExitDemo }) {
             {expanded ? 'Ocultar' : 'Info'}
           </button>
           <button
-            onClick={() => window.open('https://financeospro.com/#pricing', '_blank')}
+            onClick={() => window.open('https://www.financeospro.com/#pricing', '_blank')}
             style={{
               background: '#fff',
               border: 'none',
               color: '#0a5c3e',
               borderRadius: 6,
-              padding: '4px 10px',
-              fontSize: 10,
+              padding: '5px 14px',
+              fontSize: 11,
               fontWeight: 700,
               cursor: 'pointer',
               whiteSpace: 'nowrap',
+              boxShadow: '0 2px 8px rgba(0,0,0,.2)',
             }}
           >
-            Obtener →
+            🛒 Obtener desde US$29.99
           </button>
         </div>
       </div>
@@ -102,6 +103,13 @@ export default function DemoBanner({ onExitDemo }) {
           <div>
             <div style={{ fontWeight: 600, color: '#fff', marginBottom: 4 }}>🚀 Para usar con clientes</div>
             <div>Con la licencia Pro podés personalizar esta app con tu marca y entregársela a tus clientes en 30 minutos.</div>
+            <button
+              onClick={() => window.open('https://www.financeospro.com/#pricing', '_blank')}
+              style={{ marginTop: 10, background: '#fff', border: 'none', color: '#0a5c3e',
+                borderRadius: 6, padding: '6px 14px', fontSize: 11, fontWeight: 700,
+                cursor: 'pointer', width: '100%' }}>
+              Ver planes y precios →
+            </button>
           </div>
         </div>
       )}
