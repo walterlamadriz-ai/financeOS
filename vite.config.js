@@ -4,7 +4,19 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
   base: '/app/',
-  build: { outDir: 'dist/app' },
+  build: {
+    outDir: 'dist/app',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor:  ['react', 'react-dom'],
+          charts:  ['recharts'],
+          pdf:     ['@react-pdf/renderer'],
+          idb:     ['idb'],
+        }
+      }
+    }
+  },
   plugins: [
     react(),
     VitePWA({
@@ -21,7 +33,8 @@ export default defineConfig({
       },
       workbox: {
         navigateFallback: '/app/index.html',
-        navigateFallbackDenylist: [/^\/api/, /^\/(?!app)/]
+        navigateFallbackDenylist: [/^\/api/, /^\/(?!app)/],
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
       }
     })
   ]
