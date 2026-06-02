@@ -11,7 +11,7 @@ import {
   Tooltip, ResponsiveContainer, ReferenceLine, Legend,
 } from 'recharts'
 
-const CURRENCY_SYMBOLS = { CLP: '$', USD: 'US$', EUR: '€', VES: 'Bs.' }
+const CURRENCY_SYMBOLS = { CLP: '$', USD: 'US$', EUR: '€', VES: 'Bs.', MXN: '$', ARS: '$', COP: '$' }
 
 const ChartTooltip = ({ active, payload, label, sym }) => {
   if (!active || !payload?.length) return null
