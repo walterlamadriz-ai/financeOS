@@ -425,6 +425,27 @@ export default function Movements({ setPage }) {
             </div>
           </div>
 
+          {/* Banner impacto anual */}
+          {activeSubs.length > 0 && (
+            <div style={{ margin:'12px 14px', background: totalSubs > totalInc * 0.2
+              ? 'rgba(255,77,106,.08)' : 'rgba(245,166,35,.08)',
+              border: `.5px solid ${totalSubs > totalInc * 0.2 ? 'var(--red)' : 'var(--amb,#f5a623)'}`,
+              borderRadius:8, padding:'10px 14px' }}>
+              <div style={{ fontSize:11, fontWeight:600,
+                color: totalSubs > totalInc * 0.2 ? 'var(--red)' : 'var(--amb,#f5a623)',
+                fontFamily:'var(--mono)', marginBottom:3 }}>
+                {totalSubs > totalInc * 0.2
+                  ? '⚠️ Tus suscripciones superan el 20% de tus ingresos'
+                  : '💡 Impacto anual de tus servicios recurrentes'}
+              </div>
+              <div style={{ fontSize:13, color:'var(--tx)', fontFamily:'var(--mono)' }}>
+                Pagás <strong>{fmtM(totalSubs, sym)}/mes</strong> → <strong style={{color:'var(--red)'}}>
+                {fmtM(activeSubs.reduce((s,sub) => s + toAnnual(Number(sub.amount)||0, sub.frequency), 0), sym)} al año
+                </strong> en {activeSubs.length} servicio{activeSubs.length !== 1 ? 's' : ''}
+              </div>
+            </div>
+          )}
+
           {activeSubs.length === 0 ? (
             <div style={{ padding:'32px', textAlign:'center' }}>
               <div style={{ fontSize:13, color:'var(--th)', fontFamily:'var(--mono)',
@@ -436,31 +457,46 @@ export default function Movements({ setPage }) {
               </button>
             </div>
           ) : (
-            activeSubs.map((sub, i) => {
-              const monthly = toMonthly(Number(sub.amount)||0, sub.frequency)
-              const annual  = toAnnual(Number(sub.amount)||0, sub.frequency)
-              const freq    = FREQS.find(f => f.value === sub.frequency)?.label || sub.frequency
-              return (
-                <div key={sub.id} style={{
-                  display:'flex', alignItems:'center', gap:12, padding:'10px 14px',
-                  borderBottom: i < activeSubs.length-1 ? '.5px solid var(--brd)' : 'none' }}>
-                  <div style={{ width:8, height:8, borderRadius:'50%', flexShrink:0,
-                    background: CAT_COLORS[sub.category] || '#00b8d9' }}/>
-                  <div style={{ flex:1, minWidth:0 }}>
-                    <div style={{ fontSize:13, color:'var(--tx)', fontWeight:500 }}>
-                      {sub.name}
+            [...activeSubs]
+              .sort((a,b) => toMonthly(Number(b.amount)||0, b.frequency) - toMonthly(Number(a.amount)||0, a.frequency))
+              .map((sub, i, arr) => {
+                const monthly = toMonthly(Number(sub.amount)||0, sub.frequency)
+                const annual  = toAnnual(Number(sub.amount)||0, sub.frequency)
+                const freq    = FREQS.find(f => f.value === sub.frequency)?.label || sub.frequency
+                const pct     = totalSubs > 0 ? (monthly / totalSubs * 100).toFixed(0) : 0
+                return (
+                  <div key={sub.id} style={{
+                    display:'flex', alignItems:'center', gap:12, padding:'10px 14px',
+                    borderBottom: i < arr.length-1 ? '.5px solid var(--brd)' : 'none' }}>
+                    <div style={{ width:8, height:8, borderRadius:'50%', flexShrink:0,
+                      background: CAT_COLORS[sub.category] || '#00b8d9' }}/>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div style={{ fontSize:13, color:'var(--tx)', fontWeight:500,
+                        display:'flex', alignItems:'center', gap:6 }}>
+                        {sub.name}
+                        <span style={{ fontSize:9, padding:'1px 5px', borderRadius:4,
+                          background:'rgba(0,184,217,.12)', color:'var(--accent2,#00b8d9)',
+                          fontFamily:'var(--mono)', flexShrink:0 }}>{freq}</span>
+                      </div>
+                      <div style={{ fontSize:10, color:'var(--th)', fontFamily:'var(--mono)',
+                        marginTop:2 }}>
+                        {sub.category} · anual: {fmtM(annual, sym)} · {pct}% del total
+                      </div>
+                      {/* Barra de proporción */}
+                      <div style={{ marginTop:4, height:3, background:'var(--brd)',
+                        borderRadius:2, overflow:'hidden', width:'100%' }}>
+                        <div style={{ height:'100%', width:`${pct}%`,
+                          background: CAT_COLORS[sub.category] || '#00b8d9',
+                          borderRadius:2 }}/>
+                      </div>
                     </div>
-                    <div style={{ fontSize:10, color:'var(--th)', fontFamily:'var(--mono)' }}>
-                      {sub.category} · {freq} · anual: {fmtM(annual, sym)}
+                    <div style={{ fontFamily:'var(--mono)', fontSize:13, fontWeight:600,
+                      color:'var(--amb,#f5a623)', flexShrink:0, textAlign:'right' }}>
+                      <div>{fmtM(monthly, sym)}/mes</div>
                     </div>
                   </div>
-                  <div style={{ fontFamily:'var(--mono)', fontSize:13, fontWeight:600,
-                    color:'var(--amb,#f5a623)', flexShrink:0 }}>
-                    {fmtM(monthly, sym)}/mes
-                  </div>
-                </div>
-              )
-            })
+                )
+              })
           )}
         </div>
       )}
