@@ -131,7 +131,6 @@ export default function Coach() {
         </h1>
         <p style={{ fontSize: 12, color: 'var(--th)', fontFamily: 'var(--mono)', marginBottom: 4 }}>
           Señales orientativas basadas en tus datos · {metrics.activeMonth}
-          <span style={{display:'block',fontSize:10,color:'var(--th)',marginTop:3,fontFamily:'var(--mono)'}}>⚠️ Indicadores orientativos. No constituyen asesoría financiera, tributaria ni legal.</span>
         </p>
         <p style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', background: 'var(--sur2)', padding: '5px 9px', borderRadius: 6, display: 'inline-block' }}>
           Generado localmente · sin IA externa · sin envío de datos
