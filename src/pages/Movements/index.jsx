@@ -1,5 +1,5 @@
 // src/pages/Movements/index.jsx — v1.2
-// Hub "Salidas del mes" — vista unificada Gastos + Recurrentes
+// Hub "Egresos del mes" — vista unificada Gastos + Recurrentes
 
 import { useState, useMemo } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
@@ -217,8 +217,8 @@ export default function Movements({ setPage }) {
     debts.reduce((s,d) => s + (Number(d.minPayment)||0), 0)
   , [debts])
 
-  const totalSalidas = totalExp + totalSubs
-  const balance      = totalInc - totalSalidas - totalDebt
+  const totalEgresos = totalExp + totalSubs
+  const balance      = totalInc - totalEgresos - totalDebt
 
   // Lista unificada cronológica — gastos del mes + recurrentes con badge
   const unifiedList = useMemo(() => {
@@ -299,7 +299,7 @@ export default function Movements({ setPage }) {
         <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--grn)',
           textTransform:'uppercase', letterSpacing:'1.2px', marginBottom:4 }}>Movimientos</div>
         <h1 style={{ fontSize:20, fontWeight:700, color:'var(--tx)', marginBottom:2 }}>
-          Salidas del mes
+          Egresos del mes
         </h1>
         <p style={{ fontSize:12, color:'var(--th)', fontFamily:'var(--mono)' }}>
           // {activeMonth} · gastos únicos + pagos recurrentes
@@ -313,7 +313,7 @@ export default function Movements({ setPage }) {
           { label:'Ingresos',      value:fmtM(totalInc, sym),      color:'var(--accent,#00d4aa)' },
           { label:'Gastos únicos', value:fmtM(totalExp, sym),      color:'var(--red)' },
           { label:'Recurrentes',   value:fmtM(totalSubs, sym),     color:'var(--amb,#f5a623)' },
-          { label:'Total salidas', value:fmtM(totalSalidas, sym),  color:'var(--red)' },
+          { label:'Total egresos', value:fmtM(totalEgresos, sym),  color:'var(--red)' },
           { label:'Disponible',    value:fmtM(balance, sym),       color: balance >= 0 ? 'var(--accent,#00d4aa)' : 'var(--red)' },
         ].map((k,i) => (
           <div key={i} style={kpiBox}>
@@ -403,7 +403,7 @@ export default function Movements({ setPage }) {
       {/* Gráficos unificados */}
       {(monthExp.length > 0 || activeSubs.length > 0) && (
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16, marginBottom:16 }}>
-          <ChartCard title="Top salidas del mes" minHeight={180}>
+          <ChartCard title="Top egresos del mes" minHeight={180}>
             <HorizontalBars records={topBarRecords} sym={sym} maxItems={8}/>
           </ChartCard>
           <ChartCard title="Distribución por categoría" minHeight={180}>

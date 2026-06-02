@@ -9,7 +9,7 @@ const NAV = [
   { sec: 'Principal',    items: [{ id: 'dashboard', ic: '◈', lb: 'Dashboard' }] },
   { sec: 'Movimientos',  items: [
     { id: 'income',    ic: '↑', lb: 'Ingresos' },
-    { id: 'movements', ic: '↓', lb: 'Salidas' },
+    { id: 'movements', ic: '↓', lb: 'Egresos' },
     { id: 'import',    ic: '↑', lb: 'Importar' },
   ] },
   { sec: 'Planificación', items: [
