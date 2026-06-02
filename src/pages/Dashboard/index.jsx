@@ -13,10 +13,10 @@ const pct  = (n) => ((Number(n) || 0) * 100).toFixed(1) + '%'
 const pct0 = (n) => ((Number(n) || 0) * 100).toFixed(0) + '%'
 
 export default function Dashboard({ setPage }) {
-  const showTour = !incomes?.length && !expenses?.length
   const ctx      = useApp() || {}
   const incomes  = Array.isArray(ctx.incomes)       ? ctx.incomes       : []
   const expenses = Array.isArray(ctx.expenses)      ? ctx.expenses      : []
+  const showTour = !incomes.length && !expenses.length
   const budgets  = Array.isArray(ctx.budgets)       ? ctx.budgets       : []
   const goals    = Array.isArray(ctx.goals)         ? ctx.goals         : []
   const settings = (ctx.settings && typeof ctx.settings === 'object') ? ctx.settings : {}
