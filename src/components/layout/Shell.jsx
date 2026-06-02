@@ -8,9 +8,10 @@ import { BackupStatusBadge } from '../backup/BackupManager.jsx'
 const NAV = [
   { sec: 'Principal',    items: [{ id: 'dashboard', ic: '◈', lb: 'Dashboard' }] },
   { sec: 'Movimientos',  items: [
-    { id: 'income',    ic: '↑', lb: 'Ingresos' },
-    { id: 'movements', ic: '↓', lb: 'Salidas' },
-    { id: 'import',    ic: '↑', lb: 'Importar' },
+    { id: 'income',        ic: '↑', lb: 'Ingresos' },
+    { id: 'expenses',      ic: '↓', lb: 'Gastos' },
+    { id: 'subscriptions', ic: '↻', lb: 'Suscripciones' },
+    { id: 'import',        ic: '↑', lb: 'Importar movimientos' },
   ] },
   { sec: 'Planificación', items: [
     { id: 'budgets', ic: '▤', lb: 'Presupuestos' },
