@@ -407,7 +407,7 @@ export default function Movements({ setPage }) {
             <HorizontalBars records={topBarRecords} sym={sym} maxItems={8}/>
           </ChartCard>
           <ChartCard title="Distribución por categoría" minHeight={180}>
-            <CategoryDonut data={chartRecords} sym={sym}/>
+            <CategoryDonut records={chartRecords} sym={sym}/>
           </ChartCard>
         </div>
       )}
