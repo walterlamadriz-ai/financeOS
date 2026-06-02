@@ -357,14 +357,27 @@ export function Debts() {
             <FormGroup label="Monto inicial"><input type="number" min="0" value={f.initial} placeholder="Si no sabes, igual al saldo" onChange={e => setF(p => ({ ...p, initial: e.target.value }))} /></FormGroup>
             <FormGroup label="Pago mínimo"><input type="number" min="0" value={f.minPayment} placeholder="0" onChange={e => setF(p => ({ ...p, minPayment: e.target.value }))} /></FormGroup>
           </FormRow>
-          <FormRow>
-            <FormGroup label="Fecha vencimiento"><input type="date" value={f.dueDate} onChange={e => setF(p => ({ ...p, dueDate: e.target.value }))} /></FormGroup>
-            <FormGroup label="Tasa anual % (TAE)"><input type="number" min="0" max="200" value={f.rate} placeholder="0" onChange={e => setF(p => ({ ...p, rate: e.target.value }))} /></FormGroup>
-          </FormRow>
-          <FormRow>
-            <FormGroup label="Cuotas totales"><input type="number" min="0" value={f.totalInstallments} placeholder="ej. 36" onChange={e => setF(p => ({ ...p, totalInstallments: e.target.value }))} /></FormGroup>
-            <FormGroup label="Cuotas pagadas"><input type="number" min="0" value={f.paidInstallments} placeholder="ej. 12" onChange={e => setF(p => ({ ...p, paidInstallments: e.target.value }))} /></FormGroup>
-          </FormRow>
+          <div style={{ marginTop: 8, marginBottom: 8 }}>
+            <button
+              type="button"
+              onClick={() => setF(p => ({ ...p, _showExtra: !p._showExtra }))}
+              style={{ background: 'none', border: 'none', color: 'var(--grn)', fontSize: 12, fontFamily: 'var(--mono)', cursor: 'pointer', padding: 0 }}
+            >
+              {f._showExtra ? '▲ Menos opciones' : '▼ Más opciones (tasa, cuotas, vencimiento)'}
+            </button>
+          </div>
+          {f._showExtra && (
+            <>
+              <FormRow>
+                <FormGroup label="Fecha vencimiento"><input type="date" value={f.dueDate} onChange={e => setF(p => ({ ...p, dueDate: e.target.value }))} /></FormGroup>
+                <FormGroup label="Tasa anual % (TAE)"><input type="number" min="0" max="200" value={f.rate} placeholder="0" onChange={e => setF(p => ({ ...p, rate: e.target.value }))} /></FormGroup>
+              </FormRow>
+              <FormRow>
+                <FormGroup label="Cuotas totales"><input type="number" min="0" value={f.totalInstallments} placeholder="ej. 36" onChange={e => setF(p => ({ ...p, totalInstallments: e.target.value }))} /></FormGroup>
+                <FormGroup label="Cuotas pagadas"><input type="number" min="0" value={f.paidInstallments} placeholder="ej. 12" onChange={e => setF(p => ({ ...p, paidInstallments: e.target.value }))} /></FormGroup>
+              </FormRow>
+            </>
+          )}
           <div style={{ display: 'flex', gap: 8 }}>
             <Btn variant="primary" onClick={submit}>+ Registrar deuda</Btn>
             <Btn variant="ghost" onClick={() => setShow(false)}>Cancelar</Btn>
