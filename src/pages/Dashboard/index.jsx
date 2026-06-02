@@ -16,7 +16,6 @@ export default function Dashboard({ setPage }) {
   const ctx      = useApp() || {}
   const incomes  = Array.isArray(ctx.incomes)       ? ctx.incomes       : []
   const expenses = Array.isArray(ctx.expenses)      ? ctx.expenses      : []
-  const showTour = !incomes.length && !expenses.length
   const budgets  = Array.isArray(ctx.budgets)       ? ctx.budgets       : []
   const goals    = Array.isArray(ctx.goals)         ? ctx.goals         : []
   const settings = (ctx.settings && typeof ctx.settings === 'object') ? ctx.settings : {}
@@ -158,7 +157,6 @@ export default function Dashboard({ setPage }) {
 
 
 
-      {showTour && <TourOnboarding/>}
       {/* Empieza aquí */}
       {setPage && kpis.incCount === 0 && kpis.expCount === 0 && (
         <div style={{ background:'rgba(0,212,170,.06)', border:'.5px solid rgba(0,212,170,.25)', borderRadius:'var(--r)', padding:'18px 20px', marginBottom:20 }}>
