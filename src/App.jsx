@@ -30,7 +30,7 @@ function isDemoMode() {
 
 function renderPage(page) {
   switch (page) {
-    case 'dashboard':  return <Dashboard />
+    case 'dashboard':  return <Dashboard setPage={setPage}/>
     case 'income':     return <Income />
     case 'expenses':   return <Expenses />
     case 'budgets':    return <Budgets />
@@ -48,7 +48,7 @@ function renderPage(page) {
     case 'coach':         return <Coach />
     case 'movements': return <Movements setPage={setPage}/>
     case 'import':        return <ImportCSV />
-    default:           return <Dashboard />
+    default:           return <Dashboard setPage={setPage}/>
   }
 }
 
