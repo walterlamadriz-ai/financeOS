@@ -232,6 +232,7 @@ export default function Onboarding({ onComplete }) {
     { code: 'AR', flag: '🇦🇷', label: 'Argentina', currency: 'ARS' },
     { code: 'CO', flag: '🇨🇴', label: 'Colombia',  currency: 'COP' },
     { code: 'PE', flag: '🇵🇪', label: 'Perú',      currency: 'CLP' },
+    { code: 'VE', flag: '🇻🇪', label: 'Venezuela', currency: 'VES' },
     { code: 'OTHER', flag: '🌎', label: 'Otro',     currency: 'CLP' },
   ]
   if (step === 3) return (
