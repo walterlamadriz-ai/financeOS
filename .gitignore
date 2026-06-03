@@ -4,3 +4,4 @@ dist
 *.local
 .env
 .env.local
+FNOS_LICENSE_KEYS.txt
