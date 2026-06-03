@@ -108,11 +108,12 @@ const btnG = {
 
 export default function Onboarding({ onComplete }) {
   const { settings, updateSettings } = useApp()
-  const TOTAL = 6
+  const TOTAL = 7
   const [step, setStep] = useState(0)
   const [loading, setLoading] = useState(false)
   const [answers, setAnswers] = useState({
     useType: '', profileId: '',
+    country: settings.country || 'CL',
     currency: settings.currency || 'CLP',
     savingGoal: 20, hasDebts: '', mainGoal: '', experience: '',
   })
@@ -151,6 +152,7 @@ export default function Onboarding({ onComplete }) {
     await updateSettings({
       ...settings,
       currency: answers.currency, savingGoalPct: answers.savingGoal,
+      country: answers.country,
       onboardingDone: true, onboardingUseType: answers.useType,
       onboardingExperience: answers.experience, onboardingMainGoal: answers.mainGoal,
       activeMonth: new Date().toISOString().slice(0, 7),
@@ -222,10 +224,53 @@ export default function Onboarding({ onComplete }) {
     </div></div>
   )
 
-  // Step 3 — Configuración básica
+
+  // Step 3 — País (NUEVO v1.3)
+  const COUNTRIES = [
+    { code: 'CL', flag: '🇨🇱', label: 'Chile',     currency: 'CLP' },
+    { code: 'MX', flag: '🇲🇽', label: 'México',    currency: 'MXN' },
+    { code: 'AR', flag: '🇦🇷', label: 'Argentina', currency: 'ARS' },
+    { code: 'CO', flag: '🇨🇴', label: 'Colombia',  currency: 'COP' },
+    { code: 'PE', flag: '🇵🇪', label: 'Perú',      currency: 'CLP' },
+    { code: 'OTHER', flag: '🌎', label: 'Otro',     currency: 'CLP' },
+  ]
   if (step === 3) return (
     <div style={wrap}><div style={box}>
       <ProgressBar step={3} total={TOTAL} />
+      <h2 style={h1s}>¿De qué país sos?</h2>
+      <p style={subs}>Activa funciones regionales — podés cambiarlo en Ajustes.</p>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 7, marginBottom: 14 }}>
+        {COUNTRIES.map(c => (
+          <button key={c.code} onClick={() => {
+            set('country', c.code)
+            set('currency', c.currency)
+          }} style={{
+            padding: '10px 8px', borderRadius: 10, cursor: 'pointer',
+            border: answers.country === c.code ? '1.5px solid var(--grn)' : '0.5px solid var(--brd2)',
+            background: answers.country === c.code ? 'var(--grn-bg)' : 'var(--sur2)',
+            textAlign: 'center', transition: 'all .15s',
+          }}>
+            <div style={{ fontSize: 22, marginBottom: 4 }}>{c.flag}</div>
+            <div style={{ fontSize: 11, fontWeight: answers.country === c.code ? 600 : 400, color: answers.country === c.code ? 'var(--grn)' : 'var(--tx)' }}>{c.label}</div>
+          </button>
+        ))}
+      </div>
+      {answers.country === 'CL' && (
+        <div style={{ padding: '8px 10px', background: 'var(--grn-bg)', borderRadius: 8, border: '0.5px solid rgba(26,163,104,.2)', fontSize: 10, color: 'var(--grn)', fontFamily: 'var(--mono)', marginBottom: 10 }}>
+          🇨🇱 Chile: activa el simulador APV / Jubilación en Metas.
+        </div>
+      )}
+      <div style={{ display: 'flex', gap: 7, marginTop: 4 }}>
+        <button style={{ ...btnG, width: 'auto', padding: '8px 14px', marginTop: 0 }} onClick={back}>← Atrás</button>
+        <button style={{ ...btnP(false), flex: 1, marginTop: 0 }} onClick={next}>Continuar →</button>
+      </div>
+    </div></div>
+  )
+
+  // Step 4 — Configuración básica
+  if (step === 4) return (
+    <div style={wrap}><div style={box}>
+      <ProgressBar step={4} total={TOTAL} />
       <h2 style={h1s}>Configuración básica</h2>
       <p style={subs}>Ajustá la moneda y tu meta de ahorro inicial.</p>
       <div style={{ marginBottom: 14 }}>
@@ -274,10 +319,10 @@ export default function Onboarding({ onComplete }) {
     </div></div>
   )
 
-  // Step 4 — Objetivo y experiencia
-  if (step === 4) return (
+  // Step 5 — Objetivo y experiencia
+  if (step === 5) return (
     <div style={wrap}><div style={box}>
-      <ProgressBar step={4} total={TOTAL} />
+      <ProgressBar step={5} total={TOTAL} />
       <h2 style={h1s}>Objetivo y experiencia</h2>
       <p style={subs}>Orientativo — podés cambiarlo en cualquier momento.</p>
       {MAIN_GOALS.map(g => <OptionCard key={g.id} {...g} selected={answers.mainGoal === g.id} onClick={() => set('mainGoal', g.id)} />)}
@@ -301,10 +346,10 @@ export default function Onboarding({ onComplete }) {
     </div></div>
   )
 
-  // Step 5 — Plantilla recomendada
-  if (step === 5) return (
+  // Step 6 — Plantilla recomendada
+  if (step === 6) return (
     <div style={wrap}><div style={box}>
-      <ProgressBar step={5} total={TOTAL} />
+      <ProgressBar step={6} total={TOTAL} />
       <h2 style={h1s}>Plantilla recomendada</h2>
       <p style={subs}>Basado en tus respuestas, esta configuración se adapta mejor.</p>
       <div style={{ padding: '13px', borderRadius: 10, border: `1.5px solid ${activeTemplate.color}`, background: `${activeTemplate.color}08`, marginBottom: 13 }}>
@@ -341,7 +386,7 @@ export default function Onboarding({ onComplete }) {
     </div></div>
   )
 
-  // Step 6 — Resumen y finalizar
+  // Step 7 — Resumen y finalizar
   return (
     <div style={wrap}><div style={box}>
       <ProgressBar step={TOTAL} total={TOTAL} />
@@ -352,6 +397,7 @@ export default function Onboarding({ onComplete }) {
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 0, marginBottom: 14 }}>
         {[
+          { label: 'País', value: COUNTRIES.find(c => c.code === answers.country)?.label || answers.country },
           { label: 'Moneda', value: CURRENCIES.find(c => c.code === answers.currency)?.label || answers.currency },
           { label: 'Meta de ahorro', value: `${answers.savingGoal}% del ingreso` },
           { label: 'Plantilla activa', value: activeTemplate.name },
