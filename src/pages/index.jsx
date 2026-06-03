@@ -504,6 +504,7 @@ export function Debts() {
 
 // ─── GOALS ────────────────────────────────────────────────────────────────────
 import GoalProgressList from '../components/charts/GoalProgressList.jsx'
+import { calcAPV } from '../utils/apvCalc.js'
 
 export function Goals() {
   const { goals, addGoal, delGoal, updateGoal, settings } = useApp()
@@ -512,6 +513,21 @@ export function Goals() {
   const [err, setErr]           = useState('')
   const [savingId, setSavingId] = useState(null) // FIX: mini-modal por meta
   const [addAmt, setAddAmt]     = useState('')
+  // APV Chile
+  const [showAPV, setShowAPV]   = useState(false)
+  const [apvF, setApvF]         = useState({ monthlyContribution: '', currentBalance: '', currentAge: '', targetAge: 65, expectedReturn: 5, regime: 'unsure' })
+  const [apvResult, setApvResult] = useState(null)
+  const isChile = (settings.country || 'CL') === 'CL'
+  function calcularAPV() {
+    const r = calcAPV({
+      currentBalance: Number(apvF.currentBalance) || 0,
+      monthlyContribution: Number(apvF.monthlyContribution),
+      currentAge: Number(apvF.currentAge),
+      targetAge: Number(apvF.targetAge),
+      expectedReturn: Number(apvF.expectedReturn) || 5
+    })
+    setApvResult(r)
+  }
   const sym = CURRENCY_SYMBOLS[settings.currency] || '$'
 
   const totalTarget = useMemo(() => goals.reduce((s, g) => s + g.target, 0), [goals])
@@ -543,7 +559,83 @@ export function Goals() {
         <KPI label="Total ahorrado"  value={fmtMoney(totalSaved, sym)} color="green" sub={totalTarget > 0 ? fmtPct(totalSaved / totalTarget) + ' del total' : '-'} />
         <KPI label="Completadas"     value={goals.filter(g => g.saved >= g.target).length} color="green" />
       </div>
-      <div><Btn variant="primary" onClick={() => setShow(s => !s)}>{show ? '— Cerrar' : '+ Nueva meta'}</Btn></div>
+      <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
+        <Btn variant="primary" onClick={() => setShow(s => !s)}>{show ? '— Cerrar' : '+ Nueva meta'}</Btn>
+        {isChile && (
+          <Btn variant="ghost" onClick={() => { setShowAPV(s => !s); setApvResult(null) }}>
+            {showAPV ? '— Cerrar' : '🇨🇱 Simular APV / Jubilación'}
+          </Btn>
+        )}
+      </div>
+      {showAPV && isChile && (
+        <Card>
+          <CardHeader title="🇨🇱 Simulador APV / Jubilación" />
+          <div style={{fontSize:11,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:14,lineHeight:1.6,padding:'8px 10px',background:'rgba(255,165,0,.07)',borderRadius:6,border:'0.5px solid rgba(255,165,0,.2)'}}>
+            ⚠ Simulación orientativa. No constituye asesoría financiera, tributaria, previsional ni legal. Consulta con tu administradora APV o el SII.
+          </div>
+          <FormRow>
+            <FormGroup label="Aporte mensual APV ($)"><input type="number" min="0" value={apvF.monthlyContribution} placeholder="ej. 150000" onChange={e => setApvF(p => ({...p, monthlyContribution: e.target.value}))} /></FormGroup>
+            <FormGroup label="Saldo APV actual ($)"><input type="number" min="0" value={apvF.currentBalance} placeholder="0 (opcional)" onChange={e => setApvF(p => ({...p, currentBalance: e.target.value}))} /></FormGroup>
+          </FormRow>
+          <FormRow>
+            <FormGroup label="Edad actual"><input type="number" min="18" max="80" value={apvF.currentAge} placeholder="ej. 32" onChange={e => setApvF(p => ({...p, currentAge: e.target.value}))} /></FormGroup>
+            <FormGroup label="Edad objetivo jubilación"><input type="number" min="50" max="90" value={apvF.targetAge} placeholder="65" onChange={e => setApvF(p => ({...p, targetAge: e.target.value}))} /></FormGroup>
+          </FormRow>
+          <FormRow>
+            <FormGroup label="Rentabilidad anual esperada (%)"><input type="number" min="0" max="20" step="0.5" value={apvF.expectedReturn} placeholder="5" onChange={e => setApvF(p => ({...p, expectedReturn: e.target.value}))} /></FormGroup>
+            <FormGroup label="Régimen APV (informativo)">
+              <select value={apvF.regime} onChange={e => setApvF(p => ({...p, regime: e.target.value}))}>
+                <option value="unsure">No estoy seguro</option>
+                <option value="A">Régimen A — bonificación 15%</option>
+                <option value="B">Régimen B — rebaja base imponible</option>
+              </select>
+            </FormGroup>
+          </FormRow>
+          <Btn variant="primary" onClick={calcularAPV}>Calcular proyección →</Btn>
+          {apvResult && (
+            <div style={{marginTop:16}}>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(150px,1fr))',gap:10,marginBottom:14}}>
+                <div style={{background:'var(--sur2)',borderRadius:8,padding:'12px 14px'}}>
+                  <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:.5,marginBottom:4}}>Empezando hoy</div>
+                  <div style={{fontSize:20,fontWeight:700,color:'var(--grn)',fontFamily:'var(--mono)'}}>${(apvResult.projectionToday/1000000).toFixed(1)}M</div>
+                </div>
+                <div style={{background:'var(--sur2)',borderRadius:8,padding:'12px 14px'}}>
+                  <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:.5,marginBottom:4}}>En 5 años más</div>
+                  <div style={{fontSize:20,fontWeight:700,color:'var(--tx)',fontFamily:'var(--mono)'}}>${(apvResult.projection5years/1000000).toFixed(1)}M</div>
+                </div>
+                <div style={{background:'var(--sur2)',borderRadius:8,padding:'12px 14px'}}>
+                  <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:.5,marginBottom:4}}>Diferencia</div>
+                  <div style={{fontSize:20,fontWeight:700,color:'var(--red,#e84142)',fontFamily:'var(--mono)'}}>-${(apvResult.difference/1000000).toFixed(1)}M</div>
+                </div>
+                <div style={{background:'var(--sur2)',borderRadius:8,padding:'12px 14px'}}>
+                  <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:.5,marginBottom:4}}>Bonif. Reg. A aprox/año</div>
+                  <div style={{fontSize:20,fontWeight:700,color:'var(--grn)',fontFamily:'var(--mono)'}}>${apvResult.bonusRegimeA.toLocaleString()}</div>
+                </div>
+              </div>
+              <div style={{fontSize:11,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:8}}>Acumulación estimada por edad:</div>
+              <div style={{display:'flex',flexDirection:'column',gap:6}}>
+                {apvResult.chartPoints.map(pt => (
+                  <div key={pt.age} style={{display:'flex',alignItems:'center',gap:8}}>
+                    <div style={{width:36,fontSize:11,color:'var(--th)',fontFamily:'var(--mono)',flexShrink:0}}>{pt.age}a</div>
+                    <div style={{flex:1,height:6,background:'var(--brd)',borderRadius:3,overflow:'hidden'}}>
+                      <div style={{height:'100%',width:Math.min(100,pt.today/apvResult.projectionToday*100)+'%',background:'var(--grn)',borderRadius:3}}/>
+                    </div>
+                    <div style={{width:70,fontSize:11,color:'var(--grn)',fontFamily:'var(--mono)',textAlign:'right'}}>${(pt.today/1000000).toFixed(1)}M</div>
+                  </div>
+                ))}
+              </div>
+              {apvF.regime !== 'unsure' && (
+                <div style={{marginTop:12,padding:'10px 12px',background:'var(--sur2)',borderRadius:8,fontSize:11,color:'var(--th)',fontFamily:'var(--mono)',lineHeight:1.6}}>
+                  {apvF.regime === 'A' ? '📌 Régimen A: El Estado bonifica el 15% de tu aporte anual (tope orientativo ~6 UTM/año). No rebaja base imponible.' : '📌 Régimen B: Tus aportes rebajan la base imponible. Tope orientativo 600 UF anuales. Sin bonificación directa del Estado.'}
+                </div>
+              )}
+              <div style={{marginTop:10,fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',lineHeight:1.5,padding:'8px 10px',background:'rgba(0,0,0,.03)',borderRadius:6}}>
+                Valores estimados en CLP nominal con rentabilidad del {apvF.expectedReturn}% anual. La rentabilidad pasada no garantiza resultados futuros. Consulta con tu administradora APV.
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
       {show && (
         <Card>
           <CardHeader title="Nueva meta" />
