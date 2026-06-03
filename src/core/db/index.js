@@ -81,6 +81,7 @@ export const DEFAULT_SETTINGS = {
   savingGoalPct: 25,
   emergencyFundMonths: 5,
   activeMonth: new Date().toISOString().slice(0, 7),
+  country: 'CL',
 }
 
 export async function getSettings() {

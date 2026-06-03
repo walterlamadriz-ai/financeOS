@@ -922,6 +922,18 @@ export function Settings() {
             <option value="en">English</option>
           </select>
         </div>
+        <div style={srow}>
+          <div><div style={slbl}>País</div><div style={ssub}>Activa funciones regionales</div></div>
+          <select style={{ width: 'auto' }} value={settings.country || 'CL'}
+            onChange={e => updateSettings({ ...settings, country: e.target.value })}>
+            <option value="CL">🇨🇱 Chile</option>
+            <option value="MX">🇲🇽 México</option>
+            <option value="AR">🇦🇷 Argentina</option>
+            <option value="CO">🇨🇴 Colombia</option>
+            <option value="PE">🇵🇪 Perú</option>
+            <option value="OTHER">🌎 Otro</option>
+          </select>
+        </div>
         <div style={{ ...srow, borderBottom: 'none' }}>
           <div><div style={slbl}>Tema visual</div><div style={ssub}>Claro u oscuro</div></div>
           <div style={{ display: 'flex', gap: 6 }}>
