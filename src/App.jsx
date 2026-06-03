@@ -1,5 +1,7 @@
 // src/App.jsx
 import { useState, lazy, Suspense } from 'react'
+import LicenseGate from './components/LicenseGate.jsx'
+import { isLicenseActive } from './utils/licenseValidator.js'
 import { AppProvider, useApp } from './context/AppContext.jsx'
 import Shell from './components/layout/Shell.jsx'
 import Toast from './components/ui/Toast.jsx'
@@ -30,6 +32,14 @@ function isDemoMode() {
 
 function Inner() {
   const [page, setPage] = useState('dashboard')
+  const [licensed, setLicensed] = useState(isLicenseActive())
+
+  // Demo bypass: si URL tiene ?demo=true no se pide licencia
+  const isDemo = typeof window !== 'undefined' && window.location.search.includes('demo=true')
+
+  if (!licensed && !isDemo) {
+    return <LicenseGate onActivate={() => setLicensed(true)} />
+  }
   const { settings, loading } = useApp()
 
   function renderPage(page) {
