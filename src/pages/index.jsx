@@ -505,7 +505,7 @@ export function Debts() {
 // ─── GOALS ────────────────────────────────────────────────────────────────────
 import GoalProgressList from '../components/charts/GoalProgressList.jsx'
 import { calcAPV } from '../utils/apvCalc.js'
-import { calcBeneficioAPV } from '../utils/taxCalcCL.js'
+import { calcBeneficioAPV, calcDescuentos, calcImpuestoAnual } from '../utils/taxCalcCL.js'
 
 export function Goals() {
   const { goals, addGoal, delGoal, updateGoal, settings } = useApp()
@@ -604,15 +604,47 @@ export function Goals() {
               </select>
             </FormGroup>
           </FormRow>
-          <div style={{marginTop:16,paddingTop:16,borderTop:'0.5px solid var(--brd)'}}>
-            <div style={{fontSize:11,fontWeight:600,color:'var(--tx)',marginBottom:8,fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:'.5px'}}>Estimación tributaria orientativa (opcional)</div>
-            <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:12,lineHeight:1.5}}>Si ingresas tu sueldo bruto, estimamos el impacto en tu declaración anual.</div>
+          {/* ── PASO 1: Situación actual ── */}
+          <div style={{marginBottom:16,padding:'14px',background:'var(--sur2)',borderRadius:8,border:'0.5px solid var(--brd)'}}>
+            <div style={{fontSize:11,fontWeight:600,color:'var(--tx)',marginBottom:10,fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:'.5px'}}>① Tu situación actual</div>
             <FormRow>
-              <FormGroup label="Sueldo bruto mensual ($)"><input type="number" min="0" value={apvF.grossMonthly} placeholder="ej. 2000000 (opcional)" onChange={e => setApvF(p => ({...p, grossMonthly: e.target.value}))} /></FormGroup>
+              <FormGroup label="Sueldo bruto mensual ($)"><input type="number" min="0" value={apvF.grossMonthly} placeholder="ej. 2000000" onChange={e => setApvF(p => ({...p, grossMonthly: e.target.value}))} /></FormGroup>
               <FormGroup label="Bono anual estimado ($)"><input type="number" min="0" value={apvF.annualBonus} placeholder="0 (opcional)" onChange={e => setApvF(p => ({...p, annualBonus: e.target.value}))} /></FormGroup>
             </FormRow>
+            {apvF.grossMonthly && Number(apvF.grossMonthly) > 0 && (() => {
+              const gm = Number(apvF.grossMonthly)
+              const desc = calcDescuentos(gm)
+              const rentaAnual = gm * 12 + (Number(apvF.annualBonus) || 0)
+              const baseAnual = Math.max(0, rentaAnual - desc.total * 12)
+              const imp = calcImpuestoAnual(baseAnual)
+              return (
+                <div style={{marginTop:12}}>
+                  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6,marginBottom:10}}>
+                    <div style={{background:'var(--bg)',borderRadius:6,padding:'8px 12px'}}>
+                      <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:2}}>Líquido mensual est.</div>
+                      <div style={{fontSize:15,fontWeight:700,color:'var(--tx)',fontFamily:'var(--mono)'}}>${desc.liquido.toLocaleString()}</div>
+                    </div>
+                    <div style={{background:'var(--bg)',borderRadius:6,padding:'8px 12px'}}>
+                      <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:2}}>Impuesto anual sin APV</div>
+                      <div style={{fontSize:15,fontWeight:700,color:'var(--tx)',fontFamily:'var(--mono)'}}>${imp.impuesto.toLocaleString()}</div>
+                    </div>
+                  </div>
+                  <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+                    <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',background:'var(--bg)',padding:'4px 8px',borderRadius:4}}>AFP: ${desc.afp.toLocaleString()}/mes</div>
+                    <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',background:'var(--bg)',padding:'4px 8px',borderRadius:4}}>Salud: ${desc.salud.toLocaleString()}/mes</div>
+                    <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',background:'var(--bg)',padding:'4px 8px',borderRadius:4}}>Cesantía: ${desc.cesantia.toLocaleString()}/mes</div>
+                    <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',background:'var(--bg)',padding:'4px 8px',borderRadius:4}}>Tramo {imp.tramo} · {(imp.tasaMarginal*100).toFixed(0)}% marginal</div>
+                  </div>
+                  <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginTop:6}}>Descuentos orientativos: AFP 10% + Salud 7% + Cesantía 0.6%</div>
+                </div>
+              )
+            })()}
           </div>
+          {/* ── PASO 2: Simulación APV ── */}
+          <div style={{padding:'14px',background:'var(--sur2)',borderRadius:8,border:'0.5px solid var(--brd)'}}>
+            <div style={{fontSize:11,fontWeight:600,color:'var(--tx)',marginBottom:10,fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:'.5px'}}>② Simular aporte APV</div>
           <Btn variant="primary" onClick={calcularAPV}>Calcular proyección →</Btn>
+          </div>
           {apvResult && (
             <div style={{marginTop:16}}>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(150px,1fr))',gap:10,marginBottom:14}}>
