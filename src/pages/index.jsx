@@ -505,6 +505,7 @@ export function Debts() {
 // ─── GOALS ────────────────────────────────────────────────────────────────────
 import GoalProgressList from '../components/charts/GoalProgressList.jsx'
 import { calcAPV } from '../utils/apvCalc.js'
+import { calcBeneficioAPV } from '../utils/taxCalcCL.js'
 
 export function Goals() {
   const { goals, addGoal, delGoal, updateGoal, settings } = useApp()
@@ -515,8 +516,9 @@ export function Goals() {
   const [addAmt, setAddAmt]     = useState('')
   // APV Chile
   const [showAPV, setShowAPV]   = useState(false)
-  const [apvF, setApvF]         = useState({ monthlyContribution: '', currentBalance: '', currentAge: '', targetAge: 65, expectedReturn: 5, regime: 'unsure' })
+  const [apvF, setApvF]         = useState({ monthlyContribution: '', currentBalance: '', currentAge: '', targetAge: 65, expectedReturn: 5, regime: 'unsure', grossMonthly: '', annualBonus: '' })
   const [apvResult, setApvResult] = useState(null)
+  const [taxResult, setTaxResult]   = useState(null)
   const isChile = (settings.country || 'CL') === 'CL'
   function calcularAPV() {
     const r = calcAPV({
@@ -527,6 +529,17 @@ export function Goals() {
       expectedReturn: Number(apvF.expectedReturn) || 5
     })
     setApvResult(r)
+    // Cálculo tributario orientativo (solo si ingresó sueldo bruto)
+    if (apvF.grossMonthly && Number(apvF.grossMonthly) > 0) {
+      const t = calcBeneficioAPV({
+        sueldoBrutoMensual: Number(apvF.grossMonthly),
+        bonoAnual: Number(apvF.annualBonus) || 0,
+        apvMensual: Number(apvF.monthlyContribution),
+      })
+      setTaxResult(t)
+    } else {
+      setTaxResult(null)
+    }
   }
   const sym = CURRENCY_SYMBOLS[settings.currency] || '$'
 
@@ -591,6 +604,14 @@ export function Goals() {
               </select>
             </FormGroup>
           </FormRow>
+          <div style={{marginTop:16,paddingTop:16,borderTop:'0.5px solid var(--brd)'}}>
+            <div style={{fontSize:11,fontWeight:600,color:'var(--tx)',marginBottom:8,fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:'.5px'}}>Estimación tributaria orientativa (opcional)</div>
+            <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:12,lineHeight:1.5}}>Si ingresas tu sueldo bruto, estimamos el impacto en tu declaración anual.</div>
+            <FormRow>
+              <FormGroup label="Sueldo bruto mensual ($)"><input type="number" min="0" value={apvF.grossMonthly} placeholder="ej. 2000000 (opcional)" onChange={e => setApvF(p => ({...p, grossMonthly: e.target.value}))} /></FormGroup>
+              <FormGroup label="Bono anual estimado ($)"><input type="number" min="0" value={apvF.annualBonus} placeholder="0 (opcional)" onChange={e => setApvF(p => ({...p, annualBonus: e.target.value}))} /></FormGroup>
+            </FormRow>
+          </div>
           <Btn variant="primary" onClick={calcularAPV}>Calcular proyección →</Btn>
           {apvResult && (
             <div style={{marginTop:16}}>
@@ -632,6 +653,48 @@ export function Goals() {
               <div style={{marginTop:10,fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',lineHeight:1.5,padding:'8px 10px',background:'rgba(0,0,0,.03)',borderRadius:6}}>
                 Valores estimados en CLP nominal con rentabilidad del {apvF.expectedReturn}% anual. La rentabilidad pasada no garantiza resultados futuros. Consulta con tu administradora APV.
               </div>
+              {taxResult && (
+                <div style={{marginTop:16,paddingTop:16,borderTop:'0.5px solid var(--brd)'}}>
+                  <div style={{fontSize:11,fontWeight:600,color:'var(--tx)',marginBottom:12,fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:'.5px'}}>Estimación tributaria orientativa</div>
+                  <div style={{display:'flex',flexDirection:'column',gap:0,border:'0.5px solid var(--brd)',borderRadius:8,overflow:'hidden',marginBottom:12}}>
+                    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',background:'var(--sur2)'}}>
+                      <div style={{padding:'8px 12px',fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',textTransform:'uppercase',letterSpacing:'.5px'}}>Situación</div>
+                      <div style={{padding:'8px 12px',fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',textTransform:'uppercase',letterSpacing:'.5px',borderLeft:'0.5px solid var(--brd)'}}>Impuesto anual est.</div>
+                      <div style={{padding:'8px 12px',fontSize:10,fontFamily:'var(--mono)',color:'var(--grn)',textTransform:'uppercase',letterSpacing:'.5px',borderLeft:'0.5px solid var(--brd)'}}>Ahorro est.</div>
+                    </div>
+                    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',borderTop:'0.5px solid var(--brd)'}}>
+                      <div style={{padding:'10px 12px',fontSize:12,fontFamily:'var(--mono)',color:'var(--tx)'}}>Sin APV</div>
+                      <div style={{padding:'10px 12px',fontSize:12,fontFamily:'var(--mono)',color:'var(--tx)',borderLeft:'0.5px solid var(--brd)'}}>${taxResult.impuestoSinAPV.toLocaleString()}</div>
+                      <div style={{padding:'10px 12px',fontSize:12,fontFamily:'var(--mono)',color:'var(--th)',borderLeft:'0.5px solid var(--brd)'}}>—</div>
+                    </div>
+                    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',borderTop:'0.5px solid var(--brd)',background:'var(--sur2)'}}>
+                      <div style={{padding:'10px 12px',fontSize:12,fontFamily:'var(--mono)',color:'var(--tx)'}}>Régimen A</div>
+                      <div style={{padding:'10px 12px',fontSize:12,fontFamily:'var(--mono)',color:'var(--tx)',borderLeft:'0.5px solid var(--brd)'}}>${(taxResult.impuestoSinAPV - taxResult.ahorroRegA).toLocaleString()}</div>
+                      <div style={{padding:'10px 12px',fontSize:12,fontFamily:'var(--mono)',color:'var(--grn)',fontWeight:600,borderLeft:'0.5px solid var(--brd)'}}>+${taxResult.ahorroRegA.toLocaleString()}</div>
+                    </div>
+                    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',borderTop:'0.5px solid var(--brd)'}}>
+                      <div style={{padding:'10px 12px',fontSize:12,fontFamily:'var(--mono)',color:'var(--tx)'}}>Régimen B</div>
+                      <div style={{padding:'10px 12px',fontSize:12,fontFamily:'var(--mono)',color:'var(--tx)',borderLeft:'0.5px solid var(--brd)'}}>${taxResult.impuestoConRegB.toLocaleString()}</div>
+                      <div style={{padding:'10px 12px',fontSize:12,fontFamily:'var(--mono)',color:'var(--grn)',fontWeight:600,borderLeft:'0.5px solid var(--brd)'}}>+${taxResult.ahorroRegB.toLocaleString()}</div>
+                    </div>
+                  </div>
+                  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:12}}>
+                    <div style={{background:'var(--sur2)',borderRadius:8,padding:'10px 12px'}}>
+                      <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:4}}>Tramo impuesto</div>
+                      <div style={{fontSize:14,fontWeight:700,color:'var(--tx)',fontFamily:'var(--mono)'}}>Tramo {taxResult.tramoActual}</div>
+                      <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)'}}>{(taxResult.tasaMarginal*100).toFixed(0)}% tasa marginal</div>
+                    </div>
+                    <div style={{background:'var(--sur2)',borderRadius:8,padding:'10px 12px'}}>
+                      <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:4}}>Mayor beneficio orientativo</div>
+                      <div style={{fontSize:14,fontWeight:700,color:'var(--grn)',fontFamily:'var(--mono)'}}>Régimen {taxResult.mayorBeneficio}</div>
+                      <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)'}}>+${taxResult.mayorBeneficio==='A'?taxResult.ahorroRegA.toLocaleString():taxResult.ahorroRegB.toLocaleString()}/año est.</div>
+                    </div>
+                  </div>
+                  <div style={{padding:'8px 12px',background:'rgba(0,0,0,.03)',borderRadius:6,fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',lineHeight:1.6}}>
+                    Estimación orientativa. UTM referencial ${taxResult.UTMref.toLocaleString()} · Descuentos AFP 10% + Salud 7% + Cesantía 0.6% (orientativos). No constituye asesoría tributaria. Consulta con un contador o el SII.
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </Card>
