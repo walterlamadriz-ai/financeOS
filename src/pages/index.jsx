@@ -687,12 +687,13 @@ export function Goals() {
               </div>
               {taxResult && (
                 <div style={{marginTop:16,paddingTop:16,borderTop:'0.5px solid var(--brd)'}}>
-                  <div style={{fontSize:11,fontWeight:600,color:'var(--tx)',marginBottom:12,fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:'.5px'}}>Estimación tributaria orientativa</div>
+                  <div style={{fontSize:11,fontWeight:600,color:'var(--tx)',marginBottom:4,fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:'.5px'}}>Estimación tributaria orientativa</div>
+                  <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:12,lineHeight:1.5,padding:'6px 10px',background:'rgba(0,0,0,.03)',borderRadius:4}}>Resultados en base anual · Aporte mensual ${Number(apvF.monthlyContribution).toLocaleString()} × 12 = ${(Number(apvF.monthlyContribution)*12).toLocaleString()}/año</div>
                   <div style={{display:'flex',flexDirection:'column',gap:0,border:'0.5px solid var(--brd)',borderRadius:8,overflow:'hidden',marginBottom:12}}>
                     <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',background:'var(--sur2)'}}>
                       <div style={{padding:'8px 12px',fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',textTransform:'uppercase',letterSpacing:'.5px'}}>Situación</div>
-                      <div style={{padding:'8px 12px',fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',textTransform:'uppercase',letterSpacing:'.5px',borderLeft:'0.5px solid var(--brd)'}}>Impuesto anual est.</div>
-                      <div style={{padding:'8px 12px',fontSize:10,fontFamily:'var(--mono)',color:'var(--grn)',textTransform:'uppercase',letterSpacing:'.5px',borderLeft:'0.5px solid var(--brd)'}}>Ahorro est.</div>
+                      <div style={{padding:'8px 12px',fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',textTransform:'uppercase',letterSpacing:'.5px',borderLeft:'0.5px solid var(--brd)'}}>Impuesto anual est. ($)</div>
+                      <div style={{padding:'8px 12px',fontSize:10,fontFamily:'var(--mono)',color:'var(--grn)',textTransform:'uppercase',letterSpacing:'.5px',borderLeft:'0.5px solid var(--brd)'}}>Ahorro anual est. ($)</div>
                     </div>
                     <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',borderTop:'0.5px solid var(--brd)'}}>
                       <div style={{padding:'10px 12px',fontSize:12,fontFamily:'var(--mono)',color:'var(--tx)'}}>Sin APV</div>
@@ -723,7 +724,7 @@ export function Goals() {
                     </div>
                   </div>
                   <div style={{padding:'8px 12px',background:'rgba(0,0,0,.03)',borderRadius:6,fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',lineHeight:1.6}}>
-                    Estimación orientativa. UTM referencial ${taxResult.UTMref.toLocaleString()} · Descuentos AFP 10% + Salud 7% + Cesantía 0.6% (orientativos). No constituye asesoría tributaria. Consulta con un contador o el SII.
+                    Estimación anual orientativa basada en aporte mensual × 12. UTM referencial ${taxResult.UTMref.toLocaleString()} · Descuentos AFP 10% + Salud 7% + Cesantía 0.6% (orientativos). No constituye asesoría tributaria ni previsional. Consulta con un contador o el SII.
                   </div>
                 </div>
               )}
