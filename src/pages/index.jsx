@@ -648,7 +648,9 @@ export function Goals() {
           </div>
           </div>{/* fin grid pasos */}
           {apvResult && (
-            <div style={{marginTop:16,display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:16,alignItems:'start'}}>
+            <div style={{marginTop:16,display:'flex',flexDirection:'column',gap:16}}>
+              {/* Fila 1: Impacto + Proyección lado a lado */}
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:16,alignItems:'start'}}>
 
               {/* ── BLOQUE 1: Impacto tributario este año ── */}
               {taxResult && (
@@ -760,8 +762,10 @@ export function Goals() {
                   Proyección en CLP nominal con {apvF.expectedReturn}% anual. La rentabilidad pasada no garantiza resultados futuros. Consulta con tu administradora APV.
                 </div>
               </div>
+              </div>{/* fin fila 1 */}
+              {/* Fila 2: Estimación tributaria — ancho completo */}
               {taxResult && (
-                <div style={{marginTop:16,paddingTop:16,borderTop:'0.5px solid var(--brd)'}}>
+                <div style={{paddingTop:0}}>
                   <div style={{fontSize:11,fontWeight:600,color:'var(--tx)',marginBottom:4,fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:'.5px'}}>Estimación tributaria orientativa</div>
                   <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:12,lineHeight:1.5,padding:'6px 10px',background:'rgba(0,0,0,.03)',borderRadius:4}}>Resultados en base anual · Aporte mensual ${Number(apvF.monthlyContribution).toLocaleString()} × 12 = ${(Number(apvF.monthlyContribution)*12).toLocaleString()}/año</div>
                   <div style={{display:'flex',flexDirection:'column',gap:0,border:'0.5px solid var(--brd)',borderRadius:8,overflow:'hidden',marginBottom:12}}>
