@@ -57,6 +57,34 @@ export function Income() {
   const fixed = useMemo(() => filtered.filter(r => r.recurrence !== 'Único').reduce((s, r) => s + r.amount, 0), [filtered])
 
   // FIX: loading state para evitar doble submit
+  function openSuggestions() {
+    const sugs = generateGoalSuggestions({
+      ingresoNeto: ingresoNetoGoals,
+      gastoMensual: gastoMensualGoals,
+      existingGoals: goals,
+    })
+    setSuggestions(sugs)
+    setShowSuggest(true)
+  }
+
+  async function createSuggestedGoals() {
+    const toCreate = suggestions.filter(s => s.selected && !s.alreadyExists)
+    for (const s of toCreate) {
+      const targetDate = new Date()
+      targetDate.setMonth(targetDate.getMonth() + (s.monthsToGoal || 12))
+      await addGoal({
+        name:       `${s.emoji} ${s.name}`,
+        target:     s.target,
+        saved:      0,
+        targetDate: targetDate.toISOString().slice(0, 7),
+        priority:   s.goalPriority,
+        color:      s.color,
+      })
+    }
+    setShowSuggest(false)
+    setSuggestions([])
+  }
+
   async function submit() {
     if (!f.source.trim())                        { setErr('El nombre es requerido'); return }
     if (!f.amount || Number(f.amount) <= 0)       { setErr('Ingresa un monto válido'); return }
@@ -138,6 +166,34 @@ export function Expenses() {
 
   const total     = useMemo(() => filtered.reduce((s, r) => s + r.amount, 0), [filtered])
   const necesidad = useMemo(() => filtered.filter(r => r.type === 'Necesidad').reduce((s, r) => s + r.amount, 0), [filtered])
+
+  function openSuggestions() {
+    const sugs = generateGoalSuggestions({
+      ingresoNeto: ingresoNetoGoals,
+      gastoMensual: gastoMensualGoals,
+      existingGoals: goals,
+    })
+    setSuggestions(sugs)
+    setShowSuggest(true)
+  }
+
+  async function createSuggestedGoals() {
+    const toCreate = suggestions.filter(s => s.selected && !s.alreadyExists)
+    for (const s of toCreate) {
+      const targetDate = new Date()
+      targetDate.setMonth(targetDate.getMonth() + (s.monthsToGoal || 12))
+      await addGoal({
+        name:       `${s.emoji} ${s.name}`,
+        target:     s.target,
+        saved:      0,
+        targetDate: targetDate.toISOString().slice(0, 7),
+        priority:   s.goalPriority,
+        color:      s.color,
+      })
+    }
+    setShowSuggest(false)
+    setSuggestions([])
+  }
 
   async function submit() {
     if (!f.description.trim())                  { setErr('La descripción es requerida'); return }
@@ -226,6 +282,16 @@ export function Budgets() {
   const [err, setErr] = useState('')
   const sym = CURRENCY_SYMBOLS[settings.currency] || '$'
   const isChile = (settings.country || 'CL') === 'CL'
+  const { incomes: goalsIncomes, expenses: goalsExpenses } = useApp()
+  const goalsActiveMonth = settings.activeMonth || new Date().toISOString().slice(0, 7)
+  const ingresoNetoGoals = useMemo(() => {
+    const mInc = (goalsIncomes || []).filter(r => r.date?.startsWith(goalsActiveMonth))
+    return mInc.reduce((s, r) => s + r.amount, 0)
+  }, [goalsIncomes, goalsActiveMonth])
+  const gastoMensualGoals = useMemo(() => {
+    const mExp = (goalsExpenses || []).filter(r => r.date?.startsWith(goalsActiveMonth))
+    return mExp.reduce((s, r) => s + r.amount, 0)
+  }, [goalsExpenses, goalsActiveMonth])
   const ahorroLabel = isChile ? 'Ahorro/APV/Inversión' : 'Ahorro/Inversión'
 
   // FIX: filtrar gastos por mes activo para cálculo de presupuesto
@@ -241,6 +307,34 @@ export function Budgets() {
   const budgetedCats   = useMemo(() => new Set(budgets.map(b => b.category)), [budgets])
   const totalBudgeted  = useMemo(() => mExpenses.filter(e => budgetedCats.has(e.category)).reduce((s, r) => s + r.amount, 0), [mExpenses, budgetedCats])
   const overBudget     = useMemo(() => budgets.filter(b => (expByCat[b.category] || 0) > b.limit), [budgets, expByCat])
+
+  function openSuggestions() {
+    const sugs = generateGoalSuggestions({
+      ingresoNeto: ingresoNetoGoals,
+      gastoMensual: gastoMensualGoals,
+      existingGoals: goals,
+    })
+    setSuggestions(sugs)
+    setShowSuggest(true)
+  }
+
+  async function createSuggestedGoals() {
+    const toCreate = suggestions.filter(s => s.selected && !s.alreadyExists)
+    for (const s of toCreate) {
+      const targetDate = new Date()
+      targetDate.setMonth(targetDate.getMonth() + (s.monthsToGoal || 12))
+      await addGoal({
+        name:       `${s.emoji} ${s.name}`,
+        target:     s.target,
+        saved:      0,
+        targetDate: targetDate.toISOString().slice(0, 7),
+        priority:   s.goalPriority,
+        color:      s.color,
+      })
+    }
+    setShowSuggest(false)
+    setSuggestions([])
+  }
 
   async function submit() {
     if (!f.limit || Number(f.limit) <= 0)                          { setErr('Ingresa un límite válido'); return }
@@ -445,6 +539,34 @@ export function Debts() {
   const totalBalance = useMemo(() => debts.reduce((s, d) => s + d.balance, 0), [debts])
   const totalMin     = useMemo(() => debts.reduce((s, d) => s + d.minPayment, 0), [debts])
 
+  function openSuggestions() {
+    const sugs = generateGoalSuggestions({
+      ingresoNeto: ingresoNetoGoals,
+      gastoMensual: gastoMensualGoals,
+      existingGoals: goals,
+    })
+    setSuggestions(sugs)
+    setShowSuggest(true)
+  }
+
+  async function createSuggestedGoals() {
+    const toCreate = suggestions.filter(s => s.selected && !s.alreadyExists)
+    for (const s of toCreate) {
+      const targetDate = new Date()
+      targetDate.setMonth(targetDate.getMonth() + (s.monthsToGoal || 12))
+      await addGoal({
+        name:       `${s.emoji} ${s.name}`,
+        target:     s.target,
+        saved:      0,
+        targetDate: targetDate.toISOString().slice(0, 7),
+        priority:   s.goalPriority,
+        color:      s.color,
+      })
+    }
+    setShowSuggest(false)
+    setSuggestions([])
+  }
+
   async function submit() {
     if (!f.creditor.trim() || !f.balance || Number(f.balance) <= 0) { setErr('Acreedor y saldo son requeridos'); return }
     const init = Number(f.initial) || Number(f.balance)
@@ -626,6 +748,7 @@ export function Debts() {
 
 // ─── GOALS ────────────────────────────────────────────────────────────────────
 import GoalProgressList from '../components/charts/GoalProgressList.jsx'
+import { generateGoalSuggestions, totalMonthlyContribution } from '../utils/goalSuggestions.js'
 
 export function Goals({ setPage }) {
   const { goals, addGoal, delGoal, updateGoal, settings } = useApp()
@@ -634,13 +757,53 @@ export function Goals({ setPage }) {
   const [err, setErr]           = useState('')
   const [savingId, setSavingId] = useState(null) // FIX: mini-modal por meta
   const [addAmt, setAddAmt]     = useState('')
+  const [showSuggest, setShowSuggest] = useState(false)
+  const [suggestions, setSuggestions] = useState([])
 
   const isChile = (settings.country || 'CL') === 'CL'
+  const { incomes: goalsIncomes, expenses: goalsExpenses } = useApp()
+  const goalsActiveMonth = settings.activeMonth || new Date().toISOString().slice(0, 7)
+  const ingresoNetoGoals = useMemo(() => {
+    const mInc = (goalsIncomes || []).filter(r => r.date?.startsWith(goalsActiveMonth))
+    return mInc.reduce((s, r) => s + r.amount, 0)
+  }, [goalsIncomes, goalsActiveMonth])
+  const gastoMensualGoals = useMemo(() => {
+    const mExp = (goalsExpenses || []).filter(r => r.date?.startsWith(goalsActiveMonth))
+    return mExp.reduce((s, r) => s + r.amount, 0)
+  }, [goalsExpenses, goalsActiveMonth])
 
   const sym = CURRENCY_SYMBOLS[settings.currency] || '$'
 
   const totalTarget = useMemo(() => goals.reduce((s, g) => s + g.target, 0), [goals])
   const totalSaved  = useMemo(() => goals.reduce((s, g) => s + g.saved,  0), [goals])
+
+  function openSuggestions() {
+    const sugs = generateGoalSuggestions({
+      ingresoNeto: ingresoNetoGoals,
+      gastoMensual: gastoMensualGoals,
+      existingGoals: goals,
+    })
+    setSuggestions(sugs)
+    setShowSuggest(true)
+  }
+
+  async function createSuggestedGoals() {
+    const toCreate = suggestions.filter(s => s.selected && !s.alreadyExists)
+    for (const s of toCreate) {
+      const targetDate = new Date()
+      targetDate.setMonth(targetDate.getMonth() + (s.monthsToGoal || 12))
+      await addGoal({
+        name:       `${s.emoji} ${s.name}`,
+        target:     s.target,
+        saved:      0,
+        targetDate: targetDate.toISOString().slice(0, 7),
+        priority:   s.goalPriority,
+        color:      s.color,
+      })
+    }
+    setShowSuggest(false)
+    setSuggestions([])
+  }
 
   async function submit() {
     if (!f.name.trim() || !f.target || Number(f.target) <= 0) { setErr('Nombre y monto objetivo son requeridos'); return }
@@ -690,6 +853,64 @@ export function Goals({ setPage }) {
             <Btn variant="primary" onClick={submit}>+ Crear meta</Btn>
             <Btn variant="ghost" onClick={() => setShow(false)}>Cancelar</Btn>
           </div>
+        </Card>
+      )}
+      {/* Panel de sugerencias */}
+      {showSuggest && (
+        <Card>
+          <CardHeader title="💡 Metas financieras básicas sugeridas" />
+          {ingresoNetoGoals > 0 ? (
+            <>
+              <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:14,padding:'8px 12px',background:'var(--sur2)',borderRadius:6}}>
+                <span style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)'}}>Basado en ingreso neto {goalsActiveMonth}:</span>
+                <span style={{fontSize:13,fontWeight:700,color:'var(--grn)',fontFamily:'var(--mono)'}}>{fmtMoney(ingresoNetoGoals, sym)}</span>
+              </div>
+              <div style={{display:'flex',flexDirection:'column',gap:10,marginBottom:14}}>
+                {suggestions.map((s, i) => (
+                  <div key={s.id} style={{padding:'12px 14px',borderRadius:8,border:`0.5px solid ${s.selected&&!s.alreadyExists?'rgba(10,92,62,.25)':'var(--brd)'}`,background:s.alreadyExists?'var(--sur2)':s.selected?'rgba(10,92,62,.04)':'var(--bg)',opacity:s.alreadyExists?0.6:1}}>
+                    <div style={{display:'flex',alignItems:'flex-start',gap:10}}>
+                      <input type="checkbox" checked={s.selected && !s.alreadyExists} disabled={s.alreadyExists}
+                        onChange={e => setSuggestions(prev => prev.map((x,j) => j===i?{...x,selected:e.target.checked}:x))}
+                        style={{marginTop:3,flexShrink:0,accentColor:'var(--grn)'}}/>
+                      <div style={{flex:1}}>
+                        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:4}}>
+                          <span style={{fontSize:13,fontWeight:600,color:'var(--tx)'}}>{s.emoji} {s.name}</span>
+                          {s.alreadyExists && <span style={{fontSize:10,padding:'1px 6px',borderRadius:4,background:'var(--sur2)',color:'var(--th)',fontFamily:'var(--mono)'}}>Ya existe</span>}
+                        </div>
+                        <div style={{fontSize:11,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:6}}>{s.description}</div>
+                        <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+                          <span style={{fontSize:11,fontFamily:'var(--mono)',color:'var(--grn)',fontWeight:600}}>Objetivo: {fmtMoney(s.target, sym)}</span>
+                          <span style={{fontSize:11,fontFamily:'var(--mono)',color:'var(--th)'}}>Aporte: {fmtMoney(s.monthlyContribution, sym)}/mes</span>
+                          {s.monthsToGoal && <span style={{fontSize:11,fontFamily:'var(--mono)',color:'var(--th)'}}>Plazo: ~{s.monthsToGoal} meses</span>}
+                        </div>
+                        <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginTop:4,fontStyle:'italic'}}>{s.hint}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{padding:'10px 14px',background:'var(--sur2)',borderRadius:6,marginBottom:14}}>
+                <div style={{fontSize:11,color:'var(--th)',fontFamily:'var(--mono)'}}>
+                  Total aportes mensuales sugeridos: <span style={{color:'var(--grn)',fontWeight:700}}>{fmtMoney(totalMonthlyContribution(suggestions), sym)}/mes</span>
+                  <span style={{marginLeft:8,color:'var(--th)'}}>({ingresoNetoGoals>0?((totalMonthlyContribution(suggestions)/ingresoNetoGoals)*100).toFixed(0):0}% del ingreso)</span>
+                </div>
+              </div>
+              <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:12,lineHeight:1.5}}>
+                ⚠ Sugerencias orientativas basadas en principios financieros generales. No constituyen asesoría financiera certificada. Ajustá los montos según tu situación personal.
+              </div>
+              <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+                <Btn variant="primary" onClick={createSuggestedGoals}
+                  disabled={suggestions.filter(s=>s.selected&&!s.alreadyExists).length===0}>
+                  Crear metas seleccionadas →
+                </Btn>
+                <Btn variant="ghost" onClick={()=>{setShowSuggest(false);setSuggestions([])}}>Cancelar</Btn>
+              </div>
+            </>
+          ) : (
+            <div style={{fontSize:12,color:'var(--th)',fontFamily:'var(--mono)',padding:'12px 0'}}>
+              ⚠ No hay ingresos registrados en {activeMonth}. Agrega ingresos primero para calcular las sugerencias.
+            </div>
+          )}
         </Card>
       )}
       {goals.length === 0 && !show && <Card><div style={{textAlign:'center',padding:'24px 0'}}>
