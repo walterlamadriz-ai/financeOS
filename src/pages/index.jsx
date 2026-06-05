@@ -264,8 +264,9 @@ export function Budgets() {
         <KPI label="Categorías excedidas"  value={overBudget.length} color={overBudget.length > 0 ? 'red' : 'green'} sub={overBudget.length > 0 ? 'revisar' : 'todo en orden'} />
       </div>
       {overBudget.length > 0 && <Alert type="danger">⚠ {overBudget.map(b => b.category).join(', ')} superaron el límite mensual.</Alert>}
-      {/* Fila 1: Formulario + Donut resumen */}
-      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:16,marginBottom:16}}>
+      {/* Layout 2 columnas: izquierda=formulario+modelo, derecha=resumen+tarjetas */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:16,alignItems:'start'}}>
+        <div style={{display:'flex',flexDirection:'column',gap:16}}>
         <Card>
           <CardHeader title="Nuevo presupuesto" />
           {err && <Alert type="danger">⚠ {err}</Alert>}
@@ -335,6 +336,7 @@ export function Budgets() {
             )
           })()}
         </Card>
+        </div>{/* fin columna izquierda */}
         <Card>
           <CardHeader title={`Resumen · ${monthLabel(activeMonth)}`} />
           {budgets.length === 0 ? (
@@ -382,43 +384,7 @@ export function Budgets() {
         </Card>
       </div>
 
-      {/* Fila 2: Tarjetas por categoría con donut */}
-      {budgets.length > 0 && (
-        <div>
-          <div style={{fontFamily:'var(--mono)',fontSize:11,letterSpacing:'1px',textTransform:'uppercase',color:'var(--grn2)',marginBottom:12}}>
-            Avance por categoría · {monthLabel(activeMonth)}
-          </div>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))',gap:12}}>
-            {budgets.map(b => {
-              const spent = expByCat[b.category] || 0
-              const pct = b.limit > 0 ? spent/b.limit : 0
-              const over = spent > b.limit
-              const warn = !over && pct >= 0.8
-              const strokeColor = over ? '#e84142' : warn ? 'var(--amber,#f5a623)' : 'var(--grn)'
-              const r = 36, cx = 50, cy = 50
-              const circ = 2 * Math.PI * r
-              const dash = Math.min(pct, 1) * circ
-              return (
-                <div key={b.id} style={{background:'var(--sur2)',borderRadius:10,padding:'14px',border:`0.5px solid ${over?'#e84142':warn?'rgba(245,166,35,.3)':'var(--brd)'}`,display:'flex',flexDirection:'column',alignItems:'center',gap:8,position:'relative'}}>
-                  <button onClick={() => delBudget(b.id)} style={{position:'absolute',top:8,right:8,background:'none',border:'none',color:'var(--th)',fontSize:11,cursor:'pointer',padding:'2px 5px',borderRadius:4,lineHeight:1}}>✕</button>
-                  <div style={{fontSize:11,fontWeight:600,color:'var(--tx)',fontFamily:'var(--mono)',textAlign:'center',maxWidth:120,lineHeight:1.3}}>{b.category}</div>
-                  <svg width="100" height="100" viewBox="0 0 100 100">
-                    <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--brd)" strokeWidth="10"/>
-                    <circle cx={cx} cy={cy} r={r} fill="none" stroke={strokeColor} strokeWidth="10"
-                      strokeDasharray={`${dash} ${circ}`} strokeDashoffset={circ/4} strokeLinecap="round"/>
-                    <text x={cx} y={cy-5} textAnchor="middle" fontSize="11" fill={strokeColor} fontWeight="700" fontFamily="var(--mono)">{(pct*100).toFixed(0)}%</text>
-                    <text x={cx} y={cy+8} textAnchor="middle" fontSize="7" fill="var(--th)" fontFamily="var(--mono)">{over?'EXCEDIDO':warn?'ATENCIÓN':'en rango'}</text>
-                  </svg>
-                  <div style={{textAlign:'center'}}>
-                    <div style={{fontSize:12,fontWeight:700,color:strokeColor,fontFamily:'var(--mono)'}}>{fmtMoney(spent,sym)}</div>
-                    <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)'}}>de {fmtMoney(b.limit,sym)}</div>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
+
     </div>
   )
 }
