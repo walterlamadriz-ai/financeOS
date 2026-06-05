@@ -17,6 +17,7 @@ import DemoShell from './demo/DemoShell.jsx'
 const Advisor = lazy(() => import('./pages/Advisor/index.jsx'))
 import Subscriptions from './pages/Subscriptions/index.jsx'
 import Coach from './pages/Coach/index.jsx'
+import APVPage from './pages/APV/index.jsx'
 import ImportCSV from './pages/Import/index.jsx'
 import Movements from './pages/Movements/index.jsx'
 
@@ -60,6 +61,7 @@ function Inner() {
       case 'advisor':    return <Suspense fallback={<div style={{padding:24,color:'var(--th)',fontFamily:'var(--mono)',fontSize:12}}>Cargando...</div>}><Advisor /></Suspense>
       case 'subscriptions': return <Subscriptions />
       case 'coach':         return <Coach />
+      case 'apv':           return <APVPage />
       case 'movements': return <Movements setPage={setPage}/>
       case 'import':        return <ImportCSV />
       default:           return <Dashboard setPage={setPage}/>

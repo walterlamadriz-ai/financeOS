@@ -16,6 +16,7 @@ const NAV = [
     { id: 'budgets', ic: '▤', lb: 'Presupuestos' },
     { id: 'debts',   ic: '⊖', lb: 'Deudas' },
     { id: 'goals',   ic: '◎', lb: 'Metas' },
+    { id: 'apv',     ic: '🇨🇱', lb: 'APV Chile', chileOnly: true },
   ] },
   { sec: 'Análisis', items: [
     { id: 'coach',    ic: '◈', lb: 'Señales' },
@@ -38,6 +39,7 @@ function pageLabel(id) {
 
 export default function Shell({ page, setPage, children }) {
   const { settings, updateSettings } = useApp()
+  const isChile = (settings.country || 'CL') === 'CL'
   const isDark = settings.theme === 'dark'
 
   // ── Drawer móvil ────────────────────────────────────────────────────────────

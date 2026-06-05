@@ -50,6 +50,34 @@ También puedes instalar FinanceOS como app para usarla sin abrir el navegador.
 
 ---
 
+---
+
+## Tus primeros 10 minutos
+
+Sigue estos pasos para sacar el máximo provecho desde el inicio:
+
+**1. Completa el onboarding (2 min)**
+Al abrir por primera vez, elige tu moneda y perfil. FinanceOS carga categorías sugeridas según tu situación.
+
+**2. Registra tu primer ingreso (1 min)**
+Ve a Ingresos → "+ Nuevo ingreso". Agrega tu sueldo o entrada principal del mes.
+
+**3. Registra 3 gastos del mes (2 min)**
+Ve a Egresos → "+ Agregar egreso". Empieza con tus gastos más grandes: arriendo, supermercado, transporte.
+
+**4. Agrega tus suscripciones (2 min)**
+En Egresos → "Pago recurrente". Registra Netflix, Spotify, gimnasio. Verás cuánto suman al año.
+
+**5. Crea un presupuesto (1 min)**
+Ve a Presupuestos y define un límite para tu categoría más grande. La barra te muestra cuánto llevas gastado.
+
+**6. Haz tu primer backup (2 min)**
+Ve a Ajustes → "Crear respaldo". Guarda el archivo en un lugar seguro. **Este paso protege toda tu información.**
+
+Listo. Ya tienes tu dashboard funcionando con datos reales.
+
+---
+
 ## Lo que incluye tu plan
 
 - Uso inmediato desde navegador
