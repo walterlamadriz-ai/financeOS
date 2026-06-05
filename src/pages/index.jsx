@@ -504,8 +504,6 @@ export function Debts() {
 
 // ─── GOALS ────────────────────────────────────────────────────────────────────
 import GoalProgressList from '../components/charts/GoalProgressList.jsx'
-import { calcAPV } from '../utils/apvCalc.js'
-import { calcBeneficioAPV, calcDescuentos, calcImpuestoAnual } from '../utils/taxCalcCL.js'
 
 export function Goals() {
   const { goals, addGoal, delGoal, updateGoal, settings } = useApp()
@@ -514,33 +512,9 @@ export function Goals() {
   const [err, setErr]           = useState('')
   const [savingId, setSavingId] = useState(null) // FIX: mini-modal por meta
   const [addAmt, setAddAmt]     = useState('')
-  // APV Chile
-  const [showAPV, setShowAPV]   = useState(false)
-  const [apvF, setApvF]         = useState({ monthlyContribution: '', currentBalance: '', currentAge: '', targetAge: 65, expectedReturn: 5, regime: 'unsure', grossMonthly: '', annualBonus: '' })
-  const [apvResult, setApvResult] = useState(null)
-  const [taxResult, setTaxResult]   = useState(null)
+
   const isChile = (settings.country || 'CL') === 'CL'
-  function calcularAPV() {
-    const r = calcAPV({
-      currentBalance: Number(apvF.currentBalance) || 0,
-      monthlyContribution: Number(apvF.monthlyContribution),
-      currentAge: Number(apvF.currentAge),
-      targetAge: Number(apvF.targetAge),
-      expectedReturn: Number(apvF.expectedReturn) || 5
-    })
-    setApvResult(r)
-    // Cálculo tributario orientativo (solo si ingresó sueldo bruto)
-    if (apvF.grossMonthly && Number(apvF.grossMonthly) > 0) {
-      const t = calcBeneficioAPV({
-        sueldoBrutoMensual: Number(apvF.grossMonthly),
-        bonoAnual: Number(apvF.annualBonus) || 0,
-        apvMensual: Number(apvF.monthlyContribution),
-      })
-      setTaxResult(t)
-    } else {
-      setTaxResult(null)
-    }
-  }
+
   const sym = CURRENCY_SYMBOLS[settings.currency] || '$'
 
   const totalTarget = useMemo(() => goals.reduce((s, g) => s + g.target, 0), [goals])
@@ -575,8 +549,8 @@ export function Goals() {
       <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
         <Btn variant="primary" onClick={() => setShow(s => !s)}>{show ? '— Cerrar' : '+ Nueva meta'}</Btn>
         {isChile && (
-          <Btn variant="ghost" onClick={() => { setShowAPV(s => !s); setApvResult(null) }}>
-            {showAPV ? '— Cerrar' : '🇨🇱 Simular APV / Jubilación'}
+          <Btn variant="ghost" onClick={() => setPage('apv')}>
+            🇨🇱 Simulador APV Chile →
           </Btn>
         )}
       </div>
