@@ -10,7 +10,7 @@ const NAV = [
   { sec: 'Movimientos',  items: [
     { id: 'income',    ic: '↑', lb: 'Ingresos' },
     { id: 'movements', ic: '↓', lb: 'Egresos' },
-    { id: 'import',    ic: '↑', lb: 'Importar' },
+    { id: 'import',    ic: '⇪', lb: 'Importar' },
   ] },
   { sec: 'Planificación', items: [
     { id: 'budgets', ic: '▤', lb: 'Presupuestos' },

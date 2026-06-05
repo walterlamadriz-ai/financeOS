@@ -256,7 +256,7 @@ export function Budgets() {
         <PageHeader title="Presupuestos" sub={`Límites mensuales · ${monthLabel(activeMonth)}`} />
         <MonthSelector incomes={[]} expenses={expenses} />
       </div>
-      <p style={{fontSize:12,color:"var(--th)",fontFamily:"var(--mono)",marginBottom:12,marginTop:-8}}>Compara gasto usado vs presupuesto disponible por categoría.</p>
+
       <div className="kpi-row" style={{ gridTemplateColumns: 'repeat(4,1fr)' }}>
         <KPI label="Presupuesto total"    value={fmtMoney(totalBudget, sym)} />
         <KPI label="Gastado (con presup.)" value={fmtMoney(totalBudgeted, sym)} color="red" sub={totalBudget > 0 ? fmtPct(totalBudgeted / totalBudget) : '-'} />
