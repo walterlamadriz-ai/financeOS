@@ -12,16 +12,16 @@ export default function APVPage() {
   const { settings } = useApp()
   const isChile = (settings.country || 'CL') === 'CL'
 
-  const isDemo = window.location.search.includes('demo=true')
+  const isDemo = typeof window !== 'undefined' && window.location.search.includes('demo=true')
   const [apvF, setApvF] = useState({
     monthlyContribution: isDemo ? '150000' : '',
-    currentBalance: isDemo ? '2000000' : '',
-    currentAge: isDemo ? '32' : '',
-    targetAge: 65,
-    expectedReturn: 5,
-    regime: isDemo ? 'B' : 'unsure',
-    grossMonthly: isDemo ? '2000000' : '',
-    annualBonus: isDemo ? '1000000' : ''
+    currentBalance:      isDemo ? '2000000' : '',
+    currentAge:          isDemo ? '32' : '',
+    targetAge:           65,
+    expectedReturn:      5,
+    regime:              isDemo ? 'B' : 'unsure',
+    grossMonthly:        isDemo ? '2000000' : '',
+    annualBonus:         isDemo ? '1000000' : ''
   })
   const [apvResult, setApvResult]   = useState(null)
   const [taxResult, setTaxResult]   = useState(null)
