@@ -696,44 +696,52 @@ export function Goals({ setPage }) {
               <div style={{fontSize:13,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:12}}>Aún no tienes metas de ahorro. Crea una para hacer seguimiento de tus objetivos.</div>
               <button onClick={()=>setShow(true)} style={{background:'var(--grn)',color:'#fff',border:'none',borderRadius:8,padding:'8px 18px',fontSize:13,fontWeight:600,cursor:'pointer'}}>+ Crear meta</button>
             </div></Card>}
-      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))',gap:14}}>
+      <div style={{display:'flex',flexDirection:'column',gap:10}}>
       {goals.map(g => {
         const p    = g.target > 0 ? Math.min(g.saved / g.target, 1) : 0
         const done = g.saved >= g.target
         const clr  = done ? 'var(--grn)' : p >= 0.7 ? 'var(--amber,#f5a623)' : 'var(--accent,#3b82f6)'
-        const r2 = 38, cx2 = 50, cy2 = 50
-        const circ2 = 2 * Math.PI * r2
-        const dash2 = p * circ2
         return (
-          <div key={g.id} style={{background:'var(--sur2)',borderRadius:12,padding:'16px',border:`0.5px solid ${done?'rgba(10,92,62,.3)':'var(--brd)'}`,display:'flex',flexDirection:'column',alignItems:'center',gap:10,position:'relative'}}>
-            <button onClick={() => delGoal(g.id)} style={{position:'absolute',top:8,right:8,background:'none',border:'none',color:'var(--th)',fontSize:11,cursor:'pointer',padding:'2px 5px',lineHeight:1}}>✕</button>
-            <div style={{fontSize:12,fontWeight:600,color:'var(--tx)',textAlign:'center',lineHeight:1.3,paddingRight:14}}>{g.name}</div>
-            <svg width="100" height="100" viewBox="0 0 100 100">
-              <circle cx={cx2} cy={cy2} r={r2} fill="none" stroke="var(--brd)" strokeWidth="10"/>
-              <circle cx={cx2} cy={cy2} r={r2} fill="none" stroke={clr} strokeWidth="10"
-                strokeDasharray={`${dash2} ${circ2}`} strokeDashoffset={circ2/4} strokeLinecap="round"/>
-              {done && <text x={cx2} y={cy2-6} textAnchor="middle" fontSize="11" fill={clr} fontFamily="var(--mono)">✓</text>}
-              <text x={cx2} y={done?cy2+8:cy2-4} textAnchor="middle" fontSize="12" fill={clr} fontWeight="700" fontFamily="var(--mono)">{(p*100).toFixed(0)}%</text>
-              {!done && <text x={cx2} y={cy2+10} textAnchor="middle" fontSize="7" fill="var(--th)" fontFamily="var(--mono)">{g.priority} prior.</text>}
-            </svg>
-            <div style={{textAlign:'center',width:'100%'}}>
-              <div style={{fontSize:11,fontWeight:700,color:clr,fontFamily:'var(--mono)'}}>{fmtMoney(g.saved,sym)}</div>
-              <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)'}}>de {fmtMoney(g.target,sym)}</div>
-              {g.targetDate && <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginTop:2}}>Meta: {g.targetDate.slice(0,7).replace('-','/')}</div>}
+          <div key={g.id} style={{background:'var(--sur2)',borderRadius:10,padding:'14px 16px',border:`0.5px solid ${done?'rgba(10,92,62,.25)':'var(--brd)'}`}}>
+            {/* Header */}
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:8}}>
+              <div style={{flex:1,paddingRight:8}}>
+                <div style={{fontSize:13,fontWeight:600,color:'var(--tx)',marginBottom:2}}>{g.name}</div>
+                <div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>
+                  <span style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)'}}>{g.priority} prioridad</span>
+                  {g.targetDate && <span style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)'}}>· Meta: {g.targetDate.slice(0,7).replace('-','/')}</span>}
+                  {done && <span style={{fontSize:10,padding:'1px 8px',borderRadius:10,background:'rgba(10,92,62,.12)',color:'var(--grn)',fontFamily:'var(--mono)',fontWeight:600}}>✓ Completada</span>}
+                </div>
+              </div>
+              <div style={{display:'flex',alignItems:'center',gap:8,flexShrink:0}}>
+                <span style={{fontSize:13,fontWeight:700,color:clr,fontFamily:'var(--mono)'}}>{(p*100).toFixed(0)}%</span>
+                <button onClick={() => delGoal(g.id)} style={{background:'none',border:'none',color:'var(--th)',fontSize:11,cursor:'pointer',padding:'2px 5px'}}>✕</button>
+              </div>
             </div>
-            {done
-              ? <span style={{fontSize:10,padding:'3px 10px',borderRadius:20,background:'rgba(10,92,62,.12)',color:'var(--grn)',fontFamily:'var(--mono)',fontWeight:600}}>Completada ✓</span>
-              : savingId === g.id
-                ? <div style={{display:'flex',gap:6,alignItems:'center',width:'100%'}}>
-                    <input type="number" min="0" value={addAmt} placeholder="Monto" autoFocus
-                      style={{flex:1,padding:'4px 7px',fontSize:11,borderRadius:6,border:'0.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)'}}
-                      onChange={e => setAddAmt(e.target.value)}
-                      onKeyDown={e => e.key === 'Enter' && confirmAddSaving(g)} />
-                    <Btn variant="primary" size="xs" onClick={() => confirmAddSaving(g)}>OK</Btn>
-                    <Btn variant="ghost" size="xs" onClick={() => { setSavingId(null); setAddAmt('') }}>×</Btn>
-                  </div>
-                : <Btn variant="ghost" size="xs" onClick={() => { setSavingId(g.id); setAddAmt('') }}>+ Agregar ahorro</Btn>
-            }
+            {/* Barra de progreso */}
+            <div style={{height:8,background:'var(--brd)',borderRadius:4,overflow:'hidden',marginBottom:8}}>
+              <div style={{height:'100%',width:(p*100)+'%',background:clr,borderRadius:4,transition:'width .4s'}}/>
+            </div>
+            {/* Footer */}
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+              <div style={{display:'flex',gap:6,alignItems:'center'}}>
+                <span style={{fontSize:11,fontFamily:'var(--mono)',color:clr,fontWeight:600}}>{fmtMoney(g.saved,sym)}</span>
+                <span style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)'}}>de {fmtMoney(g.target,sym)}</span>
+                <span style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)'}}>· {fmtMoney(g.target-g.saved,sym)} restante</span>
+              </div>
+              {!done && (
+                savingId === g.id
+                  ? <div style={{display:'flex',gap:6,alignItems:'center'}}>
+                      <input type="number" min="0" value={addAmt} placeholder="Monto" autoFocus
+                        style={{width:90,padding:'4px 7px',fontSize:11,borderRadius:6,border:'0.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)'}}
+                        onChange={e => setAddAmt(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && confirmAddSaving(g)} />
+                      <Btn variant="primary" size="xs" onClick={() => confirmAddSaving(g)}>OK</Btn>
+                      <Btn variant="ghost" size="xs" onClick={() => { setSavingId(null); setAddAmt('') }}>×</Btn>
+                    </div>
+                  : <Btn variant="ghost" size="xs" onClick={() => { setSavingId(g.id); setAddAmt('') }}>+ Agregar ahorro</Btn>
+              )}
+            </div>
           </div>
         )
       })}
