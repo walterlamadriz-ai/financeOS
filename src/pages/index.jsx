@@ -646,44 +646,117 @@ export function Goals() {
           <Btn variant="primary" onClick={calcularAPV}>Calcular proyección →</Btn>
           </div>
           {apvResult && (
-            <div style={{marginTop:16}}>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(150px,1fr))',gap:10,marginBottom:14}}>
-                <div style={{background:'var(--sur2)',borderRadius:8,padding:'12px 14px'}}>
-                  <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:.5,marginBottom:4}}>Empezando hoy</div>
-                  <div style={{fontSize:20,fontWeight:700,color:'var(--grn)',fontFamily:'var(--mono)'}}>${(apvResult.projectionToday/1000000).toFixed(1)}M</div>
-                </div>
-                <div style={{background:'var(--sur2)',borderRadius:8,padding:'12px 14px'}}>
-                  <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:.5,marginBottom:4}}>En 5 años más</div>
-                  <div style={{fontSize:20,fontWeight:700,color:'var(--tx)',fontFamily:'var(--mono)'}}>${(apvResult.projection5years/1000000).toFixed(1)}M</div>
-                </div>
-                <div style={{background:'var(--sur2)',borderRadius:8,padding:'12px 14px'}}>
-                  <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:.5,marginBottom:4}}>Diferencia</div>
-                  <div style={{fontSize:20,fontWeight:700,color:'var(--red,#e84142)',fontFamily:'var(--mono)'}}>-${(apvResult.difference/1000000).toFixed(1)}M</div>
-                </div>
-                <div style={{background:'var(--sur2)',borderRadius:8,padding:'12px 14px'}}>
-                  <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:.5,marginBottom:4}}>Bonif. Reg. A aprox/año</div>
-                  <div style={{fontSize:20,fontWeight:700,color:'var(--grn)',fontFamily:'var(--mono)'}}>${apvResult.bonusRegimeA.toLocaleString()}</div>
-                </div>
-              </div>
-              <div style={{fontSize:11,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:8}}>Acumulación estimada por edad:</div>
-              <div style={{display:'flex',flexDirection:'column',gap:6}}>
-                {apvResult.chartPoints.map(pt => (
-                  <div key={pt.age} style={{display:'flex',alignItems:'center',gap:8}}>
-                    <div style={{width:36,fontSize:11,color:'var(--th)',fontFamily:'var(--mono)',flexShrink:0}}>{pt.age}a</div>
-                    <div style={{flex:1,height:6,background:'var(--brd)',borderRadius:3,overflow:'hidden'}}>
-                      <div style={{height:'100%',width:Math.min(100,pt.today/apvResult.projectionToday*100)+'%',background:'var(--grn)',borderRadius:3}}/>
+            <div style={{marginTop:16,display:'flex',flexDirection:'column',gap:16}}>
+
+              {/* ── BLOQUE 1: Impacto tributario este año ── */}
+              {taxResult && (
+                <div style={{background:'var(--sur2)',borderRadius:10,padding:'16px',border:'0.5px solid var(--brd)'}}>
+                  <div style={{fontSize:11,fontWeight:600,color:'var(--tx)',marginBottom:4,fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:'.5px'}}>① Impacto tributario este año</div>
+                  <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:14,lineHeight:1.4}}>Aporte mensual ${Number(apvF.monthlyContribution).toLocaleString()} × 12 = ${(Number(apvF.monthlyContribution)*12).toLocaleString()}/año</div>
+                  <div style={{display:'flex',alignItems:'center',gap:20,flexWrap:'wrap'}}>
+                    {/* Donut SVG */}
+                    {(() => {
+                      const total = taxResult.impuestoSinAPV
+                      const ahorroA = taxResult.ahorroRegA
+                      const ahorroB = taxResult.ahorroRegB
+                      const mejor = taxResult.mayorBeneficio === 'B' ? ahorroB : ahorroA
+                      const pagado = Math.max(0, total - mejor)
+                      const pct = total > 0 ? mejor / total : 0
+                      const r = 40, cx = 50, cy = 50
+                      const circ = 2 * Math.PI * r
+                      const dash = pct * circ
+                      return (
+                        <div style={{flexShrink:0,textAlign:'center'}}>
+                          <svg width="100" height="100" viewBox="0 0 100 100">
+                            <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--brd)" strokeWidth="12"/>
+                            <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--grn)" strokeWidth="12"
+                              strokeDasharray={`${dash} ${circ}`} strokeDashoffset={circ/4}
+                              strokeLinecap="round" style={{transition:'stroke-dasharray .6s'}}/>
+                            <text x={cx} y={cy-6} textAnchor="middle" fontSize="10" fill="var(--grn)" fontWeight="700" fontFamily="var(--mono)">{(pct*100).toFixed(0)}%</text>
+                            <text x={cx} y={cy+8} textAnchor="middle" fontSize="7" fill="var(--th)" fontFamily="var(--mono)">ahorro</text>
+                          </svg>
+                          <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)'}}>vs impuesto sin APV</div>
+                        </div>
+                      )
+                    })()}
+                    {/* Tabla compacta */}
+                    <div style={{flex:1,minWidth:200}}>
+                      <div style={{display:'flex',flexDirection:'column',gap:6}}>
+                        <div style={{display:'flex',justifyContent:'space-between',padding:'8px 12px',background:'var(--bg)',borderRadius:6}}>
+                          <span style={{fontSize:12,fontFamily:'var(--mono)',color:'var(--th)'}}>Sin APV</span>
+                          <span style={{fontSize:12,fontFamily:'var(--mono)',color:'var(--tx)',fontWeight:600}}>${taxResult.impuestoSinAPV.toLocaleString()}/año</span>
+                        </div>
+                        <div style={{display:'flex',justifyContent:'space-between',padding:'8px 12px',background:'rgba(10,92,62,.06)',borderRadius:6,border:'0.5px solid rgba(10,92,62,.2)'}}>
+                          <span style={{fontSize:12,fontFamily:'var(--mono)',color:'var(--grn)'}}>Reg. A → ahorro</span>
+                          <span style={{fontSize:12,fontFamily:'var(--mono)',color:'var(--grn)',fontWeight:700}}>+${taxResult.ahorroRegA.toLocaleString()}/año</span>
+                        </div>
+                        <div style={{display:'flex',justifyContent:'space-between',padding:'8px 12px',background:'rgba(10,92,62,.06)',borderRadius:6,border:'0.5px solid rgba(10,92,62,.2)'}}>
+                          <span style={{fontSize:12,fontFamily:'var(--mono)',color:'var(--grn)'}}>Reg. B → ahorro</span>
+                          <span style={{fontSize:12,fontFamily:'var(--mono)',color:'var(--grn)',fontWeight:700}}>+${taxResult.ahorroRegB.toLocaleString()}/año</span>
+                        </div>
+                        <div style={{padding:'6px 12px',background:'var(--bg)',borderRadius:6}}>
+                          <span style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)'}}>Mayor beneficio orientativo: </span>
+                          <span style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--grn)',fontWeight:700}}>Régimen {taxResult.mayorBeneficio}</span>
+                          <span style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)'}}> · Tramo {taxResult.tramoActual} · {(taxResult.tasaMarginal*100).toFixed(0)}% marginal</span>
+                        </div>
+                      </div>
                     </div>
-                    <div style={{width:70,fontSize:11,color:'var(--grn)',fontFamily:'var(--mono)',textAlign:'right'}}>${(pt.today/1000000).toFixed(1)}M</div>
                   </div>
-                ))}
-              </div>
-              {apvF.regime !== 'unsure' && (
-                <div style={{marginTop:12,padding:'10px 12px',background:'var(--sur2)',borderRadius:8,fontSize:11,color:'var(--th)',fontFamily:'var(--mono)',lineHeight:1.6}}>
-                  {apvF.regime === 'A' ? '📌 Régimen A: El Estado bonifica el 15% de tu aporte anual (tope orientativo ~6 UTM/año). No rebaja base imponible.' : '📌 Régimen B: Tus aportes rebajan la base imponible. Tope orientativo 600 UF anuales. Sin bonificación directa del Estado.'}
+                  <div style={{marginTop:10,fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',lineHeight:1.5}}>
+                    Estimación anual orientativa. UTM ref. ${taxResult.UTMref.toLocaleString()} · AFP 10% + Salud 7% + Cesantía 0.6%. No constituye asesoría tributaria. Consulta con el SII.
+                  </div>
                 </div>
               )}
-              <div style={{marginTop:10,fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',lineHeight:1.5,padding:'8px 10px',background:'rgba(0,0,0,.03)',borderRadius:6}}>
-                Valores estimados en CLP nominal con rentabilidad del {apvF.expectedReturn}% anual. La rentabilidad pasada no garantiza resultados futuros. Consulta con tu administradora APV.
+
+              {/* ── BLOQUE 2: Proyección al jubilar ── */}
+              <div style={{background:'var(--sur2)',borderRadius:10,padding:'16px',border:'0.5px solid var(--brd)'}}>
+                <div style={{fontSize:11,fontWeight:600,color:'var(--tx)',marginBottom:4,fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:'.5px'}}>② Proyección acumulada al jubilar</div>
+                <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:14,lineHeight:1.4}}>Con ${Number(apvF.monthlyContribution).toLocaleString()}/mes al {apvF.expectedReturn}% anual — valores en CLP nominal orientativos</div>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8,marginBottom:16}}>
+                  <div style={{background:'var(--bg)',borderRadius:8,padding:'10px 12px',borderBottom:'2px solid var(--grn)'}}>
+                    <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:4}}>EMPEZANDO HOY</div>
+                    <div style={{fontSize:16,fontWeight:700,color:'var(--grn)',fontFamily:'var(--mono)'}}>{apvResult.projectionToday >= 1000000 ? '$'+(apvResult.projectionToday/1000000).toFixed(1)+'M' : '$'+apvResult.projectionToday.toLocaleString()}</div>
+                    <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginTop:2}}>acumulado est. al retiro</div>
+                  </div>
+                  <div style={{background:'var(--bg)',borderRadius:8,padding:'10px 12px',borderBottom:'2px solid var(--brd)'}}>
+                    <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:4}}>EN 5 AÑOS MÁS</div>
+                    <div style={{fontSize:16,fontWeight:700,color:'var(--tx)',fontFamily:'var(--mono)'}}>{apvResult.projection5years >= 1000000 ? '$'+(apvResult.projection5years/1000000).toFixed(1)+'M' : '$'+apvResult.projection5years.toLocaleString()}</div>
+                    <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginTop:2}}>si empezás en 5 años</div>
+                  </div>
+                  <div style={{background:'var(--bg)',borderRadius:8,padding:'10px 12px',borderBottom:'2px solid #e84142'}}>
+                    <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:4}}>COSTO DE ESPERAR</div>
+                    <div style={{fontSize:16,fontWeight:700,color:'#e84142',fontFamily:'var(--mono)'}}>-{apvResult.difference >= 1000000 ? '$'+(apvResult.difference/1000000).toFixed(1)+'M' : '$'+apvResult.difference.toLocaleString()}</div>
+                    <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginTop:2}}>menos al jubilar</div>
+                  </div>
+                </div>
+                {/* Barras por edad — hoy vs 5 años */}
+                <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:8}}>Crecimiento estimado por edad:</div>
+                <div style={{display:'flex',flexDirection:'column',gap:8}}>
+                  {apvResult.chartPoints.map(pt => (
+                    <div key={pt.age}>
+                      <div style={{display:'flex',justifyContent:'space-between',marginBottom:3}}>
+                        <span style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)'}}>{pt.age} años</span>
+                        <span style={{fontSize:10,color:'var(--grn)',fontFamily:'var(--mono)',fontWeight:600}}>{pt.today >= 1000000 ? '$'+(pt.today/1000000).toFixed(1)+'M' : '$'+pt.today.toLocaleString()}</span>
+                      </div>
+                      <div style={{position:'relative',height:8,background:'var(--brd)',borderRadius:4,overflow:'hidden'}}>
+                        <div style={{position:'absolute',height:'100%',width:Math.min(100,pt.in5years/apvResult.projectionToday*100)+'%',background:'rgba(10,92,62,.2)',borderRadius:4}}/>
+                        <div style={{position:'absolute',height:'100%',width:Math.min(100,pt.today/apvResult.projectionToday*100)+'%',background:'var(--grn)',borderRadius:4,opacity:.85}}/>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{display:'flex',gap:12,marginTop:10}}>
+                  <div style={{display:'flex',alignItems:'center',gap:4}}><div style={{width:10,height:10,borderRadius:2,background:'var(--grn)',opacity:.85}}/><span style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)'}}>Empezando hoy</span></div>
+                  <div style={{display:'flex',alignItems:'center',gap:4}}><div style={{width:10,height:10,borderRadius:2,background:'rgba(10,92,62,.2)'}}/><span style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)'}}>En 5 años más</span></div>
+                </div>
+                {apvF.regime !== 'unsure' && (
+                  <div style={{marginTop:12,padding:'8px 12px',background:'var(--bg)',borderRadius:6,fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',lineHeight:1.6}}>
+                    {apvF.regime === 'A' ? '📌 Reg. A: Bonificación estatal 15% del aporte anual (tope ~6 UTM). No rebaja base imponible.' : '📌 Reg. B: Rebaja base imponible. Tope orientativo 600 UF anuales. Sin bonificación directa.'}
+                  </div>
+                )}
+                <div style={{marginTop:10,fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',lineHeight:1.5}}>
+                  Proyección en CLP nominal con {apvF.expectedReturn}% anual. La rentabilidad pasada no garantiza resultados futuros. Consulta con tu administradora APV.
+                </div>
               </div>
               {taxResult && (
                 <div style={{marginTop:16,paddingTop:16,borderTop:'0.5px solid var(--brd)'}}>
