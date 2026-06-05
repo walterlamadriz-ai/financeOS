@@ -1,16 +1,76 @@
+import * as XLSX from 'xlsx'
 // src/pages/Import/fileParser.js
 // Parser CSV — sin dependencias externas · 100% local · sin envío de datos
 
 export const MAX_ROWS = 1000
-export const SUPPORTED_TYPES = ['.csv']
+export const SUPPORTED_TYPES = ['.csv', '.xlsx', '.xls']
 
 export async function parseFile(file) {
   const ext = file.name.split('.').pop().toLowerCase()
+  if (ext === 'xlsx' || ext === 'xls') {
+    return parseXLSX(file)
+  }
   if (ext !== 'csv') {
-    throw new Error('Solo se aceptan archivos .csv. Si tienes un Excel, ábrelo y guárdalo como CSV.')
+    throw new Error('Formato no soportado. Se aceptan archivos .csv, .xlsx y .xls')
   }
   const text = await readAsText(file)
   return parseCSV(text)
+}
+
+async function parseXLSX(file) {
+  return new Promise((res, rej) => {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target.result)
+        const workbook = XLSX.read(data, { type: 'array', cellDates: true })
+        // Usar la primera hoja
+        const sheetName = workbook.SheetNames[0]
+        const sheet = workbook.Sheets[sheetName]
+        // Convertir a JSON — primera fila como headers
+        const jsonRows = XLSX.utils.sheet_to_json(sheet, {
+          header: 1,
+          raw: false,
+          dateNF: 'yyyy-mm-dd',
+          defval: '',
+        })
+        if (!jsonRows || jsonRows.length < 2) {
+          rej(new Error('El archivo Excel no contiene filas válidas.'))
+          return
+        }
+        // Buscar la primera fila con contenido real como headers
+        // Algunos bancos tienen filas vacías o de título al inicio
+        let headerRowIdx = 0
+        for (let i = 0; i < Math.min(10, jsonRows.length); i++) {
+          const row = jsonRows[i]
+          const nonEmpty = row.filter(c => c && String(c).trim())
+          if (nonEmpty.length >= 3) { headerRowIdx = i; break }
+        }
+        const headers = jsonRows[headerRowIdx]
+          .map(h => String(h || '').trim())
+          .filter(h => h)
+        const dataRows = []
+        for (let i = headerRowIdx + 1; i < jsonRows.length; i++) {
+          const cells = jsonRows[i]
+          if (!cells || cells.every(c => !c || !String(c).trim())) continue
+          const row = { _rowIndex: i }
+          headers.forEach((h, idx) => { row[h] = String(cells[idx] || '').trim() })
+          dataRows.push(row)
+        }
+        res({
+          headers,
+          rows: dataRows.slice(0, MAX_ROWS),
+          totalLines: dataRows.length,
+          sourceType: 'xlsx',
+          sheetName,
+        })
+      } catch (err) {
+        rej(new Error('Error al leer el Excel: ' + err.message))
+      }
+    }
+    reader.onerror = () => rej(new Error('No se pudo leer el archivo Excel'))
+    reader.readAsArrayBuffer(file)
+  })
 }
 
 function readAsText(file) {

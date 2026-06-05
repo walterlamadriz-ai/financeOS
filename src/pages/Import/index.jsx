@@ -97,8 +97,8 @@ export default function ImportMovements() {
 
   async function handleFile(f) {
     const ext = f.name.split('.').pop().toLowerCase()
-    if (ext !== 'csv') {
-      setWarning('Solo se aceptan archivos .csv. Si tienes un archivo de otro formato, expórtalo como CSV primero.')
+    if (!['csv', 'xlsx', 'xls'].includes(ext)) {
+      setWarning('Formato no soportado. Se aceptan archivos .csv, .xlsx y .xls')
       return
     }
     setWarning(null)
@@ -241,7 +241,7 @@ export default function ImportMovements() {
                   </>
               }
             </div>
-            <input id="csv-input" type="file" accept=".csv" style={{ display: 'none' }}
+            <input id="csv-input" type="file" accept=".csv,.xlsx,.xls" style={{ display: 'none' }}
               onChange={e => e.target.files[0] && handleFile(e.target.files[0])} />
             <div style={s.privacy}>
               <span>◑</span>
@@ -249,7 +249,7 @@ export default function ImportMovements() {
             </div>
             <div style={s.hint}>
               <span>→</span>
-              <span>Si tu banco entrega el archivo en otro formato, ábrelo en una planilla y guárdalo como CSV antes de importarlo.</span>
+              <span>Se aceptan archivos .csv y .xlsx directamente desde tu banco.</span>
             </div>
           </div>
 
