@@ -552,39 +552,47 @@ export default function Advisor() {
         <TemplateSelector compact onApplied={(t) => showToast(`Plantilla "${t.name}" aplicada.`, 'ok')} />
       </Card>
 
-      {/* CTA reporte PDF */}
-      <div style={{
-        padding: '16px 20px', background: 'var(--grn-bg)',
-        border: '0.5px solid rgba(26,163,104,.2)', borderRadius: 8,
-        display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',
-      }}>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx)', marginBottom: 2 }}>
-            Exportar reporte PDF profesional
+      {/* Preview PDF + CTA */}
+      <div style={{border:'0.5px solid rgba(26,163,104,.2)',borderRadius:10,overflow:'hidden'}}>
+        {/* Preview mini del reporte */}
+        <div style={{background:'#fff',padding:'16px 20px',borderBottom:'0.5px solid rgba(0,0,0,.08)'}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+            <div style={{fontSize:11,fontWeight:700,color:'#1a1a1a',letterSpacing:.5}}>REPORTE FINANCIERO · VISTA PREVIA</div>
+            <div style={{fontSize:9,color:'#888',fontFamily:'monospace'}}>FinanceOS Pro</div>
           </div>
-          <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)' }}>
-            Genera un PDF con métricas, semáforo, alertas y notas del asesor. Listo para compartir con el cliente.
+          <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8,marginBottom:12}}>
+            {[
+              {l:'Ingresos mes',    v:fmtMoney(totalIncome, sym), c:'#1a6b4a'},
+              {l:'Gastos mes',      v:fmtMoney(totalExpense, sym), c:'#e05a4a'},
+              {l:'Tasa de ahorro',  v:pctStr(savingsRate), c:'#1a6b4a'},
+            ].map((item,i) => (
+              <div key={i} style={{background:'#f8f9fa',borderRadius:6,padding:'8px 10px'}}>
+                <div style={{fontSize:8,color:'#888',marginBottom:2,textTransform:'uppercase',letterSpacing:.5}}>{item.l}</div>
+                <div style={{fontSize:13,fontWeight:700,color:item.c,fontFamily:'monospace'}}>{item.v}</div>
+              </div>
+            ))}
           </div>
-          {pdfError && (
-            <div style={{ fontSize: 11, color: '#e05a4a', fontFamily: 'var(--mono)', marginTop: 4 }}>
-              {pdfError}
-            </div>
-          )}
+          <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+            {['✓ Semáforo financiero','✓ Alertas automáticas','✓ Deudas activas','✓ Metas de ahorro','✓ Notas del asesor'].map((t,i) => (
+              <span key={i} style={{fontSize:9,padding:'2px 8px',borderRadius:10,background:'rgba(26,107,74,.08)',color:'#1a6b4a',fontFamily:'monospace'}}>{t}</span>
+            ))}
+          </div>
         </div>
-        <button
-          onClick={handleExportPDF}
-          disabled={pdfLoading || noData}
-          style={{
-            background: pdfLoading ? 'var(--sur)' : 'var(--grn)',
-            color: pdfLoading ? 'var(--th)' : '#fff',
-            border: 'none', borderRadius: 6, padding: '10px 20px',
-            fontSize: 12, fontWeight: 600, cursor: pdfLoading || noData ? 'not-allowed' : 'pointer',
-            fontFamily: 'var(--syne, sans-serif)', flexShrink: 0, opacity: noData ? 0.5 : 1,
-            transition: 'all .15s',
-          }}
-        >
-          {pdfLoading ? 'Generando PDF…' : '↓ Exportar PDF'}
-        </button>
+        {/* CTA */}
+        <div style={{padding:'14px 20px',background:'var(--grn-bg)',display:'flex',alignItems:'center',gap:14,flexWrap:'wrap'}}>
+          <div style={{flex:1}}>
+            <div style={{fontSize:13,fontWeight:600,color:'var(--tx)',marginBottom:2}}>Exportar reporte PDF profesional</div>
+            <div style={{fontSize:11,color:'var(--th)',fontFamily:'var(--mono)'}}>Listo para compartir con el cliente en 1 click.</div>
+            {pdfError && <div style={{fontSize:11,color:'#e05a4a',fontFamily:'var(--mono)',marginTop:4}}>{pdfError}</div>}
+          </div>
+          <button
+            onClick={handleExportPDF}
+            disabled={pdfLoading || noData}
+            style={{background:pdfLoading?'var(--sur)':'var(--grn)',color:pdfLoading?'var(--th)':'#fff',border:'none',borderRadius:6,padding:'10px 20px',fontSize:12,fontWeight:600,cursor:pdfLoading||noData?'not-allowed':'pointer',fontFamily:'var(--syne, sans-serif)',flexShrink:0,opacity:noData?0.5:1,transition:'all .15s'}}
+          >
+            {pdfLoading ? 'Generando PDF…' : '↓ Exportar PDF'}
+          </button>
+        </div>
       </div>
 
       {/* ── SECCIÓN SUSCRIPCIONES EN MODO ASESOR ── */}
