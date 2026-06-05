@@ -6,6 +6,7 @@ import { useState, useCallback, useMemo } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
 import { dbGetAll, dbAdd } from '../../core/db/index.js'
 import { uid } from '../../utils/index.js'
+import { detectBankTemplate, applyTemplate } from './bankTemplates.js'
 import {
   parseFile, detectColumns, validateRows, detectDuplicates,
   createImportBatch, buildTransactions, MAX_ROWS,
@@ -84,6 +85,7 @@ export default function ImportMovements() {
   const [rows, setRows] = useState([])
   const [history, setHistory] = useState([])
   const [importing, setImporting] = useState(false)
+  const [detectedBank, setDetectedBank] = useState(null)
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
   const [warning, setWarning] = useState(null)
@@ -105,18 +107,34 @@ export default function ImportMovements() {
       const result = await parseFile(f)
       if (result.rows.length === 0) { setWarning('El archivo no contiene filas válidas.'); return }
       const suggested = detectColumns(result.headers)
+      const bankTemplate = detectBankTemplate(result.headers)
       setFile(f)
       setParsed(result)
-      setMapping({
-        date: suggested.date || result.headers[0] || '',
-        description: suggested.description || result.headers[1] || '',
-        amount: suggested.amount || result.headers[2] || '',
-        debit: suggested.debit || '',
-        credit: suggested.credit || '',
-        category: suggested.category || '',
-        account: suggested.account || '',
-      })
-      if (suggested.debit && suggested.credit) setModeConfig({ mode: 'debit_credit', negativeIsExpense: true })
+      setDetectedBank(bankTemplate)
+      if (bankTemplate) {
+        const templateMapping = applyTemplate(bankTemplate, result.headers)
+        setMapping({
+          date:        templateMapping.date        || suggested.date        || result.headers[0] || '',
+          description: templateMapping.description || suggested.description || result.headers[1] || '',
+          amount:      templateMapping.amount      || suggested.amount      || result.headers[2] || '',
+          debit:       templateMapping.debit       || suggested.debit       || '',
+          credit:      templateMapping.credit      || suggested.credit      || '',
+          category:    suggested.category || '',
+          account:     suggested.account  || '',
+        })
+        setModeConfig(bankTemplate.config)
+      } else {
+        setMapping({
+          date: suggested.date || result.headers[0] || '',
+          description: suggested.description || result.headers[1] || '',
+          amount: suggested.amount || result.headers[2] || '',
+          debit: suggested.debit || '',
+          credit: suggested.credit || '',
+          category: suggested.category || '',
+          account: suggested.account || '',
+        })
+        if (suggested.debit && suggested.credit) setModeConfig({ mode: 'debit_credit', negativeIsExpense: true })
+      }
       if (result.totalLines > MAX_ROWS) setWarning(`El archivo tiene ${result.totalLines} filas. Se procesarán solo las primeras ${MAX_ROWS}.`)
       setStep(1)
     } catch (err) {
@@ -271,9 +289,25 @@ export default function ImportMovements() {
       {/* STEP 1 — Mapear columnas */}
       {step === 1 && parsed && (
         <div style={s.card}>
-          <div style={s.cardTitle}>Indica qué columna corresponde a cada campo</div>
+          {/* Banner detección banco */}
+          {detectedBank ? (
+            <div style={{display:'flex',alignItems:'center',gap:12,padding:'12px 14px',background:'rgba(10,92,62,.07)',border:'0.5px solid rgba(10,92,62,.2)',borderRadius:8,marginBottom:16}}>
+              <div style={{fontSize:22,flexShrink:0}}>{detectedBank.flag}</div>
+              <div style={{flex:1}}>
+                <div style={{fontSize:12,fontWeight:600,color:'var(--grn)',marginBottom:2}}>✓ Detectamos formato {detectedBank.name}</div>
+                <div style={{fontSize:11,color:'var(--th)',fontFamily:'var(--mono)'}}>{detectedBank.hint} · Columnas mapeadas automáticamente</div>
+              </div>
+              <div style={{fontSize:10,padding:'3px 8px',borderRadius:4,background:'rgba(10,92,62,.1)',color:'var(--grn)',fontFamily:'var(--mono)',flexShrink:0}}>Auto</div>
+            </div>
+          ) : (
+            <div style={{display:'flex',alignItems:'center',gap:10,padding:'10px 14px',background:'var(--sur2)',border:'0.5px solid var(--brd)',borderRadius:8,marginBottom:16}}>
+              <div style={{fontSize:18}}>📄</div>
+              <div style={{fontSize:11,color:'var(--th)',fontFamily:'var(--mono)'}}>Banco no detectado — verifica el mapeo de columnas manualmente.</div>
+            </div>
+          )}
+          <div style={s.cardTitle}>Confirma el mapeo de columnas</div>
           <p style={{ fontSize: 12, color: 'var(--th)', fontFamily: 'var(--mono)', marginBottom: 16 }}>
-            FinanceOS detectó las columnas automáticamente. Confirma o corrige el mapeo antes de continuar.
+            {detectedBank ? 'Mapeo aplicado automáticamente. Podés ajustar si algo no coincide.' : 'FinanceOS detectó las columnas automáticamente. Confirma o corrige el mapeo antes de continuar.'}
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
