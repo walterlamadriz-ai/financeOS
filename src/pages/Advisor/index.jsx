@@ -562,9 +562,9 @@ export default function Advisor() {
           </div>
           <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8,marginBottom:12}}>
             {[
-              {l:'Ingresos mes',    v:fmtMoney(totalIncome, sym), c:'#1a6b4a'},
-              {l:'Gastos mes',      v:fmtMoney(totalExpense, sym), c:'#e05a4a'},
-              {l:'Tasa de ahorro',  v:pctStr(savingsRate), c:'#1a6b4a'},
+              {l:'Ingresos mes',    v:fmtMoney(mIncome, sym), c:'#1a6b4a'},
+              {l:'Gastos mes',      v:fmtMoney(mExpense, sym), c:'#e05a4a'},
+              {l:'Tasa de ahorro',  v:fmtPct(mIncome>0?(mIncome-mExpense)/mIncome:0), c:'#1a6b4a'},
             ].map((item,i) => (
               <div key={i} style={{background:'#f8f9fa',borderRadius:6,padding:'8px 10px'}}>
                 <div style={{fontSize:8,color:'#888',marginBottom:2,textTransform:'uppercase',letterSpacing:.5}}>{item.l}</div>
