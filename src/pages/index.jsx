@@ -646,7 +646,7 @@ export function Goals() {
             <Btn variant="primary" onClick={calcularAPV}>Calcular proyección →</Btn>
           </div>
           {apvResult && (
-            <div style={{marginTop:16,display:'flex',flexDirection:'column',gap:16}}>
+            <div style={{marginTop:16,display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:16,alignItems:'start'}}>
 
               {/* ── BLOQUE 1: Impacto tributario este año ── */}
               {taxResult && (
