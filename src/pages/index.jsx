@@ -700,7 +700,7 @@ export function Goals({ setPage }) {
       {goals.map(g => {
         const p    = g.target > 0 ? Math.min(g.saved / g.target, 1) : 0
         const done = g.saved >= g.target
-        const clr  = done ? 'var(--grn)' : p >= 0.7 ? '#f5a623' : '#3b82f6'
+        const clr  = done ? 'var(--grn)' : p >= 0.7 ? '#d4982a' : p < 0.2 ? 'var(--red)' : 'var(--tm)'
         return (
           <div key={g.id} style={{background:'var(--sur2)',borderRadius:10,padding:'14px 16px',border:`0.5px solid ${done?'rgba(10,92,62,.25)':'var(--brd)'}`}}>
             {/* Header */}
