@@ -586,8 +586,9 @@ export function Goals() {
           <div style={{fontSize:11,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:14,lineHeight:1.6,padding:'8px 10px',background:'rgba(255,165,0,.07)',borderRadius:6,border:'0.5px solid rgba(255,165,0,.2)'}}>
             ⚠ Simulación orientativa. No constituye asesoría financiera, tributaria, previsional ni legal. Consulta con tu administradora APV o el SII.
           </div>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:16,marginBottom:16,alignItems:'start'}}>
           {/* ── PASO 1: Situación actual ── */}
-          <div style={{marginBottom:16,padding:'14px',background:'var(--sur2)',borderRadius:8,border:'0.5px solid var(--brd)'}}>
+          <div style={{padding:'14px',background:'var(--sur2)',borderRadius:8,border:'0.5px solid var(--brd)'}}>
             <div style={{fontSize:11,fontWeight:600,color:'var(--tx)',marginBottom:10,fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:'.5px'}}>① Tu situación actual</div>
             <FormRow>
               <FormGroup label="Sueldo bruto mensual ($)"><input type="number" min="0" value={apvF.grossMonthly} placeholder="ej. 2000000" onChange={e => setApvF(p => ({...p, grossMonthly: e.target.value}))} /></FormGroup>
@@ -645,6 +646,7 @@ export function Goals() {
             </FormRow>
             <Btn variant="primary" onClick={calcularAPV}>Calcular proyección →</Btn>
           </div>
+          </div>{/* fin grid pasos */}
           {apvResult && (
             <div style={{marginTop:16,display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:16,alignItems:'start'}}>
 
