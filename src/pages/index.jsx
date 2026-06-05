@@ -381,6 +381,43 @@ export function Budgets() {
               </div>
             )
           })()}
+          {/* ── Avance por categoría dentro del resumen ── */}
+          {budgets.length > 0 && (
+            <div style={{marginTop:16,paddingTop:16,borderTop:'0.5px solid var(--brd)'}}>
+              <div style={{fontFamily:'var(--mono)',fontSize:10,letterSpacing:'1px',textTransform:'uppercase',color:'var(--grn2)',marginBottom:10}}>
+                Avance por categoría · {monthLabel(activeMonth)}
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(130px,1fr))',gap:10}}>
+                {budgets.map(b => {
+                  const spent = expByCat[b.category] || 0
+                  const pct = b.limit > 0 ? spent/b.limit : 0
+                  const over = spent > b.limit
+                  const warn = !over && pct >= 0.8
+                  const clr = over ? '#e84142' : warn ? 'var(--amber,#f5a623)' : 'var(--grn)'
+                  const r2 = 32, cx2 = 45, cy2 = 45
+                  const circ2 = 2 * Math.PI * r2
+                  const dash2 = Math.min(pct, 1) * circ2
+                  return (
+                    <div key={b.id} style={{background:'var(--bg)',borderRadius:8,padding:'10px',border:`0.5px solid ${over?'#e84142':warn?'rgba(245,166,35,.3)':'var(--brd)'}`,display:'flex',flexDirection:'column',alignItems:'center',gap:6,position:'relative'}}>
+                      <button onClick={() => delBudget(b.id)} style={{position:'absolute',top:4,right:4,background:'none',border:'none',color:'var(--th)',fontSize:10,cursor:'pointer',padding:'1px 4px',lineHeight:1}}>✕</button>
+                      <div style={{fontSize:10,fontWeight:600,color:'var(--tx)',fontFamily:'var(--mono)',textAlign:'center',lineHeight:1.2,paddingRight:10}}>{b.category}</div>
+                      <svg width="90" height="90" viewBox="0 0 90 90">
+                        <circle cx={cx2} cy={cy2} r={r2} fill="none" stroke="var(--brd)" strokeWidth="9"/>
+                        <circle cx={cx2} cy={cy2} r={r2} fill="none" stroke={clr} strokeWidth="9"
+                          strokeDasharray={`${dash2} ${circ2}`} strokeDashoffset={circ2/4} strokeLinecap="round"/>
+                        <text x={cx2} y={cy2-4} textAnchor="middle" fontSize="10" fill={clr} fontWeight="700" fontFamily="var(--mono)">{(pct*100).toFixed(0)}%</text>
+                        <text x={cx2} y={cy2+8} textAnchor="middle" fontSize="6" fill="var(--th)" fontFamily="var(--mono)">{over?'EXCEDIDO':warn?'ATENCIÓN':'en rango'}</text>
+                      </svg>
+                      <div style={{textAlign:'center'}}>
+                        <div style={{fontSize:11,fontWeight:700,color:clr,fontFamily:'var(--mono)'}}>{fmtMoney(spent,sym)}</div>
+                        <div style={{fontSize:8,color:'var(--th)',fontFamily:'var(--mono)'}}>de {fmtMoney(b.limit,sym)}</div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
         </Card>
       </div>
 
