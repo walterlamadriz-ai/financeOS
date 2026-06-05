@@ -505,7 +505,7 @@ export function Debts() {
 // ─── GOALS ────────────────────────────────────────────────────────────────────
 import GoalProgressList from '../components/charts/GoalProgressList.jsx'
 
-export function Goals() {
+export function Goals({ setPage }) {
   const { goals, addGoal, delGoal, updateGoal, settings } = useApp()
   const [show, setShow]         = useState(false)
   const [f, setF]               = useState({ name: '', target: '', saved: '', targetDate: '', priority: 'Media', color: '#1a6b4a' })
