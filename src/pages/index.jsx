@@ -548,11 +548,7 @@ export function Goals({ setPage }) {
       </div>
       <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
         <Btn variant="primary" onClick={() => setShow(s => !s)}>{show ? '— Cerrar' : '+ Nueva meta'}</Btn>
-        {isChile && (
-          <Btn variant="ghost" onClick={() => setPage('apv')}>
-            🇨🇱 Simulador APV Chile →
-          </Btn>
-        )}
+
       </div>
 
       {show && (
