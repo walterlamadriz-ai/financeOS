@@ -221,11 +221,10 @@ export function Expenses() {
 import BudgetProgressList from '../components/charts/BudgetProgressList.jsx'
 
 export function Budgets() {
-  const { budgets, addBudget, delBudget, expenses, settings } = useApp()
+  const { budgets, addBudget, delBudget, expenses, incomes, settings } = useApp()
   const [f, setF]   = useState({ category: 'Vivienda', limit: '' })
   const [err, setErr] = useState('')
   const [showSuggest, setShowSuggest] = useState(false)
-  const [suggestIncome, setSuggestIncome] = useState('')
   const sym = CURRENCY_SYMBOLS[settings.currency] || '$'
   const isChile = (settings.country || 'CL') === 'CL'
   const ahorroLabel = isChile ? 'Ahorro/APV/Inversión' : 'Ahorro/Inversión'
@@ -235,6 +234,8 @@ export function Budgets() {
   const mExpenses    = useMemo(() => expenses.filter(r => r.date?.startsWith(activeMonth)), [expenses, activeMonth])
 
   const expByCat     = useMemo(() => { const m = {}; mExpenses.forEach(e => { m[e.category] = (m[e.category] || 0) + e.amount }); return m }, [mExpenses])
+  const mIncomesB    = useMemo(() => incomes.filter(r => r.date?.startsWith(activeMonth)), [incomes, activeMonth])
+  const ingresoNeto  = useMemo(() => mIncomesB.reduce((s, r) => s + r.amount, 0), [mIncomesB])
   const totalBudget  = useMemo(() => budgets.reduce((s, b) => s + b.limit, 0), [budgets])
 
   // FIX: solo gastos de categorías con presupuesto definido
@@ -282,12 +283,18 @@ export function Budgets() {
             {showSuggest && (
               <div style={{marginTop:12,padding:'14px',background:'var(--sur2)',borderRadius:8,border:'0.5px solid var(--brd)'}}>
                 <div style={{fontSize:11,fontWeight:600,color:'var(--tx)',marginBottom:6,fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:'.5px'}}>Modelo 50/30/20</div>
-                <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:10,lineHeight:1.5}}>Ingresa tu ingreso neto mensual y aplicamos la distribución recomendada.</div>
-                <FormGroup label={`Ingreso neto mensual (${settings.currency || 'CLP'})`}>
-                  <input type="number" min="0" value={suggestIncome} placeholder="ej. 1500000" onChange={e => setSuggestIncome(e.target.value)} />
-                </FormGroup>
-                {suggestIncome && Number(suggestIncome) > 0 && (() => {
-                  const inc = Number(suggestIncome)
+                {ingresoNeto > 0 ? (
+                  <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:12,padding:'8px 12px',background:'var(--bg)',borderRadius:6}}>
+                    <span style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)'}}>Ingreso neto del mes:</span>
+                    <span style={{fontSize:13,fontWeight:700,color:'var(--grn)',fontFamily:'var(--mono)'}}>{fmtMoney(ingresoNeto, sym)}</span>
+                  </div>
+                ) : (
+                  <div style={{fontSize:10,color:'var(--red,#e84142)',fontFamily:'var(--mono)',marginBottom:10,padding:'6px 10px',background:'rgba(232,65,66,.06)',borderRadius:6}}>
+                    ⚠ No hay ingresos registrados en {monthLabel(activeMonth)}. Agrega ingresos primero.
+                  </div>
+                )}
+                {ingresoNeto > 0 && (() => {
+                  const inc = ingresoNeto
                   const sugs = [
                     { cat:'Vivienda',        pct:0.25, grupo:'Necesidades' },
                     { cat:'Alimentación',    pct:0.12, grupo:'Necesidades' },
@@ -332,6 +339,7 @@ export function Budgets() {
                     </div>
                   )
                 })()}
+                ) : null}
               </div>
             )}
           </div>
@@ -786,6 +794,8 @@ export function Reports() {
   const necesidad    = useMemo(() => mExpenses.filter(r => r.type === 'Necesidad').reduce((s, r) => s + r.amount, 0), [mExpenses])
   const deseos       = useMemo(() => mExpenses.filter(r => r.type === 'Deseo').reduce((s, r)    => s + r.amount, 0), [mExpenses])
   const expByCat     = useMemo(() => { const m = {}; mExpenses.forEach(e => { m[e.category] = (m[e.category] || 0) + e.amount }); return m }, [mExpenses])
+  const mIncomesB    = useMemo(() => incomes.filter(r => r.date?.startsWith(activeMonth)), [incomes, activeMonth])
+  const ingresoNeto  = useMemo(() => mIncomesB.reduce((s, r) => s + r.amount, 0), [mIncomesB])
   const overBudget   = useMemo(() => budgets.filter(b => (expByCat[b.category] || 0) > b.limit), [budgets, expByCat])
   const neededToSave = Math.max(0, totalIncome * (settings.savingGoalPct / 100 || 0.25) - Math.max(0, balance))
 
