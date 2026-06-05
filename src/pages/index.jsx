@@ -257,13 +257,19 @@ export function Budgets() {
         <MonthSelector incomes={[]} expenses={expenses} />
       </div>
       <p style={{fontSize:12,color:"var(--th)",fontFamily:"var(--mono)",marginBottom:12,marginTop:-8}}>Compara gasto usado vs presupuesto disponible por categoría.</p>
-      <div className="kpi-row" style={{ gridTemplateColumns: 'repeat(3,1fr)' }}>
+      <div className="kpi-row" style={{ gridTemplateColumns: 'repeat(4,1fr)' }}>
         <KPI label="Presupuesto total"    value={fmtMoney(totalBudget, sym)} />
-        {/* FIX: gastado = solo categorías con presupuesto */}
         <KPI label="Gastado (con presup.)" value={fmtMoney(totalBudgeted, sym)} color="red" sub={totalBudget > 0 ? fmtPct(totalBudgeted / totalBudget) : '-'} />
         <KPI label="Categorías excedidas"  value={overBudget.length} color={overBudget.length > 0 ? 'red' : 'green'} sub={overBudget.length > 0 ? 'revisar' : 'todo en orden'} />
+        <KPI label="Cobertura con ingresos" value={ingresoNeto > 0 ? fmtPct(totalBudget / ingresoNeto) : '—'} color={ingresoNeto > 0 && totalBudget > ingresoNeto ? 'red' : ingresoNeto > 0 && totalBudget / ingresoNeto > 0.8 ? 'amber' : 'green'} sub={ingresoNeto > 0 ? (totalBudget > ingresoNeto ? '⚠ Supera ingresos' : totalBudget / ingresoNeto > 0.8 ? 'Sin margen de ahorro' : 'Margen saludable') : 'Sin ingresos registrados'} />
       </div>
       {overBudget.length > 0 && <Alert type="danger">⚠ {overBudget.map(b => b.category).join(', ')} superaron el límite mensual.</Alert>}
+      {ingresoNeto > 0 && totalBudget > ingresoNeto && (
+        <Alert type="danger">⚠ Tu presupuesto total ({fmtMoney(totalBudget, sym)}) supera tus ingresos netos ({fmtMoney(ingresoNeto, sym)}). Estás planificando un déficit de {fmtMoney(totalBudget - ingresoNeto, sym)}.</Alert>
+      )}
+      {ingresoNeto > 0 && totalBudget > 0 && totalBudget <= ingresoNeto && totalBudget / ingresoNeto > 0.8 && (
+        <Alert type="warning">⚠ Tu presupuesto usa el {fmtPct(totalBudget / ingresoNeto)} de tus ingresos. Considera reservar al menos un 20% para ahorro.</Alert>
+      )}
       {/* Layout 2 columnas: izquierda=formulario+modelo, derecha=resumen+tarjetas */}
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:16,alignItems:'start'}}>
         <div style={{display:'flex',flexDirection:'column',gap:16}}>
