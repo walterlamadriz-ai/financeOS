@@ -224,7 +224,6 @@ export function Budgets() {
   const { budgets, addBudget, delBudget, expenses, incomes, settings } = useApp()
   const [f, setF]   = useState({ category: 'Vivienda', limit: '' })
   const [err, setErr] = useState('')
-  const [showSuggest, setShowSuggest] = useState(false)
   const sym = CURRENCY_SYMBOLS[settings.currency] || '$'
   const isChile = (settings.country || 'CL') === 'CL'
   const ahorroLabel = isChile ? 'Ahorro/APV/Inversión' : 'Ahorro/Inversión'
@@ -275,74 +274,66 @@ export function Budgets() {
             <FormGroup label={`Límite mensual (${settings.currency || 'CLP'})`}><input type="number" min="0" value={f.limit} placeholder="0" onChange={e => setF(p => ({ ...p, limit: e.target.value }))} /></FormGroup>
           </FormRow>
           <Btn variant="primary" onClick={submit}>+ Agregar presupuesto</Btn>
-          {/* ── Sugerir presupuesto 50/30/20 ── */}
-          <div style={{marginTop:14,paddingTop:14,borderTop:'0.5px solid var(--brd)'}}>
-            <button onClick={() => setShowSuggest(s => !s)} style={{background:'none',border:'0.5px solid var(--grn)',color:'var(--grn)',borderRadius:6,padding:'6px 12px',fontSize:11,fontFamily:'var(--mono)',cursor:'pointer'}}>
-              💡 {showSuggest ? 'Ocultar sugerencia' : 'Sugerir presupuesto 50/30/20'}
-            </button>
-            {showSuggest && (
-              <div style={{marginTop:12,padding:'14px',background:'var(--sur2)',borderRadius:8,border:'0.5px solid var(--brd)'}}>
-                <div style={{fontSize:11,fontWeight:600,color:'var(--tx)',marginBottom:6,fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:'.5px'}}>Modelo 50/30/20</div>
-                {ingresoNeto > 0 ? (
-                  <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:12,padding:'8px 12px',background:'var(--bg)',borderRadius:6}}>
-                    <span style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)'}}>Ingreso neto del mes:</span>
-                    <span style={{fontSize:13,fontWeight:700,color:'var(--grn)',fontFamily:'var(--mono)'}}>{fmtMoney(ingresoNeto, sym)}</span>
-                  </div>
-                ) : (
-                  <div style={{fontSize:10,color:'var(--red,#e84142)',fontFamily:'var(--mono)',marginBottom:10,padding:'6px 10px',background:'rgba(232,65,66,.06)',borderRadius:6}}>
-                    ⚠ No hay ingresos registrados en {monthLabel(activeMonth)}. Agrega ingresos primero.
-                  </div>
-                )}
-                {ingresoNeto > 0 && (() => {
-                  const inc = ingresoNeto
-                  const sugs = [
-                    { cat:'Vivienda',        pct:0.25, grupo:'Necesidades' },
-                    { cat:'Alimentación',    pct:0.12, grupo:'Necesidades' },
-                    { cat:'Transporte',      pct:0.08, grupo:'Necesidades' },
-                    { cat:'Salud',           pct:0.05, grupo:'Necesidades' },
-                    { cat:'Entretenimiento', pct:0.08, grupo:'Estilo de vida' },
-                    { cat:'Educación',       pct:0.07, grupo:'Estilo de vida' },
-                    { cat:'Ropa y calzado',  pct:0.05, grupo:'Estilo de vida' },
-                    { cat:'Restaurantes',    pct:0.05, grupo:'Estilo de vida' },
-                    { cat:'Otros',           pct:0.05, grupo:'Estilo de vida' },
-                    { cat:ahorroLabel,       pct:0.20, grupo:'Ahorro/Inversión', highlight:true },
-                  ]
-                  async function aplicar() {
-                    for (const s of sugs) {
-                      if (!budgets.find(b => b.category === s.cat)) {
-                        await addBudget({ category: s.cat, limit: Math.round(inc * s.pct) })
-                      }
-                    }
-                    setShowSuggest(false)
-                    setSuggestIncome('')
-                  }
-                  return (
-                    <div style={{marginTop:10}}>
-                      <div style={{display:'flex',flexDirection:'column',gap:4,marginBottom:12}}>
-                        {sugs.map((s,i) => (
-                          <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'6px 10px',borderRadius:6,background:s.highlight?'rgba(10,92,62,.08)':i%2===0?'var(--bg)':'transparent',border:s.highlight?'0.5px solid rgba(10,92,62,.25)':'none'}}>
-                            <div>
-                              <span style={{fontSize:11,fontFamily:'var(--mono)',color:s.highlight?'var(--grn)':'var(--tx)',fontWeight:s.highlight?700:400}}>{s.cat}</span>
-                              <span style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginLeft:6}}>{s.grupo}</span>
-                            </div>
-                            <div style={{textAlign:'right'}}>
-                              <span style={{fontSize:11,fontFamily:'var(--mono)',color:s.highlight?'var(--grn)':'var(--tx)',fontWeight:600}}>{fmtMoney(Math.round(inc*s.pct),sym)}</span>
-                              <span style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginLeft:4}}>{(s.pct*100).toFixed(0)}%</span>
-                            </div>
-                          </div>
-                        ))}
+        </Card>
+        {/* ── Modelo 50/30/20 — siempre visible ── */}
+        <Card>
+          <CardHeader title="💡 Modelo 50/30/20" />
+          {ingresoNeto > 0 ? (
+            <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:12,padding:'8px 12px',background:'var(--sur2)',borderRadius:6}}>
+              <span style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)'}}>Ingreso neto {monthLabel(activeMonth)}:</span>
+              <span style={{fontSize:13,fontWeight:700,color:'var(--grn)',fontFamily:'var(--mono)'}}>{fmtMoney(ingresoNeto,sym)}</span>
+            </div>
+          ) : (
+            <div style={{fontSize:10,color:'#e84142',fontFamily:'var(--mono)',marginBottom:10,padding:'6px 10px',background:'rgba(232,65,66,.06)',borderRadius:6}}>
+              ⚠ Sin ingresos en {monthLabel(activeMonth)}. Agrega ingresos primero.
+            </div>
+          )}
+          {(() => {
+            const inc = ingresoNeto
+            const sugs = [
+              { cat:'Vivienda',        pct:0.25, grupo:'Necesidades' },
+              { cat:'Alimentación',    pct:0.12, grupo:'Necesidades' },
+              { cat:'Transporte',      pct:0.08, grupo:'Necesidades' },
+              { cat:'Salud',           pct:0.05, grupo:'Necesidades' },
+              { cat:'Entretenimiento', pct:0.08, grupo:'Estilo de vida' },
+              { cat:'Educación',       pct:0.07, grupo:'Estilo de vida' },
+              { cat:'Ropa y calzado',  pct:0.05, grupo:'Estilo de vida' },
+              { cat:'Restaurantes',    pct:0.05, grupo:'Estilo de vida' },
+              { cat:'Otros',           pct:0.05, grupo:'Estilo de vida' },
+              { cat:ahorroLabel,       pct:0.20, grupo:'Ahorro/Inversión', highlight:true },
+            ]
+            async function aplicar() {
+              for (const s of sugs) {
+                if (!budgets.find(b => b.category === s.cat)) {
+                  await addBudget({ category: s.cat, limit: Math.round(inc * s.pct) })
+                }
+              }
+            }
+            return (
+              <div>
+                <div style={{display:'flex',flexDirection:'column',gap:3,marginBottom:12}}>
+                  {sugs.map((s,i) => (
+                    <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'5px 10px',borderRadius:6,background:s.highlight?'rgba(10,92,62,.08)':i%2===0?'var(--sur2)':'transparent',border:s.highlight?'0.5px solid rgba(10,92,62,.25)':'none'}}>
+                      <div>
+                        <span style={{fontSize:11,fontFamily:'var(--mono)',color:s.highlight?'var(--grn)':'var(--tx)',fontWeight:s.highlight?700:400}}>{s.cat}</span>
+                        <span style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginLeft:6}}>{s.grupo}</span>
                       </div>
-                      <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:8}}>
-                        ⚠ Solo se crean categorías que aún no tienen presupuesto.
+                      <div style={{textAlign:'right'}}>
+                        <span style={{fontSize:11,fontFamily:'var(--mono)',color:s.highlight?'var(--grn)':'var(--tx)',fontWeight:600}}>{inc>0?fmtMoney(Math.round(inc*s.pct),sym):'—'}</span>
+                        <span style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginLeft:4}}>{(s.pct*100).toFixed(0)}%</span>
                       </div>
-                      <Btn variant="primary" onClick={aplicar}>Aplicar sugerencias →</Btn>
                     </div>
-                  )
-                })()}
-                ) : null}
+                  ))}
+                </div>
+                {inc > 0 && (
+                  <>
+                    <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:8}}>Solo se crean categorías sin presupuesto.</div>
+                    <Btn variant="primary" onClick={aplicar}>Aplicar sugerencias →</Btn>
+                  </>
+                )}
               </div>
-            )}
-          </div>
+            )
+          })()}
         </Card>
         <Card>
           <CardHeader title={`Resumen · ${monthLabel(activeMonth)}`} />
