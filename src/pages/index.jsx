@@ -260,7 +260,8 @@ export function Budgets() {
         <KPI label="Categorías excedidas"  value={overBudget.length} color={overBudget.length > 0 ? 'red' : 'green'} sub={overBudget.length > 0 ? 'revisar' : 'todo en orden'} />
       </div>
       {overBudget.length > 0 && <Alert type="danger">⚠ {overBudget.map(b => b.category).join(', ')} superaron el límite mensual.</Alert>}
-      <div className="grid2">
+      {/* Fila 1: Formulario + Donut resumen */}
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:16,marginBottom:16}}>
         <Card>
           <CardHeader title="Nuevo presupuesto" />
           {err && <Alert type="danger">⚠ {err}</Alert>}
@@ -271,39 +272,87 @@ export function Budgets() {
           <Btn variant="primary" onClick={submit}>+ Agregar presupuesto</Btn>
         </Card>
         <Card>
-          <CardHeader title={`Estado · ${monthLabel(activeMonth)}`} />
-          {budgets.length === 0 ? <div style={{textAlign:'center',padding:'24px 0'}}>
-              <div style={{fontSize:13,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:12}}>Aún no tienes presupuestos. Crea uno para controlar tus gastos por categoría.</div>
-              <button onClick={()=>setF({category:'Vivienda',limit:''})} style={{background:'var(--grn)',color:'#fff',border:'none',borderRadius:8,padding:'8px 18px',fontSize:13,fontWeight:600,cursor:'pointer'}}>+ Crear presupuesto</button>
-            </div> :
-            budgets.map(b => {
-              const spent = expByCat[b.category] || 0
-              const over  = spent > b.limit
-              const color = over ? 'red' : spent / b.limit > 0.8 ? 'amber' : 'green'
-              return (
-                <div key={b.id} style={{ marginBottom: 10 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
-                    <span style={{ fontSize: 12, fontWeight: 500 }}>{b.category}</span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ fontSize: 10, fontFamily: 'var(--mono)', color: over ? 'var(--red)' : 'var(--tm)' }}>
-                        {fmtMoney(spent, sym)} / {fmtMoney(b.limit, sym)} · {b.limit > 0 ? fmtPct(spent / b.limit) : '-'}
-                      </span>
-                      <button onClick={() => delBudget(b.id)} style={{ background: 'none', border: 'none', color: 'var(--th)', fontSize: 10, cursor: 'pointer', padding: '1px 4px' }}>✕</button>
-                    </div>
-                  </div>
-                  <ProgressBar value={spent} max={b.limit} color={color} height={6} />
+          <CardHeader title={`Resumen · ${monthLabel(activeMonth)}`} />
+          {budgets.length === 0 ? (
+            <div style={{textAlign:'center',padding:'24px 0'}}>
+              <div style={{fontSize:13,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:12}}>Aún no tienes presupuestos.</div>
+            </div>
+          ) : (() => {
+            const total = budgets.reduce((s,b) => s+b.limit, 0)
+            const gastado = budgets.reduce((s,b) => s+(expByCat[b.category]||0), 0)
+            const disponible = Math.max(0, total - gastado)
+            const pct = total > 0 ? gastado/total : 0
+            const r = 60, cx = 80, cy = 80
+            const circ = 2 * Math.PI * r
+            const dash = Math.min(pct, 1) * circ
+            const strokeColor = pct >= 1 ? '#e84142' : pct >= 0.8 ? 'var(--amber,#f5a623)' : 'var(--grn)'
+            return (
+              <div style={{display:'flex',alignItems:'center',gap:20,flexWrap:'wrap'}}>
+                <div style={{flexShrink:0}}>
+                  <svg width="160" height="160" viewBox="0 0 160 160">
+                    <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--brd)" strokeWidth="16"/>
+                    <circle cx={cx} cy={cy} r={r} fill="none" stroke={strokeColor} strokeWidth="16"
+                      strokeDasharray={`${dash} ${circ}`} strokeDashoffset={circ/4} strokeLinecap="round"/>
+                    <text x={cx} y={cy-10} textAnchor="middle" fontSize="18" fill={strokeColor} fontWeight="700" fontFamily="var(--mono)">{(pct*100).toFixed(0)}%</text>
+                    <text x={cx} y={cy+8} textAnchor="middle" fontSize="9" fill="var(--th)" fontFamily="var(--mono)">usado</text>
+                    <text x={cx} y={cy+22} textAnchor="middle" fontSize="8" fill="var(--th)" fontFamily="var(--mono)">del total</text>
+                  </svg>
                 </div>
-              )
-            })
-          }
+                <div style={{flex:1,display:'flex',flexDirection:'column',gap:8}}>
+                  <div style={{background:'var(--sur2)',borderRadius:6,padding:'8px 12px'}}>
+                    <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:2}}>PRESUPUESTO TOTAL</div>
+                    <div style={{fontSize:14,fontWeight:700,color:'var(--tx)',fontFamily:'var(--mono)'}}>{fmtMoney(total,sym)}</div>
+                  </div>
+                  <div style={{background:'var(--sur2)',borderRadius:6,padding:'8px 12px'}}>
+                    <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:2}}>GASTADO</div>
+                    <div style={{fontSize:14,fontWeight:700,color:strokeColor,fontFamily:'var(--mono)'}}>{fmtMoney(gastado,sym)}</div>
+                  </div>
+                  <div style={{background:'var(--sur2)',borderRadius:6,padding:'8px 12px'}}>
+                    <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:2}}>DISPONIBLE</div>
+                    <div style={{fontSize:14,fontWeight:700,color:'var(--grn)',fontFamily:'var(--mono)'}}>{fmtMoney(disponible,sym)}</div>
+                  </div>
+                </div>
+              </div>
+            )
+          })()}
         </Card>
       </div>
+
+      {/* Fila 2: Tarjetas por categoría con donut */}
       {budgets.length > 0 && (
-        <div style={{ marginTop: 8 }}>
-          <div style={{ fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--grn2)', marginBottom: 12 }}>
-            Avance por presupuesto · {monthLabel(activeMonth)}
+        <div>
+          <div style={{fontFamily:'var(--mono)',fontSize:11,letterSpacing:'1px',textTransform:'uppercase',color:'var(--grn2)',marginBottom:12}}>
+            Avance por categoría · {monthLabel(activeMonth)}
           </div>
-          <BudgetProgressList budgets={budgets} expByCat={expByCat} sym={sym} />
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))',gap:12}}>
+            {budgets.map(b => {
+              const spent = expByCat[b.category] || 0
+              const pct = b.limit > 0 ? spent/b.limit : 0
+              const over = spent > b.limit
+              const warn = !over && pct >= 0.8
+              const strokeColor = over ? '#e84142' : warn ? 'var(--amber,#f5a623)' : 'var(--grn)'
+              const r = 36, cx = 50, cy = 50
+              const circ = 2 * Math.PI * r
+              const dash = Math.min(pct, 1) * circ
+              return (
+                <div key={b.id} style={{background:'var(--sur2)',borderRadius:10,padding:'14px',border:`0.5px solid ${over?'#e84142':warn?'rgba(245,166,35,.3)':'var(--brd)'}`,display:'flex',flexDirection:'column',alignItems:'center',gap:8,position:'relative'}}>
+                  <button onClick={() => delBudget(b.id)} style={{position:'absolute',top:8,right:8,background:'none',border:'none',color:'var(--th)',fontSize:11,cursor:'pointer',padding:'2px 5px',borderRadius:4,lineHeight:1}}>✕</button>
+                  <div style={{fontSize:11,fontWeight:600,color:'var(--tx)',fontFamily:'var(--mono)',textAlign:'center',maxWidth:120,lineHeight:1.3}}>{b.category}</div>
+                  <svg width="100" height="100" viewBox="0 0 100 100">
+                    <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--brd)" strokeWidth="10"/>
+                    <circle cx={cx} cy={cy} r={r} fill="none" stroke={strokeColor} strokeWidth="10"
+                      strokeDasharray={`${dash} ${circ}`} strokeDashoffset={circ/4} strokeLinecap="round"/>
+                    <text x={cx} y={cy-5} textAnchor="middle" fontSize="11" fill={strokeColor} fontWeight="700" fontFamily="var(--mono)">{(pct*100).toFixed(0)}%</text>
+                    <text x={cx} y={cy+8} textAnchor="middle" fontSize="7" fill="var(--th)" fontFamily="var(--mono)">{over?'EXCEDIDO':warn?'ATENCIÓN':'en rango'}</text>
+                  </svg>
+                  <div style={{textAlign:'center'}}>
+                    <div style={{fontSize:12,fontWeight:700,color:strokeColor,fontFamily:'var(--mono)'}}>{fmtMoney(spent,sym)}</div>
+                    <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)'}}>de {fmtMoney(b.limit,sym)}</div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         </div>
       )}
     </div>
