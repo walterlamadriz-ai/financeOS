@@ -271,7 +271,7 @@ export function Budgets() {
         <Alert type="warning">⚠ Tu presupuesto usa el {fmtPct(totalBudget / ingresoNeto)} de tus ingresos. Considera reservar al menos un 20% para ahorro.</Alert>
       )}
       {/* Layout 2 columnas: izquierda=formulario+modelo, derecha=resumen+tarjetas */}
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:16,alignItems:'start'}}>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:16,marginBottom:16,alignItems:'start'}}>
         <div style={{display:'flex',flexDirection:'column',gap:16}}>
         <Card>
           <CardHeader title="Nuevo presupuesto" />
