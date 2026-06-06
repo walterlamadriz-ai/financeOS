@@ -73,7 +73,7 @@ export function Empty({ text = 'Sin registros aún' }) {
   return <div className={styles.empty}>{text}</div>
 }
 
-export function TxRow({ dot, name, meta, amount, isIncome, onDelete }) {
+export function TxRow({ dot, name, meta, amount, isIncome, onDelete, onEdit }) {
   return (
     <div className={styles.txRow}>
       <div className={styles.txDot} style={{ background: dot }} />
@@ -84,6 +84,9 @@ export function TxRow({ dot, name, meta, amount, isIncome, onDelete }) {
       <div className={[styles.txAmt, isIncome ? styles.txInc : styles.txExp].join(' ')}>
         {isIncome ? '+' : '-'}{amount}
       </div>
+      {onEdit && (
+        <button className={styles.delBtn} onClick={onEdit} title="Editar" style={{marginRight:2,fontSize:11}}>✏️</button>
+      )}
       {onDelete && (
         <button className={styles.delBtn} onClick={onDelete}>✕</button>
       )}

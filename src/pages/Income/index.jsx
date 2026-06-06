@@ -7,16 +7,24 @@ import { CURRENCY_SYMBOLS, monthLabel } from '../shared/constants.js'
 import MonthSelector from '../shared/MonthSelector.jsx'
 
 export default function Income() {
-  const { incomes, addIncome, delIncome, settings } = useApp()
+  const { incomes, addIncome, delIncome, updateIncome, settings } = useApp()
   const [f, setF]       = useState({ source: '', amount: '', date: today(), category: 'Salario', recurrence: 'Único', notes: '' })
   const [err, setErr]   = useState('')
-  const [saving, setSaving] = useState(false)
+  const [saving, setSaving]   = useState(false)
+  const [editingId, setEditingId] = useState(null)
+  const [editForm, setEditForm]   = useState({})
 
   const activeMonth = settings.activeMonth || new Date().toISOString().slice(0, 7)
   const filtered    = useMemo(() => incomes.filter(r => r.date?.startsWith(activeMonth)), [incomes, activeMonth])
   const sym         = CURRENCY_SYMBOLS[settings.currency] || '$'
   const total       = useMemo(() => filtered.reduce((s, r) => s + r.amount, 0), [filtered])
   const fixed       = useMemo(() => filtered.filter(r => r.recurrence !== 'Único').reduce((s, r) => s + r.amount, 0), [filtered])
+
+  async function saveEdit(r) {
+    if (!editForm.source?.trim() || !editForm.amount || Number(editForm.amount) <= 0) return
+    await updateIncome({ ...r, source:editForm.source.trim(), amount:Number(editForm.amount), date:editForm.date||r.date, category:editForm.category||r.category, recurrence:editForm.recurrence||r.recurrence, notes:editForm.notes||'' })
+    setEditingId(null); setEditForm({})
+  }
 
   async function submit() {
     if (!f.source.trim())               { setErr('El nombre es requerido'); return }

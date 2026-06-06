@@ -10,16 +10,24 @@ import CategoryDonut from '../../components/charts/CategoryDonut.jsx'
 import HorizontalBars from '../../components/charts/HorizontalBars.jsx'
 
 export default function Expenses() {
-  const { expenses, addExpense, delExpense, settings } = useApp()
+  const { expenses, addExpense, delExpense, updateExpense, settings } = useApp()
   const [f, setF]       = useState({ description: '', amount: '', date: today(), category: 'Alimentación', method: 'Débito', type: 'Necesidad', recurrence: 'Único', notes: '' })
   const [err, setErr]   = useState('')
-  const [saving, setSaving] = useState(false)
+  const [saving, setSaving]   = useState(false)
+  const [editingId, setEditingId] = useState(null)
+  const [editForm, setEditForm]   = useState({})
 
   const activeMonth = settings.activeMonth || new Date().toISOString().slice(0, 7)
   const filtered    = useMemo(() => expenses.filter(r => r.date?.startsWith(activeMonth)), [expenses, activeMonth])
   const sym         = CURRENCY_SYMBOLS[settings.currency] || '$'
   const total       = useMemo(() => filtered.reduce((s, r) => s + r.amount, 0), [filtered])
   const necesidad   = useMemo(() => filtered.filter(r => r.type === 'Necesidad').reduce((s, r) => s + r.amount, 0), [filtered])
+
+  async function saveEdit(r) {
+    if (!editForm.description?.trim() || !editForm.amount || Number(editForm.amount) <= 0) return
+    await updateExpense({ ...r, description:editForm.description.trim(), amount:Number(editForm.amount), date:editForm.date||r.date, category:editForm.category||r.category, type:editForm.type||r.type, notes:editForm.notes||'' })
+    setEditingId(null); setEditForm({})
+  }
 
   async function submit() {
     if (!f.description.trim())             { setErr('La descripción es requerida'); return }
