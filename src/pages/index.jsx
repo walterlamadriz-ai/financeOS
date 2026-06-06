@@ -867,23 +867,23 @@ export function Goals({ setPage }) {
               </div>
               <div style={{display:'flex',flexDirection:'column',gap:10,marginBottom:14}}>
                 {suggestions.map((s, i) => (
-                  <div key={s.id} style={{padding:'12px 14px',borderRadius:8,border:`0.5px solid ${s.selected&&!s.alreadyExists?'rgba(10,92,62,.25)':'var(--brd)'}`,background:s.alreadyExists?'var(--sur2)':s.selected?'rgba(10,92,62,.04)':'var(--bg)',opacity:s.alreadyExists?0.6:1}}>
-                    <div style={{display:'flex',alignItems:'flex-start',gap:10}}>
+                  <div key={s.id} style={{padding:'12px 14px',borderRadius:8,border:`0.5px solid ${s.selected&&!s.alreadyExists?'rgba(10,92,62,.25)':'var(--brd)'}`,background:s.alreadyExists?'var(--sur2)':s.selected?'rgba(10,92,62,.04)':'var(--bg)',opacity:s.alreadyExists?0.6:1,boxSizing:'border-box',width:'100%',overflow:'hidden'}}>
+                    <div style={{display:'grid',gridTemplateColumns:'20px 1fr',gap:10,alignItems:'start'}}>
                       <input type="checkbox" checked={s.selected && !s.alreadyExists} disabled={s.alreadyExists}
                         onChange={e => setSuggestions(prev => prev.map((x,j) => j===i?{...x,selected:e.target.checked}:x))}
-                        style={{marginTop:3,flexShrink:0,accentColor:'var(--grn)'}}/>
-                      <div style={{flex:1}}>
-                        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:4}}>
+                        style={{marginTop:3,accentColor:'var(--grn)'}}/>
+                      <div style={{minWidth:0}}>
+                        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:4,flexWrap:'wrap',gap:4}}>
                           <span style={{fontSize:13,fontWeight:600,color:'var(--tx)'}}>{s.emoji} {s.name}</span>
                           {s.alreadyExists && <span style={{fontSize:10,padding:'1px 6px',borderRadius:4,background:'var(--sur2)',color:'var(--th)',fontFamily:'var(--mono)'}}>Ya existe</span>}
                         </div>
-                        <div style={{fontSize:11,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:6}}>{s.description}</div>
-                        <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+                        <div style={{fontSize:11,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:6,lineHeight:1.4}}>{s.description}</div>
+                        <div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:4}}>
                           <span style={{fontSize:11,fontFamily:'var(--mono)',color:'var(--grn)',fontWeight:600}}>Objetivo: {fmtMoney(s.target, sym)}</span>
                           <span style={{fontSize:11,fontFamily:'var(--mono)',color:'var(--th)'}}>Aporte: {fmtMoney(s.monthlyContribution, sym)}/mes</span>
-                          {s.monthsToGoal && <span style={{fontSize:11,fontFamily:'var(--mono)',color:'var(--th)'}}>Plazo: ~{s.monthsToGoal} meses</span>}
+                          {s.monthsToGoal && <span style={{fontSize:11,fontFamily:'var(--mono)',color:'var(--th)'}}>~{s.monthsToGoal} meses</span>}
                         </div>
-                        <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginTop:4,fontStyle:'italic'}}>{s.hint}</div>
+                        <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',fontStyle:'italic',lineHeight:1.4}}>{s.hint}</div>
                       </div>
                     </div>
                   </div>
