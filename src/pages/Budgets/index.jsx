@@ -1,0 +1,192 @@
+// src/pages/Budgets/index.jsx — v1.5
+import { useState, useMemo } from 'react'
+import { useApp } from '../../context/AppContext.jsx'
+import { KPI, Card, CardHeader, FormGroup, FormRow, Btn, Alert, PageHeader } from '../../components/ui/index.jsx'
+import { fmtMoney, fmtPct, CATS_EXPENSE } from '../../utils/index.js'
+import { CURRENCY_SYMBOLS, monthLabel } from '../shared/constants.js'
+import MonthSelector from '../shared/MonthSelector.jsx'
+
+export default function Budgets() {
+  const { budgets, addBudget, delBudget, expenses, incomes, settings } = useApp()
+  const [f, setF]     = useState({ category: 'Vivienda', limit: '' })
+  const [err, setErr] = useState('')
+  const sym           = CURRENCY_SYMBOLS[settings.currency] || '$'
+  const isChile       = (settings.country || 'CL') === 'CL'
+  const ahorroLabel   = isChile ? 'Ahorro/APV/Inversión' : 'Ahorro/Inversión'
+
+  const activeMonth   = settings.activeMonth || new Date().toISOString().slice(0, 7)
+  const mExpenses     = useMemo(() => expenses.filter(r => r.date?.startsWith(activeMonth)), [expenses, activeMonth])
+  const mIncomes      = useMemo(() => incomes.filter(r => r.date?.startsWith(activeMonth)), [incomes, activeMonth])
+  const ingresoNeto   = useMemo(() => mIncomes.reduce((s, r) => s + r.amount, 0), [mIncomes])
+  const expByCat      = useMemo(() => { const m = {}; mExpenses.forEach(e => { m[e.category] = (m[e.category] || 0) + e.amount }); return m }, [mExpenses])
+  const totalBudget   = useMemo(() => budgets.reduce((s, b) => s + b.limit, 0), [budgets])
+  const budgetedCats  = useMemo(() => new Set(budgets.map(b => b.category)), [budgets])
+  const totalBudgeted = useMemo(() => mExpenses.filter(e => budgetedCats.has(e.category)).reduce((s, r) => s + r.amount, 0), [mExpenses, budgetedCats])
+  const overBudget    = useMemo(() => budgets.filter(b => (expByCat[b.category] || 0) > b.limit), [budgets, expByCat])
+
+  async function submit() {
+    if (!f.limit || Number(f.limit) <= 0)         { setErr('Ingresa un límite válido'); return }
+    if (budgets.find(b => b.category === f.category)) { setErr('Ya existe presupuesto para esta categoría'); return }
+    setErr('')
+    await addBudget({ ...f, limit: Number(f.limit) })
+    setF({ category: 'Vivienda', limit: '' })
+  }
+
+  return (
+    <div className="stack">
+      <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+        <PageHeader title="Presupuestos" sub={`Límites mensuales · ${monthLabel(activeMonth)}`} />
+        <MonthSelector incomes={[]} expenses={expenses} />
+      </div>
+      <div className="kpi-row" style={{ gridTemplateColumns: 'repeat(4,1fr)' }}>
+        <KPI label="Presupuesto total"     value={fmtMoney(totalBudget, sym)} />
+        <KPI label="Gastado (con presup.)" value={fmtMoney(totalBudgeted, sym)} color="red" sub={totalBudget > 0 ? fmtPct(totalBudgeted/totalBudget) : '-'} />
+        <KPI label="Categorías excedidas"  value={overBudget.length} color={overBudget.length > 0 ? 'red' : 'green'} sub={overBudget.length > 0 ? 'revisar' : 'todo en orden'} />
+        <KPI label="Cobertura con ingresos" value={ingresoNeto > 0 ? fmtPct(totalBudget/ingresoNeto) : '—'} color={ingresoNeto > 0 && totalBudget > ingresoNeto ? 'red' : ingresoNeto > 0 && totalBudget/ingresoNeto > 0.8 ? 'amber' : 'green'} sub={ingresoNeto > 0 ? (totalBudget > ingresoNeto ? '⚠ Supera ingresos' : totalBudget/ingresoNeto > 0.8 ? 'Sin margen de ahorro' : 'Margen saludable') : 'Sin ingresos'} />
+      </div>
+      {overBudget.length > 0 && <Alert type="danger">⚠ {overBudget.map(b => b.category).join(', ')} superaron el límite mensual.</Alert>}
+      {ingresoNeto > 0 && totalBudget > ingresoNeto && <Alert type="danger">⚠ Tu presupuesto total ({fmtMoney(totalBudget,sym)}) supera tus ingresos netos ({fmtMoney(ingresoNeto,sym)}). Déficit: {fmtMoney(totalBudget-ingresoNeto,sym)}.</Alert>}
+      {ingresoNeto > 0 && totalBudget > 0 && totalBudget <= ingresoNeto && totalBudget/ingresoNeto > 0.8 && <Alert type="warning">⚠ Tu presupuesto usa el {fmtPct(totalBudget/ingresoNeto)} de tus ingresos. Reserva al menos 20% para ahorro.</Alert>}
+
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:16,marginBottom:16,alignItems:'start'}}>
+        <div style={{display:'flex',flexDirection:'column',gap:16}}>
+          <Card>
+            <CardHeader title="Nuevo presupuesto" />
+            {err && <Alert type="danger">⚠ {err}</Alert>}
+            <FormRow>
+              <FormGroup label="Categoría"><select value={f.category} onChange={e => setF(p => ({...p,category:e.target.value}))}>{CATS_EXPENSE.map(c => <option key={c}>{c}</option>)}</select></FormGroup>
+              <FormGroup label={`Límite mensual (${settings.currency||'CLP'})`}><input type="number" min="0" value={f.limit} placeholder="0" onChange={e => setF(p => ({...p,limit:e.target.value}))} /></FormGroup>
+            </FormRow>
+            <Btn variant="primary" onClick={submit}>+ Agregar presupuesto</Btn>
+          </Card>
+
+          <Card>
+            <CardHeader title="💡 Modelo 50/30/20" />
+            {ingresoNeto > 0 ? (
+              <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:12,padding:'8px 12px',background:'var(--sur2)',borderRadius:6}}>
+                <span style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)'}}>Ingreso neto {monthLabel(activeMonth)}:</span>
+                <span style={{fontSize:13,fontWeight:700,color:'var(--grn)',fontFamily:'var(--mono)'}}>{fmtMoney(ingresoNeto,sym)}</span>
+              </div>
+            ) : (
+              <div style={{fontSize:10,color:'#e84142',fontFamily:'var(--mono)',marginBottom:10,padding:'6px 10px',background:'rgba(232,65,66,.06)',borderRadius:6}}>
+                ⚠ Sin ingresos en {monthLabel(activeMonth)}. Agrega ingresos primero.
+              </div>
+            )}
+            {(() => {
+              const inc = ingresoNeto
+              const sugs = [
+                {cat:'Vivienda',pct:0.25,grupo:'Necesidades'},
+                {cat:'Alimentación',pct:0.12,grupo:'Necesidades'},
+                {cat:'Transporte',pct:0.08,grupo:'Necesidades'},
+                {cat:'Salud',pct:0.05,grupo:'Necesidades'},
+                {cat:'Entretenimiento',pct:0.08,grupo:'Estilo de vida'},
+                {cat:'Educación',pct:0.07,grupo:'Estilo de vida'},
+                {cat:'Ropa y calzado',pct:0.05,grupo:'Estilo de vida'},
+                {cat:'Restaurantes',pct:0.05,grupo:'Estilo de vida'},
+                {cat:'Otros',pct:0.05,grupo:'Estilo de vida'},
+                {cat:ahorroLabel,pct:0.20,grupo:'Ahorro/Inversión',highlight:true},
+              ]
+              async function aplicar() {
+                for (const s of sugs) {
+                  if (!budgets.find(b => b.category === s.cat)) await addBudget({category:s.cat,limit:Math.round(inc*s.pct)})
+                }
+              }
+              return (
+                <div>
+                  <div style={{display:'flex',flexDirection:'column',gap:3,marginBottom:12}}>
+                    {sugs.map((s,i) => (
+                      <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'5px 10px',borderRadius:6,background:s.highlight?'rgba(10,92,62,.08)':i%2===0?'var(--sur2)':'transparent',border:s.highlight?'0.5px solid rgba(10,92,62,.25)':'none'}}>
+                        <div>
+                          <span style={{fontSize:11,fontFamily:'var(--mono)',color:s.highlight?'var(--grn)':'var(--tx)',fontWeight:s.highlight?700:400}}>{s.cat}</span>
+                          <span style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginLeft:6}}>{s.grupo}</span>
+                        </div>
+                        <div style={{textAlign:'right'}}>
+                          <span style={{fontSize:11,fontFamily:'var(--mono)',color:s.highlight?'var(--grn)':'var(--tx)',fontWeight:600}}>{inc>0?fmtMoney(Math.round(inc*s.pct),sym):'—'}</span>
+                          <span style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginLeft:4}}>{(s.pct*100).toFixed(0)}%</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {inc > 0 && <>
+                    <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:8}}>Solo se crean categorías sin presupuesto.</div>
+                    <Btn variant="primary" onClick={aplicar}>Aplicar sugerencias →</Btn>
+                  </>}
+                </div>
+              )
+            })()}
+          </Card>
+        </div>
+
+        <Card>
+          <CardHeader title={`Resumen · ${monthLabel(activeMonth)}`} />
+          {budgets.length === 0 ? (
+            <div style={{textAlign:'center',padding:'24px 0'}}>
+              <div style={{fontSize:13,color:'var(--th)',fontFamily:'var(--mono)'}}>Aún no tienes presupuestos.</div>
+            </div>
+          ) : (() => {
+            const total = budgets.reduce((s,b) => s+b.limit, 0)
+            const gastado = budgets.reduce((s,b) => s+(expByCat[b.category]||0), 0)
+            const disponible = Math.max(0, total-gastado)
+            const pct = total > 0 ? gastado/total : 0
+            const r = 60, cx = 80, cy = 80
+            const circ = 2*Math.PI*r
+            const dash = Math.min(pct,1)*circ
+            const strokeColor = pct >= 1 ? '#e84142' : pct >= 0.8 ? 'var(--amber,#f5a623)' : 'var(--grn)'
+            return (
+              <div>
+                <div style={{display:'flex',alignItems:'center',gap:20,flexWrap:'wrap'}}>
+                  <div style={{flexShrink:0}}>
+                    <svg width="160" height="160" viewBox="0 0 160 160">
+                      <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--brd)" strokeWidth="16"/>
+                      <circle cx={cx} cy={cy} r={r} fill="none" stroke={strokeColor} strokeWidth="16" strokeDasharray={`${dash} ${circ}`} strokeDashoffset={circ/4} strokeLinecap="round"/>
+                      <text x={cx} y={cy-10} textAnchor="middle" fontSize="18" fill={strokeColor} fontWeight="700" fontFamily="var(--mono)">{(pct*100).toFixed(0)}%</text>
+                      <text x={cx} y={cy+8}  textAnchor="middle" fontSize="9"  fill="var(--th)" fontFamily="var(--mono)">usado</text>
+                      <text x={cx} y={cy+22} textAnchor="middle" fontSize="8"  fill="var(--th)" fontFamily="var(--mono)">del total</text>
+                    </svg>
+                  </div>
+                  <div style={{flex:1,display:'flex',flexDirection:'column',gap:8}}>
+                    {[{lb:'PRESUPUESTO TOTAL',v:fmtMoney(total,sym),c:'var(--tx)'},{lb:'GASTADO',v:fmtMoney(gastado,sym),c:strokeColor},{lb:'DISPONIBLE',v:fmtMoney(disponible,sym),c:'var(--grn)'}].map(item => (
+                      <div key={item.lb} style={{background:'var(--sur2)',borderRadius:6,padding:'8px 12px'}}>
+                        <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:2}}>{item.lb}</div>
+                        <div style={{fontSize:14,fontWeight:700,color:item.c,fontFamily:'var(--mono)'}}>{item.v}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div style={{marginTop:16,paddingTop:16,borderTop:'0.5px solid var(--brd)'}}>
+                  <div style={{fontFamily:'var(--mono)',fontSize:10,letterSpacing:'1px',textTransform:'uppercase',color:'var(--grn2)',marginBottom:10}}>Avance por categoría · {monthLabel(activeMonth)}</div>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(130px,1fr))',gap:10}}>
+                    {budgets.map(b => {
+                      const spent = expByCat[b.category] || 0
+                      const p = b.limit > 0 ? spent/b.limit : 0
+                      const over = spent > b.limit
+                      const warn = !over && p >= 0.8
+                      const clr = over ? '#e84142' : warn ? 'var(--amber,#f5a623)' : 'var(--grn)'
+                      const r2=32,cx2=45,cy2=45,circ2=2*Math.PI*r2,dash2=Math.min(p,1)*circ2
+                      return (
+                        <div key={b.id} style={{background:'var(--bg)',borderRadius:8,padding:'10px',border:`0.5px solid ${over?'#e84142':warn?'rgba(245,166,35,.3)':'var(--brd)'}`,display:'flex',flexDirection:'column',alignItems:'center',gap:6,position:'relative'}}>
+                          <button onClick={() => delBudget(b.id)} style={{position:'absolute',top:4,right:4,background:'none',border:'none',color:'var(--th)',fontSize:10,cursor:'pointer',padding:'1px 4px'}}>✕</button>
+                          <div style={{fontSize:10,fontWeight:600,color:'var(--tx)',fontFamily:'var(--mono)',textAlign:'center',lineHeight:1.2,paddingRight:10}}>{b.category}</div>
+                          <svg width="90" height="90" viewBox="0 0 90 90">
+                            <circle cx={cx2} cy={cy2} r={r2} fill="none" stroke="var(--brd)" strokeWidth="9"/>
+                            <circle cx={cx2} cy={cy2} r={r2} fill="none" stroke={clr} strokeWidth="9" strokeDasharray={`${dash2} ${circ2}`} strokeDashoffset={circ2/4} strokeLinecap="round"/>
+                            <text x={cx2} y={cy2-4} textAnchor="middle" fontSize="10" fill={clr} fontWeight="700" fontFamily="var(--mono)">{(p*100).toFixed(0)}%</text>
+                            <text x={cx2} y={cy2+8} textAnchor="middle" fontSize="6"  fill="var(--th)" fontFamily="var(--mono)">{over?'EXCEDIDO':warn?'ATENCIÓN':'en rango'}</text>
+                          </svg>
+                          <div style={{textAlign:'center'}}>
+                            <div style={{fontSize:11,fontWeight:700,color:clr,fontFamily:'var(--mono)'}}>{fmtMoney(spent,sym)}</div>
+                            <div style={{fontSize:8,color:'var(--th)',fontFamily:'var(--mono)'}}>de {fmtMoney(b.limit,sym)}</div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+            )
+          })()}
+        </Card>
+      </div>
+    </div>
+  )
+}
