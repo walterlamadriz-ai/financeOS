@@ -833,7 +833,7 @@ export function Goals({ setPage }) {
       </div>
       <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
         <Btn variant="primary" onClick={() => setShow(s => !s)}>{show ? '— Cerrar' : '+ Nueva meta'}</Btn>
-
+        <Btn variant="ghost" onClick={openSuggestions}>💡 Sugerir metas básicas</Btn>
       </div>
 
       {show && (
