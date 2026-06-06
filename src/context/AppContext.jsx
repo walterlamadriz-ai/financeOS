@@ -317,7 +317,7 @@ export function AppProvider({ children }) {
       // Agregar metadata al respaldo
       const backup = {
         _meta: {
-          version:    '1.2',
+          version:    '1.5',
           app:        'FinanceOS',
           createdAt:  new Date().toISOString(),
           recordCount: {

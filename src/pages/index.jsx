@@ -569,10 +569,12 @@ export function Budgets() {
 import DebtProgressList from '../components/charts/DebtProgressList.jsx'
 
 export function Debts() {
-  const { debts, addDebt, delDebt, settings } = useApp()
+  const { debts, addDebt, delDebt, updateDebt, addExpense, settings } = useApp()
   const [show, setShow] = useState(false)
   const [f, setF]       = useState({ creditor: '', initial: '', balance: '', minPayment: '', dueDate: '', rate: '', totalInstallments: '', paidInstallments: '' })
-  const [err, setErr]   = useState('')
+  const [err, setErr]       = useState('')
+  const [confirmPay, setConfirmPay] = useState(null)  // id de deuda con pago pendiente de confirmar
+  const [payMsg, setPayMsg]         = useState(null)  // {id, text} mensaje de éxito temporal
   const sym = CURRENCY_SYMBOLS[settings.currency] || '$'
 
   const totalBalance = useMemo(() => debts.reduce((s, d) => s + d.balance, 0), [debts])
@@ -617,6 +619,24 @@ export function Debts() {
     })
     setEditingId(null)
     setEditForm({})
+  }
+
+  async function handleRegisterPayment(d) {
+    const monto = Math.min(Number(d.minPayment) || 0, d.balance)
+    if (monto <= 0) return
+    const newBalance = Math.max(0, d.balance - monto)
+    const today = new Date().toISOString().slice(0, 10)
+    await updateDebt({ ...d, balance: newBalance, paidInstallments: (Number(d.paidInstallments) || 0) + 1 })
+    await addExpense({
+      date: today,
+      description: `Pago deuda · ${d.creditor}`,
+      amount: monto,
+      category: 'Deudas',
+      notes: `Cuota ${(Number(d.paidInstallments) || 0) + 1} registrada automáticamente`,
+    })
+    setConfirmPay(null)
+    setPayMsg({ id: d.id, text: `✓ Pago de ${sym}${Math.round(monto).toLocaleString('es-CL')} registrado` })
+    setTimeout(() => setPayMsg(null), 3000)
   }
 
   async function submit() {
@@ -705,11 +725,36 @@ export function Debts() {
             {/* Header */}
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:6 }}>
               <div style={{ fontSize:13, fontWeight:600, color:'var(--tx)' }}>{d.creditor}</div>
-              <div style={{ display:'flex', gap:6, alignItems:'center' }}>
+              <div style={{ display:'flex', gap:6, alignItems:'center', flexWrap:'wrap', justifyContent:'flex-end' }}>
                 {d.rate > 0 && <Badge color="red">{d.rate}% TAE</Badge>}
+                {d.balance > 0 && d.minPayment > 0 && confirmPay !== d.id && (
+                  <button onClick={() => setConfirmPay(d.id)}
+                    style={{fontSize:11,padding:'2px 8px',borderRadius:4,border:'0.5px solid rgba(10,92,62,.3)',background:'rgba(10,92,62,.08)',color:'var(--grn)',cursor:'pointer',fontFamily:'var(--mono)',fontWeight:600}}>
+                    💳 Registrar pago
+                  </button>
+                )}
+                {d.balance <= 0 && (
+                  <span style={{fontSize:10,padding:'2px 8px',borderRadius:4,background:'rgba(10,92,62,.1)',color:'var(--grn)',fontFamily:'var(--mono)'}}>✓ Saldada</span>
+                )}
                 <button onClick={() => delDebt(d.id)} style={{ background:'none', border:'none', color:'var(--th)', fontSize:11, cursor:'pointer' }}>✕</button>
               </div>
             </div>
+            {/* Confirmación pago */}
+            {confirmPay === d.id && (
+              <div style={{display:'flex',alignItems:'center',gap:10,padding:'8px 12px',marginBottom:8,background:'rgba(10,92,62,.06)',borderRadius:6,border:'0.5px solid rgba(10,92,62,.2)',flexWrap:'wrap'}}>
+                <span style={{fontSize:12,color:'var(--tx)',fontFamily:'var(--mono)',flex:1}}>
+                  ¿Registrar pago de <strong>{sym}{Math.round(Math.min(Number(d.minPayment)||0,d.balance)).toLocaleString('es-CL')}</strong> para {d.creditor}?
+                </span>
+                <div style={{display:'flex',gap:6}}>
+                  <Btn variant="primary" size="xs" onClick={() => handleRegisterPayment(d)}>✓ Confirmar</Btn>
+                  <Btn variant="ghost" size="xs" onClick={() => setConfirmPay(null)}>Cancelar</Btn>
+                </div>
+              </div>
+            )}
+            {/* Mensaje éxito */}
+            {payMsg?.id === d.id && (
+              <div style={{fontSize:11,color:'var(--grn)',fontFamily:'var(--mono)',marginBottom:6,padding:'4px 8px',background:'rgba(10,92,62,.06)',borderRadius:4}}>{payMsg.text}</div>
+            )}
 
             {/* Info básica */}
             <div style={{ fontSize:11, color:'var(--th)', fontFamily:'var(--mono)', marginBottom:8 }}>
@@ -1453,7 +1498,7 @@ export function Settings() {
 
       <BackupWarning />
       <div style={{ padding: '10px 12px', background: 'var(--sur2)', borderRadius: 'var(--r)', border: '0.5px solid var(--brd)', fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', lineHeight: 1.7, marginTop: 8 }}>
-        FinanceOS v1.2 · MAXNOVA & LUCI Global LLC · Datos locales · Sin servidor · No asesoría financiera certificada
+        FinanceOS v1.5 · MAXNOVA & LUCI Global LLC · Datos locales · Sin servidor · No asesoría financiera certificada
       </div>
     </div>
   )

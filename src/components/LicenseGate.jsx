@@ -34,7 +34,7 @@ export default function LicenseGate({ onActivate }) {
       <div style={{background:'var(--card,#fff)',border:'1px solid var(--brd)',borderRadius:'16px',padding:'40px 36px',maxWidth:'420px',width:'100%'}}>
 
         <div style={{fontFamily:'var(--head)',fontSize:'22px',color:'var(--ink)',marginBottom:'4px',fontWeight:'600'}}>FinanceOS</div>
-        <div style={{fontFamily:'var(--mono)',fontSize:'11px',color:'var(--ink3)',marginBottom:'32px'}}>v1.2 · MAXNOVA &amp; LUCI Global LLC</div>
+        <div style={{fontFamily:'var(--mono)',fontSize:'11px',color:'var(--ink3)',marginBottom:'32px'}}>v1.5 · MAXNOVA &amp; LUCI Global LLC</div>
 
         <div style={{fontSize:'18px',fontWeight:'600',color:'var(--ink)',marginBottom:'8px',fontFamily:'var(--head)'}}>Activa tu licencia</div>
         <div style={{fontSize:'13px',color:'var(--ink2)',marginBottom:'24px',lineHeight:'1.5',fontFamily:'var(--body)'}}>
