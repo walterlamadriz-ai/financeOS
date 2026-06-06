@@ -83,9 +83,53 @@ export default function Expenses() {
                 <button onClick={() => {}} style={{background:'var(--grn)',color:'#fff',border:'none',borderRadius:8,padding:'8px 18px',fontSize:13,fontWeight:600,cursor:'pointer'}}>+ Agregar gasto</button>
               </div>
             : <div style={{ maxHeight: 280, overflowY: 'auto' }}>
-                {filtered.map(r => <TxRow key={r.id} dot={CAT_COLORS[r.category] || '#888'} name={r.description}
-                  meta={`${r.category} · ${r.date.slice(5).replace('-','/')}${r.type === 'Deseo' ? ' · Deseo' : ''}`}
-                  amount={fmtMoney(r.amount, sym)} isIncome={false} onDelete={() => delExpense(r.id)} />)}
+                {filtered.map(r => editingId === r.id ? (
+                  <div key={r.id} style={{padding:'10px 12px',borderRadius:8,border:'0.5px solid rgba(232,65,66,.3)',background:'rgba(232,65,66,.03)',marginBottom:6}}>
+                    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:8}}>
+                      <div style={{gridColumn:'1/-1'}}>
+                        <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:3}}>Descripción</div>
+                        <input type="text" value={editForm.description||''} onChange={e=>setEditForm(f=>({...f,description:e.target.value}))}
+                          style={{width:'100%',padding:'5px 8px',fontSize:12,borderRadius:5,border:'0.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
+                      </div>
+                      <div>
+                        <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:3}}>Monto</div>
+                        <input type="number" min="0" value={editForm.amount||''} onChange={e=>setEditForm(f=>({...f,amount:e.target.value}))}
+                          style={{width:'100%',padding:'5px 8px',fontSize:12,borderRadius:5,border:'0.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
+                      </div>
+                      <div>
+                        <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:3}}>Fecha</div>
+                        <input type="date" value={editForm.date||''} onChange={e=>setEditForm(f=>({...f,date:e.target.value}))}
+                          style={{width:'100%',padding:'5px 8px',fontSize:12,borderRadius:5,border:'0.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
+                      </div>
+                      <div>
+                        <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:3}}>Categoría</div>
+                        <select value={editForm.category||''} onChange={e=>setEditForm(f=>({...f,category:e.target.value}))}
+                          style={{width:'100%',padding:'5px 8px',fontSize:12,borderRadius:5,border:'0.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}>
+                          {CATS_EXPENSE.map(c=><option key={c}>{c}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:3}}>Tipo</div>
+                        <select value={editForm.type||'Necesidad'} onChange={e=>setEditForm(f=>({...f,type:e.target.value}))}
+                          style={{width:'100%',padding:'5px 8px',fontSize:12,borderRadius:5,border:'0.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}>
+                          {['Necesidad','Deseo'].map(t=><option key={t}>{t}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    <div style={{display:'flex',gap:6}}>
+                      <Btn variant="primary" size="xs" onClick={()=>saveEdit(r)}>✓ Guardar</Btn>
+                      <Btn variant="ghost"   size="xs" onClick={()=>{setEditingId(null);setEditForm({})}}>Cancelar</Btn>
+                    </div>
+                  </div>
+                ) : (
+                  <div key={r.id}>
+                    <TxRow dot={CAT_COLORS[r.category]||'#888'} name={r.description}
+                      meta={`${r.category} · ${r.date.slice(5).replace('-','/')}${r.type==='Deseo'?' · Deseo':''}`}
+                      amount={fmtMoney(r.amount,sym)} isIncome={false}
+                      onDelete={()=>delExpense(r.id)}
+                      onEdit={()=>{setEditingId(r.id);setEditForm({description:r.description,amount:r.amount,date:r.date,category:r.category,type:r.type||'Necesidad',notes:r.notes||''})}} />
+                  </div>
+                ))}
               </div>
           }
         </Card>

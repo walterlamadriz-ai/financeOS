@@ -78,9 +78,46 @@ export default function Income() {
                 <button onClick={() => setF(p => ({...p, recurrence:'Mensual'}))} style={{background:'var(--grn)',color:'#fff',border:'none',borderRadius:8,padding:'8px 18px',fontSize:13,fontWeight:600,cursor:'pointer'}}>+ Agregar ingreso</button>
               </div>
             : <div style={{ maxHeight: 280, overflowY: 'auto' }}>
-                {filtered.map(r => <TxRow key={r.id} dot={CAT_COLORS[r.category] || '#888'} name={r.source}
-                  meta={`${r.category} · ${r.date.slice(5).replace('-', '/')}${r.recurrence !== 'Único' ? ' · ' + r.recurrence : ''}`}
-                  amount={fmtMoney(r.amount, sym)} isIncome onDelete={() => delIncome(r.id)} />)}
+                {filtered.map(r => editingId === r.id ? (
+                  <div key={r.id} style={{padding:'10px 12px',borderRadius:8,border:'0.5px solid rgba(10,92,62,.3)',background:'rgba(10,92,62,.04)',marginBottom:6}}>
+                    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:8}}>
+                      <div style={{gridColumn:'1/-1'}}>
+                        <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:3}}>Fuente</div>
+                        <input type="text" value={editForm.source||''} onChange={e=>setEditForm(f=>({...f,source:e.target.value}))}
+                          style={{width:'100%',padding:'5px 8px',fontSize:12,borderRadius:5,border:'0.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
+                      </div>
+                      <div>
+                        <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:3}}>Monto</div>
+                        <input type="number" min="0" value={editForm.amount||''} onChange={e=>setEditForm(f=>({...f,amount:e.target.value}))}
+                          style={{width:'100%',padding:'5px 8px',fontSize:12,borderRadius:5,border:'0.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
+                      </div>
+                      <div>
+                        <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:3}}>Fecha</div>
+                        <input type="date" value={editForm.date||''} onChange={e=>setEditForm(f=>({...f,date:e.target.value}))}
+                          style={{width:'100%',padding:'5px 8px',fontSize:12,borderRadius:5,border:'0.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
+                      </div>
+                      <div>
+                        <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:3}}>Categoría</div>
+                        <select value={editForm.category||''} onChange={e=>setEditForm(f=>({...f,category:e.target.value}))}
+                          style={{width:'100%',padding:'5px 8px',fontSize:12,borderRadius:5,border:'0.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}>
+                          {CATS_INCOME.map(c=><option key={c}>{c}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    <div style={{display:'flex',gap:6}}>
+                      <Btn variant="primary" size="xs" onClick={()=>saveEdit(r)}>✓ Guardar</Btn>
+                      <Btn variant="ghost"   size="xs" onClick={()=>{setEditingId(null);setEditForm({})}}>Cancelar</Btn>
+                    </div>
+                  </div>
+                ) : (
+                  <div key={r.id}>
+                    <TxRow dot={CAT_COLORS[r.category]||'#888'} name={r.source}
+                      meta={`${r.category} · ${r.date.slice(5).replace('-','/')}${r.recurrence!=='Único'?' · '+r.recurrence:''}`}
+                      amount={fmtMoney(r.amount,sym)} isIncome
+                      onDelete={()=>delIncome(r.id)}
+                      onEdit={()=>{setEditingId(r.id);setEditForm({source:r.source,amount:r.amount,date:r.date,category:r.category,recurrence:r.recurrence,notes:r.notes||''})}} />
+                  </div>
+                ))}
               </div>
           }
         </Card>
