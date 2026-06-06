@@ -85,6 +85,19 @@ export function Income() {
     setSuggestions([])
   }
 
+  async function saveEdit(goal) {
+    if (!editForm.name?.trim() || !editForm.target || Number(editForm.target) <= 0) return
+    await updateGoal({
+      ...goal,
+      name:       editForm.name.trim(),
+      target:     Number(editForm.target),
+      targetDate: editForm.targetDate || '',
+      priority:   editForm.priority || 'Media',
+    })
+    setEditingId(null)
+    setEditForm({})
+  }
+
   async function submit() {
     if (!f.source.trim())                        { setErr('El nombre es requerido'); return }
     if (!f.amount || Number(f.amount) <= 0)       { setErr('Ingresa un monto válido'); return }
@@ -193,6 +206,19 @@ export function Expenses() {
     }
     setShowSuggest(false)
     setSuggestions([])
+  }
+
+  async function saveEdit(goal) {
+    if (!editForm.name?.trim() || !editForm.target || Number(editForm.target) <= 0) return
+    await updateGoal({
+      ...goal,
+      name:       editForm.name.trim(),
+      target:     Number(editForm.target),
+      targetDate: editForm.targetDate || '',
+      priority:   editForm.priority || 'Media',
+    })
+    setEditingId(null)
+    setEditForm({})
   }
 
   async function submit() {
@@ -334,6 +360,19 @@ export function Budgets() {
     }
     setShowSuggest(false)
     setSuggestions([])
+  }
+
+  async function saveEdit(goal) {
+    if (!editForm.name?.trim() || !editForm.target || Number(editForm.target) <= 0) return
+    await updateGoal({
+      ...goal,
+      name:       editForm.name.trim(),
+      target:     Number(editForm.target),
+      targetDate: editForm.targetDate || '',
+      priority:   editForm.priority || 'Media',
+    })
+    setEditingId(null)
+    setEditForm({})
   }
 
   async function submit() {
@@ -567,6 +606,19 @@ export function Debts() {
     setSuggestions([])
   }
 
+  async function saveEdit(goal) {
+    if (!editForm.name?.trim() || !editForm.target || Number(editForm.target) <= 0) return
+    await updateGoal({
+      ...goal,
+      name:       editForm.name.trim(),
+      target:     Number(editForm.target),
+      targetDate: editForm.targetDate || '',
+      priority:   editForm.priority || 'Media',
+    })
+    setEditingId(null)
+    setEditForm({})
+  }
+
   async function submit() {
     if (!f.creditor.trim() || !f.balance || Number(f.balance) <= 0) { setErr('Acreedor y saldo son requeridos'); return }
     const init = Number(f.initial) || Number(f.balance)
@@ -759,6 +811,8 @@ export function Goals({ setPage }) {
   const [addAmt, setAddAmt]     = useState('')
   const [showSuggest, setShowSuggest] = useState(false)
   const [suggestions, setSuggestions] = useState([])
+  const [editingId, setEditingId] = useState(null)
+  const [editForm, setEditForm] = useState({})
 
   const isChile = (settings.country || 'CL') === 'CL'
   const { incomes: goalsIncomes, expenses: goalsExpenses } = useApp()
@@ -803,6 +857,19 @@ export function Goals({ setPage }) {
     }
     setShowSuggest(false)
     setSuggestions([])
+  }
+
+  async function saveEdit(goal) {
+    if (!editForm.name?.trim() || !editForm.target || Number(editForm.target) <= 0) return
+    await updateGoal({
+      ...goal,
+      name:       editForm.name.trim(),
+      target:     Number(editForm.target),
+      targetDate: editForm.targetDate || '',
+      priority:   editForm.priority || 'Media',
+    })
+    setEditingId(null)
+    setEditForm({})
   }
 
   async function submit() {
@@ -922,9 +989,44 @@ export function Goals({ setPage }) {
         const p    = g.target > 0 ? Math.min(g.saved / g.target, 1) : 0
         const done = g.saved >= g.target
         const clr  = done ? 'var(--grn)' : p >= 0.5 ? '#d4982a' : p < 0.25 ? 'var(--red)' : 'var(--tm)'
+        const isEditing = editingId === g.id
         return (
-          <div key={g.id} style={{background:'var(--sur2)',borderRadius:10,padding:'14px 16px',border:`0.5px solid ${done?'rgba(10,92,62,.25)':'var(--brd)'}`}}>
-            {/* Header */}
+          <div key={g.id} style={{background:'var(--sur2)',borderRadius:10,padding:'14px 16px',border:`0.5px solid ${isEditing?'rgba(10,92,62,.4)':done?'rgba(10,92,62,.25)':'var(--brd)'}`}}>
+            {/* Modo edición */}
+            {isEditing ? (
+              <div style={{display:'flex',flexDirection:'column',gap:10}}>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+                  <div style={{gridColumn:'1/-1'}}>
+                    <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:4}}>Nombre</div>
+                    <input type="text" value={editForm.name||''} onChange={e=>setEditForm(f=>({...f,name:e.target.value}))}
+                      style={{width:'100%',padding:'6px 10px',fontSize:13,borderRadius:6,border:'0.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
+                  </div>
+                  <div>
+                    <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:4}}>Monto objetivo</div>
+                    <input type="number" min="0" value={editForm.target||''} onChange={e=>setEditForm(f=>({...f,target:e.target.value}))}
+                      style={{width:'100%',padding:'6px 10px',fontSize:13,borderRadius:6,border:'0.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
+                  </div>
+                  <div>
+                    <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:4}}>Fecha objetivo</div>
+                    <input type="month" value={(editForm.targetDate||'').slice(0,7)} onChange={e=>setEditForm(f=>({...f,targetDate:e.target.value}))}
+                      style={{width:'100%',padding:'6px 10px',fontSize:13,borderRadius:6,border:'0.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
+                  </div>
+                  <div>
+                    <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:4}}>Prioridad</div>
+                    <select value={editForm.priority||'Media'} onChange={e=>setEditForm(f=>({...f,priority:e.target.value}))}
+                      style={{width:'100%',padding:'6px 10px',fontSize:13,borderRadius:6,border:'0.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}>
+                      {['Alta','Media','Baja'].map(p=><option key={p}>{p}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div style={{display:'flex',gap:8}}>
+                  <Btn variant="primary" size="xs" onClick={()=>saveEdit(g)}>✓ Guardar</Btn>
+                  <Btn variant="ghost" size="xs" onClick={()=>{setEditingId(null);setEditForm({})}}>Cancelar</Btn>
+                </div>
+              </div>
+            ) : (
+            <>
+            {/* Header modo normal */}
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:8}}>
               <div style={{flex:1,paddingRight:8}}>
                 <div style={{fontSize:13,fontWeight:600,color:'var(--tx)',marginBottom:2}}>{g.name}</div>
@@ -934,8 +1036,10 @@ export function Goals({ setPage }) {
                   {done && <span style={{fontSize:10,padding:'1px 8px',borderRadius:10,background:'rgba(10,92,62,.12)',color:'var(--grn)',fontFamily:'var(--mono)',fontWeight:600}}>✓ Completada</span>}
                 </div>
               </div>
-              <div style={{display:'flex',alignItems:'center',gap:8,flexShrink:0}}>
+              <div style={{display:'flex',alignItems:'center',gap:6,flexShrink:0}}>
                 <span style={{fontSize:13,fontWeight:700,color:clr,fontFamily:'var(--mono)'}}>{(p*100).toFixed(0)}%</span>
+                <button onClick={()=>{setEditingId(g.id);setEditForm({name:g.name,target:g.target,targetDate:g.targetDate||'',priority:g.priority||'Media'})}}
+                  style={{background:'none',border:'none',color:'var(--th)',fontSize:12,cursor:'pointer',padding:'2px 5px'}} title="Editar meta">✏️</button>
                 <button onClick={() => delGoal(g.id)} style={{background:'none',border:'none',color:'var(--th)',fontSize:11,cursor:'pointer',padding:'2px 5px'}}>✕</button>
               </div>
             </div>
@@ -963,6 +1067,8 @@ export function Goals({ setPage }) {
                   : <Btn variant="ghost" size="xs" onClick={() => { setSavingId(g.id); setAddAmt('') }}>+ Agregar ahorro</Btn>
               )}
             </div>
+            </>
+            )}
           </div>
         )
       })}
