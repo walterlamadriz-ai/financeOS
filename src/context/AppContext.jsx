@@ -40,7 +40,10 @@ function reducer(state, action) {
     case 'DEL_BUDGET':   return { ...state, budgets:  state.budgets.filter(b => b.id !== action.id) }
     case 'ADD_DEBT':     return { ...state, debts:    [...state.debts, action.item] }
     case 'DEL_DEBT':     return { ...state, debts:    state.debts.filter(d => d.id !== action.id) }
-    case 'UPDATE_DEBT':  return { ...state, debts:    state.debts.map(d => d.id === action.item.id ? action.item : d) }
+    case 'UPDATE_INCOME':  return { ...state, incomes:  state.incomes.map(r => r.id === action.item.id ? action.item : r) }
+    case 'UPDATE_EXPENSE': return { ...state, expenses: state.expenses.map(r => r.id === action.item.id ? action.item : r) }
+    case 'UPDATE_BUDGET':  return { ...state, budgets:  state.budgets.map(b => b.id === action.item.id ? action.item : b) }
+    case 'UPDATE_DEBT':    return { ...state, debts:    state.debts.map(d => d.id === action.item.id ? action.item : d) }
     case 'ADD_GOAL':     return { ...state, goals:    [...state.goals, action.item] }
     case 'DEL_GOAL':     return { ...state, goals:    state.goals.filter(g => g.id !== action.id) }
     case 'UPDATE_GOAL':  return { ...state, goals:    state.goals.map(g => g.id === action.item.id ? action.item : g) }
@@ -108,6 +111,16 @@ export function AppProvider({ children }) {
     }
   }, [showToast])
 
+  const updateIncome = useCallback(async (item) => {
+    try {
+      await dbAdd('incomes', item)
+      dispatch({ type: 'UPDATE_INCOME', item })
+    } catch (e) {
+      showToast('Error al actualizar ingreso.', 'error')
+      throw e
+    }
+  }, [showToast])
+
   const addExpense = useCallback(async (data) => {
     const item = { ...data, id: uid(), createdAt: new Date().toISOString() }
     try {
@@ -129,6 +142,16 @@ export function AppProvider({ children }) {
     }
   }, [showToast])
 
+  const updateExpense = useCallback(async (item) => {
+    try {
+      await dbAdd('expenses', item)
+      dispatch({ type: 'UPDATE_EXPENSE', item })
+    } catch (e) {
+      showToast('Error al actualizar gasto.', 'error')
+      throw e
+    }
+  }, [showToast])
+
   const addBudget = useCallback(async (data) => {
     const item = { ...data, id: uid() }
     try {
@@ -146,6 +169,16 @@ export function AppProvider({ children }) {
       dispatch({ type: 'DEL_BUDGET', id })
     } catch (e) {
       showToast('Error al eliminar presupuesto.', 'error')
+      throw e
+    }
+  }, [showToast])
+
+  const updateBudget = useCallback(async (item) => {
+    try {
+      await dbAdd('budgets', item)
+      dispatch({ type: 'UPDATE_BUDGET', item })
+    } catch (e) {
+      showToast('Error al actualizar presupuesto.', 'error')
       throw e
     }
   }, [showToast])
@@ -361,9 +394,9 @@ export function AppProvider({ children }) {
 
   const value = {
     ...state,
-    addIncome,  delIncome,
-    addExpense, delExpense,
-    addBudget,  delBudget,
+    addIncome,  delIncome,  updateIncome,
+    addExpense, delExpense,   updateExpense,
+    addBudget,  delBudget,  updateBudget,
     addDebt,    delDebt,    updateDebt,
     addGoal,    delGoal,    updateGoal,
       addSubscription, deleteSubscription, updateSubscription,
