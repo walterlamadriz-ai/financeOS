@@ -9,10 +9,21 @@ import { calcAPV } from '../../utils/apvCalc.js'
 import { calcBeneficioAPV, calcDescuentos, calcImpuestoAnual } from '../../utils/taxCalcCL.js'
 
 export default function APVPage() {
-  const { settings } = useApp()
+  const { settings, incomes } = useApp()
   const isChile = (settings.country || 'CL') === 'CL'
 
   const isDemo = typeof window !== 'undefined' && window.location.search.includes('demo=true')
+
+  // Calcular sueldo bruto desde ingresos netos del mes activo
+  // Bruto = Neto / (1 - AFP 10% - Salud 7% - Cesantía 0.6%) = Neto / 0.824
+  const DESCUENTOS = 1 - 0.10 - 0.07 - 0.006  // 0.824
+  const activeMonth = settings.activeMonth || new Date().toISOString().slice(0, 7)
+  const ingresoNetoAPV = (incomes || [])
+    .filter(r => r.date?.startsWith(activeMonth))
+    .reduce((s, r) => s + r.amount, 0)
+  const sueldoBrutoCalculado = ingresoNetoAPV > 0
+    ? Math.round(ingresoNetoAPV / DESCUENTOS)
+    : 0
   const [apvF, setApvF] = useState({
     monthlyContribution: isDemo ? '150000' : '',
     currentBalance:      isDemo ? '2000000' : '',
@@ -20,7 +31,7 @@ export default function APVPage() {
     targetAge:           65,
     expectedReturn:      5,
     regime:              isDemo ? 'B' : 'unsure',
-    grossMonthly:        isDemo ? '2000000' : '',
+    grossMonthly:        isDemo ? '2000000' : (sueldoBrutoCalculado > 0 ? String(sueldoBrutoCalculado) : ''),
     annualBonus:         isDemo ? '1000000' : ''
   })
   const [apvResult, setApvResult]   = useState(null)
