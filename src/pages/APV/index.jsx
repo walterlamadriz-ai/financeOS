@@ -2,7 +2,7 @@
 // Módulo APV Chile — página propia v1.4
 // Solo visible si settings.country === 'CL'
 
-import { useState } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
 import { Card, CardHeader, FormRow, FormGroup, Btn } from '../../components/ui/index.jsx'
 import { calcAPV } from '../../utils/apvCalc.js'
@@ -18,12 +18,12 @@ export default function APVPage() {
   // Bruto = Neto / (1 - AFP 10% - Salud 7% - Cesantía 0.6%) = Neto / 0.824
   const DESCUENTOS = 1 - 0.10 - 0.07 - 0.006  // 0.824
   const activeMonth = settings.activeMonth || new Date().toISOString().slice(0, 7)
-  const ingresoNetoAPV = (incomes || [])
-    .filter(r => r.date?.startsWith(activeMonth))
-    .reduce((s, r) => s + r.amount, 0)
-  const sueldoBrutoCalculado = ingresoNetoAPV > 0
-    ? Math.round(ingresoNetoAPV / DESCUENTOS)
-    : 0
+  const sueldoBrutoCalculado = useMemo(() => {
+    const neto = (incomes || [])
+      .filter(r => r.date?.startsWith(activeMonth))
+      .reduce((s, r) => s + r.amount, 0)
+    return neto > 0 ? Math.round(neto / DESCUENTOS) : 0
+  }, [incomes, activeMonth])
   const [apvF, setApvF] = useState({
     monthlyContribution: isDemo ? '150000' : '',
     currentBalance:      isDemo ? '2000000' : '',
@@ -31,9 +31,16 @@ export default function APVPage() {
     targetAge:           65,
     expectedReturn:      5,
     regime:              isDemo ? 'B' : 'unsure',
-    grossMonthly:        isDemo ? '2000000' : (sueldoBrutoCalculado > 0 ? String(sueldoBrutoCalculado) : ''),
+    grossMonthly:        isDemo ? '2000000' : '',
     annualBonus:         isDemo ? '1000000' : ''
   })
+  // Actualizar grossMonthly cuando cambian los ingresos (excepto en demo)
+  useEffect(() => {
+    if (!isDemo && sueldoBrutoCalculado > 0) {
+      setApvF(p => ({ ...p, grossMonthly: String(sueldoBrutoCalculado) }))
+    }
+  }, [sueldoBrutoCalculado, isDemo])
+
   const [apvResult, setApvResult]   = useState(null)
   const [taxResult, setTaxResult]   = useState(null)
 
