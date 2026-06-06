@@ -18,9 +18,14 @@ export default function APVPage() {
   // Bruto = Neto / (1 - AFP 10% - Salud 7% - Cesantía 0.6%) = Neto / 0.824
   const DESCUENTOS = 1 - 0.10 - 0.07 - 0.006  // 0.824
   const activeMonth = settings.activeMonth || new Date().toISOString().slice(0, 7)
+  // Solo categorías de renta del trabajo (no arriendo, inversión, etc.)
+  const CATEGORIAS_TRABAJO = ['Salario', 'Sueldo', 'Freelance', 'Honorarios', 'Bono', 'Comisión']
   const sueldoBrutoCalculado = useMemo(() => {
     const neto = (incomes || [])
       .filter(r => r.date?.startsWith(activeMonth))
+      .filter(r => CATEGORIAS_TRABAJO.some(c => 
+        (r.category || '').toLowerCase().includes(c.toLowerCase())
+      ))
       .reduce((s, r) => s + r.amount, 0)
     return neto > 0 ? Math.round(neto / DESCUENTOS) : 0
   }, [incomes, activeMonth])
