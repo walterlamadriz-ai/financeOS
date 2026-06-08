@@ -13,7 +13,6 @@ import Terms from './pages/legal/Terms.jsx'
 import License from './pages/legal/License.jsx'
 import Disclaimer from './pages/legal/Disclaimer.jsx'
 import Income    from './pages/Income/index.jsx'
-import Expenses  from './pages/Expenses/index.jsx'
 import Budgets   from './pages/Budgets/index.jsx'
 import Debts     from './pages/Debts/index.jsx'
 import Goals     from './pages/Goals/index.jsx'
@@ -53,7 +52,6 @@ function Inner() {
     switch (page) {
       case 'dashboard':  return <Dashboard setPage={setPage}/>
       case 'income':     return <Income />
-      case 'expenses':   return <Expenses />
       case 'budgets':    return <Budgets />
       case 'debts':      return <Debts />
       case 'goals':      return <Goals setPage={setPage}/>

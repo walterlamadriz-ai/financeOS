@@ -165,7 +165,7 @@ export default function Dashboard({ setPage }) {
           <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
             {[
               { n:'1', txt:'Agrega tu primer ingreso.',   btn:'Agregar ingreso',    page:'income',   color:'var(--accent)' },
-              { n:'2', txt:'Registra un gasto.',          btn:'Agregar gasto',      page:'expenses', color:'var(--red)' },
+              { n:'2', txt:'Registra un egreso.',         btn:'Agregar egreso',     page:'movements', color:'var(--red)' },
               { n:'3', txt:'Crea un presupuesto.',        btn:'Crear presupuesto',  page:'budgets',  color:'var(--amb)' },
               { n:'4', txt:'Crea un backup de tus datos.',btn:'Ir a backups',       page:'settings', color:'#00b8d9' },
             ].map((s,i) => (
@@ -185,7 +185,7 @@ export default function Dashboard({ setPage }) {
           <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
             {[
               { label:'+ Ingreso',     page:'income',     color:'var(--accent)' },
-              { label:'+ Gasto',       page:'expenses',   color:'var(--red)' },
+              { label:'+ Egreso',      page:'movements',  color:'var(--red)' },
               { label:'↑ Importar CSV',page:'import',     color:'#00b8d9' },
               { label:'▤ Presupuesto', page:'budgets',    color:'var(--amb)' },
               { label:'◎ Meta',        page:'goals',      color:'var(--accent)' },

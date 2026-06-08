@@ -10,7 +10,6 @@ import Toast from '../components/ui/Toast.jsx'
 import Dashboard from '../pages/Dashboard/index.jsx'
 import CashFlow from '../pages/CashFlow/index.jsx'
 import Income    from '../pages/Income/index.jsx'
-import Expenses  from '../pages/Expenses/index.jsx'
 import Budgets   from '../pages/Budgets/index.jsx'
 import Debts     from '../pages/Debts/index.jsx'
 import Goals     from '../pages/Goals/index.jsx'
@@ -47,7 +46,6 @@ function DemoInner() {
     switch (page) {
       case 'dashboard':     return <Dashboard setPage={setPage}/>
       case 'income':        return <Income />
-      case 'expenses':      return <Expenses />
       case 'budgets':       return <Budgets />
       case 'debts':         return <Debts />
       case 'goals':         return <Goals />

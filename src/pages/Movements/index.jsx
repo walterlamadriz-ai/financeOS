@@ -176,7 +176,9 @@ export default function Movements({ setPage }) {
   const subscriptions = Array.isArray(ctx.subscriptions) ? ctx.subscriptions : []
   const debts         = Array.isArray(ctx.debts)         ? ctx.debts         : []
   const settings      = ctx.settings || {}
-  const addExpense    = ctx.addExpense
+  const addExpense      = ctx.addExpense
+  const delExpense      = ctx.delExpense
+  const updateExpense   = ctx.updateExpense
   const addSubscription = ctx.addSubscription
 
   const sym         = SYM[settings.currency] || '$'
@@ -185,6 +187,16 @@ export default function Movements({ setPage }) {
   const [showAdd,   setShowAdd]   = useState(false)
   const [showGasto, setShowGasto] = useState(false)
   const [showSub,   setShowSub]   = useState(false)
+  const [editingId, setEditingId] = useState(null)
+  const [editForm,  setEditForm]  = useState({})
+
+  async function saveEdit(e) {
+    if (!editForm.description?.trim() || !editForm.amount || Number(editForm.amount) <= 0) return
+    if (updateExpense) {
+      await updateExpense({ ...e, description:editForm.description.trim(), amount:Number(editForm.amount), date:editForm.date||e.date, category:editForm.category||e.category })
+    }
+    setEditingId(null); setEditForm({})
+  }
 
   // ── Cálculos ─────────────────────────────────────────────────────────────────
   const monthExp   = useMemo(() =>
@@ -447,7 +459,25 @@ export default function Movements({ setPage }) {
                 color:'var(--th)', fontFamily:'var(--mono)' }}>
                 Sin gastos este mes
               </div>
-            ) : monthExp.slice(0,10).map((e,i) => (
+            ) : monthExp.slice(0,10).map((e,i) => editingId === e.id ? (
+              <div key={e.id} style={{padding:'10px 14px',borderBottom:i<Math.min(monthExp.length,10)-1?'.5px solid var(--brd)':'none',background:'rgba(232,65,66,.03)'}}>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6,marginBottom:6}}>
+                  <input type="text" value={editForm.description||''} placeholder="Descripción"
+                    onChange={ev=>setEditForm(f=>({...f,description:ev.target.value}))}
+                    style={{gridColumn:'1/-1',padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
+                  <input type="number" min="0" value={editForm.amount||''} placeholder="Monto"
+                    onChange={ev=>setEditForm(f=>({...f,amount:ev.target.value}))}
+                    style={{padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
+                  <input type="date" value={editForm.date||''}
+                    onChange={ev=>setEditForm(f=>({...f,date:ev.target.value}))}
+                    style={{padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
+                </div>
+                <div style={{display:'flex',gap:6}}>
+                  <button onClick={()=>saveEdit(e)} style={{fontSize:10,padding:'3px 10px',borderRadius:4,border:'none',background:'var(--grn)',color:'#fff',cursor:'pointer',fontFamily:'var(--mono)',fontWeight:600}}>✓ Guardar</button>
+                  <button onClick={()=>{setEditingId(null);setEditForm({})}} style={{fontSize:10,padding:'3px 10px',borderRadius:4,border:'.5px solid var(--brd)',background:'none',color:'var(--th)',cursor:'pointer',fontFamily:'var(--mono)'}}>Cancelar</button>
+                </div>
+              </div>
+            ) : (
               <div key={e.id} style={{ display:'flex', alignItems:'center', gap:8,
                 padding:'8px 14px',
                 borderBottom: i < Math.min(monthExp.length,10)-1 ? '.5px solid var(--brd)' : 'none' }}>
@@ -466,6 +496,14 @@ export default function Movements({ setPage }) {
                   fontFamily:'var(--mono)', flexShrink:0 }}>
                   -{fmtM(e.amount, sym)}
                 </div>
+                {updateExpense && (
+                  <button onClick={()=>{setEditingId(e.id);setEditForm({description:e.description||'',amount:e.amount,date:e.date,category:e.category})}}
+                    style={{background:'none',border:'none',color:'var(--th)',fontSize:11,cursor:'pointer',padding:'2px 4px'}} title="Editar">✏️</button>
+                )}
+                {delExpense && (
+                  <button onClick={()=>delExpense(e.id)}
+                    style={{background:'none',border:'none',color:'var(--th)',fontSize:10,cursor:'pointer',padding:'2px 4px'}} title="Eliminar">✕</button>
+                )}
               </div>
             ))}
             {monthExp.length > 10 && (
