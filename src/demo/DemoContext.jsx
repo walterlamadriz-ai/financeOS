@@ -20,7 +20,10 @@ function reducer(state, action) {
     case 'DEL_BUDGET':   return { ...state, budgets:  state.budgets.filter(b => b.id !== action.id) }
     case 'ADD_DEBT':     return { ...state, debts:    [...state.debts, action.item] }
     case 'DEL_DEBT':     return { ...state, debts:    state.debts.filter(d => d.id !== action.id) }
-    case 'UPDATE_DEBT':  return { ...state, debts:    state.debts.map(d => d.id === action.item.id ? action.item : d) }
+    case 'UPDATE_INCOME':  return { ...state, incomes:  state.incomes.map(r => r.id === action.item.id ? action.item : r) }
+    case 'UPDATE_EXPENSE': return { ...state, expenses: state.expenses.map(r => r.id === action.item.id ? action.item : r) }
+    case 'UPDATE_BUDGET':  return { ...state, budgets:  state.budgets.map(b => b.id === action.item.id ? action.item : b) }
+    case 'UPDATE_DEBT':    return { ...state, debts:    state.debts.map(d => d.id === action.item.id ? action.item : d) }
     case 'ADD_GOAL':     return { ...state, goals:    [...state.goals, action.item] }
     case 'DEL_GOAL':     return { ...state, goals:    state.goals.filter(g => g.id !== action.id) }
     case 'UPDATE_GOAL':  return { ...state, goals:    state.goals.map(g => g.id === action.item.id ? action.item : g) }
@@ -46,15 +49,18 @@ export function DemoProvider({ children }) {
   }, [])
 
   // Todas las operaciones son en memoria — sin await, sin IndexedDB
-  const addIncome   = useCallback((item) => { dispatch({ type: 'ADD_INCOME',  item: { ...item, id: uid() } }); showToast('Ingreso agregado en demo.', 'ok') }, [showToast])
+  const addIncome    = useCallback((item) => { dispatch({ type: 'ADD_INCOME',  item: { ...item, id: uid() } }); showToast('Ingreso agregado en demo.', 'ok') }, [showToast])
+  const updateIncome = useCallback((item) => { dispatch({ type: 'UPDATE_INCOME', item }) }, [])
   const delIncome   = useCallback((id)   => { dispatch({ type: 'DEL_INCOME',  id }) }, [])
   const addExpense  = useCallback((item) => { dispatch({ type: 'ADD_EXPENSE', item: { ...item, id: uid() } }); showToast('Gasto agregado en demo.', 'ok') }, [showToast])
-  const delExpense  = useCallback((id)   => { dispatch({ type: 'DEL_EXPENSE', id }) }, [])
+  const delExpense    = useCallback((id)   => { dispatch({ type: 'DEL_EXPENSE', id }) }, [])
+  const updateExpense = useCallback((item) => { dispatch({ type: 'UPDATE_EXPENSE', item }) }, [])
   const addBudget   = useCallback((item) => { dispatch({ type: 'ADD_BUDGET',  item: { ...item, id: uid() } }); showToast('Presupuesto agregado en demo.', 'ok') }, [showToast])
   const delBudget   = useCallback((id)   => { dispatch({ type: 'DEL_BUDGET',  id }) }, [])
   const addDebt     = useCallback((item) => { dispatch({ type: 'ADD_DEBT',    item: { ...item, id: uid() } }); showToast('Deuda agregada en demo.', 'ok') }, [showToast])
   const delDebt     = useCallback((id)   => { dispatch({ type: 'DEL_DEBT',    id }) }, [])
-  const updateDebt  = useCallback((item) => { dispatch({ type: 'UPDATE_DEBT', item }) }, [])
+  const updateDebt   = useCallback((item) => { dispatch({ type: 'UPDATE_DEBT', item }) }, [])
+  const updateBudget = useCallback((item) => { dispatch({ type: 'UPDATE_BUDGET', item }) }, [])
   const addGoal     = useCallback((item) => { dispatch({ type: 'ADD_GOAL',    item: { ...item, id: uid() } }); showToast('Meta agregada en demo.', 'ok') }, [showToast])
   const delGoal     = useCallback((id)   => { dispatch({ type: 'DEL_GOAL',    id }) }, [])
   const updateGoal  = useCallback((item) => { dispatch({ type: 'UPDATE_GOAL', item }) }, [])
@@ -126,9 +132,9 @@ export function DemoProvider({ children }) {
 
   const value = {
     ...state,
-    addIncome,  delIncome,
-    addExpense, delExpense,
-    addBudget,  delBudget,
+    addIncome,  delIncome,  updateIncome,
+    addExpense, delExpense, updateExpense,
+    addBudget,  delBudget,  updateBudget,
     addDebt,    delDebt,    updateDebt,
     addGoal,    delGoal,    updateGoal,
     updateSettings,
