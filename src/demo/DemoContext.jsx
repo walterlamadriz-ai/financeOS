@@ -23,6 +23,9 @@ function reducer(state, action) {
     case 'UPDATE_INCOME':  return { ...state, incomes:  state.incomes.map(r => r.id === action.item.id ? action.item : r) }
     case 'UPDATE_EXPENSE': return { ...state, expenses: state.expenses.map(r => r.id === action.item.id ? action.item : r) }
     case 'UPDATE_BUDGET':  return { ...state, budgets:  state.budgets.map(b => b.id === action.item.id ? action.item : b) }
+    case 'ADD_SUB':        return { ...state, subscriptions: [action.item, ...(state.subscriptions||[])] }
+    case 'DEL_SUB':        return { ...state, subscriptions: (state.subscriptions||[]).filter(s => s.id !== action.id) }
+    case 'UPDATE_SUB':     return { ...state, subscriptions: (state.subscriptions||[]).map(s => s.id === action.item.id ? action.item : s) }
     case 'UPDATE_DEBT':    return { ...state, debts:    state.debts.map(d => d.id === action.item.id ? action.item : d) }
     case 'ADD_GOAL':     return { ...state, goals:    [...state.goals, action.item] }
     case 'DEL_GOAL':     return { ...state, goals:    state.goals.filter(g => g.id !== action.id) }
@@ -64,6 +67,9 @@ export function DemoProvider({ children }) {
   const addGoal     = useCallback((item) => { dispatch({ type: 'ADD_GOAL',    item: { ...item, id: uid() } }); showToast('Meta agregada en demo.', 'ok') }, [showToast])
   const delGoal     = useCallback((id)   => { dispatch({ type: 'DEL_GOAL',    id }) }, [])
   const updateGoal  = useCallback((item) => { dispatch({ type: 'UPDATE_GOAL', item }) }, [])
+  const addSubscription    = useCallback((item) => { dispatch({ type: 'ADD_SUB', item: { ...item, id: 'sub-' + Math.random().toString(36).slice(2,9) } }); showToast('Recurrente agregado en demo.', 'ok') }, [showToast])
+  const deleteSubscription = useCallback((id)   => { dispatch({ type: 'DEL_SUB', id }) }, [])
+  const updateSubscription = useCallback((item) => { dispatch({ type: 'UPDATE_SUB', item }) }, [])
 
   const updateSettings = useCallback((settings) => {
     dispatch({ type: 'SAVE_SETTINGS', settings })
@@ -137,6 +143,7 @@ export function DemoProvider({ children }) {
     addBudget,  delBudget,  updateBudget,
     addDebt,    delDebt,    updateDebt,
     addGoal,    delGoal,    updateGoal,
+    addSubscription, deleteSubscription, updateSubscription,
     updateSettings,
     clearAll,   loadDemo,
     exportData, exportCSV,  importData,

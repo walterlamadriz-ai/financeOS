@@ -179,7 +179,9 @@ export default function Movements({ setPage }) {
   const addExpense      = ctx.addExpense
   const delExpense      = ctx.delExpense
   const updateExpense   = ctx.updateExpense
-  const addSubscription = ctx.addSubscription
+  const addSubscription    = ctx.addSubscription
+  const deleteSubscription = ctx.deleteSubscription
+  const updateSubscription = ctx.updateSubscription
 
   const sym         = SYM[settings.currency] || '$'
   const activeMonth = settings.activeMonth || new Date().toISOString().slice(0,7)
@@ -196,6 +198,17 @@ export default function Movements({ setPage }) {
       await updateExpense({ ...e, description:editForm.description.trim(), amount:Number(editForm.amount), date:editForm.date||e.date, category:editForm.category||e.category })
     }
     setEditingId(null); setEditForm({})
+  }
+
+  const [editingSubId, setEditingSubId] = useState(null)
+  const [editSubForm,  setEditSubForm]  = useState({})
+
+  async function saveSubEdit(sub) {
+    if (!editSubForm.name?.trim() || !editSubForm.amount || Number(editSubForm.amount) <= 0) return
+    if (updateSubscription) {
+      await updateSubscription({ ...sub, name:editSubForm.name.trim(), amount:Number(editSubForm.amount), frequency:editSubForm.frequency||sub.frequency, category:editSubForm.category||sub.category })
+    }
+    setEditingSubId(null); setEditSubForm({})
   }
 
   // ── Cálculos ─────────────────────────────────────────────────────────────────
@@ -538,6 +551,29 @@ export default function Movements({ setPage }) {
               .map((sub,i,arr) => {
                 const monthly = toMonthly(Number(sub.amount)||0, sub.frequency)
                 const freq = FREQS.find(f => f.value === sub.frequency)?.label || sub.frequency
+                if (editingSubId === sub.id) {
+                  return (
+                    <div key={sub.id} style={{padding:'10px 14px',borderBottom:i<arr.length-1?'.5px solid var(--brd)':'none',background:'rgba(245,166,35,.05)'}}>
+                      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6,marginBottom:6}}>
+                        <input type="text" value={editSubForm.name||''} placeholder="Nombre"
+                          onChange={ev=>setEditSubForm(f=>({...f,name:ev.target.value}))}
+                          style={{gridColumn:'1/-1',padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
+                        <input type="number" min="0" value={editSubForm.amount||''} placeholder="Monto"
+                          onChange={ev=>setEditSubForm(f=>({...f,amount:ev.target.value}))}
+                          style={{padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
+                        <select value={editSubForm.frequency||sub.frequency}
+                          onChange={ev=>setEditSubForm(f=>({...f,frequency:ev.target.value}))}
+                          style={{padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}>
+                          {FREQS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
+                        </select>
+                      </div>
+                      <div style={{display:'flex',gap:6}}>
+                        <button onClick={()=>saveSubEdit(sub)} style={{fontSize:10,padding:'3px 10px',borderRadius:4,border:'none',background:'var(--grn)',color:'#fff',cursor:'pointer',fontFamily:'var(--mono)',fontWeight:600}}>✓ Guardar</button>
+                        <button onClick={()=>{setEditingSubId(null);setEditSubForm({})}} style={{fontSize:10,padding:'3px 10px',borderRadius:4,border:'.5px solid var(--brd)',background:'none',color:'var(--th)',cursor:'pointer',fontFamily:'var(--mono)'}}>Cancelar</button>
+                      </div>
+                    </div>
+                  )
+                }
                 return (
                   <div key={sub.id} style={{ display:'flex', alignItems:'center', gap:8,
                     padding:'8px 14px',
@@ -557,6 +593,14 @@ export default function Movements({ setPage }) {
                       fontFamily:'var(--mono)', flexShrink:0 }}>
                       {fmtM(monthly, sym)}/mes
                     </div>
+                    {updateSubscription && (
+                      <button onClick={()=>{setEditingSubId(sub.id);setEditSubForm({name:sub.name||'',amount:sub.amount,frequency:sub.frequency,category:sub.category})}}
+                        style={{background:'none',border:'none',color:'var(--th)',fontSize:11,cursor:'pointer',padding:'2px 4px'}} title="Editar">✏️</button>
+                    )}
+                    {deleteSubscription && (
+                      <button onClick={()=>{if(confirm('¿Eliminar '+sub.name+'?')) deleteSubscription(sub.id)}}
+                        style={{background:'none',border:'none',color:'var(--th)',fontSize:10,cursor:'pointer',padding:'2px 4px'}} title="Eliminar">✕</button>
+                    )}
                   </div>
                 )
               })}
