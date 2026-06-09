@@ -1,5 +1,5 @@
 // src/pages/Import/index.jsx
-// Importar movimientos — CSV · FinanceOS
+// Importar movimientos — CSV/XLSX/XLS · FinanceOS
 // 100% local · sin dependencias externas · sin envío de datos
 
 import { useState, useCallback, useMemo } from 'react'
@@ -209,7 +209,7 @@ export default function ImportMovements() {
       <div style={s.header}>
         <div style={s.eyebrow}>Herramientas</div>
         <h1 style={s.h1}>Importar movimientos</h1>
-        <p style={s.sub}>Carga movimientos en formato CSV descargados desde tu banco o exportados desde una planilla.</p>
+        <p style={s.sub}>Carga movimientos desde tu banco (CSV, XLSX o XLS) o exportados desde una planilla.</p>
       </div>
 
       <div style={s.steps}>
@@ -224,7 +224,7 @@ export default function ImportMovements() {
       {step === 0 && (
         <>
           <div style={s.card}>
-            <div style={s.cardTitle}>Sube un archivo CSV descargado desde tu banco</div>
+            <div style={s.cardTitle}>Sube un archivo descargado desde tu banco</div>
             <div
               style={s.dropzone(drag)}
               onDragOver={e => { e.preventDefault(); setDrag(true) }}
@@ -237,7 +237,7 @@ export default function ImportMovements() {
                 : <>
                     <div style={{ fontSize: 28, marginBottom: 10, color: 'var(--th)' }}>↑</div>
                     <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tx)', marginBottom: 4 }}>Arrastra el archivo aquí o haz clic para seleccionarlo</div>
-                    <div style={{ fontSize: 12, color: 'var(--th)', fontFamily: 'var(--mono)' }}>Solo archivos .csv · máximo {MAX_ROWS} filas</div>
+                    <div style={{ fontSize: 12, color: 'var(--th)', fontFamily: 'var(--mono)' }}>Archivos .csv, .xlsx y .xls · máximo {MAX_ROWS} filas</div>
                   </>
               }
             </div>
@@ -249,7 +249,7 @@ export default function ImportMovements() {
             </div>
             <div style={s.hint}>
               <span>→</span>
-              <span>Se aceptan archivos .csv y .xlsx directamente desde tu banco.</span>
+              <span>Se aceptan archivos .csv, .xlsx y .xls directamente desde tu banco.</span>
             </div>
           </div>
 
@@ -280,7 +280,7 @@ export default function ImportMovements() {
 
           {history.length === 0 && (
             <div style={{ textAlign: 'center', padding: 32, color: 'var(--th)', fontSize: 13, fontFamily: 'var(--mono)' }}>
-              Aún no has importado movimientos. Descarga un CSV desde tu banco y súbelo aquí.
+              Aún no has importado movimientos. Descarga un archivo desde tu banco y súbelo aquí.
             </div>
           )}
         </>
