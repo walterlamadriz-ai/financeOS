@@ -37,7 +37,7 @@ npm run build
 # 1. Instala Git si no lo tienes: https://git-scm.com
 git init
 git add .
-git commit -m "feat: FinanceOS v1.0 inicial"
+git commit -m "feat: FinanceOS v1.5 inicial"
 
 # 2. Crea repo en github.com → botón "New repository"
 # 3. Copia la URL del repo y ejecuta:
@@ -78,7 +78,7 @@ npm run build
 Una vez deployado en Vercel o Netlify:
 
 1. En el dashboard del proyecto → **"Domains"**
-2. Agrega tu dominio (ej. `financeos.magnova.io`)
+2. Agrega tu dominio (ej. `financeos.financeospro.com`)
 3. Sigue las instrucciones para apuntar el DNS
 4. SSL automático incluido ✅
 

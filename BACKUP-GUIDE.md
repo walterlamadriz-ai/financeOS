@@ -1,4 +1,4 @@
-# Guía de backups — FinanceOS v1.0
+# Guía de backups — FinanceOS v1.5
 
 MAXNOVA & LUCI Global LLC · maxnovaluciglobal@gmail.com
 

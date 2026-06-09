@@ -1,6 +1,6 @@
 FinanceOS Personal — License
 ============================
-Version 1.3 · MAXNOVA & LUCI Global LLC
+Version 1.5 · MAXNOVA & LUCI Global LLC
 
 GRANT OF LICENSE
 This license grants you the right to use FinanceOS for personal

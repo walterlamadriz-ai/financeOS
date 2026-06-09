@@ -33,7 +33,7 @@ Tus clientes verán tu marca, no la de FinanceOS.
 ## Paso 1 — Instalar dependencias
 
 ```bash
-cd FinanceOS-Pro-v1.0
+cd FinanceOS-Pro-v1.5
 npm install
 ```
 

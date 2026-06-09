@@ -1,4 +1,4 @@
-# FinanceOS v1.3
+# FinanceOS v1.5
 
 App de finanzas personales PWA · React 18 + Vite · Offline · Sin backend
 

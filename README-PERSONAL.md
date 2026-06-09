@@ -1,4 +1,4 @@
-# FinanceOS Personal — v1.0
+# FinanceOS Personal — v1.5
 
 App de finanzas personales · PWA offline · React 18 + Vite
 
@@ -36,7 +36,7 @@ App de finanzas personales · PWA offline · React 18 + Vite
 
 ### 1. Instalá dependencias
 ```bash
-cd FinanceOS-Personal-v1.0
+cd FinanceOS-Personal-v1.5
 npm install
 ```
 

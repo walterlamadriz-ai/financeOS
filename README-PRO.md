@@ -1,4 +1,4 @@
-# FinanceOS Pro — v1.0
+# FinanceOS Pro — v1.5
 
 App financiera white-label para asesores · PWA offline · React 18 + Vite
 
@@ -29,7 +29,7 @@ App financiera white-label para asesores · PWA offline · React 18 + Vite
 
 ### 1. Instalá dependencias
 ```bash
-cd FinanceOS-Pro-v1.0
+cd FinanceOS-Pro-v1.5
 npm install
 ```
 

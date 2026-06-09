@@ -1,6 +1,6 @@
 FINANCEOS — LICENCIA DE USO COMERCIAL
 Versión 1.0 — Mayo 2025
-Copyright (c) 2025 MAGNOVA LLC / Walter [Apellido]
+Copyright (c) 2025 MAXNOVA & LUCI Global LLC / Walter La Madriz
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -82,10 +82,10 @@ CONTACTO
 ━━━━━━━━
 
 Para consultas sobre licencias, upgrade de plan o uso no contemplado:
-  Email:   hola@magnova.io
-  Web:     https://magnova.io
+  Email:   maxnovaluciglobal@gmail.com
+  Web:     https://financeospro.com
 
 Para reportar bugs o solicitar soporte técnico (planes Pro y Enterprise):
-  Email:   soporte@magnova.io
+  Email:   maxnovaluciglobal@gmail.com
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

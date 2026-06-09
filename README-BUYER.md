@@ -176,16 +176,16 @@ Sí, con la licencia Pro y Enterprise. Ver sección de Personalización arriba.
 Las actualizaciones se entregan por email al correo con el que compraste. Los compradores Pro reciben actualizaciones por 1 año, Enterprise por 2 años.
 
 **¿Qué pasa si tengo un bug o necesito soporte?**
-Escríbenos a soporte@magnova.io con tu número de licencia. Planes Pro tienen respuesta en 48h, Enterprise en 24h.
+Escríbenos a maxnovaluciglobal@gmail.com con tu número de licencia. Planes Pro tienen respuesta en 48h, Enterprise en 24h.
 
 ---
 
 ## Soporte técnico
 
-- **Email:** soporte@magnova.io
+- **Email:** maxnovaluciglobal@gmail.com
 - **Documentación completa:** Está incluida en la app (módulo Docs)
 - **Número de licencia:** Guarda el email de confirmación de compra
 
 ---
 
-*FinanceOS v1.1 · MAGNOVA LLC · https://magnova.io*
+*FinanceOS v1.5 · MAXNOVA & LUCI Global LLC · https://www.financeospro.com*

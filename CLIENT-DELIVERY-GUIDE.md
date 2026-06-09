@@ -1,4 +1,4 @@
-# Guía de entrega al cliente — FinanceOS Pro v1.0
+# Guía de entrega al cliente — FinanceOS Pro v1.5
 
 MAXNOVA & LUCI Global LLC · maxnovaluciglobal@gmail.com
 
