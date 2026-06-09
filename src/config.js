@@ -11,7 +11,7 @@ const config = {
   app: {
     name:        'FinanceOS',           // Nombre que aparece en sidebar y título
     tagline:     'Tu dinero, bajo control total',
-    version:     '1.1.0',
+    version:     '1.5.0',
     supportEmail:'maxnovaluciglobal@gmail.com',  // Aparece en Ajustes > soporte
     website:     'https://tuempresa.com',
     logoText:    'FO',                  // Iniciales para favicon SVG si no hay imagen

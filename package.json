@@ -1,7 +1,7 @@
 {
   "name": "financeos",
-  "version": "1.0.0",
-  "description": "FinanceOS — Personal Finance Command Center",
+  "version": "1.5.0",
+  "description": "FinanceOS \u2014 Personal Finance Command Center",
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -68,7 +68,7 @@ const s = {
   warn: { background: 'rgba(245,166,35,.1)', border: '.5px solid var(--amb)', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: 'var(--amb)', fontFamily: 'var(--mono)', marginBottom: 16 },
 }
 
-const STEPS = ['Subir CSV', 'Mapear columnas', 'Revisar', 'Importar']
+const STEPS = ['Importar archivo', 'Mapear columnas', 'Revisar', 'Importar']
 const fmt = (n) => (n || 0).toLocaleString('es-CL', { maximumFractionDigits: 0 })
 
 export default function ImportMovements() {
@@ -220,7 +220,7 @@ export default function ImportMovements() {
 
       {warning && <div style={s.warn}>⚠ {warning}</div>}
 
-      {/* STEP 0 — Subir CSV */}
+      {/* STEP 0 — Importar archivo */}
       {step === 0 && (
         <>
           <div style={s.card}>
