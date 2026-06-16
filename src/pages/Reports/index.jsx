@@ -1,5 +1,6 @@
 // src/pages/Reports/index.jsx — v1.5
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import { pdf } from '@react-pdf/renderer'
 import { useApp } from '../../context/AppContext.jsx'
 import { KPI, Card, CardHeader, Alert, Empty, PageHeader } from '../../components/ui/index.jsx'
 import { fmtMoney, fmtPct } from '../../utils/index.js'
@@ -9,6 +10,7 @@ import MonthSelector from '../shared/MonthSelector.jsx'
 import MoneyFlow from '../../components/charts/MoneyFlow.jsx'
 import CategoryDonut from '../../components/charts/CategoryDonut.jsx'
 import useSubscriptionMetrics from '../../hooks/useSubscriptionMetrics.js'
+import ReportPDF from './ReportPDF.jsx'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip,
   AreaChart, Area, ReferenceLine, ResponsiveContainer, Legend,
@@ -18,8 +20,32 @@ export default function Reports() {
   const { incomes, expenses, budgets, debts: allDebts, subscriptions: allSubs, settings } = useApp()
   const sym        = CURRENCY_SYMBOLS[settings.currency] || '$'
   const subMetrics = useSubscriptionMetrics()
-
+  const [pdfLoading, setPdfLoading] = useState(false)
   const activeMonth = settings.activeMonth || new Date().toISOString().slice(0, 7)
+
+  async function downloadPDF() {
+    setPdfLoading(true)
+    try {
+      const data = {
+        sym, month: activeMonth, monthLabel: monthLabel(activeMonth),
+        totalIncome, totalExpense, totalSubs, totalDebt, balance, savingRate,
+        savingGoalPct: settings.savingGoalPct || 25,
+        necesidad, deseos, expByCat, trendData, overBudget,
+        currency: settings.currency || 'CLP',
+        generatedAt: new Date().toLocaleDateString('es-CL', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }),
+      }
+      const blob = await pdf(<ReportPDF data={data} />).toBlob()
+      const url  = URL.createObjectURL(blob)
+      const a    = document.createElement('a')
+      a.href     = url
+      a.download = `FinanceOS-Reporte-${activeMonth}.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+    } finally {
+      setPdfLoading(false)
+    }
+  }
+
   const mIncomes    = useMemo(() => incomes.filter(r => r.date?.startsWith(activeMonth)), [incomes, activeMonth])
   const mExpenses   = useMemo(() => expenses.filter(r => r.date?.startsWith(activeMonth)), [expenses, activeMonth])
 
@@ -63,6 +89,19 @@ export default function Reports() {
       <div style={{display:'flex',alignItems:'center',flexWrap:'wrap',gap:8}}>
         <PageHeader title="Reportes" sub={`${monthLabel(activeMonth)} · orientación general, no asesoría certificada`} />
         <MonthSelector incomes={incomes} expenses={expenses} />
+        <button
+          onClick={downloadPDF}
+          disabled={pdfLoading}
+          style={{
+            marginLeft:'auto', display:'flex', alignItems:'center', gap:6,
+            padding:'7px 14px', borderRadius:8, border:'.5px solid var(--grn)',
+            background: pdfLoading ? 'var(--sur2)' : 'var(--grn)', color: pdfLoading ? 'var(--th)' : '#0f1923',
+            fontFamily:'var(--mono)', fontWeight:700, fontSize:12, cursor: pdfLoading ? 'wait' : 'pointer',
+            transition:'.2s', flexShrink:0,
+          }}
+        >
+          {pdfLoading ? '⏳ Generando…' : '⬇ Descargar PDF'}
+        </button>
       </div>
       <div className="kpi-row">
         <KPI label="Balance neto"  value={fmtMoney(balance,sym)} color={balance>=0?'green':'red'} />
