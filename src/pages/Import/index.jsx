@@ -6,7 +6,7 @@ import { useState, useCallback, useMemo } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
 import { dbGetAll, dbAdd } from '../../core/db/index.js'
 import { uid } from '../../utils/index.js'
-import { detectBankTemplate, applyTemplate } from './bankTemplates.js'
+import { detectBankTemplate, applyTemplate, BANK_TEMPLATES } from './bankTemplates.js'
 import {
   parseFile, detectColumns, validateRows, detectDuplicates,
   createImportBatch, buildTransactions, MAX_ROWS,
@@ -250,6 +250,34 @@ export default function ImportMovements() {
             <div style={s.hint}>
               <span>→</span>
               <span>Se aceptan archivos .csv, .xlsx y .xls directamente desde tu banco.</span>
+            </div>
+          </div>
+
+          {/* Panel bancos soportados */}
+          <div style={s.card}>
+            <div style={s.cardTitle}>Bancos con detección automática</div>
+            <p style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', marginBottom: 14 }}>
+              Al subir el archivo de estos bancos, FinanceOS mapea las columnas automáticamente.
+            </p>
+            {[
+              { label: '🇨🇱 Chile', banks: BANK_TEMPLATES.filter(b => b.country === 'CL') },
+              { label: '🇲🇽 México', banks: BANK_TEMPLATES.filter(b => b.country === 'MX') },
+              { label: '🇨🇴 Colombia', banks: BANK_TEMPLATES.filter(b => b.country === 'CO') },
+            ].map(group => (
+              <div key={group.label} style={{ marginBottom: 14 }}>
+                <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.8px', marginBottom: 8 }}>{group.label}</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {group.banks.map(b => (
+                    <div key={b.id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 10px', borderRadius: 20, background: 'var(--sur2)', border: '.5px solid var(--brd)', fontSize: 11, color: 'var(--tx)', fontFamily: 'var(--mono)' }}>
+                      <span>{b.flag}</span>
+                      <span>{b.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+            <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: 4 }}>
+              ¿Tu banco no aparece? Podés igualmente subir el archivo y mapear las columnas manualmente.
             </div>
           </div>
 
