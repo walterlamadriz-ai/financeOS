@@ -205,10 +205,10 @@ export default function Shell({ page, setPage, children }) {
           <span className={s.topRight}>FinanceOS · {settings.currency || 'CLP'}</span>
         </div>
 
-        {/* Tip de rotación — solo móvil, solo una vez */}
+        {/* Tip de navegación — solo móvil, solo una vez */}
         {showTip && (
           <div className={s.rotationTip}>
-            <span>💡 Tip: girá tu teléfono para ver el menú lateral, o usá el botón ☰</span>
+            <span>💡 Usá el botón ☰ para abrir el menú de navegación</span>
             <button className={s.tipClose} onClick={dismissTip} aria-label="Cerrar tip">✕</button>
           </div>
         )}

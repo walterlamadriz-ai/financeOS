@@ -6,6 +6,147 @@ import { fmtMoney, fmtPct } from '../../utils/index.js'
 import { CURRENCY_SYMBOLS } from '../shared/constants.js'
 import DebtProgressList from '../../components/charts/DebtProgressList.jsx'
 
+// ── Calculadora Avalanche / Snowball ─────────────────────────────────────────
+function calcPayoffPlan(debts, extraPayment, method) {
+  if (!debts.length) return { months: 0, totalInterest: 0, order: [] }
+  let pool = debts
+    .filter(d => d.balance > 0 && d.minPayment > 0)
+    .map(d => ({ ...d, balance: Number(d.balance), minPayment: Number(d.minPayment), rate: Number(d.rate) || 0 }))
+
+  // Ordenar según método
+  if (method === 'avalanche') pool.sort((a, b) => b.rate - a.rate)
+  else pool.sort((a, b) => a.balance - b.balance) // snowball
+
+  let months = 0
+  let totalInterest = 0
+  const maxMonths = 600
+
+  while (pool.some(d => d.balance > 0) && months < maxMonths) {
+    months++
+    // Aplicar interés mensual
+    pool = pool.map(d => {
+      if (d.balance <= 0) return d
+      const interest = d.balance * (d.rate / 100 / 12)
+      totalInterest += interest
+      return { ...d, balance: d.balance + interest }
+    })
+    // Pagar mínimos
+    pool = pool.map(d => {
+      if (d.balance <= 0) return d
+      const pay = Math.min(d.minPayment, d.balance)
+      return { ...d, balance: Math.max(0, d.balance - pay) }
+    })
+    // Aplicar pago extra a la primera deuda activa (según orden del método)
+    let extra = extraPayment
+    for (let i = 0; i < pool.length && extra > 0; i++) {
+      if (pool[i].balance > 0) {
+        const pay = Math.min(extra, pool[i].balance)
+        pool[i] = { ...pool[i], balance: Math.max(0, pool[i].balance - pay) }
+        extra -= pay
+      }
+    }
+  }
+
+  return { months, totalInterest: Math.round(totalInterest) }
+}
+
+function DebtPayoffSimulator({ debts, sym }) {
+  const [method, setMethod]   = useState('avalanche')
+  const [extra, setExtra]     = useState(0)
+  const activeDebts = debts.filter(d => d.balance > 0 && d.minPayment > 0)
+
+  const base     = useMemo(() => calcPayoffPlan(activeDebts, 0, method), [activeDebts, method])
+  const withExtra = useMemo(() => calcPayoffPlan(activeDebts, Number(extra)||0, method), [activeDebts, extra, method])
+
+  const monthsSaved    = base.months - withExtra.months
+  const interestSaved  = base.totalInterest - withExtra.totalInterest
+
+  const fmtMonths = m => m >= 600 ? '+50 años' : m > 12 ? `${Math.floor(m/12)} año${Math.floor(m/12)>1?'s':''} ${m%12?`${m%12} mes`:''}` : `${m} mes${m!==1?'es':''}`
+
+  if (!activeDebts.length) return null
+
+  return (
+    <Card>
+      <CardHeader title="Simulador de pago — Avalanche & Snowball" />
+      <p style={{fontSize:12,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:16,marginTop:-4,lineHeight:1.6}}>
+        Calcula cuánto antes puedes salir de deudas y cuánto ahorras en intereses pagando un poco más cada mes.
+      </p>
+
+      {/* Selector de método */}
+      <div style={{display:'flex',gap:8,marginBottom:16,flexWrap:'wrap'}}>
+        {[
+          { id:'avalanche', label:'⚡ Avalanche', desc:'Mayor tasa primero · Ahorra más intereses' },
+          { id:'snowball',  label:'❄️ Snowball',  desc:'Menor saldo primero · Más motivación' },
+        ].map(m => (
+          <button key={m.id} onClick={() => setMethod(m.id)} style={{
+            flex:1, minWidth:160, padding:'10px 14px', borderRadius:8, cursor:'pointer', textAlign:'left',
+            border: method===m.id ? '1.5px solid var(--grn)' : '.5px solid var(--brd)',
+            background: method===m.id ? 'rgba(10,92,62,.06)' : 'var(--sur)',
+          }}>
+            <div style={{fontSize:12,fontWeight:600,color: method===m.id ? 'var(--grn)' : 'var(--tx)',fontFamily:'var(--mono)'}}>{m.label}</div>
+            <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginTop:3}}>{m.desc}</div>
+          </button>
+        ))}
+      </div>
+
+      {/* Input pago extra */}
+      <div style={{marginBottom:16}}>
+        <label style={{fontSize:11,color:'var(--th)',fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:'.5px',display:'block',marginBottom:4}}>
+          Pago extra mensual ({sym})
+        </label>
+        <input
+          type="number" min="0" value={extra}
+          onChange={e => setExtra(e.target.value)}
+          placeholder="0 — solo con mínimos"
+          style={{width:'100%',maxWidth:240,padding:'7px 10px',borderRadius:7,border:'.5px solid var(--brd)',background:'var(--sur)',color:'var(--tx)',fontFamily:'var(--mono)',fontSize:13}}
+        />
+      </div>
+
+      {/* Resultados */}
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:12,marginBottom:12}}>
+        <div style={{padding:'12px 14px',borderRadius:8,background:'var(--sur)',border:'.5px solid var(--brd)'}}>
+          <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:'.8px',marginBottom:4}}>Libre de deudas en</div>
+          <div style={{fontSize:18,fontWeight:700,color:'var(--tx)',fontFamily:'var(--mono)'}}>{fmtMonths(withExtra.months)}</div>
+          {monthsSaved > 0 && <div style={{fontSize:10,color:'var(--grn)',fontFamily:'var(--mono)',marginTop:3}}>↓ {fmtMonths(monthsSaved)} antes</div>}
+        </div>
+        <div style={{padding:'12px 14px',borderRadius:8,background:'var(--sur)',border:'.5px solid var(--brd)'}}>
+          <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:'.8px',marginBottom:4}}>Intereses totales</div>
+          <div style={{fontSize:18,fontWeight:700,color:'var(--red,#e53e3e)',fontFamily:'var(--mono)'}}>{fmtMoney(withExtra.totalInterest,sym)}</div>
+          {interestSaved > 0 && <div style={{fontSize:10,color:'var(--grn)',fontFamily:'var(--mono)',marginTop:3}}>↓ {fmtMoney(interestSaved,sym)} ahorrado</div>}
+        </div>
+        {(Number(extra)||0) > 0 && monthsSaved > 0 && (
+          <div style={{padding:'12px 14px',borderRadius:8,background:'rgba(10,92,62,.06)',border:'1px solid rgba(10,92,62,.2)'}}>
+            <div style={{fontSize:9,color:'var(--grn)',fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:'.8px',marginBottom:4}}>Con {sym}{Number(extra).toLocaleString('es-CL')}/mes extra</div>
+            <div style={{fontSize:13,fontWeight:700,color:'var(--grn)',fontFamily:'var(--mono)'}}>Ahorrás {fmtMoney(interestSaved,sym)}</div>
+            <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginTop:3}}>en {fmtMonths(monthsSaved)} menos</div>
+          </div>
+        )}
+      </div>
+
+      {/* Orden de pago */}
+      <div style={{marginTop:4}}>
+        <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:'.8px',marginBottom:8}}>
+          Orden recomendado — método {method === 'avalanche' ? 'Avalanche' : 'Snowball'}
+        </div>
+        {[...activeDebts]
+          .sort((a,b) => method==='avalanche' ? (Number(b.rate)||0)-(Number(a.rate)||0) : Number(a.balance)-Number(b.balance))
+          .map((d,i) => (
+            <div key={d.id} style={{display:'flex',alignItems:'center',gap:10,padding:'7px 0',borderTop:i>0?'.5px solid var(--brd)':'none'}}>
+              <div style={{width:20,height:20,borderRadius:'50%',background:i===0?'var(--grn)':'var(--brd)',color:i===0?'#fff':'var(--th)',fontSize:10,fontFamily:'var(--mono)',fontWeight:700,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>{i+1}</div>
+              <div style={{flex:1,fontSize:12,fontFamily:'var(--mono)',color:'var(--tx)'}}>{d.creditor}</div>
+              <div style={{fontSize:11,fontFamily:'var(--mono)',color:'var(--th)'}}>{fmtMoney(d.balance,sym)}</div>
+              {Number(d.rate) > 0 && <Badge color="red">{d.rate}% TAE</Badge>}
+            </div>
+          ))
+        }
+      </div>
+      <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginTop:12,lineHeight:1.6}}>
+        Proyección orientativa basada en tasa anual ingresada. No constituye asesoría financiera.
+      </div>
+    </Card>
+  )
+}
+
 export default function Debts() {
   const { debts, addDebt, delDebt, updateDebt, addExpense, settings } = useApp()
   const [show, setShow]             = useState(false)
@@ -176,6 +317,7 @@ export default function Debts() {
         )
       })}
       {debts.length > 0 && <DebtProgressList debts={debts} sym={sym} />}
+      {debts.length > 0 && <DebtPayoffSimulator debts={debts} sym={sym} />}
     </div>
   )
 }
