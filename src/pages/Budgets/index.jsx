@@ -7,29 +7,62 @@ import { CURRENCY_SYMBOLS, monthLabel } from '../shared/constants.js'
 import MonthSelector from '../shared/MonthSelector.jsx'
 
 export default function Budgets() {
-  const { budgets, addBudget, delBudget, expenses, incomes, settings } = useApp()
+  const { budgets, addBudget, delBudget, expenses, incomes, settings, updateSettings } = useApp()
   const [f, setF]     = useState({ category: 'Vivienda', limit: '' })
   const [err, setErr] = useState('')
   const sym           = CURRENCY_SYMBOLS[settings.currency] || '$'
   const isChile       = (settings.country || 'CL') === 'CL'
   const ahorroLabel   = isChile ? 'Ahorro/APV/Inversión' : 'Ahorro/Inversión'
+  const rolloverOn    = !!settings.budgetRollover
 
   const activeMonth   = settings.activeMonth || new Date().toISOString().slice(0, 7)
+
+  // Mes anterior para calcular rollover
+  const prevMonth = useMemo(() => {
+    const [y, m] = activeMonth.split('-').map(Number)
+    return m === 1 ? `${y - 1}-12` : `${y}-${String(m - 1).padStart(2, '0')}`
+  }, [activeMonth])
+
   const mExpenses     = useMemo(() => expenses.filter(r => r.date?.startsWith(activeMonth)), [expenses, activeMonth])
+  const prevExpenses  = useMemo(() => expenses.filter(r => r.date?.startsWith(prevMonth)),   [expenses, prevMonth])
   const mIncomes      = useMemo(() => incomes.filter(r => r.date?.startsWith(activeMonth)), [incomes, activeMonth])
   const ingresoNeto   = useMemo(() => mIncomes.reduce((s, r) => s + r.amount, 0), [mIncomes])
   const expByCat      = useMemo(() => { const m = {}; mExpenses.forEach(e => { m[e.category] = (m[e.category] || 0) + e.amount }); return m }, [mExpenses])
-  const totalBudget   = useMemo(() => budgets.reduce((s, b) => s + b.limit, 0), [budgets])
+  const prevExpByCat  = useMemo(() => { const m = {}; prevExpenses.forEach(e => { m[e.category] = (m[e.category] || 0) + e.amount }); return m }, [prevExpenses])
+
+  // Rollover por categoría: lo no gastado el mes anterior (máx = limit, no puede ser negativo)
+  const rolloverByCat = useMemo(() => {
+    if (!rolloverOn) return {}
+    const r = {}
+    budgets.forEach(b => {
+      const prevSpent = prevExpByCat[b.category] || 0
+      r[b.category] = Math.max(0, Math.min(b.limit - prevSpent, b.limit))
+    })
+    return r
+  }, [rolloverOn, budgets, prevExpByCat])
+
+  // Límite efectivo = base + rollover
+  const effectiveLimitByCat = useMemo(() => {
+    const m = {}
+    budgets.forEach(b => { m[b.category] = b.limit + (rolloverByCat[b.category] || 0) })
+    return m
+  }, [budgets, rolloverByCat])
+
+  const totalBudget   = useMemo(() => budgets.reduce((s, b) => s + (effectiveLimitByCat[b.category] || b.limit), 0), [budgets, effectiveLimitByCat])
   const budgetedCats  = useMemo(() => new Set(budgets.map(b => b.category)), [budgets])
   const totalBudgeted = useMemo(() => mExpenses.filter(e => budgetedCats.has(e.category)).reduce((s, r) => s + r.amount, 0), [mExpenses, budgetedCats])
-  const overBudget    = useMemo(() => budgets.filter(b => (expByCat[b.category] || 0) > b.limit), [budgets, expByCat])
+  const overBudget    = useMemo(() => budgets.filter(b => (expByCat[b.category] || 0) > (effectiveLimitByCat[b.category] || b.limit)), [budgets, expByCat, effectiveLimitByCat])
 
   async function submit() {
-    if (!f.limit || Number(f.limit) <= 0)         { setErr('Ingresa un límite válido'); return }
+    if (!f.limit || Number(f.limit) <= 0)             { setErr('Ingresa un límite válido'); return }
     if (budgets.find(b => b.category === f.category)) { setErr('Ya existe presupuesto para esta categoría'); return }
     setErr('')
     await addBudget({ ...f, limit: Number(f.limit) })
     setF({ category: 'Vivienda', limit: '' })
+  }
+
+  function toggleRollover() {
+    updateSettings({ ...settings, budgetRollover: !rolloverOn })
   }
 
   return (
@@ -37,7 +70,36 @@ export default function Budgets() {
       <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
         <PageHeader title="Presupuestos" sub={`Límites mensuales · ${monthLabel(activeMonth)}`} />
         <MonthSelector incomes={[]} expenses={expenses} />
+        <button
+          onClick={toggleRollover}
+          title="Rollover: lo no gastado el mes anterior se suma al límite de este mes"
+          style={{
+            marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6,
+            background: rolloverOn ? 'rgba(0,212,170,.1)' : 'var(--sur2)',
+            border: `.5px solid ${rolloverOn ? 'var(--accent)' : 'var(--brd2)'}`,
+            borderRadius: 20, padding: '5px 12px', cursor: 'pointer',
+            fontSize: 11, fontFamily: 'var(--mono)',
+            color: rolloverOn ? 'var(--accent)' : 'var(--th)',
+          }}
+        >
+          <span style={{
+            width: 28, height: 14, borderRadius: 7, position: 'relative', flexShrink: 0,
+            background: rolloverOn ? 'var(--accent)' : 'var(--brd2)', transition: '.2s',
+            display: 'inline-block',
+          }}>
+            <span style={{
+              position: 'absolute', top: 2, left: rolloverOn ? 16 : 2,
+              width: 10, height: 10, borderRadius: '50%', background: '#fff', transition: '.2s',
+            }} />
+          </span>
+          Rollover {rolloverOn ? 'ON' : 'OFF'}
+        </button>
       </div>
+      {rolloverOn && (
+        <div style={{ padding: '8px 12px', background: 'rgba(0,212,170,.06)', border: '.5px solid rgba(0,212,170,.2)', borderRadius: 8, fontSize: 11, color: 'var(--accent)', fontFamily: 'var(--mono)', lineHeight: 1.6 }}>
+          ↻ Rollover activo — lo no gastado en {monthLabel(prevMonth)} se suma al límite de {monthLabel(activeMonth)}.
+        </div>
+      )}
       <div className="kpi-row" style={{ gridTemplateColumns: 'repeat(4,1fr)' }}>
         <KPI label="Presupuesto total"     value={fmtMoney(totalBudget, sym)} />
         <KPI label="Gastado (con presup.)" value={fmtMoney(totalBudgeted, sym)} color="red" sub={totalBudget > 0 ? fmtPct(totalBudgeted/totalBudget) : '-'} />
@@ -124,7 +186,7 @@ export default function Budgets() {
               <div style={{fontSize:13,color:'var(--th)',fontFamily:'var(--mono)'}}>Aún no tienes presupuestos.</div>
             </div>
           ) : (() => {
-            const total = budgets.reduce((s,b) => s+b.limit, 0)
+            const total   = budgets.reduce((s,b) => s+(effectiveLimitByCat[b.category]||b.limit), 0)
             const gastado = budgets.reduce((s,b) => s+(expByCat[b.category]||0), 0)
             const disponible = Math.max(0, total-gastado)
             const pct = total > 0 ? gastado/total : 0
@@ -157,16 +219,23 @@ export default function Budgets() {
                   <div style={{fontFamily:'var(--mono)',fontSize:10,letterSpacing:'1px',textTransform:'uppercase',color:'var(--grn2)',marginBottom:10}}>Avance por categoría · {monthLabel(activeMonth)}</div>
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(130px,1fr))',gap:10}}>
                     {budgets.map(b => {
-                      const spent = expByCat[b.category] || 0
-                      const p = b.limit > 0 ? spent/b.limit : 0
-                      const over = spent > b.limit
-                      const warn = !over && p >= 0.8
-                      const clr = over ? '#e84142' : warn ? 'var(--amber,#f5a623)' : 'var(--grn)'
+                      const spent    = expByCat[b.category] || 0
+                      const effLimit = effectiveLimitByCat[b.category] || b.limit
+                      const carry    = rolloverByCat[b.category] || 0
+                      const p        = effLimit > 0 ? spent / effLimit : 0
+                      const over     = spent > effLimit
+                      const warn     = !over && p >= 0.8
+                      const clr      = over ? '#e84142' : warn ? 'var(--amber,#f5a623)' : 'var(--grn)'
                       const r2=32,cx2=45,cy2=45,circ2=2*Math.PI*r2,dash2=Math.min(p,1)*circ2
                       return (
                         <div key={b.id} style={{background:'var(--bg)',borderRadius:8,padding:'10px',border:`0.5px solid ${over?'#e84142':warn?'rgba(245,166,35,.3)':'var(--brd)'}`,display:'flex',flexDirection:'column',alignItems:'center',gap:6,position:'relative'}}>
                           <button onClick={() => delBudget(b.id)} style={{position:'absolute',top:4,right:4,background:'none',border:'none',color:'var(--th)',fontSize:10,cursor:'pointer',padding:'1px 4px'}}>✕</button>
                           <div style={{fontSize:10,fontWeight:600,color:'var(--tx)',fontFamily:'var(--mono)',textAlign:'center',lineHeight:1.2,paddingRight:10}}>{b.category}</div>
+                          {carry > 0 && (
+                            <div style={{fontSize:8,fontFamily:'var(--mono)',color:'var(--accent)',background:'rgba(0,212,170,.1)',borderRadius:4,padding:'1px 5px'}}>
+                              ↻ +{fmtMoney(carry,sym)}
+                            </div>
+                          )}
                           <svg width="90" height="90" viewBox="0 0 90 90">
                             <circle cx={cx2} cy={cy2} r={r2} fill="none" stroke="var(--brd)" strokeWidth="9"/>
                             <circle cx={cx2} cy={cy2} r={r2} fill="none" stroke={clr} strokeWidth="9" strokeDasharray={`${dash2} ${circ2}`} strokeDashoffset={circ2/4} strokeLinecap="round"/>
@@ -175,7 +244,7 @@ export default function Budgets() {
                           </svg>
                           <div style={{textAlign:'center'}}>
                             <div style={{fontSize:11,fontWeight:700,color:clr,fontFamily:'var(--mono)'}}>{fmtMoney(spent,sym)}</div>
-                            <div style={{fontSize:8,color:'var(--th)',fontFamily:'var(--mono)'}}>de {fmtMoney(b.limit,sym)}</div>
+                            <div style={{fontSize:8,color:'var(--th)',fontFamily:'var(--mono)'}}>de {fmtMoney(effLimit,sym)}{carry > 0 ? ` (base ${fmtMoney(b.limit,sym)})` : ''}</div>
                           </div>
                         </div>
                       )
