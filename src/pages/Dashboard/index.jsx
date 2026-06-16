@@ -26,21 +26,46 @@ export default function Dashboard({ setPage }) {
   const activeMonth = settings.activeMonth || new Date().toISOString().slice(0, 7)
 
   const kpis = useMemo(() => {
-    const inc      = incomes.filter(r  => r?.date?.startsWith(activeMonth))
-    const exp      = expenses.filter(r => r?.date?.startsWith(activeMonth))
-    const totalInc = inc.reduce((s, r)  => s + (Number(r?.amount) || 0), 0)
-    const totalExp = exp.reduce((s, r)  => s + (Number(r?.amount) || 0), 0)
-    const totalDebt = debts.reduce((s, d) => s + (Number(d.minPayment) || 0), 0)
-    const totalSubs = subs.filter(s => s?.status === 'active').reduce((s, sub) => {
-      const amt = Number(sub.amount) || 0
-      const f   = sub.frequency || 'monthly'
-      if (f === 'annual' || f === 'anual') return s + amt / 12
-      if (f === 'quarterly') return s + amt / 3
-      if (f === 'weekly') return s + amt * 4.33
-      return s + amt
-    }, 0)
-    const balance   = totalInc - totalExp - totalDebt - totalSubs
-    return { totalInc, totalExp, totalDebt, totalSubs, balance, savingRate: totalInc > 0 ? Math.max(0, balance) / totalInc : 0, incCount: inc.length, expCount: exp.length }
+    const [y, mo] = activeMonth.split('-').map(Number)
+    const prevMo  = mo === 1 ? `${y - 1}-12` : `${y}-${String(mo - 1).padStart(2, '0')}`
+
+    function monthTotals(month) {
+      const inc = incomes.filter(r  => r?.date?.startsWith(month))
+      const exp = expenses.filter(r => r?.date?.startsWith(month))
+      const totalInc = inc.reduce((s, r) => s + (Number(r?.amount) || 0), 0)
+      const totalExp = exp.reduce((s, r) => s + (Number(r?.amount) || 0), 0)
+      const totalSubs = subs.filter(s => s?.status === 'active').reduce((s, sub) => {
+        const amt = Number(sub.amount) || 0
+        const f   = sub.frequency || 'monthly'
+        if (f === 'annual' || f === 'anual') return s + amt / 12
+        if (f === 'quarterly') return s + amt / 3
+        if (f === 'weekly') return s + amt * 4.33
+        return s + amt
+      }, 0)
+      const totalDebt = debts.reduce((s, d) => s + (Number(d.minPayment) || 0), 0)
+      const balance = totalInc - totalExp - totalDebt - totalSubs
+      return { totalInc, totalExp, totalDebt, totalSubs, balance,
+               savingRate: totalInc > 0 ? Math.max(0, balance) / totalInc : 0,
+               incCount: inc.length, expCount: exp.length }
+    }
+
+    const cur  = monthTotals(activeMonth)
+    const prev = monthTotals(prevMo)
+
+    function delta(cur, prev) {
+      if (prev === 0) return null
+      return ((cur - prev) / prev * 100).toFixed(1)
+    }
+
+    return {
+      ...cur,
+      delta: {
+        inc:  delta(cur.totalInc,    prev.totalInc),
+        exp:  delta(cur.totalExp,    prev.totalExp),
+        bal:  delta(cur.balance,     prev.balance),
+        save: delta(cur.savingRate,  prev.savingRate),
+      }
+    }
   }, [incomes, expenses, debts, subs, activeMonth])
 
   const monthExpenses = useMemo(() =>
@@ -102,14 +127,15 @@ export default function Dashboard({ setPage }) {
       const totalUsed   = budgets.reduce((s, b) => s + Math.min(expByCat[b.category] || 0, Number(b.limit) || 0), 0)
       if (totalBudget > 0) {
         const budgetPct = ((totalUsed / totalBudget) * 100).toFixed(0)
-        const color = Number(budgetPct) > 90 ? 'var(--red)' : Number(budgetPct) > 70 ? 'var(--amb)' : 'var(--accent)'
+        const pctN = Number(budgetPct)
+        const color = pctN > 90 ? 'var(--red)' : pctN > 80 ? 'var(--amb)' : 'var(--accent)'
         cards.push({
-          icon: '⊞',
+          icon: pctN > 90 ? '⚠' : pctN > 80 ? '◑' : '⊞',
           color,
-          bg: Number(budgetPct) > 90 ? 'rgba(255,77,106,.07)' : 'rgba(0,212,170,.07)',
-          border: Number(budgetPct) > 90 ? 'rgba(255,77,106,.22)' : 'rgba(0,212,170,.2)',
+          bg: pctN > 90 ? 'rgba(255,77,106,.07)' : pctN > 80 ? 'rgba(245,166,35,.07)' : 'rgba(0,212,170,.07)',
+          border: pctN > 90 ? 'rgba(255,77,106,.22)' : pctN > 80 ? 'rgba(245,166,35,.22)' : 'rgba(0,212,170,.2)',
           text: `Has usado el ${budgetPct}% de tu presupuesto mensual.`,
-          sub: Number(budgetPct) > 90 ? 'Cerca del límite — revisa tus gastos.' : 'Sigue así.',
+          sub: pctN > 90 ? 'Límite inminente — revisá tus gastos.' : pctN > 80 ? 'Alerta temprana — moderá los gastos restantes.' : 'Sigue así.',
         })
       }
     }
@@ -137,12 +163,27 @@ export default function Dashboard({ setPage }) {
     return cards.slice(0, 4)
   }, [subMonthly, monthExpenses, budgets, goals, sym])
 
+  function DeltaBadge({ d, invert = false }) {
+    if (d === null) return null
+    const n = Number(d)
+    if (Math.abs(n) < 0.5) return null
+    const up   = n > 0
+    const good = invert ? !up : up
+    return (
+      <span style={{ fontSize:9, fontFamily:'var(--mono)', color: good ? 'var(--accent)' : 'var(--red)',
+                     background: good ? 'rgba(0,212,170,.1)' : 'rgba(255,77,106,.1)',
+                     borderRadius:4, padding:'1px 5px', marginLeft:5 }}>
+        {up ? '↑' : '↓'}{Math.abs(n)}%
+      </span>
+    )
+  }
+
   const KPIS = [
-    { label:'Ingresos',       value:`${sym}${fmt(kpis.totalInc)}`,  color:'var(--accent)', sub:`${kpis.incCount} registros` },
-    { label:'Gastos',         value:`${sym}${fmt(kpis.totalExp)}`,  color:'var(--red)',    sub:`${kpis.expCount} registros` },
-    { label:'Balance neto',   value:`${sym}${fmt(kpis.balance)}`,   color:kpis.balance >= 0 ? 'var(--accent)' : 'var(--red)', sub:kpis.balance >= 0 ? 'Positivo' : 'Negativo' },
-    { label:'Tasa de ahorro', value:pct(kpis.savingRate),           color:kpis.savingRate >= 0.2 ? 'var(--accent)' : kpis.savingRate >= 0 ? 'var(--amb)' : 'var(--red)', sub:'del ingreso' },
-    { label:'Suscripciones',  value:`${sym}${fmt(subMonthly)}/mes`, color:'var(--amb)',    sub:`${sym}${fmt(subMonthly * 12)}/año estimado` },
+    { label:'Ingresos',       value:`${sym}${fmt(kpis.totalInc)}`,  color:'var(--accent)', sub:`${kpis.incCount} registros`,                                                          delta: kpis.delta.inc,  invertDelta: false },
+    { label:'Gastos',         value:`${sym}${fmt(kpis.totalExp)}`,  color:'var(--red)',    sub:`${kpis.expCount} registros`,                                                          delta: kpis.delta.exp,  invertDelta: true  },
+    { label:'Balance neto',   value:`${sym}${fmt(kpis.balance)}`,   color:kpis.balance >= 0 ? 'var(--accent)' : 'var(--red)', sub:kpis.balance >= 0 ? 'Positivo' : 'Negativo',      delta: kpis.delta.bal,  invertDelta: false },
+    { label:'Tasa de ahorro', value:pct(kpis.savingRate),           color:kpis.savingRate >= 0.2 ? 'var(--accent)' : kpis.savingRate >= 0 ? 'var(--amb)' : 'var(--red)', sub:'del ingreso', delta: kpis.delta.save, invertDelta: false },
+    { label:'Suscripciones',  value:`${sym}${fmt(subMonthly)}/mes`, color:'var(--amb)',    sub:`${sym}${fmt(subMonthly * 12)}/año estimado`,                                          delta: null,            invertDelta: false },
   ]
 
   return (
@@ -208,7 +249,10 @@ export default function Dashboard({ setPage }) {
           <div key={i} style={{ background:'var(--sur)', border:'.5px solid var(--brd)', borderRadius:'var(--r)', padding:'14px 16px', position:'relative', overflow:'hidden' }}>
             <div style={{ position:'absolute', top:-16, right:-16, width:56, height:56, borderRadius:'50%', background:`${k.color}`, opacity:.08 }}/>
             <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)', textTransform:'uppercase', letterSpacing:'.8px', marginBottom:6 }}>{k.label}</div>
-            <div style={{ fontFamily:'var(--mono)', fontSize:18, fontWeight:700, color:k.color, marginBottom:3 }}>{k.value}</div>
+            <div style={{ fontFamily:'var(--mono)', fontSize:18, fontWeight:700, color:k.color, marginBottom:3, display:'flex', alignItems:'center', flexWrap:'wrap', gap:2 }}>
+              {k.value}
+              <DeltaBadge d={k.delta} invert={k.invertDelta} />
+            </div>
             <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)' }}>{k.sub}</div>
           </div>
         ))}
