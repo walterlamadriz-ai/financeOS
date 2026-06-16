@@ -37,6 +37,21 @@ const fmtM  = (n, sym) => `${sym}${fmt(n)}`
 
 const EXP_CATS = ['Alimentación','Vivienda','Transporte','Salud','Educación',
   'Ropa','Entretención','Servicios','Tecnología','Deporte','Viajes','Otros']
+
+const SUBCATS = {
+  'Alimentación':  ['Supermercado','Delivery','Restaurante','Café / Bar','Panadería','Feria / Mercado','Otro'],
+  'Vivienda':      ['Arriendo / Hipoteca','Agua','Luz','Gas','Internet','Seguros hogar','Reparaciones','Otro'],
+  'Transporte':    ['Gasolina / Bencina','Taxi / Uber','Transporte público','Estacionamiento','Mantención auto','Peaje','Otro'],
+  'Salud':         ['Farmacia','Médico / Consulta','Dentista','Psicología','Exámenes','Seguro médico','Gym / Fitness','Otro'],
+  'Educación':     ['Matrícula / Mensualidad','Cursos online','Libros','Material escolar','Certificaciones','Otro'],
+  'Ropa':          ['Ropa casual','Calzado','Ropa deportiva','Accesorios','Ropa de trabajo','Otro'],
+  'Entretención':  ['Streaming','Cine','Conciertos / Eventos','Videojuegos','Salidas / Bares','Otro'],
+  'Servicios':     ['Telefonía','Suscripción software','Limpieza hogar','Lavandería','Otro'],
+  'Tecnología':    ['Celular / Accesorios','Computador','Electrónica','Apps / Software','Otro'],
+  'Deporte':       ['Cuota gym','Equipamiento','Clases','Membresía club','Otro'],
+  'Viajes':        ['Vuelos','Hotel / Alojamiento','Tours','Comida en viaje','Seguros viaje','Otro'],
+  'Otros':         ['Regalo','Donación','Multa','Impuesto','Otro'],
+}
 const SUB_CATS = ['Streaming','Música','Software','Gimnasio','Seguro',
   'Educación','Cloud','Delivery','Suscripción','Productividad','Otros']
 const METHODS  = ['Débito','Crédito','Efectivo','Transferencia','Otro']
@@ -60,7 +75,7 @@ const CAT_COLORS = {
 function FormGasto({ onSave, onCancel, sym }) {
   const [f, setF] = useState({
     description:'', amount:'', date:todayStr(),
-    category:'Alimentación', method:'Débito', type:'Necesidad', notes:''
+    category:'Alimentación', subcategory:'', method:'Débito', type:'Necesidad', notes:''
   })
   const set = (k,v) => setF(p => ({ ...p, [k]:v }))
   const inp = { background:'var(--sur)', border:'.5px solid var(--brd)', borderRadius:6,
@@ -68,6 +83,13 @@ function FormGasto({ onSave, onCancel, sym }) {
     boxSizing:'border-box', fontFamily:'var(--mono)' }
   const lbl = { fontSize:10, color:'var(--th)', fontFamily:'var(--mono)',
     textTransform:'uppercase', letterSpacing:'.5px', marginBottom:3, display:'block' }
+
+  const subcatOptions = SUBCATS[f.category] || []
+
+  function handleCatChange(e) {
+    set('category', e.target.value)
+    set('subcategory', '') // reset subcategory when category changes
+  }
 
   return (
     <div style={{ background:'var(--sur)', border:'.5px solid var(--brd)',
@@ -86,8 +108,33 @@ function FormGasto({ onSave, onCancel, sym }) {
           <input style={inp} type="date" value={f.date}
             onChange={e => set('date', e.target.value)}/></div>
         <div><label style={lbl}>Categoría</label>
-          <select style={inp} value={f.category} onChange={e => set('category', e.target.value)}>
-            {EXP_CATS.map(c => <option key={c}>{c}</option>)}</select></div>
+          <select style={inp} value={f.category} onChange={handleCatChange}>
+            {EXP_CATS.map(c => <option key={c}>{c}</option>)}
+          </select>
+        </div>
+        {subcatOptions.length > 0 && (
+          <div style={{ gridColumn:'1 / -1' }}>
+            <label style={lbl}>
+              Subcategoría <span style={{ color:'var(--accent)', fontSize:9 }}>(opcional)</span>
+            </label>
+            <div style={{ display:'flex', flexWrap:'wrap', gap:5 }}>
+              {subcatOptions.map(sc => (
+                <button key={sc} type="button"
+                  onClick={() => set('subcategory', f.subcategory === sc ? '' : sc)}
+                  style={{
+                    padding:'4px 10px', borderRadius:16, fontSize:11, cursor:'pointer',
+                    fontFamily:'var(--mono)', border:`.5px solid ${f.subcategory === sc ? 'var(--accent)' : 'var(--brd2)'}`,
+                    background: f.subcategory === sc ? 'rgba(0,212,170,.12)' : 'var(--sur2)',
+                    color: f.subcategory === sc ? 'var(--accent)' : 'var(--th)',
+                    fontWeight: f.subcategory === sc ? 600 : 400,
+                    transition:'.12s',
+                  }}>
+                  {sc}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         <div><label style={lbl}>Método</label>
           <select style={inp} value={f.method} onChange={e => set('method', e.target.value)}>
             {METHODS.map(m => <option key={m}>{m}</option>)}</select></div>
@@ -195,7 +242,13 @@ export default function Movements({ setPage }) {
   async function saveEdit(e) {
     if (!editForm.description?.trim() || !editForm.amount || Number(editForm.amount) <= 0) return
     if (updateExpense) {
-      await updateExpense({ ...e, description:editForm.description.trim(), amount:Number(editForm.amount), date:editForm.date||e.date, category:editForm.category||e.category })
+      await updateExpense({ ...e,
+        description: editForm.description.trim(),
+        amount:      Number(editForm.amount),
+        date:        editForm.date || e.date,
+        category:    editForm.category || e.category,
+        subcategory: editForm.subcategory ?? e.subcategory ?? '',
+      })
     }
     setEditingId(null); setEditForm({})
   }
@@ -484,6 +537,17 @@ export default function Movements({ setPage }) {
                   <input type="date" value={editForm.date||''}
                     onChange={ev=>setEditForm(f=>({...f,date:ev.target.value}))}
                     style={{padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
+                  <select value={editForm.category||e.category}
+                    onChange={ev=>setEditForm(f=>({...f,category:ev.target.value,subcategory:''}))}
+                    style={{padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}>
+                    {EXP_CATS.map(c=><option key={c}>{c}</option>)}
+                  </select>
+                  <select value={editForm.subcategory??e.subcategory??''}
+                    onChange={ev=>setEditForm(f=>({...f,subcategory:ev.target.value}))}
+                    style={{padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}>
+                    <option value="">— Subcategoría —</option>
+                    {(SUBCATS[editForm.category||e.category]||[]).map(sc=><option key={sc}>{sc}</option>)}
+                  </select>
                 </div>
                 <div style={{display:'flex',gap:6}}>
                   <button onClick={()=>saveEdit(e)} style={{fontSize:10,padding:'3px 10px',borderRadius:4,border:'none',background:'var(--grn)',color:'#fff',cursor:'pointer',fontFamily:'var(--mono)',fontWeight:600}}>✓ Guardar</button>
@@ -502,7 +566,10 @@ export default function Movements({ setPage }) {
                     {e.description || e.category}
                   </div>
                   <div style={{ fontSize:10, color:'var(--th)', fontFamily:'var(--mono)' }}>
-                    {e.category} · {e.date?.slice(5)}
+                    {e.subcategory
+                      ? <><span style={{ color:'var(--accent)', opacity:.75 }}>{e.category}</span>{' › '}{e.subcategory}{' · '}{e.date?.slice(5)}</>
+                      : <>{e.category}{' · '}{e.date?.slice(5)}</>
+                    }
                   </div>
                 </div>
                 <div style={{ fontSize:12, fontWeight:600, color:'var(--red)',
@@ -510,7 +577,7 @@ export default function Movements({ setPage }) {
                   -{fmtM(e.amount, sym)}
                 </div>
                 {updateExpense && (
-                  <button onClick={()=>{setEditingId(e.id);setEditForm({description:e.description||'',amount:e.amount,date:e.date,category:e.category})}}
+                  <button onClick={()=>{setEditingId(e.id);setEditForm({description:e.description||'',amount:e.amount,date:e.date,category:e.category,subcategory:e.subcategory||''})}}
                     style={{background:'none',border:'none',color:'var(--th)',fontSize:11,cursor:'pointer',padding:'2px 4px'}} title="Editar">✏️</button>
                 )}
                 {delExpense && (
