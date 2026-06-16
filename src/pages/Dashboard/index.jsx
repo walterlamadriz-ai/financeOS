@@ -22,8 +22,11 @@ export default function Dashboard({ setPage }) {
   const subs     = Array.isArray(ctx.subscriptions) ? ctx.subscriptions : []
   const debts    = Array.isArray(ctx.debts) ? ctx.debts : []
 
-  const sym         = { CLP:'$', USD:'US$', EUR:'€', VES:'Bs.', MXN:'$', ARS:'$', COP:'$' }[settings.currency] || '$'
+  const sym         = { CLP:'$', USD:'US$', EUR:'€', VES:'Bs.', MXN:'$', ARS:'$', COP:'$', PEN:'S/', BRL:'R$', UYU:'$U' }[settings.currency] || '$'
   const activeMonth = settings.activeMonth || new Date().toISOString().slice(0, 7)
+  const dualOn      = !!settings.showDualCurrency && settings.currency !== 'USD' && Number(settings.usdRate) > 0
+  const usdRate     = Number(settings.usdRate) || 1
+  const toUSD       = (n) => `≈ US$${((Number(n) || 0) / usdRate).toLocaleString('es-CL', { maximumFractionDigits: 0 })}`
 
   const kpis = useMemo(() => {
     const [y, mo] = activeMonth.split('-').map(Number)
@@ -179,11 +182,11 @@ export default function Dashboard({ setPage }) {
   }
 
   const KPIS = [
-    { label:'Ingresos',       value:`${sym}${fmt(kpis.totalInc)}`,  color:'var(--accent)', sub:`${kpis.incCount} registros`,                                                          delta: kpis.delta.inc,  invertDelta: false },
-    { label:'Gastos',         value:`${sym}${fmt(kpis.totalExp)}`,  color:'var(--red)',    sub:`${kpis.expCount} registros`,                                                          delta: kpis.delta.exp,  invertDelta: true  },
-    { label:'Balance neto',   value:`${sym}${fmt(kpis.balance)}`,   color:kpis.balance >= 0 ? 'var(--accent)' : 'var(--red)', sub:kpis.balance >= 0 ? 'Positivo' : 'Negativo',      delta: kpis.delta.bal,  invertDelta: false },
-    { label:'Tasa de ahorro', value:pct(kpis.savingRate),           color:kpis.savingRate >= 0.2 ? 'var(--accent)' : kpis.savingRate >= 0 ? 'var(--amb)' : 'var(--red)', sub:'del ingreso', delta: kpis.delta.save, invertDelta: false },
-    { label:'Suscripciones',  value:`${sym}${fmt(subMonthly)}/mes`, color:'var(--amb)',    sub:`${sym}${fmt(subMonthly * 12)}/año estimado`,                                          delta: null,            invertDelta: false },
+    { label:'Ingresos',       value:`${sym}${fmt(kpis.totalInc)}`,  color:'var(--accent)', sub:`${kpis.incCount} registros`,                                                          delta: kpis.delta.inc,  invertDelta: false, raw: kpis.totalInc },
+    { label:'Gastos',         value:`${sym}${fmt(kpis.totalExp)}`,  color:'var(--red)',    sub:`${kpis.expCount} registros`,                                                          delta: kpis.delta.exp,  invertDelta: true,  raw: kpis.totalExp },
+    { label:'Balance neto',   value:`${sym}${fmt(kpis.balance)}`,   color:kpis.balance >= 0 ? 'var(--accent)' : 'var(--red)', sub:kpis.balance >= 0 ? 'Positivo' : 'Negativo',      delta: kpis.delta.bal,  invertDelta: false, raw: kpis.balance },
+    { label:'Tasa de ahorro', value:pct(kpis.savingRate),           color:kpis.savingRate >= 0.2 ? 'var(--accent)' : kpis.savingRate >= 0 ? 'var(--amb)' : 'var(--red)', sub:'del ingreso', delta: kpis.delta.save, invertDelta: false, raw: null },
+    { label:'Suscripciones',  value:`${sym}${fmt(subMonthly)}/mes`, color:'var(--amb)',    sub:`${sym}${fmt(subMonthly * 12)}/año estimado`,                                          delta: null,            invertDelta: false, raw: subMonthly },
   ]
 
   return (
@@ -254,6 +257,11 @@ export default function Dashboard({ setPage }) {
               <DeltaBadge d={k.delta} invert={k.invertDelta} />
             </div>
             <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)' }}>{k.sub}</div>
+            {dualOn && k.raw !== null && (
+              <div style={{ fontFamily:'var(--mono)', fontSize:9, color:'var(--th)', marginTop:4, opacity:.7, borderTop:'.5px solid var(--brd)', paddingTop:4 }}>
+                {toUSD(k.raw)}
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -293,13 +301,16 @@ export default function Dashboard({ setPage }) {
             </div>
             <div style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:10, marginBottom:10 }}>
               {[
-                { label:'Gasto proyectado', value:`${sym}${fmt(projExp)}`, color:'var(--red)' },
-                { label:'Balance proyectado', value:`${sym}${fmt(Math.abs(projBal))}`, color: over ? 'var(--red)' : 'var(--accent)', prefix: over ? '−' : '+' },
-                { label:'Ritmo diario', value:`${sym}${fmt(dailyExp)}/día`, color:'var(--th)' },
+                { label:'Gasto proyectado',   value:`${sym}${fmt(projExp)}`,            color:'var(--red)',                                  rawVal: projExp },
+                { label:'Balance proyectado', value:`${sym}${fmt(Math.abs(projBal))}`,  color: over ? 'var(--red)' : 'var(--accent)', prefix: over ? '−' : '+', rawVal: projBal },
+                { label:'Ritmo diario',       value:`${sym}${fmt(dailyExp)}/día`,       color:'var(--th)',                                   rawVal: null },
               ].map(k => (
                 <div key={k.label}>
                   <div style={{ fontSize:9, fontFamily:'var(--mono)', color:'var(--th)', textTransform:'uppercase', letterSpacing:'.5px', marginBottom:3 }}>{k.label}</div>
                   <div style={{ fontSize:13, fontWeight:700, fontFamily:'var(--mono)', color:k.color }}>{k.prefix || ''}{k.value}</div>
+                  {dualOn && k.rawVal != null && (
+                    <div style={{ fontSize:9, color:'var(--th)', fontFamily:'var(--mono)', opacity:.7, marginTop:2 }}>{toUSD(k.rawVal)}</div>
+                  )}
                 </div>
               ))}
             </div>

@@ -4,7 +4,7 @@ import { Card, CardHeader, Btn, PageHeader } from '../../components/ui/index.jsx
 import { BackupWarning } from '../../components/legal/MicroCopy.jsx'
 import BackupManager from '../../components/backup/BackupManager.jsx'
 import TemplateSelector from '../../components/templates/TemplateSelector.jsx'
-import { CURRENCY_OPTIONS } from '../shared/constants.js'
+import { CURRENCY_OPTIONS, DEFAULT_USD_RATES } from '../shared/constants.js'
 
 export default function Settings() {
   const { settings, updateSettings, clearAll, loadDemo, exportCSV } = useApp()
@@ -49,13 +49,77 @@ export default function Settings() {
             <option value="OTHER">🌎 Otro</option>
           </select>
         </div>
-        <div style={{...srow,borderBottom:'none'}}>
+        <div style={srow}>
           <div><div style={slbl}>Tema visual</div><div style={ssub}>Claro u oscuro</div></div>
           <div style={{display:'flex',gap:6}}>
             <Btn variant={settings.theme==='light'?'primary':'ghost'} size="sm" onClick={()=>updateSettings({...settings,theme:'light'})}>Claro</Btn>
             <Btn variant={settings.theme==='dark' ?'primary':'ghost'} size="sm" onClick={()=>updateSettings({...settings,theme:'dark' })}>Oscuro</Btn>
           </div>
         </div>
+
+        {/* Moneda secundaria */}
+        <div style={srow}>
+          <div>
+            <div style={slbl}>Mostrar equivalente en USD</div>
+            <div style={ssub}>KPIs del Dashboard muestran tu moneda + US$ simultáneamente</div>
+          </div>
+          <button
+            onClick={() => {
+              const next = !settings.showDualCurrency
+              const rate = settings.usdRate || DEFAULT_USD_RATES[settings.currency || 'CLP'] || 1
+              updateSettings({ ...settings, showDualCurrency: next, usdRate: rate })
+            }}
+            style={{
+              width:44, height:24, borderRadius:12, position:'relative', flexShrink:0, cursor:'pointer',
+              background: settings.showDualCurrency ? 'var(--grn)' : 'var(--brd2)',
+              border: 'none', transition:'.2s', padding:0,
+            }}
+          >
+            <span style={{
+              position:'absolute', top:3, left: settings.showDualCurrency ? 23 : 3,
+              width:18, height:18, borderRadius:'50%', background:'#fff', transition:'.2s',
+              display:'block',
+            }}/>
+          </button>
+        </div>
+
+        {settings.showDualCurrency && settings.currency !== 'USD' && (
+          <div style={{...srow, borderBottom:'none', flexDirection:'column', alignItems:'flex-start', gap:10}}>
+            <div>
+              <div style={slbl}>Tipo de cambio — 1 USD = ? {settings.currency || 'CLP'}</div>
+              <div style={ssub}>Actualiza el valor manualmente cuando cambie. Orientativo, no para uso financiero formal.</div>
+            </div>
+            <div style={{display:'flex', alignItems:'center', gap:8, width:'100%'}}>
+              <input
+                type="number" min="0" step="any"
+                value={settings.usdRate || DEFAULT_USD_RATES[settings.currency] || ''}
+                placeholder={String(DEFAULT_USD_RATES[settings.currency] || '')}
+                onChange={e => updateSettings({...settings, usdRate: parseFloat(e.target.value) || 0})}
+                style={{flex:1, padding:'7px 10px', borderRadius:6, border:'.5px solid var(--brd2)',
+                  background:'var(--sur2)', color:'var(--tx)', fontSize:13, fontFamily:'var(--mono)'}}
+              />
+              <span style={{fontSize:12, color:'var(--th)', fontFamily:'var(--mono)', whiteSpace:'nowrap'}}>
+                {settings.currency || 'CLP'} por 1 USD
+              </span>
+              <Btn variant="ghost" size="sm"
+                onClick={() => updateSettings({...settings, usdRate: DEFAULT_USD_RATES[settings.currency] || 1})}>
+                Restablecer
+              </Btn>
+            </div>
+            {settings.usdRate > 0 && (
+              <div style={{fontSize:10, color:'var(--accent)', fontFamily:'var(--mono)'}}>
+                → US$1 = {Number(settings.usdRate).toLocaleString('es-CL')} {settings.currency} · US$100 = {(settings.usdRate * 100).toLocaleString('es-CL')} {settings.currency}
+              </div>
+            )}
+          </div>
+        )}
+        {settings.showDualCurrency && settings.currency === 'USD' && (
+          <div style={{...srow, borderBottom:'none'}}>
+            <div style={{fontSize:11, color:'var(--th)', fontFamily:'var(--mono)'}}>
+              Tu moneda principal ya es USD — el equivalente dual no aplica.
+            </div>
+          </div>
+        )}
       </Card>
       <Card>
         <CardHeader title="Plantillas por perfil" />
