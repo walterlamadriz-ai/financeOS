@@ -273,6 +273,47 @@ export default function Dashboard({ setPage }) {
         </div>
       )}
 
+      {/* Proyección fin de mes */}
+      {(kpis.totalInc > 0 || kpis.totalExp > 0) && (() => {
+        const now = new Date()
+        const [y, mo] = activeMonth.split('-').map(Number)
+        const daysInMonth = new Date(y, mo, 0).getDate()
+        const today = (now.getFullYear() === y && now.getMonth() + 1 === mo) ? now.getDate() : daysInMonth
+        const daysLeft = daysInMonth - today
+        const dailyExp = today > 0 ? kpis.totalExp / today : 0
+        const projExp  = kpis.totalExp + dailyExp * daysLeft
+        const projBal  = kpis.totalInc - projExp
+        const pctMonth = (today / daysInMonth * 100).toFixed(0)
+        const over     = projBal < 0
+        return (
+          <div style={{ background:'var(--sur)', border:`.5px solid ${over ? 'rgba(255,77,106,.3)' : 'var(--brd)'}`, borderRadius:'var(--r)', padding:'14px 16px', marginBottom:16 }}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10, flexWrap:'wrap', gap:6 }}>
+              <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)', textTransform:'uppercase', letterSpacing:'.8px' }}>Proyección fin de mes</div>
+              <div style={{ fontSize:10, fontFamily:'var(--mono)', color:'var(--th)' }}>Día {today}/{daysInMonth} · {daysLeft} días restantes</div>
+            </div>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:10, marginBottom:10 }}>
+              {[
+                { label:'Gasto proyectado', value:`${sym}${fmt(projExp)}`, color:'var(--red)' },
+                { label:'Balance proyectado', value:`${sym}${fmt(Math.abs(projBal))}`, color: over ? 'var(--red)' : 'var(--accent)', prefix: over ? '−' : '+' },
+                { label:'Ritmo diario', value:`${sym}${fmt(dailyExp)}/día`, color:'var(--th)' },
+              ].map(k => (
+                <div key={k.label}>
+                  <div style={{ fontSize:9, fontFamily:'var(--mono)', color:'var(--th)', textTransform:'uppercase', letterSpacing:'.5px', marginBottom:3 }}>{k.label}</div>
+                  <div style={{ fontSize:13, fontWeight:700, fontFamily:'var(--mono)', color:k.color }}>{k.prefix || ''}{k.value}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ height:4, borderRadius:2, background:'var(--brd2)', overflow:'hidden', marginBottom:4 }}>
+              <div style={{ height:'100%', width:`${pctMonth}%`, background: over ? 'var(--red)' : 'var(--accent)', borderRadius:2, transition:'.3s' }} />
+            </div>
+            <div style={{ display:'flex', justifyContent:'space-between', fontSize:9, fontFamily:'var(--mono)', color:'var(--th)' }}>
+              <span>{pctMonth}% del mes transcurrido</span>
+              {setPage && <span style={{ color:'var(--accent)', cursor:'pointer' }} onClick={() => setPage('cashflow')}>Ver proyección completa →</span>}
+            </div>
+          </div>
+        )
+      })()}
+
       {/* Gráficos */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))', gap:16, marginBottom:16 }}>
         <ChartCard title="Flujo de dinero del mes" subtitle="distribución orientativa" minHeight={220}>
