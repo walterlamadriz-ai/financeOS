@@ -1,11 +1,9 @@
 // src/demo/DemoBanner.jsx
 // Banner persistente para modo demo — visible en todas las páginas
-// Se muestra cuando settings.isDemo === true
 
 import { useState } from 'react'
-import { useApp } from '../context/AppContext.jsx'
 
-export default function DemoBanner({ onExitDemo }) {
+export default function DemoBanner() {
   const [expanded, setExpanded] = useState(false)
 
   return (
@@ -18,9 +16,8 @@ export default function DemoBanner({ onExitDemo }) {
       boxShadow: '0 2px 12px rgba(10,92,62,.3)',
     }}>
 
-      {/* Fila principal — compacta en mobile */}
+      {/* Fila principal */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', minHeight: 40 }}>
-        {/* Badge demo */}
         <div style={{
           background: 'rgba(255,255,255,.2)',
           borderRadius: 20,
@@ -36,12 +33,10 @@ export default function DemoBanner({ onExitDemo }) {
           DEMO
         </div>
 
-        {/* Mensaje principal — truncado en mobile */}
         <span style={{ fontSize: 11, color: 'rgba(255,255,255,.85)', flex: 1, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          Datos ficticios · nada se guarda
+          Datos ficticios · Sofía García · Colombia · nada se guarda
         </span>
 
-        {/* Botones */}
         <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
           <button
             onClick={() => setExpanded(!expanded)}
@@ -57,7 +52,7 @@ export default function DemoBanner({ onExitDemo }) {
               whiteSpace: 'nowrap',
             }}
           >
-            {expanded ? 'Ocultar' : 'Info'}
+            {expanded ? 'Ocultar' : '¿Por qué FinanceOS?'}
           </button>
           <button
             onClick={() => window.open('https://financeospro.com/#pricing', '_blank')}
@@ -66,8 +61,8 @@ export default function DemoBanner({ onExitDemo }) {
               border: 'none',
               color: '#0a5c3e',
               borderRadius: 6,
-              padding: '4px 10px',
-              fontSize: 10,
+              padding: '4px 12px',
+              fontSize: 11,
               fontWeight: 700,
               cursor: 'pointer',
               whiteSpace: 'nowrap',
@@ -78,30 +73,47 @@ export default function DemoBanner({ onExitDemo }) {
         </div>
       </div>
 
-      {/* Expansión informativa */}
+      {/* Panel expansible con argumentos de compra */}
       {expanded && (
         <div style={{
-          background: 'rgba(0,0,0,.15)',
-          borderRadius: 8,
-          padding: '12px 14px',
+          background: 'rgba(0,0,0,.18)',
+          padding: '14px 16px 16px',
           fontSize: 12,
           lineHeight: 1.6,
-          color: 'rgba(255,255,255,.8)',
+          color: 'rgba(255,255,255,.85)',
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr 1fr',
-          gap: 12,
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          gap: 14,
         }}>
           <div>
-            <div style={{ fontWeight: 600, color: '#fff', marginBottom: 4 }}>📊 Qué estás viendo</div>
-            <div>Datos ficticios de una coach financiera con 3 meses de historial. Dashboard, presupuestos, deudas y metas simulados.</div>
+            <div style={{ fontWeight: 700, color: '#fff', marginBottom: 4 }}>🔒 Solo tú tienes tus datos</div>
+            <div>Todo queda en tu dispositivo. Sin servidores, sin cuentas, sin conexión obligatoria. Nadie más puede ver tus finanzas.</div>
           </div>
           <div>
-            <div style={{ fontWeight: 600, color: '#fff', marginBottom: 4 }}>🔒 Tus datos reales</div>
-            <div>Esta demo vive solo en memoria. Al cerrar la ventana desaparece. No toca tu IndexedDB ni tus datos reales.</div>
+            <div style={{ fontWeight: 700, color: '#fff', marginBottom: 4 }}>💳 Un solo pago. Para siempre.</div>
+            <div>Sin suscripciones, sin renovaciones automáticas, sin sorpresas. Personal desde $19.99 USD · Pro desde $29.99 USD.</div>
           </div>
           <div>
-            <div style={{ fontWeight: 600, color: '#fff', marginBottom: 4 }}>🚀 Para usar con clientes</div>
-            <div>Con la licencia Pro podés personalizar esta app con tu marca y entregársela a tus clientes en 30 minutos.</div>
+            <div style={{ fontWeight: 700, color: '#fff', marginBottom: 4 }}>📊 Diagnóstico automático</div>
+            <div>El sistema analiza tus finanzas cada mes y te dice exactamente qué mejorar. Sin hojas de cálculo, sin configuración manual.</div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+            <button
+              onClick={() => window.open('https://financeospro.com/#pricing', '_blank')}
+              style={{
+                background: '#fff',
+                border: 'none',
+                color: '#0a5c3e',
+                borderRadius: 8,
+                padding: '9px 18px',
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: 'pointer',
+                width: '100%',
+              }}
+            >
+              Empezar con mis datos reales →
+            </button>
           </div>
         </div>
       )}
