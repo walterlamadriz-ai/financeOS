@@ -46,9 +46,9 @@ export function calcAPV({
   const difference = vfToday - vf5years
 
   // Bonificación Régimen A — orientativa
-  // 15% del aporte anual (tope informativo ~6 UTM/año ≈ $390.000 CLP aprox)
+  // 15% del aporte anual (tope informativo ~6 UTM/año ≈ $417.252 CLP, UTM vigente $69.542)
   const annualContribution = P * 12
-  const bonusRegimeA = Math.min(annualContribution * 0.15, 390000)
+  const bonusRegimeA = Math.min(annualContribution * 0.15, 6 * 69542)
 
   // Puntos de datos para gráfico (cada 5 años)
   const chartPoints = []

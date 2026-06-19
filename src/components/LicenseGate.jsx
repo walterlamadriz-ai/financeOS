@@ -1,80 +1,200 @@
 // src/components/LicenseGate.jsx
 import { useState } from 'react'
-import { validateLicense, saveLicense } from '../utils/licenseValidator.js'
+import { validateLicense } from '../utils/licenseValidator.js'
+
+const PLANS = [
+  {
+    name: 'Personal',
+    price: 'US$19.99',
+    desc: 'Pago único · uso personal',
+    product: 'personal',
+    highlight: false,
+  },
+  {
+    name: 'Pro',
+    price: 'US$29.99',
+    desc: 'PDF · Asesor · APV · pago único',
+    product: 'pro',
+    highlight: true,
+  },
+]
+
+const CHECKOUT_URL = 'https://invest.financeospro.com/api/create-checkout'
+
+async function startCheckout(product) {
+  const res = await fetch(CHECKOUT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      product,
+      successUrl: 'https://financeospro.com/activate.html?session_id={CHECKOUT_SESSION_ID}',
+      cancelUrl: 'https://financeospro.com/',
+    }),
+  })
+  const data = await res.json()
+  if (data.url) window.location.href = data.url
+  else throw new Error(data.error || 'Error al iniciar checkout')
+}
 
 export default function LicenseGate({ onActivate }) {
-  const [key, setKey] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [key, setKey]           = useState('')
+  const [loading, setLoading]   = useState(false)
+  const [buying, setBuying]     = useState(null)
+  const [error, setError]       = useState('')
+  const [showHelp, setShowHelp] = useState(false)
 
   async function handleActivate() {
-    if (!key.trim()) return
+    const clean = key.trim()
+    if (!clean) return
     setLoading(true)
     setError('')
     try {
-      const valid = await validateLicense(key)
+      const valid = await validateLicense(clean)
       if (valid) {
-        saveLicense(key)
         onActivate()
       } else {
-        setError('Clave inválida. Verifica que la copiaste correctamente desde Gumroad.')
+        setError('Clave inválida. Verifica que la copiaste completa desde el email de confirmación.')
+        setShowHelp(true)
       }
-    } catch(e) {
-      setError('Error al validar. Intenta nuevamente.')
+    } catch {
+      setError('Sin conexión. Verifica tu internet e intenta nuevamente.')
     }
     setLoading(false)
   }
 
-  function handleKey(e) {
-    if (e.key === 'Enter') handleActivate()
+  async function handleBuy(product) {
+    setBuying(product)
+    try {
+      await startCheckout(product)
+    } catch {
+      setError('Error al conectar con el servidor de pagos. Intenta de nuevo.')
+      setBuying(null)
+    }
+  }
+
+  const s = {
+    wrap: {
+      minHeight: '100vh',
+      background: 'var(--bg)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '24px',
+      fontFamily: 'var(--body)',
+    },
+    box: {
+      background: 'var(--card,#fff)',
+      border: '0.5px solid var(--brd2,#e2e2dc)',
+      borderRadius: 18,
+      padding: '40px 36px',
+      maxWidth: 440,
+      width: '100%',
+      boxShadow: '0 4px 24px rgba(0,0,0,.07)',
+    },
   }
 
   return (
-    <div style={{minHeight:'100vh',background:'var(--bg)',display:'flex',alignItems:'center',justifyContent:'center',padding:'24px',fontFamily:'var(--body)'}}>
-      <div style={{background:'var(--card,#fff)',border:'1px solid var(--brd)',borderRadius:'16px',padding:'40px 36px',maxWidth:'420px',width:'100%'}}>
+    <div style={s.wrap}>
+      <div style={s.box}>
 
-        <div style={{fontFamily:'var(--head)',fontSize:'22px',color:'var(--ink)',marginBottom:'4px',fontWeight:'600'}}>FinanceOS</div>
-        <div style={{fontFamily:'var(--mono)',fontSize:'11px',color:'var(--ink3)',marginBottom:'32px'}}>v1.5 · MAXNOVA &amp; LUCI Global LLC</div>
-
-        <div style={{fontSize:'18px',fontWeight:'600',color:'var(--ink)',marginBottom:'8px',fontFamily:'var(--head)'}}>Activa tu licencia</div>
-        <div style={{fontSize:'13px',color:'var(--ink2)',marginBottom:'24px',lineHeight:'1.5',fontFamily:'var(--body)'}}>
-          Ingresa la clave que recibiste al comprar en Gumroad. La encontrarás en tu email de confirmación.
-        </div>
-
-        <input
-          style={{width:'100%',padding:'11px 14px',border:'1px solid var(--brd)',borderRadius:'8px',fontSize:'14px',fontFamily:'var(--mono)',background:'var(--bg)',color:'var(--ink)',letterSpacing:'1px',marginBottom:'12px',boxSizing:'border-box',outline:'none'}}
-          type="text"
-          placeholder="FNOS-XXXX-XXXX-XXXX"
-          value={key}
-          onChange={e => setKey(e.target.value.toUpperCase())}
-          onKeyDown={handleKey}
-          autoFocus
-          spellCheck={false}
-        />
-
-        {error && (
-          <div style={{fontSize:'12px',color:'#e84142',marginBottom:'12px',fontFamily:'var(--mono)',padding:'8px 12px',background:'rgba(232,65,66,.08)',borderRadius:'6px'}}>
-            {error}
+        {/* Logo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }}>
+          <div style={{ width: 34, height: 34, background: 'var(--grn,#1a6b4a)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 14 }}>F</div>
+          <div>
+            <div style={{ fontFamily: 'var(--head)', fontSize: 17, fontWeight: 600, color: 'var(--ink)', letterSpacing: '-.3px' }}>FinanceOS</div>
+            <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--ink3,#888)', marginTop: 1 }}>v1.5 · MAXNOVA & LUCI Global LLC</div>
           </div>
-        )}
-
-        <button
-          style={{width:'100%',padding:'12px',background: loading || !key.trim() ? 'var(--grn2,#0d7a52)' : 'var(--grn)',opacity: loading || !key.trim() ? 0.6 : 1,color:'#fff',border:'none',borderRadius:'8px',fontSize:'14px',fontWeight:'500',cursor: loading || !key.trim() ? 'not-allowed' : 'pointer',fontFamily:'var(--body)',marginBottom:'16px'}}
-          onClick={handleActivate}
-          disabled={loading || !key.trim()}
-        >
-          {loading ? 'Verificando...' : 'Activar FinanceOS →'}
-        </button>
-
-        <div style={{textAlign:'center',fontSize:'12px',color:'var(--ink3)',fontFamily:'var(--mono)'}}>
-          ¿Quieres probar antes de comprar?{' '}
-          <a href="https://demo.financeospro.com/app/?demo=true" target="_blank" rel="noopener noreferrer" style={{color:'var(--grn)',textDecoration:'none',fontWeight:'500'}}>
-            Ver demo gratuito →
-          </a>
         </div>
 
-        <div style={{marginTop:'24px',padding:'12px',background:'rgba(0,0,0,.04)',borderRadius:'8px',fontSize:'11px',color:'var(--ink3)',lineHeight:'1.5',fontFamily:'var(--mono)'}}>
-          Esta clave es personal e intransferible. No la compartas. Cada compra incluye una clave única de acceso. ¿Problemas? maxnovaluciglobal@gmail.com
+        {/* Activate */}
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ink)', marginBottom: 6, fontFamily: 'var(--head)' }}>Ingresa tu clave de acceso</div>
+          <div style={{ fontSize: 12, color: 'var(--ink2,#666)', lineHeight: 1.6, marginBottom: 14, fontFamily: 'var(--body)' }}>
+            La encontrarás en el email de confirmación de tu compra, con formato{' '}
+            <span style={{ fontFamily: 'var(--mono)', background: '#f4f4f0', padding: '1px 6px', borderRadius: 4 }}>FNOS-XXXX-XXXX-XXXX</span>
+          </div>
+          <input
+            style={{ width: '100%', padding: '11px 14px', border: '1px solid var(--brd,#e0e0d8)', borderRadius: 8, fontSize: 14, fontFamily: 'var(--mono)', background: 'var(--bg)', color: 'var(--ink)', letterSpacing: 1, marginBottom: 10, boxSizing: 'border-box', outline: 'none' }}
+            type="text"
+            placeholder="FNOS-XXXX-XXXX-XXXX"
+            value={key}
+            onChange={e => { setKey(e.target.value.toUpperCase()); setError('') }}
+            onKeyDown={e => e.key === 'Enter' && handleActivate()}
+            autoFocus
+            spellCheck={false}
+          />
+
+          {error && (
+            <div style={{ fontSize: 11, color: '#c0392b', marginBottom: 10, fontFamily: 'var(--mono)', padding: '8px 12px', background: 'rgba(192,57,43,.07)', borderRadius: 7, lineHeight: 1.5 }}>
+              ⚠ {error}
+            </div>
+          )}
+
+          <button
+            style={{ width: '100%', padding: 12, background: 'var(--grn,#1a6b4a)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 500, cursor: loading || !key.trim() ? 'not-allowed' : 'pointer', opacity: loading || !key.trim() ? 0.55 : 1, fontFamily: 'var(--body)', transition: 'opacity .15s' }}
+            onClick={handleActivate}
+            disabled={loading || !key.trim()}
+          >
+            {loading ? 'Verificando…' : 'Activar FinanceOS →'}
+          </button>
+
+          {showHelp && (
+            <div style={{ marginTop: 12, padding: '12px 14px', background: '#f7f8f4', borderRadius: 8, fontSize: 11, color: '#555', fontFamily: 'var(--mono)', lineHeight: 1.65 }}>
+              <strong style={{ color: 'var(--ink)' }}>¿Dónde está mi clave?</strong><br />
+              1. Abre el email de confirmación de tu compra<br />
+              2. Busca el campo "License Key" — formato FNOS-XXXX-XXXX-XXXX<br />
+              3. Cópiala completa y pégala arriba<br /><br />
+              ¿No encuentras el email?{' '}
+              <a href="https://financeospro.com/activate.html" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--grn)' }}>
+                Ver instrucciones completas →
+              </a>
+            </div>
+          )}
+        </div>
+
+        {/* Divider */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '24px 0' }}>
+          <div style={{ flex: 1, height: '0.5px', background: 'var(--brd,#e0e0d8)' }} />
+          <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: '#aaa', flexShrink: 0 }}>¿Aún no tienes licencia?</span>
+          <div style={{ flex: 1, height: '0.5px', background: 'var(--brd,#e0e0d8)' }} />
+        </div>
+
+        {/* Purchase plans */}
+        <div style={{ display: 'flex', gap: 10, marginBottom: 18 }}>
+          {PLANS.map(p => (
+            <button
+              key={p.name}
+              onClick={() => handleBuy(p.product)}
+              disabled={buying !== null}
+              style={{
+                flex: 1,
+                padding: '14px 12px',
+                borderRadius: 10,
+                textAlign: 'center',
+                border: p.highlight ? '1.5px solid var(--grn,#1a6b4a)' : '1px solid var(--brd,#e0e0d8)',
+                background: p.highlight ? 'rgba(26,107,74,.05)' : 'var(--bg)',
+                cursor: buying !== null ? 'not-allowed' : 'pointer',
+                opacity: buying && buying !== p.product ? 0.5 : 1,
+                transition: 'transform .12s, opacity .15s',
+              }}
+              onMouseOver={e => { if (!buying) e.currentTarget.style.transform = 'translateY(-1px)' }}
+              onMouseOut={e => { e.currentTarget.style.transform = 'none' }}
+            >
+              <div style={{ fontFamily: 'var(--head)', fontSize: 13, fontWeight: 600, color: p.highlight ? 'var(--grn,#1a6b4a)' : 'var(--ink)', marginBottom: 3 }}>{p.name}</div>
+              <div style={{ fontFamily: 'var(--head)', fontSize: 20, fontWeight: 700, color: 'var(--ink)', marginBottom: 3 }}>{p.price}</div>
+              <div style={{ fontFamily: 'var(--mono)', fontSize: 9, color: '#888' }}>{p.desc}</div>
+              {buying === p.product && (
+                <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--grn)', marginTop: 6 }}>Redirigiendo…</div>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Demo link */}
+        <div style={{ textAlign: 'center', fontSize: 11, color: '#aaa', fontFamily: 'var(--mono)' }}>
+          <a href="https://demo.financeospro.com/app/?demo=true" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--grn,#1a6b4a)', textDecoration: 'none' }}>
+            Explorar el demo gratis →
+          </a>
         </div>
 
       </div>

@@ -3,8 +3,10 @@
 // Principio: el usuario debe entender que sus datos viven en su dispositivo.
 // FinanceOS no puede recuperar datos si no existe un respaldo previo.
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
+import { CLOUD_ENABLED } from '../../core/supabase.js'
+import { cloudPush, cloudPull, cloudStatus } from '../../core/cloudSync.js'
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
 function daysSince(isoDate) {
@@ -161,12 +163,18 @@ export function BackupStatusBadge({ compact = false }) {
 // ── MAIN BACKUP MANAGER ───────────────────────────────────────────────────────
 export default function BackupManager() {
   const { settings, updateSettings, exportData, importData, incomes, expenses, budgets, debts, goals } = useApp()
-  const [status, setStatus]         = useState(null)  // { type: 'ok'|'error'|'warn', msg }
-  const [importing, setImporting]   = useState(false)
+  const [status, setStatus]           = useState(null)
+  const [importing, setImporting]     = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [pendingFile, setPendingFile] = useState(null)
   const [pendingData, setPendingData] = useState(null)
+  const [cloudSyncing, setCloudSyncing] = useState(false)
+  const [cloudInfo, setCloudInfo]     = useState(null)
   const fileRef = useRef()
+
+  useEffect(() => {
+    if (CLOUD_ENABLED) cloudStatus().then(setCloudInfo)
+  }, [])
 
   const lastBackup = settings.lastBackupAt
   const days = daysSince(lastBackup)
@@ -185,6 +193,47 @@ export default function BackupManager() {
       setTimeout(() => setStatus(null), 5000)
     } catch (e) {
       setStatus({ type: 'error', msg: 'Error al crear el respaldo. Intenta de nuevo.' })
+    }
+  }
+
+  // ── CLOUD PUSH ──────────────────────────────────────────────────────────────
+  async function handleCloudPush() {
+    setCloudSyncing(true)
+    setStatus(null)
+    try {
+      const result = await cloudPush()
+      await updateSettings({ ...settings, lastCloudSyncAt: result.savedAt })
+      setCloudInfo(await cloudStatus())
+      setStatus({ type: 'ok', msg: '☁ Datos sincronizados en la nube correctamente.' })
+    } catch (e) {
+      setStatus({ type: 'error', msg: 'Error al sincronizar: ' + (e.message || 'verifica tu conexión.') })
+    } finally {
+      setCloudSyncing(false)
+      setTimeout(() => setStatus(null), 5000)
+    }
+  }
+
+  // ── CLOUD PULL ──────────────────────────────────────────────────────────────
+  async function handleCloudPull() {
+    setCloudSyncing(true)
+    setStatus(null)
+    try {
+      const result = await cloudPull()
+      if (!result) {
+        setStatus({ type: 'warn', msg: 'No hay datos en la nube para este dispositivo todavía.' })
+        return
+      }
+      await importData(new File(
+        [JSON.stringify(result.payload)],
+        'cloud-backup.json',
+        { type: 'application/json' }
+      ))
+      setStatus({ type: 'ok', msg: `☁ Datos restaurados desde la nube (guardado: ${formatDate(result.savedAt)}).` })
+    } catch (e) {
+      setStatus({ type: 'error', msg: 'Error al restaurar desde la nube: ' + (e.message || 'verifica tu conexión.') })
+    } finally {
+      setCloudSyncing(false)
+      setTimeout(() => setStatus(null), 6000)
     }
   }
 
@@ -367,6 +416,44 @@ export default function BackupManager() {
             />
           </label>
         </div>
+
+        {/* ── CLOUD SYNC ── */}
+        {CLOUD_ENABLED && (
+          <div style={{ marginTop: 8, padding: '16px', background: 'var(--sur2)', border: '0.5px solid var(--brd)', borderRadius: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx)', marginBottom: 2 }}>☁ Respaldo en la nube</div>
+                <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)' }}>
+                  {cloudInfo?.connected
+                    ? `Conectado · ID ${cloudInfo.userId}${cloudInfo.lastSync ? ' · Último sync: ' + formatDate(cloudInfo.lastSync) : ''}`
+                    : 'Sin sesión activa · se crea automáticamente al sincronizar'}
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  onClick={handleCloudPull}
+                  disabled={cloudSyncing}
+                  title="Restaurar desde la nube"
+                  style={{ ...btn('default'), fontSize: 11, padding: '6px 12px', opacity: cloudSyncing ? 0.5 : 1 }}
+                >
+                  ↓ Restaurar
+                </button>
+                <button
+                  onClick={handleCloudPush}
+                  disabled={cloudSyncing || !hasRealData}
+                  title="Subir datos a la nube"
+                  style={{ ...btn('primary'), fontSize: 11, padding: '6px 12px', opacity: (cloudSyncing || !hasRealData) ? 0.5 : 1 }}
+                >
+                  {cloudSyncing ? 'Sincronizando…' : '↑ Sincronizar'}
+                </button>
+              </div>
+            </div>
+            <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', lineHeight: 1.5 }}>
+              Tu backup se guarda cifrado en un servidor privado vinculado a este dispositivo. No requiere contraseña.
+              Para acceder desde otro dispositivo usa el backup local (JSON).
+            </div>
+          </div>
+        )}
 
         {/* Mensaje de estado */}
         {status && (

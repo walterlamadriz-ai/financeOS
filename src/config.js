@@ -36,6 +36,7 @@ const config = {
     { code: 'MXN', label: 'MXN — Peso mexicano',    symbol: '$'   },
     { code: 'ARS', label: 'ARS — Peso argentino',   symbol: '$'   },
     { code: 'COP', label: 'COP — Peso colombiano',  symbol: '$'   },
+    { code: 'PEN', label: 'PEN — Sol peruano',       symbol: 'S/.' },
   ],
 
   // ── CATEGORÍAS DE INGRESOS ─────────────────────────────────────────────────
