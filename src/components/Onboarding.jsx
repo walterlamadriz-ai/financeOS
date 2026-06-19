@@ -15,6 +15,7 @@ const CURRENCIES = [
   { code: 'VES', label: 'Bolívar',         flag: '🇻🇪' },
   { code: 'MXN', label: 'Peso mexicano',   flag: '🇲🇽' },
   { code: 'ARS', label: 'Peso argentino',  flag: '🇦🇷' },
+  { code: 'PEN', label: 'Sol peruano',      flag: '🇵🇪' },
   { code: 'COP', label: 'Peso colombiano', flag: '🇨🇴' },
 ]
 const USE_TYPES = [
@@ -170,7 +171,7 @@ export default function Onboarding({ onComplete }) {
       <div style={{ textAlign: 'center', marginBottom: 22 }}>
         <div style={{ width: 52, height: 52, borderRadius: 13, margin: '0 auto 12px', background: 'var(--grn-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, color: 'var(--grn)' }}>◈</div>
         <h1 style={{ ...h1s, textAlign: 'center' }}>Bienvenido a FinanceOS</h1>
-        <p style={{ ...subs, textAlign: 'center' }}>Configuración inicial en menos de 5 minutos.</p>
+        <p style={{ ...subs, textAlign: 'center' }}>Configuración inicial en 2 minutos. FinanceOS se adapta a ti desde el primer día.</p>
       </div>
       <div style={{ padding: '10px 13px', background: 'var(--grn-bg)', borderRadius: 8, border: '0.5px solid rgba(26,163,104,.2)', fontSize: 11, color: 'var(--grn)', fontFamily: 'var(--mono)', lineHeight: 1.6, marginBottom: 18 }}>
         🔒 Tus datos se guardan solo en este dispositivo. Sin servidores, sin cuentas, sin suscripciones.
@@ -231,9 +232,11 @@ export default function Onboarding({ onComplete }) {
     { code: 'MX', flag: '🇲🇽', label: 'México',    currency: 'MXN' },
     { code: 'AR', flag: '🇦🇷', label: 'Argentina', currency: 'ARS' },
     { code: 'CO', flag: '🇨🇴', label: 'Colombia',  currency: 'COP' },
-    { code: 'PE', flag: '🇵🇪', label: 'Perú',      currency: 'CLP' },
-    { code: 'VE', flag: '🇻🇪', label: 'Venezuela', currency: 'VES' },
-    { code: 'OTHER', flag: '🌎', label: 'Otro',     currency: 'CLP' },
+    { code: 'PE',    flag: '🇵🇪', label: 'Perú',           currency: 'PEN' },
+    { code: 'VE',    flag: '🇻🇪', label: 'Venezuela',      currency: 'VES' },
+    { code: 'US',    flag: '🇺🇸', label: 'Estados Unidos', currency: 'USD' },
+    { code: 'ES',    flag: '🇪🇸', label: 'España',          currency: 'EUR' },
+    { code: 'OTHER', flag: '🌎', label: 'Otro',            currency: 'USD' },
   ]
   if (step === 3) return (
     <div style={wrap}><div style={box}>
