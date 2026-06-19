@@ -109,7 +109,7 @@ const btnG = {
 
 export default function Onboarding({ onComplete }) {
   const { settings, updateSettings } = useApp()
-  const TOTAL = 7
+  const TOTAL = 8
   const [step, setStep] = useState(0)
   const [loading, setLoading] = useState(false)
   const [answers, setAnswers] = useState({
@@ -117,6 +117,7 @@ export default function Onboarding({ onComplete }) {
     country: settings.country || 'CL',
     currency: settings.currency || 'CLP',
     savingGoal: 20, hasDebts: '', mainGoal: '', experience: '',
+    estimatedMonthlyIncome: '',
   })
   const set = (k, v) => setAnswers(a => ({ ...a, [k]: v }))
 
@@ -156,6 +157,7 @@ export default function Onboarding({ onComplete }) {
       country: answers.country,
       onboardingDone: true, onboardingUseType: answers.useType,
       onboardingExperience: answers.experience, onboardingMainGoal: answers.mainGoal,
+      estimatedMonthlyIncome: Number(answers.estimatedMonthlyIncome) || 0,
       activeMonth: new Date().toISOString().slice(0, 7),
       activeTemplateId: t.id, activeTemplateName: t.name,
       categoriesIncome: t.categoriesIncome, categoriesExpense: t.categoriesExpense,
@@ -323,10 +325,45 @@ export default function Onboarding({ onComplete }) {
     </div></div>
   )
 
-  // Step 5 — Objetivo y experiencia
+  // Step 5 — Ingreso mensual estimado (nuevo)
   if (step === 5) return (
     <div style={wrap}><div style={box}>
       <ProgressBar step={5} total={TOTAL} />
+      <h2 style={h1s}>¿Cuánto ganás aproximadamente este mes?</h2>
+      <p style={subs}>Solo para activar tu diagnóstico desde el primer día. Podés cambiarlo cuando quieras en Ajustes.</p>
+      <div style={{ marginBottom: 14 }}>
+        <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', marginBottom: 6 }}>
+          Ingreso mensual en {answers.currency || 'tu moneda'}
+        </div>
+        <input
+          type="number"
+          min="0"
+          value={answers.estimatedMonthlyIncome}
+          placeholder="ej. 3.000.000"
+          onChange={e => set('estimatedMonthlyIncome', e.target.value)}
+          style={{
+            width: '100%', padding: '10px 12px', borderRadius: 8, fontSize: 14,
+            border: '0.5px solid var(--brd2)', background: 'var(--sur2)', color: 'var(--tx)',
+            fontFamily: 'var(--mono)', boxSizing: 'border-box',
+          }}
+          autoFocus
+        />
+        <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: 5, lineHeight: 1.5 }}>
+          Aproximado está bien — el sistema lo usa para calcular tu tasa de ahorro y presupuestos sugeridos.
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: 7 }}>
+        <button style={{ ...btnG, width: 'auto', padding: '8px 14px', marginTop: 0 }} onClick={back}>← Atrás</button>
+        <button style={{ ...btnP(false), flex: 1, marginTop: 0 }} onClick={next}>Continuar →</button>
+      </div>
+      <button style={{ ...btnG, fontSize: 10, marginTop: 2 }} onClick={next}>Prefiero no indicarlo ahora →</button>
+    </div></div>
+  )
+
+  // Step 6 — Objetivo y experiencia
+  if (step === 6) return (
+    <div style={wrap}><div style={box}>
+      <ProgressBar step={6} total={TOTAL} />
       <h2 style={h1s}>Objetivo y experiencia</h2>
       <p style={subs}>Orientativo — podés cambiarlo en cualquier momento.</p>
       {MAIN_GOALS.map(g => <OptionCard key={g.id} {...g} selected={answers.mainGoal === g.id} onClick={() => set('mainGoal', g.id)} />)}
@@ -350,10 +387,10 @@ export default function Onboarding({ onComplete }) {
     </div></div>
   )
 
-  // Step 6 — Plantilla recomendada
-  if (step === 6) return (
+  // Step 7 — Plantilla recomendada
+  if (step === 7) return (
     <div style={wrap}><div style={box}>
-      <ProgressBar step={6} total={TOTAL} />
+      <ProgressBar step={7} total={TOTAL} />
       <h2 style={h1s}>Plantilla recomendada</h2>
       <p style={subs}>Basado en tus respuestas, esta configuración se adapta mejor.</p>
       <div style={{ padding: '13px', borderRadius: 10, border: `1.5px solid ${activeTemplate.color}`, background: `${activeTemplate.color}08`, marginBottom: 13 }}>
@@ -390,7 +427,7 @@ export default function Onboarding({ onComplete }) {
     </div></div>
   )
 
-  // Step 7 — Resumen y finalizar
+  // Step 8 — Resumen y finalizar
   return (
     <div style={wrap}><div style={box}>
       <ProgressBar step={TOTAL} total={TOTAL} />
