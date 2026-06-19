@@ -19,12 +19,14 @@ const NAV = [
     { id: 'apv',     ic: '🇨🇱', lb: 'APV Chile', chileOnly: true },
   ] },
   { sec: 'Análisis', items: [
-    { id: 'coach',    ic: '◈', lb: 'Señales' },
+    { id: 'coach',    ic: '⚕', lb: 'Diagnóstico' },
     { id: 'reports',  ic: '⊞', lb: 'Reportes' },
     { id: 'cashflow', ic: '⟶', lb: 'Proyección' },
   ] },
   { sec: 'Pro', items: [
     { id: 'advisor',  ic: '◑', lb: 'Modo Asesor' },
+  ] },
+  { sec: 'Cuenta', items: [
     { id: 'settings', ic: '⊙', lb: 'Ajustes' },
   ] },
 ]
