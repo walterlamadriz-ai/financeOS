@@ -316,8 +316,8 @@ export default function Debts() {
           </Card>
         )
       })}
-      {debts.length > 0 && <DebtProgressList debts={debts} sym={sym} />}
       {debts.length > 0 && <DebtPayoffSimulator debts={debts} sym={sym} />}
+      {debts.length > 0 && <DebtProgressList debts={debts} sym={sym} />}
     </div>
   )
 }
