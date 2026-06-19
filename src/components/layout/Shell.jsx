@@ -151,7 +151,7 @@ export default function Shell({ page, setPage, children }) {
             <span onClick={() => navigate('privacy')} className={s.legalLink}>Privacidad</span>
             <span onClick={() => navigate('terms')} className={s.legalLink}>Términos</span>
             <span onClick={() => navigate('disclaimer')} className={s.legalLink}>Aviso legal</span>
-            <a href='https://www.financeospro.com/docs/' target='_blank' className={s.legalLink} style={{textDecoration:'none'}}>Docs</a>
+            <a href='https://www.financeospro.com/docs/' target='_blank' className={s.legalLink} style={{textDecoration:'none'}}>Ayuda</a>
           </div>
           <div className={s.appVersion}>
             FinanceOS v1.5 · MAXNOVA & LUCI Global LLC<br/>
