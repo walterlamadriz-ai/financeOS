@@ -29,7 +29,7 @@ const ChartTooltip = ({ active, payload, label, sym }) => {
 }
 
 export default function CashFlow() {
-  const { incomes, expenses, settings } = useApp()
+  const { incomes, expenses, budgets, settings } = useApp()
   const sym = CURRENCY_SYMBOLS[settings.currency] || '$'
 
   // ── Detectar recurrentes ──────────────────────────────────────────────────
@@ -65,6 +65,31 @@ export default function CashFlow() {
   const curInc  = incomes.filter(r => r.date?.startsWith(activeMonth)).reduce((s, r) => s + r.amount, 0)
   const curExp  = expenses.filter(r => r.date?.startsWith(activeMonth)).reduce((s, r) => s + r.amount, 0)
   const curBal  = curInc - curExp
+
+  // ── Proyección fin de mes (ritmo diario) ──────────────────────────────────
+  const eomProjection = useMemo(() => {
+    const now      = new Date()
+    const [y, m]   = activeMonth.split('-').map(Number)
+    const daysInMonth = new Date(y, m, 0).getDate()
+    // Día actual si el mes activo es el presente; si es pasado, usamos el último día
+    const today    = (now.getFullYear() === y && now.getMonth() + 1 === m)
+                     ? now.getDate()
+                     : daysInMonth
+    const daysLeft = daysInMonth - today
+    const dailyInc = today > 0 ? curInc / today : 0
+    const dailyExp = today > 0 ? curExp / today : 0
+    const projInc  = curInc  + dailyInc * daysLeft
+    const projExp  = curExp  + dailyExp * daysLeft
+    const projBal  = projInc - projExp
+    const totalBudget = budgets.reduce((s, b) => s + (b.limit || 0), 0)
+    const pctMonthElapsed = today / daysInMonth
+    const pctBudgetUsed   = totalBudget > 0 ? curExp / totalBudget : null
+    // Ritmo: si el % de presupuesto gastado > % de mes transcurrido → adelantado en gasto
+    const pace = pctBudgetUsed !== null
+      ? pctBudgetUsed - pctMonthElapsed
+      : null
+    return { today, daysInMonth, daysLeft, dailyInc, dailyExp, projInc, projExp, projBal, totalBudget, pctMonthElapsed, pctBudgetUsed, pace }
+  }, [activeMonth, curInc, curExp, budgets])
 
   const monthlyNetFlow = monthlyRecInc - monthlyRecExp
 
@@ -108,10 +133,79 @@ export default function CashFlow() {
 
       {!hasData && (
         <Alert type="info">
-          Para ver proyecciones, registra ingresos o gastos con recurrencia "Mensual", "Quincenal" o "Semanal".
-          La proyección se calcula automáticamente desde esos datos.
+          <strong>Para activar la proyección:</strong> cuando registres un ingreso o gasto, elige recurrencia "Mensual", "Quincenal" o "Semanal" en el campo correspondiente.
+          El sistema los detecta automáticamente y proyecta tu flujo a 30, 60 y 90 días.
         </Alert>
       )}
+
+      {/* ── Proyección fin de mes ── */}
+      {(curInc > 0 || curExp > 0) && (() => {
+        const { today, daysInMonth, daysLeft, dailyExp, projInc, projExp, projBal, totalBudget, pctMonthElapsed, pctBudgetUsed, pace } = eomProjection
+        const paceColor = pace === null ? 'var(--th)' : pace > 0.08 ? 'var(--red)' : pace > 0 ? 'var(--amb)' : 'var(--accent)'
+        const paceLabel = pace === null ? '—' : pace > 0.08 ? 'Ritmo acelerado' : pace > 0 ? 'Ritmo levemente alto' : 'Ritmo saludable'
+        const barPct    = Math.min(pctMonthElapsed * 100, 100)
+        const budgetBarPct = pctBudgetUsed !== null ? Math.min(pctBudgetUsed * 100, 100) : null
+        return (
+          <Card>
+            <CardHeader title={`Proyección fin de mes — ${activeMonth}`} />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10, marginBottom: 16 }}>
+              {[
+                { label: 'Día actual', value: `${today} / ${daysInMonth}`, sub: `${daysLeft} días restantes`, color: 'var(--tx)' },
+                { label: 'Gasto diario', value: `${sym}${Math.round(dailyExp).toLocaleString('es-CL')}`, sub: 'promedio hasta hoy', color: 'var(--red)' },
+                { label: 'Ingreso proyectado', value: `${sym}${Math.round(projInc).toLocaleString('es-CL')}`, sub: 'al 31 a este ritmo', color: 'var(--accent)' },
+                { label: 'Gasto proyectado', value: `${sym}${Math.round(projExp).toLocaleString('es-CL')}`, sub: 'al 31 a este ritmo', color: 'var(--red)' },
+                { label: 'Balance proyectado', value: `${sym}${Math.round(projBal).toLocaleString('es-CL')}`, sub: projBal >= 0 ? 'positivo' : 'déficit', color: projBal >= 0 ? 'var(--accent)' : 'var(--red)' },
+              ].map(k => (
+                <div key={k.label} style={{ background: 'var(--sur2)', borderRadius: 8, padding: '10px 12px', border: '.5px solid var(--brd)' }}>
+                  <div style={{ fontSize: 9, fontFamily: 'var(--mono)', color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 4 }}>{k.label}</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'var(--mono)', color: k.color, marginBottom: 2 }}>{k.value}</div>
+                  <div style={{ fontSize: 9, color: 'var(--th)', fontFamily: 'var(--mono)' }}>{k.sub}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Barras de progreso */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--th)', marginBottom: 4 }}>
+                  <span>% mes transcurrido</span>
+                  <span>{barPct.toFixed(0)}%</span>
+                </div>
+                <div style={{ height: 6, borderRadius: 3, background: 'var(--brd2)', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${barPct}%`, background: 'var(--accent)', borderRadius: 3, transition: '.3s' }} />
+                </div>
+              </div>
+              {budgetBarPct !== null && (
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--th)', marginBottom: 4 }}>
+                    <span>% presupuesto gastado</span>
+                    <span style={{ color: paceColor }}>{budgetBarPct.toFixed(0)}% · {paceLabel}</span>
+                  </div>
+                  <div style={{ height: 6, borderRadius: 3, background: 'var(--brd2)', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${budgetBarPct}%`, background: paceColor, borderRadius: 3, transition: '.3s' }} />
+                  </div>
+                  <div style={{ fontSize: 9, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: 4 }}>
+                    Presupuesto total: {sym}{totalBudget.toLocaleString('es-CL')} · Gastado hasta hoy: {sym}{Math.round(curExp).toLocaleString('es-CL')}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Alerta de ritmo */}
+            {pace !== null && pace > 0.08 && (
+              <div style={{ marginTop: 12, padding: '8px 12px', background: 'rgba(255,77,106,.07)', border: '.5px solid rgba(255,77,106,.25)', borderRadius: 8, fontSize: 11, color: 'var(--red)', fontFamily: 'var(--mono)' }}>
+                ⚠ Vas {(pace * 100).toFixed(0)}% por encima del ritmo esperado. A este paso gastarías {sym}{Math.round(projExp).toLocaleString('es-CL')} este mes
+                {totalBudget > 0 ? ` (${sym}${Math.round(projExp - totalBudget).toLocaleString('es-CL')} sobre el presupuesto).` : '.'}
+              </div>
+            )}
+            {pace !== null && pace <= 0 && curExp > 0 && (
+              <div style={{ marginTop: 12, padding: '8px 12px', background: 'rgba(0,212,170,.06)', border: '.5px solid rgba(0,212,170,.2)', borderRadius: 8, fontSize: 11, color: 'var(--accent)', fontFamily: 'var(--mono)' }}>
+                ✓ Ritmo de gasto saludable — vas {Math.abs((pace * 100).toFixed(0))}% por debajo del ritmo esperado del mes.
+              </div>
+            )}
+          </Card>
+        )
+      })()}
 
       {/* KPIs de proyección */}
       <div className="kpi-row">
