@@ -2,7 +2,7 @@
 // Shell para modo demo — envuelve la app con DemoProvider
 // Bridge: hace que useApp() en todos los módulos use los datos demo (sin IndexedDB)
 
-import { useState, useContext, lazy, Suspense } from 'react'
+import { useState, useEffect, useContext, lazy, Suspense } from 'react'
 import { DemoProvider, useDemo, DemoContext } from './DemoContext.jsx'
 import DemoBanner from './DemoBanner.jsx'
 import Shell from '../components/layout/Shell.jsx'
@@ -36,6 +36,66 @@ function DemoBridge({ children }) {
     <AppContext.Provider value={demoValue}>
       {children}
     </AppContext.Provider>
+  )
+}
+
+// CTA persistente al pie — aparece después de 3 min de uso demo
+function DemoBottomCTA() {
+  const [visible, setVisible] = useState(false)
+  const [dismissed, setDismissed] = useState(() => {
+    try { return !!localStorage.getItem('fos_demo_cta_dismissed') } catch { return false }
+  })
+
+  useEffect(() => {
+    if (dismissed) return
+    const t = setTimeout(() => setVisible(true), 3 * 60 * 1000)
+    return () => clearTimeout(t)
+  }, [dismissed])
+
+  if (!visible || dismissed) return null
+
+  function dismiss() {
+    try { localStorage.setItem('fos_demo_cta_dismissed', '1') } catch {}
+    setDismissed(true)
+  }
+
+  return (
+    <div style={{
+      position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 300,
+      background: 'linear-gradient(135deg, #0a5c3e, #0d7244)',
+      color: '#fff',
+      padding: '12px 16px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 12,
+      boxShadow: '0 -4px 20px rgba(0,0,0,.2)',
+      flexWrap: 'wrap',
+    }}>
+      <div style={{ flex: 1, minWidth: 200 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 2 }}>Estás viendo datos ficticios.</div>
+        <div style={{ fontSize: 11, color: 'rgba(255,255,255,.8)' }}>El tuyo es privado, es tuyo para siempre y cuesta $19.99 USD.</div>
+      </div>
+      <button
+        onClick={() => window.open('https://financeospro.com/#pricing', '_blank')}
+        style={{
+          background: '#fff', color: '#0a5c3e', border: 'none',
+          borderRadius: 8, padding: '9px 18px',
+          fontSize: 13, fontWeight: 700, cursor: 'pointer', flexShrink: 0,
+        }}
+      >
+        Obtener FinanceOS →
+      </button>
+      <button
+        onClick={dismiss}
+        aria-label="Cerrar"
+        style={{
+          background: 'transparent', border: 'none', color: 'rgba(255,255,255,.6)',
+          fontSize: 18, cursor: 'pointer', lineHeight: 1, flexShrink: 0,
+        }}
+      >
+        ✕
+      </button>
+    </div>
   )
 }
 
@@ -73,6 +133,7 @@ function DemoInner() {
         {renderPage(page)}
         <Toast />
       </Shell>
+      <DemoBottomCTA />
     </>
   )
 }
