@@ -244,3 +244,30 @@
   .rotationTip { display: flex; }
   :global(.grid2), :global(.grid3), :global(.grid4) { grid-template-columns: 1fr; }
 }
+
+/* ── FAB — botón flotante para egreso rápido (solo móvil) ── */
+.fab {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #0f1923;
+  border: none;
+  font-size: 28px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,.25);
+  z-index: 150;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: transform .15s, box-shadow .15s;
+}
+.fab:active { transform: scale(.93); }
+@media (max-width: 700px) {
+  .fab { display: flex; }
+}

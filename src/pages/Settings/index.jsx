@@ -1,4 +1,5 @@
 // src/pages/Settings/index.jsx — v1.5
+import { useState, useEffect } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
 import { Card, CardHeader, Btn, PageHeader } from '../../components/ui/index.jsx'
 import { BackupWarning } from '../../components/legal/MicroCopy.jsx'
@@ -8,6 +9,27 @@ import { CURRENCY_OPTIONS, DEFAULT_USD_RATES } from '../shared/constants.js'
 
 export default function Settings() {
   const { settings, updateSettings, clearAll, loadDemo, exportCSV } = useApp()
+  const [installPrompt, setInstallPrompt] = useState(null)
+  const [installed, setInstalled] = useState(false)
+
+  useEffect(() => {
+    function onBeforeInstall(e) { e.preventDefault(); setInstallPrompt(e) }
+    function onAppInstalled() { setInstalled(true); setInstallPrompt(null) }
+    window.addEventListener('beforeinstallprompt', onBeforeInstall)
+    window.addEventListener('appinstalled', onAppInstalled)
+    return () => {
+      window.removeEventListener('beforeinstallprompt', onBeforeInstall)
+      window.removeEventListener('appinstalled', onAppInstalled)
+    }
+  }, [])
+
+  async function handleInstall() {
+    if (!installPrompt) return
+    installPrompt.prompt()
+    const { outcome } = await installPrompt.userChoice
+    if (outcome === 'accepted') setInstalled(true)
+    setInstallPrompt(null)
+  }
 
   async function handleClear() {
     if (window.confirm('¿Borrar TODOS los datos? Esta acción no se puede deshacer.')) {
@@ -151,6 +173,18 @@ export default function Settings() {
           <Btn variant="danger" size="sm" onClick={handleClear}>Borrar todo</Btn>
         </div>
       </Card>
+      {(installPrompt || installed) && (
+        <Card>
+          <CardHeader title="Instalar como app" />
+          <div style={{...srow, borderBottom:'none'}}>
+            <div>
+              <div style={slbl}>{installed ? '✓ App instalada' : 'Agregar a pantalla de inicio'}</div>
+              <div style={ssub}>{installed ? 'FinanceOS funciona como app nativa en este dispositivo.' : 'Instalá FinanceOS como PWA para acceso sin navegador y modo offline total.'}</div>
+            </div>
+            {!installed && <Btn variant="ghost" size="sm" onClick={handleInstall}>Instalar →</Btn>}
+          </div>
+        </Card>
+      )}
       <BackupWarning />
       <div style={{padding:'10px 12px',background:'var(--sur2)',borderRadius:'var(--r)',border:'0.5px solid var(--brd)',fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',lineHeight:1.7,marginTop:8}}>
         FinanceOS v1.5 · MAXNOVA & LUCI Global LLC · Datos locales · Sin servidor · No asesoría financiera certificada

@@ -221,6 +221,16 @@ export default function Shell({ page, setPage, children }) {
         <div className={s.content}>
           {children}
         </div>
+
+        {/* FAB flotante — acceso rápido a egreso, solo móvil */}
+        <button
+          className={s.fab}
+          onClick={() => navigate('movements')}
+          aria-label="Agregar egreso rápido"
+          title="Registrar egreso"
+        >
+          +
+        </button>
       </div>
     </div>
   )
