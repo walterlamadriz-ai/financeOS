@@ -1,22 +1,32 @@
 // src/utils/taxCalcCL.js
-// Cálculo tributario orientativo APV Chile v1.4
+// Cálculo tributario orientativo APV Chile
 // NO constituye asesoría financiera, tributaria ni legal
-// Tabla Global Complementario 2024 — orientativa
-// UTM referencial: $65.916 CLP (verificar en sii.cl)
+// Tabla IGC AT 2026 (tramos vigentes SII — verificar en sii.cl cada año)
+// UTM: $69.542 (junio 2026) — actualizar anualmente
+// UF:  $39.724 (diciembre 2025) — actualizar anualmente
 
-const UTM = 65916
-const UTA = UTM * 12
+let UTM = 69542
+let UF  = 39724
+let UTA = UTM * 12
 
-const TRAMOS = [
-  { desde: 0,    hasta: 13.5,     tasa: 0,     rebaja: 0              },
-  { desde: 13.5, hasta: 30,       tasa: 0.04,  rebaja: 0.54  * UTA   },
-  { desde: 30,   hasta: 50,       tasa: 0.08,  rebaja: 1.74  * UTA   },
-  { desde: 50,   hasta: 70,       tasa: 0.135, rebaja: 4.49  * UTA   },
-  { desde: 70,   hasta: 90,       tasa: 0.23,  rebaja: 11.14 * UTA   },
-  { desde: 90,   hasta: 120,      tasa: 0.304, rebaja: 17.80 * UTA   },
-  { desde: 120,  hasta: 310,      tasa: 0.35,  rebaja: 23.32 * UTA   },
-  { desde: 310,  hasta: Infinity, tasa: 0.40,  rebaja: 38.82 * UTA   },
-]
+function buildTramos(uta) {
+  return [
+    { desde: 0,    hasta: 13.5,     tasa: 0,     rebaja: 0              },
+    { desde: 13.5, hasta: 30,       tasa: 0.04,  rebaja: 0.54  * uta   },
+    { desde: 30,   hasta: 50,       tasa: 0.08,  rebaja: 1.74  * uta   },
+    { desde: 50,   hasta: 70,       tasa: 0.135, rebaja: 4.49  * uta   },
+    { desde: 70,   hasta: 90,       tasa: 0.23,  rebaja: 11.14 * uta   },
+    { desde: 90,   hasta: 120,      tasa: 0.304, rebaja: 17.80 * uta   },
+    { desde: 120,  hasta: 310,      tasa: 0.35,  rebaja: 23.32 * uta   },
+    { desde: 310,  hasta: Infinity, tasa: 0.40,  rebaja: 38.82 * uta   },
+  ]
+}
+let TRAMOS = buildTramos(UTA)
+
+export function setIndicadores({ utm, uf }) {
+  if (utm && utm > 0) { UTM = utm; UTA = UTM * 12; TRAMOS = buildTramos(UTA) }
+  if (uf  && uf  > 0)   UF  = uf
+}
 
 export function calcDescuentos(sueldoBrutoMensual) {
   const afp      = Math.round(sueldoBrutoMensual * 0.10)
@@ -55,7 +65,7 @@ export function calcBeneficioAPV({ sueldoBrutoMensual, bonoAnual = 0, apvMensual
   const bonifRegA  = Math.min(apvAnual * 0.15, topeRegA)
   const ahorroRegA = Math.round(bonifRegA)
 
-  const topeRegB     = 19200000
+  const topeRegB     = Math.round(600 * UF)
   const apvDeducible = Math.min(apvAnual, topeRegB)
   const baseConRegB  = Math.max(0, baseImponible - apvDeducible)
   const conRegB      = calcImpuestoAnual(baseConRegB)
@@ -78,5 +88,48 @@ export function calcBeneficioAPV({ sueldoBrutoMensual, bonoAnual = 0, apvMensual
     mayorBeneficio:    ahorroRegB > ahorroRegA ? 'B' : 'A',
     UTMref:            UTM,
     UTAref:            UTA,
+    UFref:             UF,
+    topeRegB,
+  }
+}
+
+export function calcGapTramo(baseImponible) {
+  if (!baseImponible || baseImponible <= 0) return null
+  const baseUTA  = baseImponible / UTA
+  const tramoIdx = TRAMOS.findIndex(t => baseUTA >= t.desde && baseUTA < t.hasta)
+  if (tramoIdx <= 0) return null
+
+  const umbralInferiorPesos = Math.round(TRAMOS[tramoIdx].desde * UTA)
+  const gap                 = Math.round(baseImponible - umbralInferiorPesos)
+  const topeRegBActual      = Math.round(600 * UF)
+
+  return {
+    gap,
+    gapMensual:        Math.round(gap / 12),
+    tramoActual:       tramoIdx + 1,
+    tramoObjetivo:     tramoIdx,
+    tasaActual:        TRAMOS[tramoIdx].tasa,
+    tasaObjetivo:      TRAMOS[tramoIdx - 1].tasa,
+    umbralInferiorPesos,
+    dentroDelTope:     gap <= topeRegBActual,
+    porcentajeDelTope: Math.round(gap / topeRegBActual * 100),
+    topeRegB:          topeRegBActual,
+  }
+}
+
+export function calcArbitraje(tasaMarginal) {
+  let tasaRetiroEst
+  if      (tasaMarginal >= 0.304) tasaRetiroEst = 0.04
+  else if (tasaMarginal >= 0.23)  tasaRetiroEst = 0.04
+  else if (tasaMarginal >= 0.135) tasaRetiroEst = 0.02
+  else if (tasaMarginal >= 0.08)  tasaRetiroEst = 0.01
+  else                             tasaRetiroEst = 0
+
+  const arbitrajePorPeso = Math.max(0, tasaMarginal - tasaRetiroEst)
+  return {
+    tasaMarginalHoy:  tasaMarginal,
+    tasaRetiroEst,
+    arbitrajePorPeso,
+    centavosPorPeso:  Math.round(arbitrajePorPeso * 100),
   }
 }
