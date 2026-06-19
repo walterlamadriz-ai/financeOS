@@ -24,7 +24,7 @@ const NAV = [
     { id: 'cashflow', ic: '⟶', lb: 'Proyección' },
   ] },
   { sec: 'Pro', items: [
-    { id: 'advisor',  ic: '◑', lb: 'Modo Asesor' },
+    { id: 'advisor',  ic: '◑', lb: 'Modo Asesor', proOnly: true },
   ] },
   { sec: 'Cuenta', items: [
     { id: 'settings', ic: '⊙', lb: 'Ajustes' },
@@ -120,6 +120,9 @@ export default function Shell({ page, setPage, children }) {
               >
                 <span className={s.ic}>{it.ic}</span>
                 {it.lb}
+                {it.proOnly && (
+                  <span style={{ marginLeft:'auto', fontSize:8, fontFamily:'var(--mono)', background:'rgba(245,166,35,.18)', color:'var(--amb)', borderRadius:4, padding:'1px 5px', letterSpacing:'.5px', fontWeight:700 }}>PRO</span>
+                )}
               </div>
             ))}
           </div>

@@ -8,6 +8,7 @@ import useSubscriptionMetrics from '../../hooks/useSubscriptionMetrics.js'
 import { useApp } from '../../context/AppContext.jsx'
 import { Card, CardHeader, Alert } from '../../components/ui/index.jsx'
 import { fmtMoney, fmtPct } from '../../utils/index.js'
+import ProGate from '../../components/ui/ProGate.jsx'
 import { FinancialDisclaimer } from '../../components/legal/MicroCopy.jsx'
 import { downloadReportePDF } from './ReportePDF.jsx'
 import TemplateSelector from '../../components/templates/TemplateSelector.jsx'
@@ -351,6 +352,7 @@ export default function Advisor() {
           count: subCount, alerts: subAlerts, activeSubs } = subMetrics
 
   return (
+    <ProGate feature="Modo Asesor">
     <div className="stack">
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
@@ -635,5 +637,6 @@ export default function Advisor() {
 
       <FinancialDisclaimer />
     </div>
+    </ProGate>
   )
 }
