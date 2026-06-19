@@ -245,6 +245,32 @@ export default function Coach() {
         </>
       )}
 
+      {/* Checklist mensual */}
+      {signals.length >= 0 && (() => {
+        const items = [
+          { done: (incomes.filter(r => r?.date?.startsWith(settings?.activeMonth || '')).length > 0), label: 'Registrar ingresos del mes' },
+          { done: (expenses.filter(r => r?.date?.startsWith(settings?.activeMonth || '')).length > 0), label: 'Registrar gastos del mes' },
+          { done: (budgets.length > 0), label: 'Tener al menos un presupuesto activo' },
+          { done: (goals.length > 0), label: 'Tener al menos una meta financiera' },
+          { done: (signals.filter(s => s.severity === 'warning').length === 0), label: 'Sin señales críticas activas' },
+        ]
+        const doneCount = items.filter(i => i.done).length
+        return (
+          <div style={{ background: 'var(--sur)', border: '.5px solid var(--brd)', borderRadius: 'var(--r)', padding: '14px 16px', marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+              <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.8px' }}>Checklist del mes</div>
+              <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: doneCount === items.length ? 'var(--accent)' : 'var(--th)' }}>{doneCount}/{items.length}</span>
+            </div>
+            {items.map((it, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0', borderBottom: i < items.length - 1 ? '.5px solid var(--brd)' : 'none' }}>
+                <span style={{ fontSize: 13, color: it.done ? 'var(--accent)' : 'var(--brd2)', flexShrink: 0 }}>{it.done ? '✓' : '○'}</span>
+                <span style={{ fontSize: 12, color: it.done ? 'var(--tx)' : 'var(--th)' }}>{it.label}</span>
+              </div>
+            ))}
+          </div>
+        )
+      })()}
+
       {/* Disclaimer completo al pie */}
       <div style={{ padding: '10px 12px', background: 'var(--sur2)', border: '.5px solid var(--brd)', borderRadius: 'var(--r)', fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', lineHeight: 1.6, marginTop: 8 }}>
         Este diagnóstico es generado localmente a partir de los datos que ingresaste. No constituye asesoría financiera, tributaria, contable ni de inversión. No reemplaza la consulta con profesionales certificados. Las señales y el score son orientativos y se basan en umbrales configurables. MAXNOVA &amp; LUCI Global LLC no asume responsabilidad por decisiones tomadas con base en este diagnóstico.

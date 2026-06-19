@@ -288,6 +288,28 @@ export default function Dashboard({ setPage }) {
         ))}
       </div>
 
+      {/* Ingreso esperado vs recibido */}
+      {(() => {
+        const expected = Number(settings.estimatedMonthlyIncome) || 0
+        if (expected <= 0 || kpis.totalInc <= 0) return null
+        const diff = kpis.totalInc - expected
+        const pctDiff = ((diff / expected) * 100).toFixed(1)
+        const over = diff >= 0
+        return (
+          <div style={{ background: over ? 'rgba(0,212,170,.06)' : 'rgba(255,77,106,.06)', border: `.5px solid ${over ? 'rgba(0,212,170,.25)' : 'rgba(255,77,106,.25)'}`, borderRadius: 'var(--r)', padding: '12px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: 160 }}>
+              <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.8px', marginBottom: 4 }}>Ingreso esperado vs recibido</div>
+              <div style={{ fontSize: 13, color: 'var(--tx)' }}>
+                Esperado: <strong>{sym}{fmt(expected)}</strong> · Recibido: <strong style={{ color: over ? 'var(--accent)' : 'var(--red)' }}>{sym}{fmt(kpis.totalInc)}</strong>
+              </div>
+            </div>
+            <div style={{ fontFamily: 'var(--mono)', fontSize: 14, fontWeight: 700, color: over ? 'var(--accent)' : 'var(--red)' }}>
+              {over ? '+' : ''}{pctDiff}%
+            </div>
+          </div>
+        )
+      })()}
+
       {/* Insight Cards */}
       {insights.length > 0 && (
         <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))', gap:10, marginBottom:20 }}>
