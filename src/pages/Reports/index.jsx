@@ -11,6 +11,7 @@ import MoneyFlow from '../../components/charts/MoneyFlow.jsx'
 import CategoryDonut from '../../components/charts/CategoryDonut.jsx'
 import useSubscriptionMetrics from '../../hooks/useSubscriptionMetrics.js'
 import ReportPDF from './ReportPDF.jsx'
+import { evaluateCoach, calcCoachMetrics } from '../../data/coachRules.js'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip,
   AreaChart, Area, ReferenceLine, ResponsiveContainer, Legend,
@@ -79,6 +80,15 @@ export default function Reports() {
     }
     return months
   }, [incomes, expenses])
+
+  const coachSignals = useMemo(() => {
+    if (mIncomes.length === 0 && mExpenses.length === 0) return []
+    const metrics = calcCoachMetrics({ incomes, expenses, budgets, debts: allDebts, goals: [], subs: allSubs, settings })
+    return evaluateCoach(metrics)
+  }, [incomes, expenses, budgets, allDebts, allSubs, settings, mIncomes.length, mExpenses.length])
+
+  const SEV_COLOR = { warning: 'var(--red)', attention: 'var(--amb)', info: 'var(--accent)' }
+  const SEV_ICON  = { warning: '⊗', attention: '⚠', info: '◈' }
 
   const axisStyle = {fill:'var(--th)',fontSize:10}
   const gridStyle = {stroke:'rgba(0,0,0,0.05)',strokeDasharray:'3 3'}
@@ -235,6 +245,28 @@ export default function Reports() {
           )}
           {subMetrics.alerts.map((a,i)=><Alert key={i} type={a.type==='duplicate'?'warn':'info'}>{a.msg}</Alert>)}
           <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',marginTop:8}}>Las sugerencias son orientativas y no constituyen asesoría financiera.</div>
+        </Card>
+      )}
+      {coachSignals.length > 0 && (
+        <Card>
+          <CardHeader title="⚕ Diagnóstico del mes" />
+          <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',marginBottom:12}}>Señales orientativas · no constituyen asesoría financiera</div>
+          <div style={{display:'flex',flexDirection:'column',gap:10}}>
+            {coachSignals.map((s,i) => (
+              <div key={i} style={{borderLeft:`3px solid ${SEV_COLOR[s.severity]}`,paddingLeft:10}}>
+                <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:2}}>
+                  <span style={{color:SEV_COLOR[s.severity],fontSize:12}}>{SEV_ICON[s.severity]}</span>
+                  <span style={{fontSize:10,fontWeight:600,fontFamily:'var(--mono)',color:SEV_COLOR[s.severity],textTransform:'uppercase',letterSpacing:'.4px'}}>
+                    {s.severity === 'warning' ? 'Revisar' : s.severity === 'attention' ? 'Atención' : 'Info'}
+                  </span>
+                  <span style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',marginLeft:'auto'}}>{s.category}</span>
+                </div>
+                <div style={{fontSize:13,fontWeight:600,color:'var(--tx)',marginBottom:2}}>{s.title}</div>
+                <div style={{fontSize:12,color:'var(--tm)',lineHeight:1.5}}>{s.msg}</div>
+                {s.action && <div style={{fontSize:11,fontFamily:'var(--mono)',color:'var(--grn2)',marginTop:4}}>→ {s.action}</div>}
+              </div>
+            ))}
+          </div>
         </Card>
       )}
       <ReportsDisclaimer />
