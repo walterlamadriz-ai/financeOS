@@ -1,11 +1,12 @@
 // src/components/ui/ProGate.jsx
-// Muestra un bloqueo orientativo si plan !== 'pro'
+// Muestra un bloqueo orientativo si el plan activo no es Pro.
+// Lee la licencia FNOS-XXXX desde settings (vía usePlan) con fallback a config.plan.
 // Usar: <ProGate><ComponentePro /></ProGate>
 
-import config from '../../config.js'
+import { usePlan } from '../../hooks/usePlan.js'
 
 export default function ProGate({ children, feature = 'esta función' }) {
-  const isPro = config.plan === 'pro' || config.plan === 'enterprise'
+  const { isPro } = usePlan()
 
   if (isPro) return children
 

@@ -6,7 +6,9 @@ import { useState, useMemo, useEffect } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
 import { Card, CardHeader, FormRow, FormGroup, Btn } from '../../components/ui/index.jsx'
 import { calcAPV } from '../../utils/apvCalc.js'
-import { calcBeneficioAPV, calcDescuentos, calcImpuestoAnual } from '../../utils/taxCalcCL.js'
+import { calcBeneficioAPV, calcDescuentos, calcImpuestoAnual, calcGapTramo, calcArbitraje, setIndicadores } from '../../utils/taxCalcCL.js'
+import { loadIndicadores } from '../../utils/indicadores.js'
+import ProGate from '../../components/ui/ProGate.jsx'
 
 export default function APVPage() {
   const { settings, incomes } = useApp()
@@ -48,6 +50,16 @@ export default function APVPage() {
 
   const [apvResult, setApvResult]   = useState(null)
   const [taxResult, setTaxResult]   = useState(null)
+  const [gapResult, setGapResult]   = useState(null)
+  const [arb, setArb]               = useState(null)
+  const [indInfo, setIndInfo]       = useState(null)
+
+  useEffect(() => {
+    loadIndicadores().then(ind => {
+      setIndicadores({ utm: ind.utm, uf: ind.uf })
+      setIndInfo(ind)
+    })
+  }, [])
 
   if (!isChile) return (
     <div style={{padding:32,textAlign:'center',color:'var(--th)',fontFamily:'var(--mono)',fontSize:13}}>
@@ -71,17 +83,30 @@ export default function APVPage() {
         apvMensual: Number(apvF.monthlyContribution),
       })
       setTaxResult(t)
+      if (t) {
+        setGapResult(calcGapTramo(t.baseImponible))
+        setArb(calcArbitraje(t.tasaMarginal))
+      }
     } else {
       setTaxResult(null)
+      setGapResult(null)
+      setArb(null)
     }
   }
 
   return (
+    <ProGate feature="APV Chile">
     <div style={{display:'flex',flexDirection:'column',gap:16}}>
       <Card>
         <CardHeader title="🇨🇱 APV Chile — Simulador orientativo" />
         <div style={{fontSize:11,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:14,lineHeight:1.6,padding:'8px 10px',background:'rgba(255,165,0,.07)',borderRadius:6,border:'0.5px solid rgba(255,165,0,.2)'}}>
-          ⚠ Simulación orientativa. No constituye asesoría financiera, tributaria, previsional ni legal. Consulta con tu administradora APV o el SII.
+          ⚠ Simulacion orientativa. No constituye asesoria financiera, tributaria, previsional ni legal. Consulta con tu administradora APV o el SII.
+          {indInfo && (
+            <span style={{display:'block',marginTop:6,opacity:0.85}}>
+              UTM: ${indInfo.utm.toLocaleString()} · UF: ${indInfo.uf.toLocaleString()} · USD: ${(indInfo.dolar||0).toLocaleString()}
+              {indInfo.source === 'api' ? ' · actualizado hoy' : ' · valores ref. dic 2025'}
+            </span>
+          )}
         </div>
 
         {/* ── PASO 1: Situación actual ── */}
@@ -301,9 +326,64 @@ export default function APVPage() {
                 </div>
               </div>
             )}
+
+            {/* -- APV necesario para bajar un tramo -- */}
+            {gapResult && gapResult.tramoActual > 1 && (
+              <div style={{background:'var(--sur2)',borderRadius:10,padding:'16px',border:'0.5px solid var(--brd)'}}>
+                <div style={{fontSize:11,fontWeight:600,color:'var(--tx)',marginBottom:12,fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:'.5px'}}>APV necesario para bajar un tramo</div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(170px,1fr))',gap:10}}>
+                  <div style={{background:'var(--bg)',borderRadius:8,padding:'12px',borderBottom:'2px solid var(--grn)'}}>
+                    <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:4}}>Aporte anual necesario</div>
+                    <div style={{fontSize:18,fontWeight:700,color:'var(--grn)',fontFamily:'var(--mono)'}}>${gapResult.gap.toLocaleString()}</div>
+                    <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginTop:2}}>aprox. ${gapResult.gapMensual.toLocaleString()}/mes para bajar a tramo {gapResult.tramoObjetivo}</div>
+                  </div>
+                  <div style={{background:'var(--bg)',borderRadius:8,padding:'12px'}}>
+                    <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:4}}>Reduccion tasa marginal</div>
+                    <div style={{fontSize:18,fontWeight:700,color:'var(--grn)',fontFamily:'var(--mono)'}}>{(gapResult.tasaActual*100).toFixed(0)}% a {(gapResult.tasaObjetivo*100).toFixed(0)}%</div>
+                    <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginTop:2}}>menos {((gapResult.tasaActual-gapResult.tasaObjetivo)*100).toFixed(1)} puntos marginales</div>
+                  </div>
+                  <div style={{background:'var(--bg)',borderRadius:8,padding:'12px'}}>
+                    <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:4}}>Del tope legal 600 UF</div>
+                    <div style={{fontSize:18,fontWeight:700,fontFamily:'var(--mono)',color:gapResult.dentroDelTope?'var(--grn)':'#e84142'}}>{gapResult.porcentajeDelTope}%</div>
+                    <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginTop:2}}>{gapResult.dentroDelTope?'dentro del tope legal':'excede 600 UF, se limita'}</div>
+                  </div>
+                </div>
+                <div style={{marginTop:8,fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',lineHeight:1.5}}>
+                  Solo aplica Regimen B. Tope legal 600 UF = ${gapResult.topeRegB.toLocaleString()} (UF dic 2025). Estimacion orientativa. Verifica en sii.cl.
+                </div>
+              </div>
+            )}
+
+            {/* -- Arbitraje jubilar -- */}
+            {arb && arb.tasaMarginalHoy > 0 && (
+              <div style={{background:'var(--sur2)',borderRadius:10,padding:'16px',border:'0.5px solid var(--brd)'}}>
+                <div style={{fontSize:11,fontWeight:600,color:'var(--tx)',marginBottom:12,fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:'.5px'}}>Arbitraje jubilar (Regimen B)</div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(170px,1fr))',gap:10}}>
+                  <div style={{background:'var(--bg)',borderRadius:8,padding:'12px',borderBottom:'2px solid var(--grn)'}}>
+                    <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:4}}>Ahorro neto por cada $1 aportado</div>
+                    <div style={{fontSize:24,fontWeight:700,color:'var(--grn)',fontFamily:'var(--mono)'}}>{arb.centavosPorPeso}c</div>
+                    <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginTop:2}}>centavos que no pagas en impuesto</div>
+                  </div>
+                  <div style={{background:'var(--bg)',borderRadius:8,padding:'12px'}}>
+                    <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:4}}>Tasa marginal hoy</div>
+                    <div style={{fontSize:18,fontWeight:700,color:'var(--tx)',fontFamily:'var(--mono)'}}>{(arb.tasaMarginalHoy*100).toFixed(0)}%</div>
+                    <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginTop:2}}>tasa que evitas con APV Reg. B</div>
+                  </div>
+                  <div style={{background:'var(--bg)',borderRadius:8,padding:'12px'}}>
+                    <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:4}}>Tasa efectiva est. al jubilar</div>
+                    <div style={{fontSize:18,fontWeight:700,color:'var(--th)',fontFamily:'var(--mono)'}}>{(arb.tasaRetiroEst*100).toFixed(0)}%</div>
+                    <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginTop:2}}>estimado (pension AFP tipica ~35% del sueldo)</div>
+                  </div>
+                </div>
+                <div style={{marginTop:8,fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',lineHeight:1.5}}>
+                  El arbitraje existe por la diferencia estructural entre tu tramo activo y tu tramo en retiro. El fondo APV crece libre de impuestos en la acumulacion. Estimacion orientativa.
+                </div>
+              </div>
+            )}
           </div>
         )}
       </Card>
     </div>
+    </ProGate>
   )
 }

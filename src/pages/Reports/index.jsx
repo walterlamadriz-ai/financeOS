@@ -12,6 +12,8 @@ import CategoryDonut from '../../components/charts/CategoryDonut.jsx'
 import useSubscriptionMetrics from '../../hooks/useSubscriptionMetrics.js'
 import ReportPDF from './ReportPDF.jsx'
 import { evaluateCoach, calcCoachMetrics } from '../../data/coachRules.js'
+import ProGate from '../../components/ui/ProGate.jsx'
+import { usePlan } from '../../hooks/usePlan.js'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip,
   AreaChart, Area, ReferenceLine, ResponsiveContainer, Legend,
@@ -21,6 +23,7 @@ export default function Reports() {
   const { incomes, expenses, budgets, debts: allDebts, subscriptions: allSubs, settings } = useApp()
   const sym        = CURRENCY_SYMBOLS[settings.currency] || '$'
   const subMetrics = useSubscriptionMetrics()
+  const { isPro }  = usePlan()
   const [pdfLoading, setPdfLoading] = useState(false)
   const activeMonth = settings.activeMonth || new Date().toISOString().slice(0, 7)
 
@@ -99,19 +102,36 @@ export default function Reports() {
       <div style={{display:'flex',alignItems:'center',flexWrap:'wrap',gap:8}}>
         <PageHeader title="Reportes" sub={`${monthLabel(activeMonth)} · orientación general, no asesoría certificada`} />
         <MonthSelector incomes={incomes} expenses={expenses} />
-        <button
-          onClick={downloadPDF}
-          disabled={pdfLoading}
-          style={{
-            marginLeft:'auto', display:'flex', alignItems:'center', gap:6,
-            padding:'7px 14px', borderRadius:8, border:'.5px solid var(--grn)',
-            background: pdfLoading ? 'var(--sur2)' : 'var(--grn)', color: pdfLoading ? 'var(--th)' : '#0f1923',
-            fontFamily:'var(--mono)', fontWeight:700, fontSize:12, cursor: pdfLoading ? 'wait' : 'pointer',
-            transition:'.2s', flexShrink:0,
-          }}
-        >
-          {pdfLoading ? '⏳ Generando…' : '⬇ Descargar PDF'}
-        </button>
+        {isPro ? (
+          <button
+            onClick={downloadPDF}
+            disabled={pdfLoading}
+            style={{
+              marginLeft:'auto', display:'flex', alignItems:'center', gap:6,
+              padding:'7px 14px', borderRadius:8, border:'.5px solid var(--grn)',
+              background: pdfLoading ? 'var(--sur2)' : 'var(--grn)', color: pdfLoading ? 'var(--th)' : '#0f1923',
+              fontFamily:'var(--mono)', fontWeight:700, fontSize:12, cursor: pdfLoading ? 'wait' : 'pointer',
+              transition:'.2s', flexShrink:0,
+            }}
+          >
+            {pdfLoading ? '⏳ Generando…' : '⬇ Descargar PDF'}
+          </button>
+        ) : (
+          <a
+            href="https://financeospro.com/#pricing"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              marginLeft:'auto', display:'flex', alignItems:'center', gap:6,
+              padding:'7px 14px', borderRadius:8, border:'.5px solid var(--amb)',
+              background:'rgba(245,166,35,.08)', color:'var(--amb)',
+              fontFamily:'var(--mono)', fontWeight:700, fontSize:12,
+              textDecoration:'none', flexShrink:0, whiteSpace:'nowrap',
+            }}
+          >
+            ◑ PDF — Plan Pro →
+          </a>
+        )}
       </div>
       <div className="kpi-row">
         <KPI label="Balance neto"  value={fmtMoney(balance,sym)} color={balance>=0?'green':'red'} />

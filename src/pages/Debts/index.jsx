@@ -5,6 +5,7 @@ import { KPI, Card, CardHeader, FormGroup, FormRow, Btn, Alert, Badge, ProgressB
 import { fmtMoney, fmtPct } from '../../utils/index.js'
 import { CURRENCY_SYMBOLS } from '../shared/constants.js'
 import DebtProgressList from '../../components/charts/DebtProgressList.jsx'
+import ProGate from '../../components/ui/ProGate.jsx'
 
 // ── Calculadora Avalanche / Snowball ─────────────────────────────────────────
 function calcPayoffPlan(debts, extraPayment, method) {
@@ -316,7 +317,7 @@ export default function Debts() {
           </Card>
         )
       })}
-      {debts.length > 0 && <DebtPayoffSimulator debts={debts} sym={sym} />}
+      {debts.length > 0 && <ProGate feature="Simulador de liquidación de deudas"><DebtPayoffSimulator debts={debts} sym={sym} /></ProGate>}
       {debts.length > 0 && <DebtProgressList debts={debts} sym={sym} />}
     </div>
   )
