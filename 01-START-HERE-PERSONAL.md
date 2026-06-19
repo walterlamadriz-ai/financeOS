@@ -74,36 +74,46 @@ Ve a Presupuestos y define un límite para tu categoría más grande. La barra t
 **6. Haz tu primer backup (2 min)**
 Ve a Ajustes → "Crear respaldo". Guarda el archivo en un lugar seguro. **Este paso protege toda tu información.**
 
-Listo. Ya tienes tu dashboard funcionando con datos reales.
+Listo. Ya tienes tu dashboard funcionando. Verás el **puntaje de salud financiera** y las **señales del Diagnóstico** actualizarse automáticamente.
 
 ---
 
 ## Lo que incluye tu plan
 
 - Uso inmediato desde navegador
-- Instalación como app PWA
-- Dashboard financiero
+- Instalación como app PWA (también con prompt en Ajustes)
+- **Puntaje de salud financiera** 0–100 en el Dashboard (Excelente/Bueno/Regular/Crítico)
+- **Señales del Diagnóstico** visibles directamente en el Dashboard
+- **Ingreso esperado vs recibido** — configura en Ajustes → "Ingreso mensual esperado"
+- **FAB mobile** — botón "+" flotante para registro rápido de gastos en celular
+- Dashboard financiero con visualizaciones
 - Ingresos y gastos
 - Presupuestos
 - Deudas
 - Metas
 - Suscripciones y gastos recurrentes
-- FinanceOS Coach — diagnóstico financiero local
-- Reportes
+- **Diagnóstico mensual** con checklist de 5 puntos de revisión
+- Reportes (exportación CSV)
 - 7 plantillas por perfil
 - Onboarding inicial
-- Backups JSON
+- Backups JSON · Importación CSV
 - Documentación completa
 - Licencia de uso personal
 
 ## Lo que NO incluye tu plan
 
-- Modo Asesor
-- Reporte PDF profesional para clientes
-- Uso con clientes
-- Licencia comercial
-- White-label
-- Deploy propio
+- Modo Asesor — verás pantalla de upgrade al intentar acceder
+- Reporte PDF — verás enlace de upgrade en lugar del botón de descarga
+- APV Chile — requiere plan Pro
+- Simulador de liquidación de deudas — requiere plan Pro
+- Uso con clientes / licencia comercial
+- White-label / deploy propio
+
+> Los módulos Pro muestran un badge **PRO** en el menú. Es normal — indica que requieren upgrade.
+
+## Configurar el Dashboard
+
+Para activar el widget de ingreso esperado vs recibido, ve a **Ajustes → "Ingreso mensual esperado"** e ingresa tu ingreso habitual. Si tus ingresos son variables, usa el promedio de los últimos 3 meses.
 
 ---
 

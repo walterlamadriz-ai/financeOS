@@ -10,15 +10,22 @@ App financiera white-label para asesores · PWA offline · React 18 + Vite
 
 ## Qué incluye este plan
 
-- Todo lo del plan Personal
+- Todo lo del plan Personal (ver abajo)
 - **Licencia comercial — hasta 30 clientes**
 - **config.js** — nombre, colores y moneda sin tocar código
-- **Modo Asesor** — score, semáforo, alertas, notas por cliente
-- **Reporte PDF profesional** de 2 páginas con suscripciones y señales
-- **Diagnóstico financiero** con motor de reglas configurable (coachRules.js)
+- **Modo Asesor** — score, semáforo, 7 KPIs, alertas, notas por cliente *(requiere licencia activa)*
+- **Reporte PDF profesional** de 2 páginas con suscripciones y señales *(requiere licencia activa)*
+- **APV Chile** — calculadora de cotización voluntaria *(requiere licencia activa)*
+- **Simulador de liquidación de deudas** *(requiere licencia activa)*
+- **Diagnóstico financiero** con motor de reglas (coachRules.js) + checklist mensual
 - **Guía de entrega al cliente** incluida
 - Soporte técnico 60 días por email
 - Actualizaciones por 12 meses
+
+### Activar licencia Pro (obligatorio para módulos gateados)
+
+Ingresa el código `FNOS-XXXX-XXXX` recibido al comprar en: **Ajustes → Licencia → Guardar**.
+Sin esto, Modo Asesor, PDF, APV y Simulador muestran pantalla de acceso bloqueado.
 
 ---
 
@@ -67,7 +74,7 @@ Ver checklist: https://financeos-landing-omega.vercel.app/docs/deliver-client.ht
 
 | Módulo | Descripción |
 |---|---|
-| Dashboard | KPIs del mes, señales financieras, suscripciones |
+| Dashboard | KPIs del mes · **Puntaje de salud 0–100** · señales del Diagnóstico · ingreso esperado vs recibido |
 | Ingresos | Registro por categoría y fecha |
 | Gastos | Registro por categoría y fecha |
 | Presupuestos | Límites por categoría con alertas |
@@ -76,8 +83,9 @@ Ver checklist: https://financeos-landing-omega.vercel.app/docs/deliver-client.ht
 | Proyección | Flujo de caja proyectado |
 | Reportes | Análisis mensual con gráficos |
 | Suscripciones | Análisis de gastos recurrentes estimados |
-| Diagnóstico | Señales orientativas con motor de reglas local |
-| **Modo Asesor** | Score, semáforo, alertas, notas, reporte PDF |
+| Diagnóstico | Señales orientativas con motor de reglas local + **checklist mensual** 5 puntos |
+| **Modo Asesor** *(Pro)* | Score, semáforo, 7 KPIs, alertas, notas, reporte PDF — requiere licencia |
+| **APV Chile** *(Pro)* | Calculadora de cotización voluntaria — requiere licencia |
 
 ---
 

@@ -68,41 +68,61 @@ Consulta los archivos incluidos:
 
 ---
 
+## Activar licencia Pro (paso obligatorio)
+
+Al comprar recibes un código con formato `FNOS-XXXX-XXXX`. Sin este código, los módulos Pro aparecen bloqueados.
+
+1. Abre la app → **Ajustes**
+2. Ingresa el código en el campo **"Licencia"**
+3. Guarda — las funciones Pro se desbloquean sin reiniciar
+
+> El código no expira y funciona completamente offline.
+
+---
+
 ## Tus primeros 10 minutos
 
 Sigue estos pasos para sacar el máximo provecho desde el inicio:
 
-**1. Completa el onboarding (2 min)**
+**1. Activa tu licencia (1 min)**
+Ajustes → campo "Licencia" → ingresa tu código `FNOS-XXXX`. Verifica que Modo Asesor y PDF estén disponibles.
+
+**2. Completa el onboarding (2 min)**
 Al abrir por primera vez, elige tu moneda y perfil. FinanceOS carga categorías sugeridas según tu situación.
 
-**2. Registra tu primer ingreso (1 min)**
+**3. Registra tu primer ingreso (1 min)**
 Ve a Ingresos → "+ Nuevo ingreso". Agrega tu sueldo o entrada principal del mes.
 
-**3. Registra 3 gastos del mes (2 min)**
+**4. Registra 3 gastos del mes (2 min)**
 Ve a Egresos → "+ Agregar egreso". Empieza con tus gastos más grandes: arriendo, supermercado, transporte.
 
-**4. Agrega tus suscripciones (2 min)**
+**5. Agrega tus suscripciones (1 min)**
 En Egresos → "Pago recurrente". Registra Netflix, Spotify, gimnasio. Verás cuánto suman al año.
 
-**5. Crea un presupuesto (1 min)**
+**6. Crea un presupuesto (1 min)**
 Ve a Presupuestos y define un límite para tu categoría más grande. La barra te muestra cuánto llevas gastado.
 
-**6. Haz tu primer backup (2 min)**
+**7. Haz tu primer backup (2 min)**
 Ve a Ajustes → "Crear respaldo". Guarda el archivo en un lugar seguro. **Este paso protege toda tu información.**
 
-Listo. Ya tienes tu dashboard funcionando con datos reales.
+Listo. Ya tienes tu dashboard funcionando, incluyendo el **puntaje de salud financiera** y las **señales del Diagnóstico**.
 
 ---
 
 ## Lo que incluye tu plan
 
 - Todo lo de FinanceOS Personal
-- Instalación como app PWA
+- **Puntaje de salud financiera** 0–100 en el Dashboard (Excelente/Bueno/Regular/Crítico)
+- **Señales del Diagnóstico** visibles directamente en el Dashboard
+- **Ingreso esperado vs recibido** — configura en Ajustes → "Ingreso mensual esperado"
+- **Diagnóstico mensual** con checklist de 5 puntos de revisión
+- **FAB mobile** — botón "+" flotante para registro rápido de gastos en celular
+- Instalación como app PWA (también con prompt en Ajustes)
 - Licencia comercial hasta 30 clientes
-- Modo Asesor completo
-- FinanceOS Coach integrado al Modo Asesor
-- Reporte PDF profesional con suscripciones
-- Revisión de suscripciones en Modo Asesor y PDF
+- **Modo Asesor** completo (requiere licencia `FNOS-XXXX` activada)
+- **Reporte PDF profesional** (requiere licencia `FNOS-XXXX` activada)
+- **APV Chile** — calculadora de cotización voluntaria (requiere licencia Pro)
+- **Simulador de liquidación de deudas** (requiere licencia Pro)
 - White-label opcional (config.js)
 - Deploy propio opcional
 - Guía de entrega al cliente
@@ -115,14 +135,15 @@ Listo. Ya tienes tu dashboard funcionando con datos reales.
 ## Modo Asesor
 
 El Modo Asesor está en el sidebar de la app → sección "Asesor".
+**Requiere licencia Pro activa** en Ajustes → Licencia.
 
 Incluye:
 - Score financiero 0-100
 - Semáforo verde/amarillo/rojo
-- Alertas automáticas
-- FinanceOS Coach integrado
+- 7 KPIs del mes + alertas automáticas
+- Diagnóstico integrado
 - Revisión de gastos recurrentes estimados
-- Notas del asesor
+- Notas del asesor (guardadas localmente)
 - Exportación de reporte PDF
 
 ---
