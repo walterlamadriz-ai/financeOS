@@ -7,6 +7,8 @@ import ChartCard from '../../components/charts/ChartCard.jsx'
 import IncomeExpenseBar from '../../components/charts/IncomeExpenseBar.jsx'
 import CategoryDonut from '../../components/charts/CategoryDonut.jsx'
 import MoneyFlow from '../../components/charts/MoneyFlow.jsx'
+import { evaluateCoach, calcCoachMetrics } from '../../data/coachRules.js'
+import { calcFinancialScore } from '../../utils/financialScore.js'
 
 const fmt  = (n) => (Number(n) || 0).toLocaleString('es-CL', { maximumFractionDigits: 0 })
 const pct  = (n) => ((Number(n) || 0) * 100).toFixed(1) + '%'
@@ -166,6 +168,26 @@ export default function Dashboard({ setPage }) {
     return cards.slice(0, 4)
   }, [subMonthly, monthExpenses, budgets, goals, sym])
 
+  // ── Coach signals para Dashboard ──────────────────────────────────────────
+  const topSignals = useMemo(() => {
+    if (kpis.incCount === 0 && kpis.expCount === 0) return []
+    const metrics = calcCoachMetrics({ incomes, expenses, budgets, debts, goals, subs, settings })
+    return evaluateCoach(metrics).slice(0, 2)
+  }, [incomes, expenses, budgets, debts, goals, subs, settings, kpis.incCount, kpis.expCount])
+
+  // ── Puntaje de salud financiera ───────────────────────────────────────────
+  const healthScore = useMemo(() => {
+    if (kpis.incCount === 0 && kpis.expCount === 0) return null
+    return calcFinancialScore({
+      savingRate: kpis.savingRate,
+      budgets, expenses, debts, goals, subs, incomes,
+      activeMonth,
+    })
+  }, [kpis.savingRate, kpis.incCount, kpis.expCount, budgets, expenses, debts, goals, subs, incomes, activeMonth])
+
+  const SEV_ICON  = { info: '◈', attention: '⚠', warning: '⊗' }
+  const SEV_COLOR = { info: 'var(--accent)', attention: 'var(--amb)', warning: 'var(--red)' }
+
   function DeltaBadge({ d, invert = false }) {
     if (d === null) return null
     const n = Number(d)
@@ -281,6 +303,54 @@ export default function Dashboard({ setPage }) {
         </div>
       )}
 
+      {/* Puntaje de salud financiera */}
+      {healthScore && (
+        <div style={{ background:'var(--sur)', border:`.5px solid var(--brd)`, borderRadius:'var(--r)', padding:'14px 16px', marginBottom:16, display:'flex', alignItems:'center', gap:16, flexWrap:'wrap' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:14, flex:1, minWidth:180 }}>
+            <div style={{ textAlign:'center', flexShrink:0 }}>
+              <div style={{ fontSize:28, fontWeight:700, fontFamily:'var(--mono)', color:healthScore.color, lineHeight:1 }}>{healthScore.score}</div>
+              <div style={{ fontSize:9, fontFamily:'var(--mono)', color:'var(--th)', textTransform:'uppercase', letterSpacing:'.5px', marginTop:2 }}>/ 100</div>
+            </div>
+            <div>
+              <div style={{ fontSize:11, fontFamily:'var(--mono)', color:'var(--th)', textTransform:'uppercase', letterSpacing:'.8px', marginBottom:2 }}>Salud financiera</div>
+              <div style={{ fontSize:14, fontWeight:700, color:healthScore.color }}>{healthScore.label}</div>
+            </div>
+          </div>
+          <div style={{ display:'flex', gap:10, flexWrap:'wrap' }}>
+            {healthScore.breakdown.map((b, i) => (
+              <div key={i} style={{ textAlign:'center', minWidth:56 }}>
+                <div style={{ fontSize:13, fontWeight:700, fontFamily:'var(--mono)', color: b.pts >= b.max ? 'var(--accent)' : b.pts > 0 ? 'var(--amb)' : 'var(--red)' }}>{b.pts}</div>
+                <div style={{ fontSize:9, fontFamily:'var(--mono)', color:'var(--th)', textTransform:'uppercase', letterSpacing:'.3px' }}>{b.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Señales del Diagnóstico */}
+      {topSignals.length > 0 && (
+        <div style={{ background:'var(--sur)', border:`.5px solid var(--brd)`, borderRadius:'var(--r)', padding:'14px 16px', marginBottom:16 }}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
+            <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)', textTransform:'uppercase', letterSpacing:'.8px' }}>⚕ Diagnóstico — señales activas</div>
+            {setPage && (
+              <span style={{ fontSize:11, fontFamily:'var(--mono)', color:'var(--accent)', cursor:'pointer' }} onClick={() => setPage('coach')}>
+                Ver diagnóstico completo →
+              </span>
+            )}
+          </div>
+          {topSignals.map((s, i) => (
+            <div key={i} style={{ borderLeft:`3px solid ${SEV_COLOR[s.severity]}`, paddingLeft:10, marginBottom: i < topSignals.length - 1 ? 10 : 0 }}>
+              <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:2 }}>
+                <span style={{ fontSize:12, color:SEV_COLOR[s.severity] }}>{SEV_ICON[s.severity]}</span>
+                <span style={{ fontSize:11, fontWeight:600, color:SEV_COLOR[s.severity], fontFamily:'var(--mono)', textTransform:'uppercase', letterSpacing:'.4px' }}>{s.severity === 'warning' ? 'Revisar' : s.severity === 'attention' ? 'Atención' : 'Info'}</span>
+              </div>
+              <div style={{ fontSize:13, fontWeight:600, color:'var(--tx)', marginBottom:2 }}>{s.title}</div>
+              <div style={{ fontSize:12, color:'var(--tm)', lineHeight:1.5 }}>{s.msg}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Proyección fin de mes */}
       {(kpis.totalInc > 0 || kpis.totalExp > 0) && (() => {
         const now = new Date()
@@ -340,12 +410,12 @@ export default function Dashboard({ setPage }) {
 
 
 
-      {/* Link a Señales */}
+      {/* Link a Diagnóstico */}
       {setPage && (
         <div style={{ padding:'10px 14px', background:'var(--sur)', border:'.5px solid var(--brd)', borderRadius:'var(--r)', display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
-          <span style={{ fontSize:12, color:'var(--th)', fontFamily:'var(--mono)' }}>◈ Revisa señales y análisis orientativos de tu situación financiera.</span>
-          <button onClick={() => setPage('signals')} style={{ background:'none', border:'.5px solid var(--brd2)', borderRadius:6, padding:'4px 12px', fontSize:11, color:'var(--accent)', cursor:'pointer', fontFamily:'var(--mono)' }}>
-            Ver Señales →
+          <span style={{ fontSize:12, color:'var(--th)', fontFamily:'var(--mono)' }}>⚕ Análisis orientativo completo de tu situación financiera.</span>
+          <button onClick={() => setPage('coach')} style={{ background:'none', border:'.5px solid var(--brd2)', borderRadius:6, padding:'4px 12px', fontSize:11, color:'var(--accent)', cursor:'pointer', fontFamily:'var(--mono)' }}>
+            Ver Diagnóstico →
           </button>
         </div>
       )}
