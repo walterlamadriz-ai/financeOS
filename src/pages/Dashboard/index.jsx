@@ -238,6 +238,102 @@ export default function Dashboard({ setPage }) {
     )
   }
 
+  // ── Modal cierre de mes ───────────────────────────────────────────────────
+  const updateSettings = useApp()?.updateSettings
+  const [closeDismissed, setCloseDismissed] = useState(() => {
+    try { return localStorage.getItem(`fos_close_${activeMonth}`) === '1' } catch { return false }
+  })
+
+  const isMonthClosed = (() => {
+    const now = new Date()
+    const [y, mo] = activeMonth.split('-').map(Number)
+    return now.getFullYear() > y || (now.getFullYear() === y && now.getMonth() + 1 > mo)
+  })()
+
+  const showCloseModal = isMonthClosed && !closeDismissed && (kpis.incCount > 0 || kpis.expCount > 0)
+
+  function dismissClose() {
+    try { localStorage.setItem(`fos_close_${activeMonth}`, '1') } catch {}
+    setCloseDismissed(true)
+  }
+
+  function goNextMonth() {
+    const [y, mo] = activeMonth.split('-').map(Number)
+    const next = mo === 12
+      ? `${y + 1}-01`
+      : `${y}-${String(mo + 1).padStart(2, '0')}`
+    updateSettings?.({ ...settings, activeMonth: next })
+    dismissClose()
+  }
+
+  function MonthlyCloseModal() {
+    if (!showCloseModal) return null
+    const balance = kpis.balance
+    const ok = balance >= 0
+    return (
+      <div style={{
+        position:'fixed', inset:0, zIndex:500,
+        background:'rgba(0,0,0,.55)', backdropFilter:'blur(4px)',
+        display:'flex', alignItems:'center', justifyContent:'center', padding:16,
+      }}>
+        <div style={{
+          background:'var(--sur)', border:`.5px solid var(--brd)`, borderRadius:16,
+          padding:'24px 20px', maxWidth:380, width:'100%',
+          boxShadow:'0 24px 64px rgba(0,0,0,.25)',
+        }}>
+          <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)', textTransform:'uppercase', letterSpacing:'1px', marginBottom:8 }}>
+            Cierre de mes
+          </div>
+          <div style={{ fontSize:20, fontWeight:700, color:'var(--tx)', marginBottom:4 }}>
+            {activeMonth}
+          </div>
+          <div style={{ fontSize:13, color: ok ? 'var(--accent)' : 'var(--red)', fontWeight:600, marginBottom:20 }}>
+            {ok ? `✓ Mes cerrado con balance positivo` : `✗ Mes cerrado con balance negativo`}
+          </div>
+
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:20 }}>
+            {[
+              { label:'Ingresos',    val:`${sym}${fmt(kpis.totalInc)}`,  color:'var(--accent)' },
+              { label:'Gastos',      val:`${sym}${fmt(kpis.totalExp)}`,  color:'var(--red)' },
+              { label:'Balance',     val:`${sym}${fmt(Math.abs(balance))}`, color: ok ? 'var(--accent)' : 'var(--red)', prefix: ok ? '+' : '−' },
+              { label:'Ahorro',      val:pct(kpis.savingRate),            color: kpis.savingRate >= 0.2 ? 'var(--accent)' : 'var(--amb)' },
+            ].map(k => (
+              <div key={k.label} style={{ background:'var(--bg2)', borderRadius:10, padding:'10px 12px' }}>
+                <div style={{ fontSize:9, fontFamily:'var(--mono)', color:'var(--th)', textTransform:'uppercase', letterSpacing:'.5px', marginBottom:3 }}>{k.label}</div>
+                <div style={{ fontSize:15, fontWeight:700, fontFamily:'var(--mono)', color:k.color }}>{k.prefix||''}{k.val}</div>
+              </div>
+            ))}
+          </div>
+
+          {healthScore && (
+            <div style={{ background:'var(--bg2)', borderRadius:10, padding:'10px 12px', marginBottom:20, display:'flex', alignItems:'center', gap:12 }}>
+              <div style={{ fontSize:28, fontWeight:700, fontFamily:'var(--mono)', color:healthScore.color }}>{healthScore.score}</div>
+              <div>
+                <div style={{ fontSize:9, fontFamily:'var(--mono)', color:'var(--th)', textTransform:'uppercase', letterSpacing:'.5px' }}>Salud financiera</div>
+                <div style={{ fontSize:13, fontWeight:600, color:healthScore.color }}>{healthScore.label}</div>
+              </div>
+            </div>
+          )}
+
+          <div style={{ display:'flex', gap:10, flexDirection:'column' }}>
+            <button
+              onClick={goNextMonth}
+              style={{ background:'var(--accent)', color:'#fff', border:'none', borderRadius:9, padding:'11px 18px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'var(--mono)' }}
+            >
+              Ir al mes siguiente →
+            </button>
+            <button
+              onClick={dismissClose}
+              style={{ background:'none', color:'var(--th)', border:'.5px solid var(--brd)', borderRadius:9, padding:'9px 18px', fontSize:12, cursor:'pointer', fontFamily:'var(--mono)' }}
+            >
+              Quedarme en {activeMonth}
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   const SEV_ICON  = { info: '◈', attention: '⚠', warning: '⊗' }
   const SEV_COLOR = { info: 'var(--accent)', attention: 'var(--amb)', warning: 'var(--red)' }
 
@@ -266,6 +362,7 @@ export default function Dashboard({ setPage }) {
 
   return (
     <div style={{ maxWidth:960, margin:'0 auto' }}>
+      <MonthlyCloseModal />
 
       {/* Header */}
       <div style={{ marginBottom:20 }}>
