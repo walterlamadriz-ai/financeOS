@@ -34,7 +34,27 @@ export default defineConfig({
       workbox: {
         navigateFallback: '/app/index.html',
         navigateFallbackDenylist: [/^\/api/, /^\/(?!app)/],
-        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        runtimeCaching: [
+          {
+            // Fuentes de Google Fonts — cache-first, 1 año
+            urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'fos-fonts',
+              expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 365 },
+            },
+          },
+          {
+            // Chunks JS/CSS lazy de la propia app — stale-while-revalidate
+            urlPattern: /\/app\/assets\/.*/,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'fos-assets',
+              expiration: { maxEntries: 60, maxAgeSeconds: 60 * 60 * 24 * 30 },
+            },
+          },
+        ],
       }
     })
   ]
