@@ -4,7 +4,7 @@
 // Se activa cuando la URL contiene ?demo=true
 
 import { createContext, useContext, useReducer, useCallback } from 'react'
-import { DEMO_STATE } from './demoData.js'
+import { DEMO_STATE, DEMO_INCOMES_EXITOSO } from './demoData.js'
 
 export const DemoContext = createContext(null)
 
@@ -32,6 +32,7 @@ function reducer(state, action) {
     case 'UPDATE_GOAL':  return { ...state, goals:    state.goals.map(g => g.id === action.item.id ? action.item : g) }
     case 'SAVE_SETTINGS':return { ...state, settings: action.settings }
     case 'CLEAR_ALL':    return { ...DEMO_STATE } // En demo, "borrar todo" recarga los datos demo
+    case 'SET_SCENARIO': return { ...state, incomes: action.scenario === 'exitoso' ? DEMO_INCOMES_EXITOSO : DEMO_STATE.incomes }
     case 'SET_TOAST':    return { ...state, toast: action.toast }
     default:             return state
   }
@@ -136,6 +137,11 @@ export function DemoProvider({ children }) {
     })
   }, [showToast])
 
+  const setScenario = useCallback((scenario) => {
+    dispatch({ type: 'SET_SCENARIO', scenario })
+    showToast(scenario === 'exitoso' ? 'Mostrando mes exitoso · $4.700.000 ingresos' : 'Mostrando mes difícil · $2.280.000 ingresos', 'ok')
+  }, [showToast])
+
   const value = {
     ...state,
     addIncome,  delIncome,  updateIncome,
@@ -147,7 +153,7 @@ export function DemoProvider({ children }) {
     updateSettings,
     clearAll,   loadDemo,
     exportData, exportCSV,  importData,
-    showToast,
+    showToast,  setScenario,
   }
 
   return <DemoContext.Provider value={value}>{children}</DemoContext.Provider>

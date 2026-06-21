@@ -176,6 +176,15 @@ export const DEMO_SUBSCRIPTIONS = [
   { id: 'sub6', name: 'Google One 200GB',   category: 'Almacenamiento', amount:  9_900, currency: 'COP', frequency: 'monthly', nextPaymentDate: day(M0, 18), paymentMethod: 'Google Pay', status: 'active', notes: '', createdAt: '2026-01-01', updatedAt: '2026-01-01' },
 ]
 
+// ── INGRESOS MES EXITOSO (escenario alternativo para toggle) ─────────────────
+export const DEMO_INCOMES_EXITOSO = [
+  { id: d('ix1'), date: day(M0,  2), source: 'Proyecto branding — startup LATAM',  amount: 3_800_000, category: 'Freelance', recurrence: 'Único',   notes: 'Cliente nuevo — pago completo' },
+  { id: d('ix2'), date: day(M0, 10), source: 'Clases de diseño online',             amount:   480_000, category: 'Freelance', recurrence: 'Mensual', notes: '' },
+  { id: d('ix3'), date: day(M0, 18), source: 'Venta plantillas Gumroad',            amount:   420_000, category: 'Otros',     recurrence: 'Único',   notes: 'Lanzamiento nuevo pack' },
+  // meses anteriores — igual que DEMO_INCOMES
+  ...DEMO_INCOMES.filter(r => !r.date.startsWith(M0)),
+]
+
 // ── ESTADO COMPLETO ───────────────────────────────────────────────────────────
 export const DEMO_STATE = {
   incomes:       DEMO_INCOMES,
