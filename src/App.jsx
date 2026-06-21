@@ -1,30 +1,40 @@
 // src/App.jsx
-import { useState, lazy, Suspense } from 'react'
+import { lazy, Suspense } from 'react'
 import LicenseGate from './components/LicenseGate.jsx'
 import { isLicenseActive } from './utils/licenseValidator.js'
 import { AppProvider, useApp } from './context/AppContext.jsx'
 import Shell from './components/layout/Shell.jsx'
 import Toast from './components/ui/Toast.jsx'
 import Onboarding from './components/Onboarding.jsx'
-import Dashboard from './pages/Dashboard/index.jsx'
-import CashFlow from './pages/CashFlow/index.jsx'
-import Privacy from './pages/legal/Privacy.jsx'
-import Terms from './pages/legal/Terms.jsx'
-import License from './pages/legal/License.jsx'
-import Disclaimer from './pages/legal/Disclaimer.jsx'
-import Income    from './pages/Income/index.jsx'
-import Budgets   from './pages/Budgets/index.jsx'
-import Debts     from './pages/Debts/index.jsx'
-import Goals     from './pages/Goals/index.jsx'
-import Reports   from './pages/Reports/index.jsx'
-import Settings  from './pages/Settings/index.jsx'
 import DemoShell from './demo/DemoShell.jsx'
-const Advisor = lazy(() => import('./pages/Advisor/index.jsx'))
-import Subscriptions from './pages/Subscriptions/index.jsx'
-import Coach from './pages/Coach/index.jsx'
-import APVPage from './pages/APV/index.jsx'
-import ImportCSV from './pages/Import/index.jsx'
-import Movements from './pages/Movements/index.jsx'
+import { usePersistedPage } from './hooks/usePersistedPage.js'
+import { useState } from 'react'
+
+// Páginas lazy — solo se cargan cuando el usuario navega a ellas
+const Dashboard     = lazy(() => import('./pages/Dashboard/index.jsx'))
+const CashFlow      = lazy(() => import('./pages/CashFlow/index.jsx'))
+const Income        = lazy(() => import('./pages/Income/index.jsx'))
+const Budgets       = lazy(() => import('./pages/Budgets/index.jsx'))
+const Debts         = lazy(() => import('./pages/Debts/index.jsx'))
+const Goals         = lazy(() => import('./pages/Goals/index.jsx'))
+const Reports       = lazy(() => import('./pages/Reports/index.jsx'))
+const Settings      = lazy(() => import('./pages/Settings/index.jsx'))
+const Advisor       = lazy(() => import('./pages/Advisor/index.jsx'))
+const Subscriptions = lazy(() => import('./pages/Subscriptions/index.jsx'))
+const Coach         = lazy(() => import('./pages/Coach/index.jsx'))
+const APVPage       = lazy(() => import('./pages/APV/index.jsx'))
+const ImportCSV     = lazy(() => import('./pages/Import/index.jsx'))
+const Movements     = lazy(() => import('./pages/Movements/index.jsx'))
+const Privacy       = lazy(() => import('./pages/legal/Privacy.jsx'))
+const Terms         = lazy(() => import('./pages/legal/Terms.jsx'))
+const License       = lazy(() => import('./pages/legal/License.jsx'))
+const Disclaimer    = lazy(() => import('./pages/legal/Disclaimer.jsx'))
+
+const PageLoader = () => (
+  <div style={{ padding: 24, color: 'var(--th)', fontFamily: 'var(--mono)', fontSize: 12 }}>
+    Cargando...
+  </div>
+)
 
 // ── Detectar modo demo ────────────────────────────────────────────────────────
 function isDemoMode() {
@@ -37,7 +47,7 @@ function isDemoMode() {
 }
 
 function Inner() {
-  const [page, setPage] = useState('dashboard')
+  const [page, setPage] = usePersistedPage('dashboard')
   const [licensed, setLicensed] = useState(isLicenseActive())
 
   // Demo bypass: si URL tiene ?demo=true no se pide licencia
@@ -50,25 +60,25 @@ function Inner() {
 
   function renderPage(page) {
     switch (page) {
-      case 'dashboard':  return <Dashboard setPage={setPage}/>
-      case 'income':     return <Income />
-      case 'budgets':    return <Budgets />
-      case 'debts':      return <Debts />
-      case 'goals':      return <Goals setPage={setPage}/>
-      case 'cashflow':   return <CashFlow />
-      case 'reports':    return <Reports />
-      case 'settings':   return <Settings />
-      case 'privacy':    return <Privacy />
-      case 'terms':      return <Terms />
-      case 'license':    return <License />
-      case 'disclaimer': return <Disclaimer />
-      case 'advisor':    return <Suspense fallback={<div style={{padding:24,color:'var(--th)',fontFamily:'var(--mono)',fontSize:12}}>Cargando...</div>}><Advisor /></Suspense>
+      case 'dashboard':     return <Dashboard setPage={setPage}/>
+      case 'income':        return <Income />
+      case 'budgets':       return <Budgets />
+      case 'debts':         return <Debts />
+      case 'goals':         return <Goals setPage={setPage}/>
+      case 'cashflow':      return <CashFlow />
+      case 'reports':       return <Reports />
+      case 'settings':      return <Settings />
+      case 'privacy':       return <Privacy />
+      case 'terms':         return <Terms />
+      case 'license':       return <License />
+      case 'disclaimer':    return <Disclaimer />
+      case 'advisor':       return <Advisor />
       case 'subscriptions': return <Subscriptions />
       case 'coach':         return <Coach />
       case 'apv':           return <APVPage />
-      case 'movements': return <Movements setPage={setPage}/>
+      case 'movements':     return <Movements setPage={setPage}/>
       case 'import':        return <ImportCSV />
-      default:           return <Dashboard setPage={setPage}/>
+      default:              return <Dashboard setPage={setPage}/>
     }
   }
 
@@ -80,7 +90,9 @@ function Inner() {
 
   return (
     <Shell page={page} setPage={setPage}>
-      {renderPage(page)}
+      <Suspense fallback={<PageLoader />}>
+        {renderPage(page)}
+      </Suspense>
       <Toast />
     </Shell>
   )

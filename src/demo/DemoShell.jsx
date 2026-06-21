@@ -2,31 +2,38 @@
 // Shell para modo demo — envuelve la app con DemoProvider
 // Bridge: hace que useApp() en todos los módulos use los datos demo (sin IndexedDB)
 
-import { useState, useEffect, useContext, lazy, Suspense } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { DemoProvider, useDemo, DemoContext } from './DemoContext.jsx'
 import DemoBanner from './DemoBanner.jsx'
 import Shell from '../components/layout/Shell.jsx'
 import Toast from '../components/ui/Toast.jsx'
-import Dashboard from '../pages/Dashboard/index.jsx'
-import CashFlow from '../pages/CashFlow/index.jsx'
-import Income    from '../pages/Income/index.jsx'
-import Budgets   from '../pages/Budgets/index.jsx'
-import Debts     from '../pages/Debts/index.jsx'
-import Goals     from '../pages/Goals/index.jsx'
-import Reports   from '../pages/Reports/index.jsx'
-import Settings  from '../pages/Settings/index.jsx'
-import Privacy from '../pages/legal/Privacy.jsx'
-import Terms from '../pages/legal/Terms.jsx'
-import License from '../pages/legal/License.jsx'
-import Disclaimer from '../pages/legal/Disclaimer.jsx'
-import Subscriptions from '../pages/Subscriptions/index.jsx'
-import Coach from '../pages/Coach/index.jsx'
-import APVPage from '../pages/APV/index.jsx'
-import ImportCSV from '../pages/Import/index.jsx'
-import Movements from '../pages/Movements/index.jsx'
 import { AppContext } from '../context/AppContext.jsx'
 
-const Advisor = lazy(() => import('../pages/Advisor/index.jsx'))
+// Páginas lazy — mismo patrón que App.jsx para coherencia de chunks
+const Dashboard     = lazy(() => import('../pages/Dashboard/index.jsx'))
+const CashFlow      = lazy(() => import('../pages/CashFlow/index.jsx'))
+const Income        = lazy(() => import('../pages/Income/index.jsx'))
+const Budgets       = lazy(() => import('../pages/Budgets/index.jsx'))
+const Debts         = lazy(() => import('../pages/Debts/index.jsx'))
+const Goals         = lazy(() => import('../pages/Goals/index.jsx'))
+const Reports       = lazy(() => import('../pages/Reports/index.jsx'))
+const Settings      = lazy(() => import('../pages/Settings/index.jsx'))
+const Advisor       = lazy(() => import('../pages/Advisor/index.jsx'))
+const Subscriptions = lazy(() => import('../pages/Subscriptions/index.jsx'))
+const Coach         = lazy(() => import('../pages/Coach/index.jsx'))
+const APVPage       = lazy(() => import('../pages/APV/index.jsx'))
+const ImportCSV     = lazy(() => import('../pages/Import/index.jsx'))
+const Movements     = lazy(() => import('../pages/Movements/index.jsx'))
+const Privacy       = lazy(() => import('../pages/legal/Privacy.jsx'))
+const Terms         = lazy(() => import('../pages/legal/Terms.jsx'))
+const License       = lazy(() => import('../pages/legal/License.jsx'))
+const Disclaimer    = lazy(() => import('../pages/legal/Disclaimer.jsx'))
+
+const PageLoader = () => (
+  <div style={{ padding: 24, color: 'var(--th)', fontFamily: 'var(--mono)', fontSize: 12 }}>
+    Cargando...
+  </div>
+)
 
 // Bridge: inyecta el valor de DemoContext en AppContext
 // → todos los módulos que llaman useApp() reciben los datos demo
@@ -116,7 +123,7 @@ function DemoInner() {
       case 'terms':         return <Terms />
       case 'license':       return <License />
       case 'disclaimer':    return <Disclaimer />
-      case 'advisor':       return <Suspense fallback={<div style={{padding:24,color:'var(--th)',fontFamily:'var(--mono)',fontSize:12}}>Cargando...</div>}><Advisor /></Suspense>
+      case 'advisor':       return <Advisor />
       case 'subscriptions': return <Subscriptions />
       case 'coach':         return <Coach />
       case 'apv':           return <APVPage />
@@ -130,7 +137,9 @@ function DemoInner() {
     <>
       <DemoBanner />
       <Shell page={page} setPage={setPage}>
-        {renderPage(page)}
+        <Suspense fallback={<PageLoader />}>
+          {renderPage(page)}
+        </Suspense>
         <Toast />
       </Shell>
       <DemoBottomCTA />
