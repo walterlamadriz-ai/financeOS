@@ -1,7 +1,7 @@
 // src/pages/Dashboard/index.jsx
 // Dashboard Visual Polish — FinanceOS v1.1.1
 
-import { useMemo } from 'react'
+import { useMemo, useEffect, useState } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
 import ChartCard from '../../components/charts/ChartCard.jsx'
 import IncomeExpenseBar from '../../components/charts/IncomeExpenseBar.jsx'
@@ -185,6 +185,59 @@ export default function Dashboard({ setPage }) {
     })
   }, [kpis.savingRate, kpis.incCount, kpis.expCount, budgets, expenses, debts, goals, subs, incomes, activeMonth])
 
+  // ── Historial de score semanal (localStorage) ────────────────────────────
+  const SCORE_KEY = 'fos_score_history'
+  const [scoreHistory, setScoreHistory] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(SCORE_KEY) || '[]') } catch { return [] }
+  })
+
+  useEffect(() => {
+    if (!healthScore) return
+    const week = (() => {
+      const d = new Date()
+      const jan1 = new Date(d.getFullYear(), 0, 1)
+      return `${d.getFullYear()}-W${Math.ceil(((d - jan1) / 86400000 + jan1.getDay() + 1) / 7)}`
+    })()
+    setScoreHistory(prev => {
+      const existing = prev.find(e => e.w === week)
+      if (existing && existing.s === healthScore.score) return prev
+      const next = [...prev.filter(e => e.w !== week), { w: week, s: healthScore.score }]
+        .sort((a, b) => a.w.localeCompare(b.w))
+        .slice(-8)
+      try { localStorage.setItem(SCORE_KEY, JSON.stringify(next)) } catch {}
+      return next
+    })
+  }, [healthScore?.score])
+
+  function ScoreSparkline({ history, currentColor }) {
+    if (history.length < 2) return null
+    const vals = history.map(e => e.s)
+    const min = Math.min(...vals) - 5
+    const max = Math.max(...vals) + 5
+    const W = 80, H = 28
+    const pts = vals.map((v, i) => {
+      const x = (i / (vals.length - 1)) * W
+      const y = H - ((v - min) / (max - min)) * H
+      return `${x},${y}`
+    }).join(' ')
+    const prev = vals[vals.length - 2]
+    const curr = vals[vals.length - 1]
+    const diff = curr - prev
+    return (
+      <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+        <svg width={W} height={H} style={{ overflow:'visible' }}>
+          <polyline points={pts} fill="none" stroke={currentColor} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" opacity="0.7" />
+          <circle cx={pts.split(' ').pop().split(',')[0]} cy={pts.split(' ').pop().split(',')[1]} r="3" fill={currentColor} />
+        </svg>
+        {diff !== 0 && (
+          <span style={{ fontSize:10, fontFamily:'var(--mono)', color: diff > 0 ? 'var(--accent)' : 'var(--red)', background: diff > 0 ? 'rgba(0,212,170,.1)' : 'rgba(255,77,106,.1)', borderRadius:4, padding:'1px 5px' }}>
+            {diff > 0 ? '↑' : '↓'}{Math.abs(diff)} pts
+          </span>
+        )}
+      </div>
+    )
+  }
+
   const SEV_ICON  = { info: '◈', attention: '⚠', warning: '⊗' }
   const SEV_COLOR = { info: 'var(--accent)', attention: 'var(--amb)', warning: 'var(--red)' }
 
@@ -335,7 +388,8 @@ export default function Dashboard({ setPage }) {
             </div>
             <div>
               <div style={{ fontSize:11, fontFamily:'var(--mono)', color:'var(--th)', textTransform:'uppercase', letterSpacing:'.8px', marginBottom:2 }}>Salud financiera</div>
-              <div style={{ fontSize:14, fontWeight:700, color:healthScore.color }}>{healthScore.label}</div>
+              <div style={{ fontSize:14, fontWeight:700, color:healthScore.color, marginBottom:4 }}>{healthScore.label}</div>
+              <ScoreSparkline history={scoreHistory} currentColor={healthScore.color} />
             </div>
           </div>
           <div style={{ display:'flex', gap:10, flexWrap:'wrap' }}>
