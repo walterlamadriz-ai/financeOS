@@ -17,16 +17,26 @@
   --grn:       #1a6b4a;
   --grn-bg:    #e8f5ef;
   --grn-lt:    #d0eddf;
+  --grn-tint:  rgba(26,107,74,0.06);
   --red:       #c0392b;
   --red-bg:    #fdf0ee;
   --amb:       #9a6500;
   --amb-bg:    #fef8e8;
   --blu:       #1a5a8a;
   --blu-bg:    #e8f2fb;
+  --accent:    #0a9d7e;   /* verde-teal de acento — AA sobre fondos claros */
+  --accent-bg: rgba(10,157,126,0.08);
+  --accent2:   #1a7a99;   /* cyan de acento secundario */
   --sans:      'Instrument Sans', sans-serif;
   --mono:      'JetBrains Mono', monospace;
   --r:         8px;
   --rl:        12px;
+  --rs:        4px;
+  /* Escala tipográfica */
+  --fs-xs:     10px;
+  --fs-sm:     12px;
+  --fs-md:     14px;
+  --fs-lg:     18px;
 }
 
 [data-theme="dark"] {
@@ -42,12 +52,16 @@
   --grn:       #3dbe7a;
   --grn-bg:    #0f2218;
   --grn-lt:    #163d26;
+  --grn-tint:  rgba(61,190,122,0.10);
   --red:       #e05a4a;
   --red-bg:    #2a120f;
   --amb:       #d4982a;
   --amb-bg:    #261e08;
   --blu:       #4a9ad4;
   --blu-bg:    #0a1e30;
+  --accent:    #2de8c0;   /* brillante para pasar AA sobre --sur oscuro */
+  --accent-bg: rgba(45,232,192,0.12);
+  --accent2:   #4ec8e6;
 }
 
 html, body, #root {
@@ -86,6 +100,11 @@ select option { background: var(--sur); }
 
 /* Buttons */
 button { cursor: pointer; font-family: var(--sans); }
+
+/* Utilidad: ocultar en móvil (≤700px) */
+@media (max-width: 700px) {
+  .fos-hide-mobile { display: none !important; }
+}
 
 /* kpi-row responsive — mobile */
 @media (max-width: 600px) {

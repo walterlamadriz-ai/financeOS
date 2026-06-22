@@ -42,24 +42,27 @@ export default function DemoBanner() {
           Datos ficticios · Sofía García · Colombia
         </span>
 
-        {/* Toggle escenario */}
+        {/* Toggle escenario — muestra el estado ACTUAL, no el destino */}
         <button
           onClick={toggle}
-          title={scenario === 'dificil' ? 'Ver mes con buenos ingresos' : 'Ver mes con ingresos bajos'}
+          title="Cambia entre dos perfiles financieros para ver cómo responde la app"
           style={{
             background: 'rgba(255,255,255,.12)',
             border: '1px solid rgba(255,255,255,.25)',
             color: '#fff',
             borderRadius: 6,
-            padding: '4px 10px',
-            fontSize: 10,
+            padding: '8px 12px',
+            minHeight: 40,
+            fontSize: 11,
             cursor: 'pointer',
             fontFamily: 'var(--mono)',
             whiteSpace: 'nowrap',
             flexShrink: 0,
+            display: 'inline-flex',
+            alignItems: 'center',
           }}
         >
-          {scenario === 'dificil' ? '↕ Mes exitoso' : '↕ Mes difícil'}
+          {scenario === 'dificil' ? 'Escenario: Mes difícil ↕' : 'Escenario: Mes exitoso ↕'}
         </button>
 
         {/* CTA inmediato */}
@@ -72,13 +75,16 @@ export default function DemoBanner() {
             border: 'none',
             color: '#0a5c3e',
             borderRadius: 6,
-            padding: '5px 12px',
+            padding: '8px 14px',
+            minHeight: 40,
             fontSize: 11,
             fontWeight: 700,
             cursor: 'pointer',
             whiteSpace: 'nowrap',
             textDecoration: 'none',
             flexShrink: 0,
+            display: 'inline-flex',
+            alignItems: 'center',
           }}
         >
           Obtener →

@@ -193,7 +193,7 @@ export default function Debts() {
     <div className="stack">
       <PageHeader title="Deudas" sub="Seguimiento de obligaciones financieras" />
       <p style={{fontSize:12,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:12,marginTop:-4}}>Sigue saldo pendiente y avance de pago por deuda.</p>
-      <div className="kpi-row" style={{gridTemplateColumns:'repeat(4,1fr)'}}>
+      <div className="kpi-row">
         <KPI label="Deuda total"       value={fmtMoney(totalBalance,sym)} color="red" />
         <KPI label="Pago mín. mensual" value={fmtMoney(totalMin,sym)} />
         <KPI label="Deudas activas"    value={debts.length} />
@@ -264,7 +264,7 @@ export default function Debts() {
                   </button>
                 )}
                 {d.balance <= 0 && <span style={{fontSize:10,padding:'2px 8px',borderRadius:4,background:'rgba(10,92,62,.1)',color:'var(--grn)',fontFamily:'var(--mono)'}}>✓ Saldada</span>}
-                <button onClick={() => delDebt(d.id)} style={{background:'none',border:'none',color:'var(--th)',fontSize:11,cursor:'pointer'}}>✕</button>
+                <button onClick={() => delDebt(d.id)} aria-label="Eliminar deuda" style={{background:'none',border:'none',color:'var(--th)',fontSize:13,cursor:'pointer',minWidth:44,minHeight:44,display:'inline-flex',alignItems:'center',justifyContent:'center'}}>✕</button>
               </div>
             </div>
             {confirmPay === d.id && (

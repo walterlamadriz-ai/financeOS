@@ -157,9 +157,9 @@ export default function CashFlow() {
                 { label: 'Balance proyectado', value: `${sym}${Math.round(projBal).toLocaleString('es-CL')}`, sub: projBal >= 0 ? 'positivo' : 'déficit', color: projBal >= 0 ? 'var(--accent)' : 'var(--red)' },
               ].map(k => (
                 <div key={k.label} style={{ background: 'var(--sur2)', borderRadius: 8, padding: '10px 12px', border: '.5px solid var(--brd)' }}>
-                  <div style={{ fontSize: 9, fontFamily: 'var(--mono)', color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 4 }}>{k.label}</div>
+                  <div style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 4 }}>{k.label}</div>
                   <div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'var(--mono)', color: k.color, marginBottom: 2 }}>{k.value}</div>
-                  <div style={{ fontSize: 9, color: 'var(--th)', fontFamily: 'var(--mono)' }}>{k.sub}</div>
+                  <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)' }}>{k.sub}</div>
                 </div>
               ))}
             </div>
@@ -184,7 +184,7 @@ export default function CashFlow() {
                   <div style={{ height: 6, borderRadius: 3, background: 'var(--brd2)', overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${budgetBarPct}%`, background: paceColor, borderRadius: 3, transition: '.3s' }} />
                   </div>
-                  <div style={{ fontSize: 9, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: 4 }}>
+                  <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: 4 }}>
                     Presupuesto total: {sym}{totalBudget.toLocaleString('es-CL')} · Gastado hasta hoy: {sym}{Math.round(curExp).toLocaleString('es-CL')}
                   </div>
                 </div>

@@ -223,17 +223,21 @@ export default function Dashboard({ setPage }) {
     const prev = vals[vals.length - 2]
     const curr = vals[vals.length - 1]
     const diff = curr - prev
+    const trendColor = diff > 0 ? 'var(--accent)' : diff < 0 ? 'var(--red)' : 'var(--th)'
+    const trendBg    = diff > 0 ? 'var(--accent-bg)' : diff < 0 ? 'var(--red-bg)' : 'var(--sur3)'
+    const trendTxt   = diff > 0 ? `↑ +${Math.abs(diff)} pts vs anterior` : diff < 0 ? `↓ ${Math.abs(diff)} pts vs anterior` : '= sin cambio'
     return (
       <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-        <svg width={W} height={H} style={{ overflow:'visible' }}>
-          <polyline points={pts} fill="none" stroke={currentColor} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" opacity="0.7" />
-          <circle cx={pts.split(' ').pop().split(',')[0]} cy={pts.split(' ').pop().split(',')[1]} r="3" fill={currentColor} />
-        </svg>
-        {diff !== 0 && (
-          <span style={{ fontSize:10, fontFamily:'var(--mono)', color: diff > 0 ? 'var(--accent)' : 'var(--red)', background: diff > 0 ? 'rgba(0,212,170,.1)' : 'rgba(255,77,106,.1)', borderRadius:4, padding:'1px 5px' }}>
-            {diff > 0 ? '↑' : '↓'}{Math.abs(diff)} pts
-          </span>
-        )}
+        {/* SVG solo en desktop — en mobile basta la tendencia textual */}
+        <span className="fos-hide-mobile">
+          <svg width={W} height={H} style={{ overflow:'visible', display:'block' }}>
+            <polyline points={pts} fill="none" stroke={currentColor} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" opacity="0.7" />
+            <circle cx={pts.split(' ').pop().split(',')[0]} cy={pts.split(' ').pop().split(',')[1]} r="3" fill={currentColor} />
+          </svg>
+        </span>
+        <span style={{ fontSize:11, fontFamily:'var(--mono)', color: trendColor, background: trendBg, borderRadius:4, padding:'2px 6px' }}>
+          {trendTxt}
+        </span>
       </div>
     )
   }
@@ -279,9 +283,10 @@ export default function Dashboard({ setPage }) {
         <div style={{
           background:'var(--sur)', border:`.5px solid var(--brd)`, borderRadius:16,
           padding:'24px 20px', maxWidth:380, width:'100%',
+          maxHeight:'85vh', overflowY:'auto',
           boxShadow:'0 24px 64px rgba(0,0,0,.25)',
         }}>
-          <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)', textTransform:'uppercase', letterSpacing:'1px', marginBottom:8 }}>
+          <div style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--th)', textTransform:'uppercase', letterSpacing:'1px', marginBottom:8 }}>
             Cierre de mes
           </div>
           <div style={{ fontSize:20, fontWeight:700, color:'var(--tx)', marginBottom:4 }}>
@@ -299,7 +304,7 @@ export default function Dashboard({ setPage }) {
               { label:'Ahorro',      val:pct(kpis.savingRate),            color: kpis.savingRate >= 0.2 ? 'var(--accent)' : 'var(--amb)' },
             ].map(k => (
               <div key={k.label} style={{ background:'var(--bg2)', borderRadius:10, padding:'10px 12px' }}>
-                <div style={{ fontSize:9, fontFamily:'var(--mono)', color:'var(--th)', textTransform:'uppercase', letterSpacing:'.5px', marginBottom:3 }}>{k.label}</div>
+                <div style={{ fontSize:11, fontFamily:'var(--mono)', color:'var(--th)', textTransform:'uppercase', letterSpacing:'.5px', marginBottom:3 }}>{k.label}</div>
                 <div style={{ fontSize:15, fontWeight:700, fontFamily:'var(--mono)', color:k.color }}>{k.prefix||''}{k.val}</div>
               </div>
             ))}
@@ -309,7 +314,7 @@ export default function Dashboard({ setPage }) {
             <div style={{ background:'var(--bg2)', borderRadius:10, padding:'10px 12px', marginBottom:20, display:'flex', alignItems:'center', gap:12 }}>
               <div style={{ fontSize:28, fontWeight:700, fontFamily:'var(--mono)', color:healthScore.color }}>{healthScore.score}</div>
               <div>
-                <div style={{ fontSize:9, fontFamily:'var(--mono)', color:'var(--th)', textTransform:'uppercase', letterSpacing:'.5px' }}>Salud financiera</div>
+                <div style={{ fontSize:11, fontFamily:'var(--mono)', color:'var(--th)', textTransform:'uppercase', letterSpacing:'.5px' }}>Salud financiera</div>
                 <div style={{ fontSize:13, fontWeight:600, color:healthScore.color }}>{healthScore.label}</div>
               </div>
             </div>
@@ -344,7 +349,7 @@ export default function Dashboard({ setPage }) {
     const up   = n > 0
     const good = invert ? !up : up
     return (
-      <span style={{ fontSize:9, fontFamily:'var(--mono)', color: good ? 'var(--accent)' : 'var(--red)',
+      <span style={{ fontSize:11, fontFamily:'var(--mono)', color: good ? 'var(--accent)' : 'var(--red)',
                      background: good ? 'rgba(0,212,170,.1)' : 'rgba(255,77,106,.1)',
                      borderRadius:4, padding:'1px 5px', marginLeft:5 }}>
         {up ? '↑' : '↓'}{Math.abs(n)}%
@@ -430,7 +435,7 @@ export default function Dashboard({ setPage }) {
             </div>
             <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)' }}>{k.sub}</div>
             {dualOn && k.raw !== null && (
-              <div style={{ fontFamily:'var(--mono)', fontSize:9, color:'var(--th)', marginTop:4, opacity:.7, borderTop:'.5px solid var(--brd)', paddingTop:4 }}>
+              <div style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--th)', marginTop:4, opacity:.7, borderTop:'.5px solid var(--brd)', paddingTop:4 }}>
                 {toUSD(k.raw)}
               </div>
             )}
@@ -481,7 +486,7 @@ export default function Dashboard({ setPage }) {
           <div style={{ display:'flex', alignItems:'center', gap:14, flex:1, minWidth:180 }}>
             <div style={{ textAlign:'center', flexShrink:0 }}>
               <div style={{ fontSize:28, fontWeight:700, fontFamily:'var(--mono)', color:healthScore.color, lineHeight:1 }}>{healthScore.score}</div>
-              <div style={{ fontSize:9, fontFamily:'var(--mono)', color:'var(--th)', textTransform:'uppercase', letterSpacing:'.5px', marginTop:2 }}>/ 100</div>
+              <div style={{ fontSize:11, fontFamily:'var(--mono)', color:'var(--th)', textTransform:'uppercase', letterSpacing:'.5px', marginTop:2 }}>/ 100</div>
             </div>
             <div>
               <div style={{ fontSize:11, fontFamily:'var(--mono)', color:'var(--th)', textTransform:'uppercase', letterSpacing:'.8px', marginBottom:2 }}>Salud financiera</div>
@@ -493,7 +498,7 @@ export default function Dashboard({ setPage }) {
             {healthScore.breakdown.map((b, i) => (
               <div key={i} style={{ textAlign:'center', minWidth:56 }}>
                 <div style={{ fontSize:13, fontWeight:700, fontFamily:'var(--mono)', color: b.pts >= b.max ? 'var(--accent)' : b.pts > 0 ? 'var(--amb)' : 'var(--red)' }}>{b.pts}</div>
-                <div style={{ fontSize:9, fontFamily:'var(--mono)', color:'var(--th)', textTransform:'uppercase', letterSpacing:'.3px' }}>{b.label}</div>
+                <div style={{ fontSize:11, fontFamily:'var(--mono)', color:'var(--th)', textTransform:'uppercase', letterSpacing:'.3px' }}>{b.label}</div>
               </div>
             ))}
           </div>
@@ -549,10 +554,10 @@ export default function Dashboard({ setPage }) {
                 { label:'Ritmo diario',       value:`${sym}${fmt(dailyExp)}/día`,       color:'var(--th)',                                   rawVal: null },
               ].map(k => (
                 <div key={k.label}>
-                  <div style={{ fontSize:9, fontFamily:'var(--mono)', color:'var(--th)', textTransform:'uppercase', letterSpacing:'.5px', marginBottom:3 }}>{k.label}</div>
+                  <div style={{ fontSize:11, fontFamily:'var(--mono)', color:'var(--th)', textTransform:'uppercase', letterSpacing:'.5px', marginBottom:3 }}>{k.label}</div>
                   <div style={{ fontSize:13, fontWeight:700, fontFamily:'var(--mono)', color:k.color }}>{k.prefix || ''}{k.value}</div>
                   {dualOn && k.rawVal != null && (
-                    <div style={{ fontSize:9, color:'var(--th)', fontFamily:'var(--mono)', opacity:.7, marginTop:2 }}>{toUSD(k.rawVal)}</div>
+                    <div style={{ fontSize:11, color:'var(--th)', fontFamily:'var(--mono)', opacity:.7, marginTop:2 }}>{toUSD(k.rawVal)}</div>
                   )}
                 </div>
               ))}
@@ -560,7 +565,7 @@ export default function Dashboard({ setPage }) {
             <div style={{ height:4, borderRadius:2, background:'var(--brd2)', overflow:'hidden', marginBottom:4 }}>
               <div style={{ height:'100%', width:`${pctMonth}%`, background: over ? 'var(--red)' : 'var(--accent)', borderRadius:2, transition:'.3s' }} />
             </div>
-            <div style={{ display:'flex', justifyContent:'space-between', fontSize:9, fontFamily:'var(--mono)', color:'var(--th)' }}>
+            <div style={{ display:'flex', justifyContent:'space-between', fontSize:11, fontFamily:'var(--mono)', color:'var(--th)' }}>
               <span>{pctMonth}% del mes transcurrido</span>
               {setPage && <span style={{ color:'var(--accent)', cursor:'pointer' }} onClick={() => setPage('cashflow')}>Ver proyección completa →</span>}
             </div>

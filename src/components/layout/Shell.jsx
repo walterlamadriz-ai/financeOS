@@ -48,6 +48,9 @@ export default function Shell({ page, setPage, children }) {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const drawerRef = useRef(null)
 
+  // ── FAB speed-dial (Ingreso / Egreso) ────────────────────────────────────────
+  const [fabOpen, setFabOpen] = useState(false)
+
   // Cerrar drawer al hacer clic fuera
   useEffect(() => {
     function handleOutside(e) {
@@ -88,17 +91,6 @@ export default function Shell({ page, setPage, children }) {
     } else {
       setPage('dashboard')
     }
-  }
-
-  // ── Tip de rotación — mostrar solo una vez ───────────────────────────────────
-  const [showTip, setShowTip] = useState(() => {
-    try { return !localStorage.getItem('fos_rotation_tip_seen') }
-    catch { return true }
-  })
-
-  function dismissTip() {
-    try { localStorage.setItem('fos_rotation_tip_seen', '1') } catch {}
-    setShowTip(false)
   }
 
   function toggleTheme() {
@@ -171,7 +163,7 @@ export default function Shell({ page, setPage, children }) {
             <div className={s.logoName}>FinanceOS</div>
             <div className={s.logoSub}>v1.5</div>
           </div>
-          <button className={s.drawerClose} onClick={() => setDrawerOpen(false)} aria-label="Cerrar menú"><span style={{fontSize:18}}>☰</span><span style={{fontSize:10,fontFamily:"var(--mono)",display:"block",lineHeight:1,marginTop:2}}>Menú</span></button>
+          <button className={s.drawerClose} onClick={() => setDrawerOpen(false)} aria-label="Cerrar menú"><span style={{fontSize:18}}>✕</span></button>
         </div>
 
         <div className={s.drawerNav}>
@@ -210,27 +202,41 @@ export default function Shell({ page, setPage, children }) {
           <span className={s.topRight}>FinanceOS · {settings.currency || 'CLP'}</span>
         </div>
 
-        {/* Tip de navegación — solo móvil, solo una vez */}
-        {showTip && (
-          <div className={s.rotationTip}>
-            <span>💡 Usá el botón ☰ para abrir el menú de navegación</span>
-            <button className={s.tipClose} onClick={dismissTip} aria-label="Cerrar tip">✕</button>
-          </div>
-        )}
-
         <div className={s.content}>
           {children}
         </div>
 
-        {/* FAB flotante — acceso rápido a egreso, solo móvil */}
-        <button
-          className={s.fab}
-          onClick={() => navigate('movements')}
-          aria-label="Agregar egreso rápido"
-          title="Registrar egreso"
-        >
-          +
-        </button>
+        {/* FAB speed-dial — Ingreso / Egreso, solo móvil */}
+        {fabOpen && <div className={s.fabBackdrop} onClick={() => setFabOpen(false)} />}
+        <div className={s.fabWrap}>
+          {fabOpen && (
+            <div className={s.fabActions}>
+              <button
+                className={s.fabAction}
+                onClick={() => { setFabOpen(false); navigate('income') }}
+                aria-label="Agregar ingreso"
+              >
+                <span className={s.fabActionIc}>↑</span> Ingreso
+              </button>
+              <button
+                className={s.fabAction}
+                onClick={() => { setFabOpen(false); navigate('movements') }}
+                aria-label="Agregar egreso"
+              >
+                <span className={s.fabActionIc}>↓</span> Egreso
+              </button>
+            </div>
+          )}
+          <button
+            className={s.fab}
+            onClick={() => setFabOpen(o => !o)}
+            aria-label={fabOpen ? 'Cerrar acciones' : 'Agregar movimiento'}
+            aria-expanded={fabOpen}
+            style={fabOpen ? { transform: 'rotate(45deg)' } : undefined}
+          >
+            +
+          </button>
+        </div>
       </div>
     </div>
   )

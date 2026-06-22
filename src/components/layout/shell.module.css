@@ -130,11 +130,12 @@
   display: none;
   background: transparent;
   border: none;
-  font-size: 12px;
-  color: var(--grn2);
+  font-size: 13px;
+  color: var(--grn);
   cursor: pointer;
   font-family: var(--sans);
-  padding: 4px 6px;
+  padding: 10px 12px;
+  min-height: 44px;
   border-radius: var(--r);
   transition: background .15s;
   flex-shrink: 0;
@@ -181,8 +182,8 @@
   background: var(--sur2);
   border: 0.5px solid var(--brd2);
   border-radius: var(--r);
-  width: 28px;
-  height: 28px;
+  width: 44px;
+  height: 44px;
   cursor: pointer;
   font-size: 13px;
   color: var(--tm);
@@ -238,10 +239,10 @@
 @media (max-width: 700px) {
   .shell { grid-template-columns: 1fr; }
   .sb    { display: none; }
-  .menuBtn { display: flex; align-items: center; justify-content: center; }
+  .menuBtn { display: flex; align-items: center; justify-content: center; min-height: 44px; }
   .backBtn { display: inline-flex; align-items: center; }
   .overlay { display: block; }
-  .rotationTip { display: flex; }
+  .content { padding-bottom: 88px; }  /* deja aire para el FAB (52px) */
   :global(.grid2), :global(.grid3), :global(.grid4) { grid-template-columns: 1fr; }
 }
 
@@ -268,6 +269,57 @@
   transition: transform .15s, box-shadow .15s;
 }
 .fab:active { transform: scale(.93); }
+
+/* Speed-dial wrapper + acciones */
+.fabWrap {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 150;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+.fabBackdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.25);
+  z-index: 149;
+}
+.fabActions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-end;
+}
+.fabAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 22px;
+  background: var(--sur);
+  border: 0.5px solid var(--brd2);
+  box-shadow: 0 4px 16px rgba(0,0,0,.18);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tx);
+  font-family: var(--sans);
+  cursor: pointer;
+}
+.fabActionIc {
+  font-family: var(--mono);
+  font-size: 15px;
+  color: var(--grn);
+}
+.fab {
+  position: static;  /* ahora el wrapper posiciona */
+}
 @media (max-width: 700px) {
+  .fabWrap { display: flex; }
+  .fabBackdrop { display: block; }
   .fab { display: flex; }
 }
