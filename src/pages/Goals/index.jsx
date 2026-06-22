@@ -72,12 +72,27 @@ export default function Goals({ setPage }) {
     <div className="stack">
       <PageHeader title="Metas de ahorro" sub="Objetivos financieros con seguimiento visual" />
       <p style={{fontSize:12,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:12,marginTop:-4}}>Mide el progreso hacia tus objetivos de ahorro.</p>
-      <div className="kpi-row" style={{gridTemplateColumns:'repeat(4,1fr)'}}>
+      <div className="kpi-row">
         <KPI label="Metas activas"  value={goals.length} />
         <KPI label="Total objetivo" value={fmtMoney(totalTarget,sym)} />
         <KPI label="Total ahorrado" value={fmtMoney(totalSaved,sym)} color="green" sub={totalTarget>0 ? fmtPct(totalSaved/totalTarget)+' del total' : '-'} />
         <KPI label="Completadas"    value={goals.filter(g=>g.saved>=g.target).length} color="green" />
       </div>
+      {/* Disponible este mes para ahorrar */}
+      {(() => {
+        const disponible = ingresoNetoGoals - gastoMensualGoals
+        if (ingresoNetoGoals <= 0) return null
+        const ok = disponible > 0
+        return (
+          <div style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 14px', borderRadius:'var(--r)', background: ok ? 'var(--accent-bg)' : 'var(--red-bg)', border:`.5px solid ${ok ? 'var(--accent)' : 'var(--red)'}`, flexWrap:'wrap' }}>
+            <span style={{ fontSize:11, fontFamily:'var(--mono)', color:'var(--th)', textTransform:'uppercase', letterSpacing:'.5px' }}>Disponible este mes para ahorrar</span>
+            <span style={{ fontSize:15, fontWeight:700, fontFamily:'var(--mono)', color: ok ? 'var(--accent)' : 'var(--red)', marginLeft:'auto' }}>
+              {ok ? '' : '−'}{fmtMoney(Math.abs(disponible), sym)}
+            </span>
+            {!ok && <span style={{ fontSize:11, color:'var(--red)', width:'100%' }}>Tus gastos superan tus ingresos este mes — prioriza antes de asignar a metas.</span>}
+          </div>
+        )
+      })()}
       <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
         <Btn variant="primary" onClick={() => setShow(s=>!s)}>{show ? '— Cerrar' : '+ Nueva meta'}</Btn>
         <Btn variant="ghost"   onClick={openSuggestions}>💡 Sugerir metas básicas</Btn>

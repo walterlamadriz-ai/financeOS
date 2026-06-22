@@ -357,6 +357,35 @@ export default function Dashboard({ setPage }) {
     )
   }
 
+  // CTA contextual reutilizable (señales, proyección, metas)
+  function InlineCTA({ label, page, tone = 'accent' }) {
+    if (!setPage) return null
+    const color = tone === 'red' ? 'var(--red)' : tone === 'amb' ? 'var(--amb)' : 'var(--accent)'
+    return (
+      <button
+        onClick={() => setPage(page)}
+        style={{
+          marginTop:6, background:'none', border:`.5px solid ${color}`, borderRadius:6,
+          padding:'5px 11px', fontSize:11, fontWeight:600, color, cursor:'pointer',
+          fontFamily:'var(--mono)', whiteSpace:'nowrap',
+        }}
+      >
+        {label} →
+      </button>
+    )
+  }
+
+  // Mapea una señal del diagnóstico a una acción concreta
+  function signalAction(s) {
+    const t = `${s.title || ''} ${s.msg || ''}`.toLowerCase()
+    if (t.includes('ahorro'))     return { label:'Crear presupuesto', page:'budgets', tone:'amb' }
+    if (t.includes('suscrip'))    return { label:'Ver suscripciones', page:'subscriptions', tone:'amb' }
+    if (t.includes('deuda'))      return { label:'Ver deudas',        page:'debts',   tone:'red' }
+    if (t.includes('presupuesto'))return { label:'Ajustar presupuesto',page:'budgets', tone:'amb' }
+    if (t.includes('meta'))       return { label:'Ver metas',         page:'goals',   tone:'accent' }
+    return { label:'Ver diagnóstico', page:'coach', tone:'accent' }
+  }
+
   const KPIS = [
     { label:'Ingresos',       value:`${sym}${fmt(kpis.totalInc)}`,  color:'var(--accent)', sub:`${kpis.incCount} registros`,                                                          delta: kpis.delta.inc,  invertDelta: false, raw: kpis.totalInc },
     { label:'Gastos',         value:`${sym}${fmt(kpis.totalExp)}`,  color:'var(--red)',    sub:`${kpis.expCount} registros`,                                                          delta: kpis.delta.exp,  invertDelta: true,  raw: kpis.totalExp },
@@ -369,12 +398,23 @@ export default function Dashboard({ setPage }) {
     <div style={{ maxWidth:960, margin:'0 auto' }}>
       <MonthlyCloseModal />
 
-      {/* Header */}
-      <div style={{ marginBottom:20 }}>
-        <div style={{ fontFamily:'var(--mono)', fontSize:11, letterSpacing:'1.2px', textTransform:'uppercase', color:'var(--grn2)', marginBottom:6 }}>Dashboard</div>
-        <h1 style={{ fontSize:22, fontWeight:700, color:'var(--tx)', letterSpacing:'-.5px', marginBottom:2 }}>Tu mes en una mirada</h1>
-        <p style={{ fontSize:13, color:'var(--th)', fontFamily:'var(--mono)' }}>// {activeMonth} · sin servidor · privado</p>
-      </div>
+      {/* Header — hero contextual */}
+      {(() => {
+        const noData = kpis.incCount === 0 && kpis.expCount === 0
+        const ok = kpis.balance >= 0
+        const heroLine = noData
+          ? 'Tus finanzas, privadas y sin banco. Empieza agregando un movimiento.'
+          : ok
+            ? `Este mes vas en positivo: te quedan ${sym}${fmt(kpis.balance)} disponibles.`
+            : `Este mes estás en rojo por ${sym}${fmt(Math.abs(kpis.balance))}. Revisa tus gastos.`
+        return (
+          <div style={{ marginBottom:20 }}>
+            <div style={{ fontFamily:'var(--mono)', fontSize:11, letterSpacing:'1.2px', textTransform:'uppercase', color:'var(--grn2)', marginBottom:6 }}>Dashboard · {activeMonth}</div>
+            <h1 style={{ fontSize:22, fontWeight:700, color:'var(--tx)', letterSpacing:'-.5px', marginBottom:4 }}>Tu mes en una mirada</h1>
+            <p style={{ fontSize:13, color: noData ? 'var(--th)' : ok ? 'var(--grn)' : 'var(--red)', fontWeight: noData ? 400 : 500, lineHeight:1.5 }}>{heroLine}</p>
+          </div>
+        )
+      })()}
 
 
 
@@ -388,7 +428,6 @@ export default function Dashboard({ setPage }) {
               { n:'1', txt:'Agrega tu primer ingreso.',   btn:'Agregar ingreso',    page:'income',   color:'var(--accent)' },
               { n:'2', txt:'Registra un egreso.',         btn:'Agregar egreso',     page:'movements', color:'var(--red)' },
               { n:'3', txt:'Crea un presupuesto.',        btn:'Crear presupuesto',  page:'budgets',  color:'var(--amb)' },
-              { n:'4', txt:'Crea un backup de tus datos.',btn:'Ir a backups',       page:'settings', color:'#00b8d9' },
             ].map((s,i) => (
               <div key={i} style={{ display:'flex', alignItems:'center', gap:12 }}>
                 <div style={{ width:24, height:24, borderRadius:'50%', background:'var(--accent)', color:'#fff', fontSize:11, fontWeight:700, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>{s.n}</div>
@@ -524,6 +563,7 @@ export default function Dashboard({ setPage }) {
               </div>
               <div style={{ fontSize:13, fontWeight:600, color:'var(--tx)', marginBottom:2 }}>{s.title}</div>
               <div style={{ fontSize:12, color:'var(--tm)', lineHeight:1.5 }}>{s.msg}</div>
+              {(() => { const a = signalAction(s); return <InlineCTA label={a.label} page={a.page} tone={a.tone} /> })()}
             </div>
           ))}
         </div>
@@ -569,17 +609,21 @@ export default function Dashboard({ setPage }) {
               <span>{pctMonth}% del mes transcurrido</span>
               {setPage && <span style={{ color:'var(--accent)', cursor:'pointer' }} onClick={() => setPage('cashflow')}>Ver proyección completa →</span>}
             </div>
+            {over && <InlineCTA label="Revisar mis gastos" page="movements" tone="red" />}
           </div>
         )
       })()}
 
       {/* Gráficos */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))', gap:16, marginBottom:16 }}>
-        <ChartCard title="Flujo de dinero del mes" subtitle="distribución orientativa" minHeight={220}>
-          <MoneyFlow incomes={incomes} expenses={monthExpenses} subscriptions={subs} debts={debts} sym={sym}/>
-        </ChartCard>
+        <div className="fos-hide-mobile">
+          <ChartCard title="Flujo de dinero del mes" subtitle="distribución orientativa" minHeight={220}>
+            <MoneyFlow incomes={incomes} expenses={monthExpenses} subscriptions={subs} debts={debts} sym={sym}/>
+          </ChartCard>
+        </div>
         <ChartCard title="Gastos por categoría" subtitle={activeMonth} minHeight={160}>
-          <CategoryDonut records={monthExpenses} sym={sym} maxCategories={6}/>
+          <CategoryDonut records={monthExpenses} sym={sym} maxCategories={6}
+            onCategoryClick={setPage ? (cat) => { try { sessionStorage.setItem('fos_drill_category', cat) } catch {} ; setPage('movements') } : undefined}/>
         </ChartCard>
       </div>
       <ChartCard title="Ingresos vs Gastos" subtitle="últimos 6 meses" minHeight={180}>

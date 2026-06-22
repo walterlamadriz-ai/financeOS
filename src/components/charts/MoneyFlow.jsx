@@ -88,6 +88,15 @@ export default function MoneyFlow({ incomes, expenses, subscriptions, debts, sym
     return node
   })
 
+  // Slices del lado izquierdo (origen del flujo) — proporcionales al monto, NO en partes iguales
+  let leftCursor = PAD
+  const leftSlices = rightNodes.map(node => {
+    const h = Math.max(6, (node.amount / totalOut) * incH)
+    const slice = { y: leftCursor, h }
+    leftCursor += h
+    return slice
+  })
+
   return (
     <div>
       <svg
@@ -113,10 +122,8 @@ export default function MoneyFlow({ incomes, expenses, subscriptions, debts, sym
 
         {/* Paths Sankey + nodos derecha */}
         {rightNodes.map((node, i) => {
-          const incFromY  = PAD + (node.y - PAD) * (incH / (rightY - PAD - 4 * items.length + 4 * items.length))
-          const incPropH  = Math.max(8, Math.round(node.h * (incH / (rightY - PAD))))
-          const startY    = PAD + Math.round(i * incH / items.length)
-          const sliceH    = Math.round(incH / items.length)
+          const startY    = leftSlices[i].y
+          const sliceH    = leftSlices[i].h
 
           return (
             <g key={node.key}>

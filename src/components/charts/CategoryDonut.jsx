@@ -18,8 +18,9 @@ function CustomTooltip({ active, payload, sym }) {
   )
 }
 
-export default function CategoryDonut({ records, sym = '$', maxCategories = 6 }) {
+export default function CategoryDonut({ records, sym = '$', maxCategories = 6, onCategoryClick }) {
   const safeRecords = Array.isArray(records) ? records : []
+  const clickable = (name) => typeof onCategoryClick === 'function' && name !== 'Otros'
 
   const { data, total } = useMemo(() => {
     const map = {}
@@ -57,8 +58,9 @@ export default function CategoryDonut({ records, sym = '$', maxCategories = 6 })
       <div style={{ position:'relative', flex:'0 0 auto', width:'48%', minWidth:160, maxWidth:280 }}>
         <ResponsiveContainer width="100%" aspect={1}>
           <PieChart>
-            <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={64} outerRadius={96} strokeWidth={0} paddingAngle={2}>
-              {data.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} style={{ outline:'none' }}/>)}
+            <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={64} outerRadius={96} strokeWidth={0} paddingAngle={2}
+              onClick={(d) => { if (d && clickable(d.name)) onCategoryClick(d.name) }}>
+              {data.map((d, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} style={{ outline:'none', cursor: clickable(d.name) ? 'pointer' : 'default' }}/>)}
             </Pie>
             <Tooltip content={<CustomTooltip sym={sym}/>}/>
           </PieChart>
@@ -71,9 +73,14 @@ export default function CategoryDonut({ records, sym = '$', maxCategories = 6 })
       </div>
       <div style={{ flex:1, minWidth:140, display:'flex', flexDirection:'column', gap:6 }}>
         {data.map((d, i) => (
-          <div key={i} style={{ display:'flex', alignItems:'center', gap:8 }}>
+          <div
+            key={i}
+            onClick={() => { if (clickable(d.name)) onCategoryClick(d.name) }}
+            title={clickable(d.name) ? `Ver movimientos de ${d.name}` : undefined}
+            style={{ display:'flex', alignItems:'center', gap:8, cursor: clickable(d.name) ? 'pointer' : 'default', padding:'2px 0' }}
+          >
             <div style={{ width:8, height:8, borderRadius:'50%', background:COLORS[i % COLORS.length], flexShrink:0 }}/>
-            <div style={{ flex:1, fontSize:13, color:'var(--tx)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{d.name}</div>
+            <div style={{ flex:1, fontSize:13, color:'var(--tx)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{d.name}{clickable(d.name) ? ' ›' : ''}</div>
             <div style={{ fontSize:12, color:'var(--th)', fontFamily:'var(--mono)' }}>{d.pct}%</div>
           </div>
         ))}

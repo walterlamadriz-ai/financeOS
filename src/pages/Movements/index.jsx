@@ -1,7 +1,7 @@
 // src/pages/Movements/index.jsx — v1.2
 // Hub "Egresos del mes" — vista unificada Gastos + Recurrentes
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
 import MoneyFlow from '../../components/charts/MoneyFlow.jsx'
 import ChartCard from '../../components/charts/ChartCard.jsx'
@@ -239,6 +239,15 @@ export default function Movements({ setPage }) {
   const [editingId, setEditingId] = useState(null)
   const [editForm,  setEditForm]  = useState({})
 
+  // Filtro de categoría por drilldown desde el Dashboard (donut clicable)
+  // NB: no se borra en el initializer (StrictMode monta 2× en dev y perdería el valor)
+  const [drillCat, setDrillCat] = useState(() => {
+    try { return sessionStorage.getItem('fos_drill_category') || null } catch { return null }
+  })
+  useEffect(() => {
+    try { sessionStorage.removeItem('fos_drill_category') } catch {}
+  }, [])
+
   async function saveEdit(e) {
     if (!editForm.description?.trim() || !editForm.amount || Number(editForm.amount) <= 0) return
     if (updateExpense) {
@@ -269,6 +278,12 @@ export default function Movements({ setPage }) {
     expenses.filter(e => e?.date?.startsWith(activeMonth))
       .sort((a,b) => new Date(b.date) - new Date(a.date))
   , [expenses, activeMonth])
+
+  // Lista visible — aplica filtro de categoría del drilldown si está activo
+  const listExp = useMemo(
+    () => drillCat ? monthExp.filter(e => (e.category || '') === drillCat) : monthExp,
+    [monthExp, drillCat]
+  )
 
   const activeSubs = useMemo(() =>
     subscriptions.filter(s => s?.status === 'active')
@@ -514,19 +529,28 @@ export default function Movements({ setPage }) {
             display:'flex', alignItems:'center', justifyContent:'space-between' }}>
             <div style={{ fontSize:11, fontWeight:600, color:'var(--red)',
               fontFamily:'var(--mono)', textTransform:'uppercase', letterSpacing:'.5px' }}>
-              💳 Gastos únicos ({monthExp.length})
+              💳 Gastos únicos ({listExp.length})
             </div>
             <div style={{ fontSize:11, fontWeight:700, color:'var(--red)',
               fontFamily:'var(--mono)' }}>{fmtM(totalExp, sym)}</div>
           </div>
+          {drillCat && (
+            <div style={{ padding:'8px 14px', borderBottom:'.5px solid var(--brd)', display:'flex', alignItems:'center', gap:8, background:'var(--accent-bg)' }}>
+              <span style={{ fontSize:11, fontFamily:'var(--mono)', color:'var(--tx)' }}>Filtrando categoría: <strong>{drillCat}</strong></span>
+              <button onClick={() => setDrillCat(null)} aria-label="Quitar filtro"
+                style={{ marginLeft:'auto', background:'none', border:'.5px solid var(--brd2)', borderRadius:6, padding:'4px 10px', fontSize:11, fontFamily:'var(--mono)', color:'var(--tm)', cursor:'pointer' }}>
+                ✕ Quitar filtro
+              </button>
+            </div>
+          )}
           <div style={{ maxHeight:320, overflowY:'auto' }}>
-            {monthExp.length === 0 ? (
+            {listExp.length === 0 ? (
               <div style={{ padding:'20px', textAlign:'center', fontSize:12,
                 color:'var(--th)', fontFamily:'var(--mono)' }}>
-                Sin gastos este mes
+                {drillCat ? `Sin gastos en "${drillCat}" este mes` : 'Sin gastos este mes'}
               </div>
-            ) : monthExp.slice(0,10).map((e,i) => editingId === e.id ? (
-              <div key={e.id} style={{padding:'10px 14px',borderBottom:i<Math.min(monthExp.length,10)-1?'.5px solid var(--brd)':'none',background:'rgba(232,65,66,.03)'}}>
+            ) : listExp.slice(0,10).map((e,i) => editingId === e.id ? (
+              <div key={e.id} style={{padding:'10px 14px',borderBottom:i<Math.min(listExp.length,10)-1?'.5px solid var(--brd)':'none',background:'rgba(232,65,66,.03)'}}>
                 <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6,marginBottom:6}}>
                   <input type="text" value={editForm.description||''} placeholder="Descripción"
                     onChange={ev=>setEditForm(f=>({...f,description:ev.target.value}))}
@@ -557,7 +581,7 @@ export default function Movements({ setPage }) {
             ) : (
               <div key={e.id} style={{ display:'flex', alignItems:'center', gap:8,
                 padding:'8px 14px',
-                borderBottom: i < Math.min(monthExp.length,10)-1 ? '.5px solid var(--brd)' : 'none' }}>
+                borderBottom: i < Math.min(listExp.length,10)-1 ? '.5px solid var(--brd)' : 'none' }}>
                 <div style={{ width:6, height:6, borderRadius:'50%', flexShrink:0,
                   background: CAT_COLORS[e.category]||'#888' }}/>
                 <div style={{ flex:1, minWidth:0 }}>
@@ -586,10 +610,10 @@ export default function Movements({ setPage }) {
                 )}
               </div>
             ))}
-            {monthExp.length > 10 && (
+            {listExp.length > 10 && (
               <div style={{ padding:'8px 14px', fontSize:11, color:'var(--th)',
                 fontFamily:'var(--mono)', textAlign:'center', borderTop:'.5px solid var(--brd)' }}>
-                +{monthExp.length - 10} gastos más este mes
+                +{listExp.length - 10} gastos más este mes
               </div>
             )}
           </div>
