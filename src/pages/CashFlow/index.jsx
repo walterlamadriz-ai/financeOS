@@ -28,7 +28,7 @@ const ChartTooltip = ({ active, payload, label, sym }) => {
   )
 }
 
-export default function CashFlow() {
+export default function CashFlow({ setPage }) {
   const { incomes, expenses, budgets, settings } = useApp()
   const sym = CURRENCY_SYMBOLS[settings.currency] || '$'
 
@@ -133,8 +133,16 @@ export default function CashFlow() {
 
       {!hasData && (
         <Alert type="info">
-          <strong>Para activar la proyección:</strong> cuando registres un ingreso o gasto, elige recurrencia "Mensual", "Quincenal" o "Semanal" en el campo correspondiente.
-          El sistema los detecta automáticamente y proyecta tu flujo a 30, 60 y 90 días.
+          <div style={{ marginBottom: setPage ? 10 : 0 }}>
+            <strong>Para activar la proyección:</strong> marca tus ingresos o gastos fijos (arriendo, servicios, sueldo) con recurrencia "Mensual", "Quincenal" o "Semanal".
+            El sistema los detecta y proyecta tu flujo a 30, 60 y 90 días.
+          </div>
+          {setPage && (
+            <button onClick={() => setPage('movements')}
+              style={{ background:'var(--accent)', color:'#0f1923', border:'none', borderRadius:7, padding:'7px 14px', fontSize:12, fontWeight:700, fontFamily:'var(--mono)', cursor:'pointer' }}>
+              Marcar mis gastos fijos →
+            </button>
+          )}
         </Alert>
       )}
 

@@ -55,7 +55,7 @@ function DemoBottomCTA() {
 
   useEffect(() => {
     if (dismissed) return
-    const t = setTimeout(() => setVisible(true), 3 * 60 * 1000)
+    const t = setTimeout(() => setVisible(true), 75 * 1000)
     return () => clearTimeout(t)
   }, [dismissed])
 
@@ -79,8 +79,8 @@ function DemoBottomCTA() {
       flexWrap: 'wrap',
     }}>
       <div style={{ flex: 1, minWidth: 200 }}>
-        <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 2 }}>Estás viendo datos ficticios.</div>
-        <div style={{ fontSize: 11, color: 'rgba(255,255,255,.8)' }}>El tuyo es privado, es tuyo para siempre y cuesta $19.99 USD.</div>
+        <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 2 }}>¿Te convence lo que ves?</div>
+        <div style={{ fontSize: 11, color: 'rgba(255,255,255,.8)' }}>El tuyo es privado, local y sin suscripción mensual — pago único de US$19.99.</div>
       </div>
       <button
         onClick={() => window.open('https://financeospro.com/#pricing', '_blank')}
@@ -116,7 +116,7 @@ function DemoInner() {
       case 'budgets':       return <Budgets />
       case 'debts':         return <Debts />
       case 'goals':         return <Goals />
-      case 'cashflow':      return <CashFlow />
+      case 'cashflow':      return <CashFlow setPage={setPage}/>
       case 'reports':       return <Reports />
       case 'settings':      return <Settings />
       case 'privacy':       return <Privacy />

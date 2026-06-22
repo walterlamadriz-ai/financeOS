@@ -65,7 +65,7 @@ function Inner() {
       case 'budgets':       return <Budgets />
       case 'debts':         return <Debts />
       case 'goals':         return <Goals setPage={setPage}/>
-      case 'cashflow':      return <CashFlow />
+      case 'cashflow':      return <CashFlow setPage={setPage}/>
       case 'reports':       return <Reports />
       case 'settings':      return <Settings />
       case 'privacy':       return <Privacy />

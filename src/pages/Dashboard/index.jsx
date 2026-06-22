@@ -242,6 +242,18 @@ export default function Dashboard({ setPage }) {
     )
   }
 
+  // ── Vista compacta (progressive disclosure) ───────────────────────────────
+  const [compact, setCompact] = useState(() => {
+    try { return localStorage.getItem('fos_dash_compact') === '1' } catch { return false }
+  })
+  function toggleCompact() {
+    setCompact(c => {
+      const next = !c
+      try { localStorage.setItem('fos_dash_compact', next ? '1' : '0') } catch {}
+      return next
+    })
+  }
+
   // ── Modal cierre de mes ───────────────────────────────────────────────────
   const updateSettings = useApp()?.updateSettings
   const [closeDismissed, setCloseDismissed] = useState(() => {
@@ -408,10 +420,16 @@ export default function Dashboard({ setPage }) {
             ? `Este mes vas en positivo: te quedan ${sym}${fmt(kpis.balance)} disponibles.`
             : `Este mes estás en rojo por ${sym}${fmt(Math.abs(kpis.balance))}. Revisa tus gastos.`
         return (
-          <div style={{ marginBottom:20 }}>
-            <div style={{ fontFamily:'var(--mono)', fontSize:11, letterSpacing:'1.2px', textTransform:'uppercase', color:'var(--grn2)', marginBottom:6 }}>Dashboard · {activeMonth}</div>
-            <h1 style={{ fontSize:22, fontWeight:700, color:'var(--tx)', letterSpacing:'-.5px', marginBottom:4 }}>Tu mes en una mirada</h1>
-            <p style={{ fontSize:13, color: noData ? 'var(--th)' : ok ? 'var(--grn)' : 'var(--red)', fontWeight: noData ? 400 : 500, lineHeight:1.5 }}>{heroLine}</p>
+          <div style={{ marginBottom:20, display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:12, flexWrap:'wrap' }}>
+            <div>
+              <div style={{ fontFamily:'var(--mono)', fontSize:11, letterSpacing:'1.2px', textTransform:'uppercase', color:'var(--grn2)', marginBottom:6 }}>Dashboard · {activeMonth}</div>
+              <h1 style={{ fontSize:22, fontWeight:700, color:'var(--tx)', letterSpacing:'-.5px', marginBottom:4 }}>Tu mes en una mirada</h1>
+              <p style={{ fontSize:13, color: noData ? 'var(--th)' : ok ? 'var(--grn)' : 'var(--red)', fontWeight: noData ? 400 : 500, lineHeight:1.5 }}>{heroLine}</p>
+            </div>
+            <button onClick={toggleCompact} title={compact ? 'Mostrar gráficos y proyección' : 'Ocultar gráficos y proyección'}
+              style={{ background:'none', border:'.5px solid var(--brd2)', borderRadius:7, padding:'6px 12px', fontSize:11, fontFamily:'var(--mono)', color:'var(--tm)', cursor:'pointer', whiteSpace:'nowrap', flexShrink:0 }}>
+              {compact ? '▸ Vista detallada' : '▾ Vista compacta'}
+            </button>
           </div>
         )
       })()}
@@ -570,7 +588,7 @@ export default function Dashboard({ setPage }) {
       )}
 
       {/* Proyección fin de mes */}
-      {(kpis.totalInc > 0 || kpis.totalExp > 0) && (() => {
+      {!compact && (kpis.totalInc > 0 || kpis.totalExp > 0) && (() => {
         const now = new Date()
         const [y, mo] = activeMonth.split('-').map(Number)
         const daysInMonth = new Date(y, mo, 0).getDate()
@@ -615,20 +633,24 @@ export default function Dashboard({ setPage }) {
       })()}
 
       {/* Gráficos */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))', gap:16, marginBottom:16 }}>
-        <div className="fos-hide-mobile">
-          <ChartCard title="Flujo de dinero del mes" subtitle="distribución orientativa" minHeight={220}>
-            <MoneyFlow incomes={incomes} expenses={monthExpenses} subscriptions={subs} debts={debts} sym={sym}/>
+      {!compact && (
+        <>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))', gap:16, marginBottom:16 }}>
+            <div className="fos-hide-mobile">
+              <ChartCard title="Flujo de dinero del mes" subtitle="distribución orientativa" minHeight={220}>
+                <MoneyFlow incomes={incomes} expenses={monthExpenses} subscriptions={subs} debts={debts} sym={sym}/>
+              </ChartCard>
+            </div>
+            <ChartCard title="Gastos por categoría" subtitle={activeMonth} minHeight={160}>
+              <CategoryDonut records={monthExpenses} sym={sym} maxCategories={6}
+                onCategoryClick={setPage ? (cat) => { try { sessionStorage.setItem('fos_drill_category', cat) } catch {} ; setPage('movements') } : undefined}/>
+            </ChartCard>
+          </div>
+          <ChartCard title="Ingresos vs Gastos" subtitle="últimos 6 meses" minHeight={180}>
+            <IncomeExpenseBar incomes={incomes} expenses={expenses} sym={sym} months={6}/>
           </ChartCard>
-        </div>
-        <ChartCard title="Gastos por categoría" subtitle={activeMonth} minHeight={160}>
-          <CategoryDonut records={monthExpenses} sym={sym} maxCategories={6}
-            onCategoryClick={setPage ? (cat) => { try { sessionStorage.setItem('fos_drill_category', cat) } catch {} ; setPage('movements') } : undefined}/>
-        </ChartCard>
-      </div>
-      <ChartCard title="Ingresos vs Gastos" subtitle="últimos 6 meses" minHeight={180}>
-        <IncomeExpenseBar incomes={incomes} expenses={expenses} sym={sym} months={6}/>
-      </ChartCard>
+        </>
+      )}
 
 
 
