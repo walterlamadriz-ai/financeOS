@@ -18,6 +18,7 @@ const NAV = [
     { id: 'goals',   ic: '◎', lb: 'Metas' },
     { id: 'apv',     ic: '🇨🇱', lb: 'APV Chile', chileOnly: true },
     { id: 'deducciones', ic: '🧾', lb: 'Deducciones', countries: ['EC', 'PE'] },
+    { id: 'ahorrofiscal', ic: '🏦', lb: 'Ahorro fiscal', countries: ['MX', 'CO', 'US', 'ES'] },
   ] },
   { sec: 'Análisis', items: [
     { id: 'coach',    ic: '⚕', lb: 'Diagnóstico' },

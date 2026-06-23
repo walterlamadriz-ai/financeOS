@@ -24,6 +24,7 @@ const Subscriptions = lazy(() => import('./pages/Subscriptions/index.jsx'))
 const Coach         = lazy(() => import('./pages/Coach/index.jsx'))
 const APVPage       = lazy(() => import('./pages/APV/index.jsx'))
 const Deducciones   = lazy(() => import('./pages/Deducciones/index.jsx'))
+const AhorroFiscal  = lazy(() => import('./pages/AhorroFiscal/index.jsx'))
 const ImportCSV     = lazy(() => import('./pages/Import/index.jsx'))
 const Movements     = lazy(() => import('./pages/Movements/index.jsx'))
 const Privacy       = lazy(() => import('./pages/legal/Privacy.jsx'))
@@ -78,6 +79,7 @@ function Inner() {
       case 'coach':         return <Coach />
       case 'apv':           return <APVPage />
       case 'deducciones':   return <Deducciones />
+      case 'ahorrofiscal':  return <AhorroFiscal />
       case 'movements':     return <Movements setPage={setPage}/>
       case 'import':        return <ImportCSV />
       default:              return <Dashboard setPage={setPage}/>
