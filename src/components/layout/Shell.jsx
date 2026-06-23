@@ -17,6 +17,7 @@ const NAV = [
     { id: 'debts',   ic: '⊖', lb: 'Deudas' },
     { id: 'goals',   ic: '◎', lb: 'Metas' },
     { id: 'apv',     ic: '🇨🇱', lb: 'APV Chile', chileOnly: true },
+    { id: 'deducciones', ic: '🧾', lb: 'Deducciones', countries: ['EC', 'PE'] },
   ] },
   { sec: 'Análisis', items: [
     { id: 'coach',    ic: '⚕', lb: 'Diagnóstico' },
@@ -98,13 +99,14 @@ export default function Shell({ page, setPage, children }) {
   }
 
   // ── Render del nav (reutilizado en sidebar y drawer) ─────────────────────────
+  const navCountry = (settings.country || 'CL').toUpperCase()
   function NavItems({ onNavigate }) {
     return (
       <>
         {NAV.map(g => (
           <div key={g.sec}>
             <div className={s.sec}>{g.sec}</div>
-            {g.items.map(it => (
+            {g.items.filter(it => !it.countries || it.countries.includes(navCountry)).map(it => (
               <div
                 key={it.id}
                 className={s.ni + (page === it.id ? ' ' + s.active : '')}
