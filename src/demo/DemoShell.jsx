@@ -24,6 +24,8 @@ const Coach         = lazy(() => import('../pages/Coach/index.jsx'))
 const APVPage       = lazy(() => import('../pages/APV/index.jsx'))
 const Deducciones   = lazy(() => import('../pages/Deducciones/index.jsx'))
 const AhorroFiscal  = lazy(() => import('../pages/AhorroFiscal/index.jsx'))
+const Inflacion     = lazy(() => import('../pages/Inflacion/index.jsx'))
+const Multimoneda   = lazy(() => import('../pages/Multimoneda/index.jsx'))
 const ImportCSV     = lazy(() => import('../pages/Import/index.jsx'))
 const Movements     = lazy(() => import('../pages/Movements/index.jsx'))
 const Privacy       = lazy(() => import('../pages/legal/Privacy.jsx'))
@@ -131,6 +133,8 @@ function DemoInner() {
       case 'apv':           return <APVPage />
       case 'deducciones':   return <Deducciones />
       case 'ahorrofiscal':  return <AhorroFiscal />
+      case 'inflacion':     return <Inflacion />
+      case 'multimoneda':   return <Multimoneda />
       case 'movements':     return <Movements setPage={setPage}/>
       case 'import':        return <ImportCSV />
       default:              return <Dashboard setPage={setPage}/>
