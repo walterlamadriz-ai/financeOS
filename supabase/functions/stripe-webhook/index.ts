@@ -59,7 +59,8 @@ function generateKey(): string {
 }
 
 function planFromAmount(amountTotal: number | null): "personal" | "pro" {
-  return (amountTotal ?? 0) >= 2500 ? "pro" : "personal"; // centavos; ≥US$25 → Pro
+  // centavos. Personal US$14.99 (1499) / Pro US$19.99 (1999) → umbral 1750.
+  return (amountTotal ?? 0) >= 1750 ? "pro" : "personal";
 }
 
 async function issueLicense(key: string, plan: string, email: string | null, session: string) {

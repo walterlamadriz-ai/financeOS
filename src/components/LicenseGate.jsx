@@ -5,14 +5,14 @@ import { validateLicense } from '../utils/licenseValidator.js'
 const PLANS = [
   {
     name: 'Personal',
-    price: 'US$19.99',
+    price: 'US$14.99',
     desc: 'Pago único · uso personal',
     product: 'personal',
     highlight: false,
   },
   {
     name: 'Pro',
-    price: 'US$29.99',
+    price: 'US$19.99',
     desc: 'PDF · Asesor · APV · pago único',
     product: 'pro',
     highlight: true,
