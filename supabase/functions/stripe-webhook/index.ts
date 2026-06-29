@@ -11,7 +11,11 @@
 //   https://<PROYECTO>.supabase.co/functions/v1/stripe-webhook
 //   evento: checkout.session.completed
 
-const WEBHOOK_SECRET = Deno.env.get("STRIPE_WEBHOOK_SECRET")!;
+// Acepta firma de TEST y de LIVE: prueba contra ambos secrets (los que existan).
+const WEBHOOK_SECRETS = [
+  Deno.env.get("STRIPE_WEBHOOK_SECRET"),       // test (o el principal)
+  Deno.env.get("STRIPE_WEBHOOK_SECRET_LIVE"),  // live
+].filter((s): s is string => !!s);
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
@@ -20,8 +24,9 @@ const FROM_EMAIL = Deno.env.get("FROM_EMAIL") ?? "FinanceOS <licencias@financeos
 const enc = new TextEncoder();
 
 // Verifica la firma del webhook de Stripe (esquema t=...,v1=...) con HMAC-SHA256.
-async function verifyStripeSignature(rawBody: string, sigHeader: string, secret: string): Promise<boolean> {
-  if (!sigHeader) return false;
+// Prueba contra varios secrets (test + live) y acepta si alguno coincide.
+async function verifyStripeSignature(rawBody: string, sigHeader: string, secrets: string[]): Promise<boolean> {
+  if (!sigHeader || secrets.length === 0) return false;
   const parts = sigHeader.split(",").map((p) => p.trim());
   const t = parts.find((p) => p.startsWith("t="))?.slice(2);
   const v1s = parts.filter((p) => p.startsWith("v1=")).map((p) => p.slice(3));
@@ -31,12 +36,15 @@ async function verifyStripeSignature(rawBody: string, sigHeader: string, secret:
   const now = Math.floor(Date.now() / 1000);
   if (Math.abs(now - Number(t)) > 300) return false;
 
-  const key = await crypto.subtle.importKey(
-    "raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"],
-  );
-  const mac = await crypto.subtle.sign("HMAC", key, enc.encode(`${t}.${rawBody}`));
-  const expected = [...new Uint8Array(mac)].map((b) => b.toString(16).padStart(2, "0")).join("");
-  return v1s.includes(expected);
+  for (const secret of secrets) {
+    const key = await crypto.subtle.importKey(
+      "raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"],
+    );
+    const mac = await crypto.subtle.sign("HMAC", key, enc.encode(`${t}.${rawBody}`));
+    const expected = [...new Uint8Array(mac)].map((b) => b.toString(16).padStart(2, "0")).join("");
+    if (v1s.includes(expected)) return true;
+  }
+  return false;
 }
 
 function generateKey(): string {
@@ -95,7 +103,7 @@ Deno.serve(async (req) => {
   const sig = req.headers.get("stripe-signature") ?? "";
   const raw = await req.text();
 
-  const ok = await verifyStripeSignature(raw, sig, WEBHOOK_SECRET);
+  const ok = await verifyStripeSignature(raw, sig, WEBHOOK_SECRETS);
   if (!ok) {
     return new Response("Webhook signature verification failed", { status: 400 });
   }
