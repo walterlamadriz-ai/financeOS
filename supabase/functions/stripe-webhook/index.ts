@@ -1,28 +1,44 @@
 // FinanceOS — Webhook de Stripe → emite licencia en Supabase + envía email
-// Supabase Edge Function (Deno). Deploy:
-//   supabase functions deploy stripe-webhook --no-verify-jwt
-// Env (supabase secrets set):
-//   STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, SUPABASE_URL,
-//   SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY, FROM_EMAIL
+// Supabase Edge Function (Deno). SIN SDK de Stripe: verifica la firma con Web Crypto
+// (evita el shim de Node de esm.sh que rompe en el runtime nuevo de Supabase/Deno 2).
 //
-// Stripe Dashboard → Developers → Webhooks → endpoint:
-//   https://<TU-PROYECTO>.supabase.co/functions/v1/stripe-webhook
+// Secrets necesarios (Supabase → Edge Functions → Secrets):
+//   STRIPE_WEBHOOK_SECRET   (whsec_...)   ← obligatorio
+//   RESEND_API_KEY, FROM_EMAIL            ← opcional (email de la clave)
+//   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY ← los inyecta Supabase solo
+//
+// Stripe → Developers → Webhooks → endpoint:
+//   https://<PROYECTO>.supabase.co/functions/v1/stripe-webhook
 //   evento: checkout.session.completed
 
-import Stripe from "https://esm.sh/stripe@14?target=deno";
-
-const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
-  apiVersion: "2024-06-20",
-  httpClient: Stripe.createFetchHttpClient(),
-});
-const cryptoProvider = Stripe.createSubtleCryptoProvider();
-
+const WEBHOOK_SECRET = Deno.env.get("STRIPE_WEBHOOK_SECRET")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") ?? "FinanceOS <licencias@financeospro.com>";
 
-// Genera una clave FNOS-XXXX-XXXX-XXXX (sin caracteres ambiguos)
+const enc = new TextEncoder();
+
+// Verifica la firma del webhook de Stripe (esquema t=...,v1=...) con HMAC-SHA256.
+async function verifyStripeSignature(rawBody: string, sigHeader: string, secret: string): Promise<boolean> {
+  if (!sigHeader) return false;
+  const parts = sigHeader.split(",").map((p) => p.trim());
+  const t = parts.find((p) => p.startsWith("t="))?.slice(2);
+  const v1s = parts.filter((p) => p.startsWith("v1=")).map((p) => p.slice(3));
+  if (!t || v1s.length === 0) return false;
+
+  // tolerancia de 5 min contra replay
+  const now = Math.floor(Date.now() / 1000);
+  if (Math.abs(now - Number(t)) > 300) return false;
+
+  const key = await crypto.subtle.importKey(
+    "raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"],
+  );
+  const mac = await crypto.subtle.sign("HMAC", key, enc.encode(`${t}.${rawBody}`));
+  const expected = [...new Uint8Array(mac)].map((b) => b.toString(16).padStart(2, "0")).join("");
+  return v1s.includes(expected);
+}
+
 function generateKey(): string {
   const charset = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // sin I,O,0,1
   const rnd = crypto.getRandomValues(new Uint8Array(12));
@@ -34,10 +50,8 @@ function generateKey(): string {
   return `FNOS-${out}`;
 }
 
-// Determina el plan según el monto pagado (US$19.99 Personal / US$29.99 Pro)
 function planFromAmount(amountTotal: number | null): "personal" | "pro" {
-  // amountTotal viene en centavos. >= 2500 → Pro
-  return (amountTotal ?? 0) >= 2500 ? "pro" : "personal";
+  return (amountTotal ?? 0) >= 2500 ? "pro" : "personal"; // centavos; ≥US$25 → Pro
 }
 
 async function issueLicense(key: string, plan: string, email: string | null, session: string) {
@@ -55,7 +69,7 @@ async function issueLicense(key: string, plan: string, email: string | null, ses
 
 async function sendKeyEmail(to: string, key: string, plan: string) {
   if (!RESEND_API_KEY) {
-    console.warn("RESEND_API_KEY no configurada — clave generada pero NO enviada por email:", key);
+    console.warn(`RESEND_API_KEY no configurada — clave generada NO enviada por email: ${key}`);
     return;
   }
   const appUrl = "https://app.financeospro.com/app/";
@@ -78,26 +92,27 @@ async function sendKeyEmail(to: string, key: string, plan: string) {
 }
 
 Deno.serve(async (req) => {
-  const sig = req.headers.get("stripe-signature");
-  const body = await req.text();
-  let event: Stripe.Event;
-  try {
-    event = await stripe.webhooks.constructEventAsync(
-      body, sig!, Deno.env.get("STRIPE_WEBHOOK_SECRET")!, undefined, cryptoProvider,
-    );
-  } catch (err) {
-    return new Response(`Webhook signature error: ${(err as Error).message}`, { status: 400 });
+  const sig = req.headers.get("stripe-signature") ?? "";
+  const raw = await req.text();
+
+  const ok = await verifyStripeSignature(raw, sig, WEBHOOK_SECRET);
+  if (!ok) {
+    return new Response("Webhook signature verification failed", { status: 400 });
   }
 
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object as Stripe.Checkout.Session;
+  let event: any;
+  try { event = JSON.parse(raw); } catch { return new Response("bad json", { status: 400 }); }
+
+  if (event?.type === "checkout.session.completed") {
+    const session = event.data?.object ?? {};
     const email = session.customer_details?.email ?? session.customer_email ?? null;
-    const plan = planFromAmount(session.amount_total);
+    const plan = planFromAmount(session.amount_total ?? null);
     const key = generateKey();
     try {
-      await issueLicense(key, plan, email, session.id);
+      await issueLicense(key, plan, email, session.id ?? null);
       if (email) await sendKeyEmail(email, key, plan);
-      console.log(`Licencia emitida: plan=${plan} email=${email} session=${session.id}`);
+      // Log siempre la clave (para test/retiro manual aunque no haya email)
+      console.log(`Licencia emitida: plan=${plan} email=${email} key=${key} session=${session.id}`);
     } catch (err) {
       console.error("Error emitiendo licencia:", err);
       return new Response("error issuing license", { status: 500 });
