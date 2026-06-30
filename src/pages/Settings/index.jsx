@@ -6,6 +6,7 @@ import { BackupWarning } from '../../components/legal/MicroCopy.jsx'
 import BackupManager from '../../components/backup/BackupManager.jsx'
 import TemplateSelector from '../../components/templates/TemplateSelector.jsx'
 import { CURRENCY_OPTIONS, DEFAULT_USD_RATES } from '../shared/constants.js'
+import { clearLicense, getLicensePlan } from '../../utils/licenseValidator.js'
 
 export default function Settings() {
   const { settings, updateSettings, clearAll, loadDemo, exportCSV } = useApp()
@@ -34,6 +35,14 @@ export default function Settings() {
   async function handleClear() {
     if (window.confirm('¿Borrar TODOS los datos? Esta acción no se puede deshacer.')) {
       await clearAll()
+    }
+  }
+
+  const isDemo = typeof window !== 'undefined' && window.location.search.includes('demo=true')
+  function handleDeactivate() {
+    if (window.confirm('¿Desactivar la licencia en este dispositivo?\n\nTendrás que volver a ingresar tu clave para entrar.\nTus datos financieros NO se borran.')) {
+      clearLicense()
+      window.location.reload()
     }
   }
 
@@ -171,6 +180,12 @@ export default function Settings() {
           <div><div style={slbl}>Reiniciar onboarding</div><div style={ssub}>Volver al asistente de configuración inicial</div></div>
           <Btn variant="ghost" size="sm" onClick={()=>updateSettings({...settings,onboardingDone:false})}>Reiniciar</Btn>
         </div>
+        {!isDemo && (
+          <div style={srow}>
+            <div><div style={slbl}>Licencia · plan {getLicensePlan() === 'pro' ? 'Pro' : 'Personal'}</div><div style={ssub}>Desactivar en este dispositivo · tus datos NO se borran</div></div>
+            <Btn variant="ghost" size="sm" onClick={handleDeactivate}>Desactivar licencia</Btn>
+          </div>
+        )}
         <div style={{...srow,borderBottom:'none'}}>
           <div><div style={slbl}>Borrar todos los datos</div><div style={ssub}>Acción irreversible · sin recuperación posible</div></div>
           <Btn variant="danger" size="sm" onClick={handleClear}>Borrar todo</Btn>
