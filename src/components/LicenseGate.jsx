@@ -19,21 +19,15 @@ const PLANS = [
   },
 ]
 
-const CHECKOUT_URL = 'https://invest.financeospro.com/api/create-checkout'
+// Stripe Payment Links (Live) — Personal US$14.99 / Pro US$19.99
+const CHECKOUT_LINKS = {
+  personal: 'https://buy.stripe.com/6oU5kFdxo2a95Xz7Z73wQ00',
+  pro:      'https://buy.stripe.com/3cIdRb9h82a90Dfenv3wQ01',
+}
 
 async function startCheckout(product) {
-  const res = await fetch(CHECKOUT_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      product,
-      successUrl: 'https://financeospro.com/activate.html?session_id={CHECKOUT_SESSION_ID}',
-      cancelUrl: 'https://financeospro.com/',
-    }),
-  })
-  const data = await res.json()
-  if (data.url) window.location.href = data.url
-  else throw new Error(data.error || 'Error al iniciar checkout')
+  const url = CHECKOUT_LINKS[product] || 'https://financeospro.com/#pricing'
+  window.location.href = url
 }
 
 export default function LicenseGate({ onActivate }) {

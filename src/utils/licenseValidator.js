@@ -1,12 +1,10 @@
-// src/utils/licenseValidator.supabase.js
-// VALIDADOR v2.0 — Supabase. PREPARADO, NO WIRED todavía.
-// No lo importa nadie aún. Reemplazará a licenseValidator.js SOLO cuando:
-//   1) la RPC `validate_license` exista y esté probada en Supabase, y
-//   2) VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY estén en Vercel (ya están).
-// Swap final: renombrar este archivo a licenseValidator.js (ver LICENSE-V2-SETUP.md, paso 6).
+// src/utils/licenseValidator.js
+// VALIDADOR v2.0 — Supabase. ACTIVO en producción (lo usan App.jsx, LicenseGate, Settings).
+// Valida la clave contra la RPC `validate_license` de Supabase y cachea en localStorage
+// (fnos_license_v2). VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY están en Vercel.
 //
-// Corrige los 2 bugs de la versión WIP anterior:
-//   - bypass offline (aceptaba cualquier clave con formato válido si había cache) → ahora exige coincidencia de clave
+// Características:
+//   - bypass offline cerrado (sin red, solo acepta la clave si coincide con la cacheada)
 //   - sin migración v1→v2 (deslogueaba usuarios activos) → ahora migra fnos_license_v1 → fnos_license_v2
 
 const LS_V2 = 'fnos_license_v2'

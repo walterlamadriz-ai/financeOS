@@ -24,7 +24,7 @@ export default function ProGate({ children, feature = 'esta función' }) {
         {feature} es exclusivo del plan Pro
       </h2>
       <p style={{ fontSize: 13, color: 'var(--th)', lineHeight: 1.7, marginBottom: 20 }}>
-        Actualizá tu licencia a Pro por un pago único de <strong>$19.99 USD</strong> para acceder a Modo Asesor, reportes PDF, proyección de flujo, simulador de deudas, APV Chile e importación CSV.
+        Actualizá tu licencia a Pro por un pago único de <strong>US$19.99</strong> para acceder a Modo Asesor, reportes PDF, proyección de flujo, simulador de deudas, APV Chile e importación CSV.
       </p>
       <a
         href="https://financeospro.com/#pricing"

@@ -34,7 +34,7 @@ export default {
   calcular({ ingresoAnual = 0, aporteAnual = 0 }) {
     const ingreso = Number(ingresoAnual) || 0
     const aporte = Number(aporteAnual) || 0
-    const tope = LIMIT_401K
+    const tope = Math.min(LIMIT_401K, ingreso) // no se puede deducir más que el ingreso
     const deducible = Math.min(aporte, tope)
     const ahorro = impuestoProgresivo(BR, ingreso) - impuestoProgresivo(BR, ingreso - deducible)
     const topePct = tope > 0 ? Math.min(100, (aporte / tope) * 100) : 0
