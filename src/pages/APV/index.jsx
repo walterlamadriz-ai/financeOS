@@ -23,12 +23,21 @@ export default function APVPage() {
   // Solo categorías de renta del trabajo (no arriendo, inversión, etc.)
   const CATEGORIAS_TRABAJO = ['Salario', 'Sueldo', 'Freelance', 'Honorarios', 'Bono', 'Comisión']
   const sueldoBrutoCalculado = useMemo(() => {
-    const neto = (incomes || [])
-      .filter(r => r.date?.startsWith(activeMonth))
-      .filter(r => CATEGORIAS_TRABAJO.some(c => 
-        (r.category || '').toLowerCase().includes(c.toLowerCase())
-      ))
+    // Solo rentas del trabajo (excluye arriendo, inversión, etc.)
+    const work = (incomes || []).filter(r =>
+      CATEGORIAS_TRABAJO.some(c => (r.category || '').toLowerCase().includes(c.toLowerCase()))
+    )
+    if (!work.length) return 0
+    const netoDelMes = m => work
+      .filter(r => r.date?.startsWith(m))
       .reduce((s, r) => s + r.amount, 0)
+    // Preferir el mes activo; si no hay renta de trabajo ahí, usar el mes más reciente que sí la tenga
+    let neto = netoDelMes(activeMonth)
+    if (neto <= 0) {
+      const meses = [...new Set(work.map(r => (r.date || '').slice(0, 7)).filter(Boolean))]
+        .sort().reverse()
+      for (const m of meses) { neto = netoDelMes(m); if (neto > 0) break }
+    }
     return neto > 0 ? Math.round(neto / DESCUENTOS) : 0
   }, [incomes, activeMonth])
   const [apvF, setApvF] = useState({
@@ -41,12 +50,14 @@ export default function APVPage() {
     grossMonthly:        isDemo ? '2000000' : '',
     annualBonus:         isDemo ? '1000000' : ''
   })
-  // Actualizar grossMonthly cuando cambian los ingresos (excepto en demo)
+  // Marca si el usuario editó el sueldo bruto a mano (para no pisarlo con el auto-cálculo)
+  const [grossTouched, setGrossTouched] = useState(false)
+  // Auto-rellenar grossMonthly desde los ingresos, salvo en demo o si el usuario lo editó
   useEffect(() => {
-    if (!isDemo && sueldoBrutoCalculado > 0) {
+    if (!isDemo && !grossTouched && sueldoBrutoCalculado > 0) {
       setApvF(p => ({ ...p, grossMonthly: String(sueldoBrutoCalculado) }))
     }
-  }, [sueldoBrutoCalculado, isDemo])
+  }, [sueldoBrutoCalculado, isDemo, grossTouched])
 
   const [apvResult, setApvResult]   = useState(null)
   const [taxResult, setTaxResult]   = useState(null)
@@ -114,9 +125,16 @@ export default function APVPage() {
           <div style={{padding:'14px',background:'var(--sur2)',borderRadius:8,border:'0.5px solid var(--brd)'}}>
             <div style={{fontSize:11,fontWeight:600,color:'var(--tx)',marginBottom:10,fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:'.5px'}}>① Tu situación actual</div>
             <FormRow>
-              <FormGroup label="Sueldo bruto mensual ($)"><input type="number" min="0" value={apvF.grossMonthly} placeholder="ej. 2000000" onChange={e => setApvF(p => ({...p, grossMonthly: e.target.value}))} /></FormGroup>
+              <FormGroup label="Sueldo bruto mensual ($)"><input type="number" min="0" value={apvF.grossMonthly} placeholder="ej. 2000000" onChange={e => { setGrossTouched(true); setApvF(p => ({...p, grossMonthly: e.target.value})) }} /></FormGroup>
               <FormGroup label="Bono anual estimado ($)"><input type="number" min="0" value={apvF.annualBonus} placeholder="0 (opcional)" onChange={e => setApvF(p => ({...p, annualBonus: e.target.value}))} /></FormGroup>
             </FormRow>
+            {!isDemo && sueldoBrutoCalculado > 0 && (
+              <div style={{marginTop:6,fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',lineHeight:1.5}}>
+                {!grossTouched
+                  ? <>✓ Calculado automáticamente desde tus ingresos del mes (líquido → bruto). Podés ajustarlo.</>
+                  : <>Valor sugerido desde tus ingresos: ${sueldoBrutoCalculado.toLocaleString()} · <span style={{color:'var(--grn)',cursor:'pointer',textDecoration:'underline'}} onClick={() => { setGrossTouched(false); setApvF(p => ({...p, grossMonthly: String(sueldoBrutoCalculado)})) }}>usar valor automático</span></>}
+              </div>
+            )}
             {apvF.grossMonthly && Number(apvF.grossMonthly) > 0 && (() => {
               const gm = Number(apvF.grossMonthly)
               const desc = calcDescuentos(gm)
