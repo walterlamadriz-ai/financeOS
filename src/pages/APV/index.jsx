@@ -6,7 +6,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
 import { Card, CardHeader, FormRow, FormGroup, Btn } from '../../components/ui/index.jsx'
 import { calcAPV } from '../../utils/apvCalc.js'
-import { calcBeneficioAPV, calcDescuentos, calcImpuestoAnual, calcGapTramo, calcArbitraje, setIndicadores } from '../../utils/taxCalcCL.js'
+import { calcBeneficioAPV, calcDescuentos, calcImpuestoAnual, calcGapTramo, calcArbitraje, calcBrutoDesdeLiquido, setIndicadores } from '../../utils/taxCalcCL.js'
 import { loadIndicadores } from '../../utils/indicadores.js'
 import ProGate from '../../components/ui/ProGate.jsx'
 
@@ -16,14 +16,20 @@ export default function APVPage() {
 
   const isDemo = typeof window !== 'undefined' && window.location.search.includes('demo=true')
 
-  // Calcular sueldo bruto desde ingresos netos del mes activo
-  // Bruto = Neto / (1 - AFP 10% - Salud 7% - Cesantía 0.6%) = Neto / 0.824
-  const DESCUENTOS = 1 - 0.10 - 0.07 - 0.006  // 0.824
   const activeMonth = settings.activeMonth || new Date().toISOString().slice(0, 7)
+  // Indicadores (UTM/UF) — se cargan primero para que el bruto se estime con la UTM vigente
+  const [indInfo, setIndInfo] = useState(null)
+  useEffect(() => {
+    loadIndicadores().then(ind => {
+      setIndicadores({ utm: ind.utm, uf: ind.uf })
+      setIndInfo(ind)
+    })
+  }, [])
+
+  // Estima el sueldo bruto desde el ingreso líquido del mes (previsional + impuesto único de 2ª cat.)
   // Solo categorías de renta del trabajo (no arriendo, inversión, etc.)
   const CATEGORIAS_TRABAJO = ['Salario', 'Sueldo', 'Freelance', 'Honorarios', 'Bono', 'Comisión']
   const sueldoBrutoCalculado = useMemo(() => {
-    // Solo rentas del trabajo (excluye arriendo, inversión, etc.)
     const work = (incomes || []).filter(r =>
       CATEGORIAS_TRABAJO.some(c => (r.category || '').toLowerCase().includes(c.toLowerCase()))
     )
@@ -38,8 +44,8 @@ export default function APVPage() {
         .sort().reverse()
       for (const m of meses) { neto = netoDelMes(m); if (neto > 0) break }
     }
-    return neto > 0 ? Math.round(neto / DESCUENTOS) : 0
-  }, [incomes, activeMonth])
+    return neto > 0 ? calcBrutoDesdeLiquido(neto) : 0
+  }, [incomes, activeMonth, indInfo])
   const [apvF, setApvF] = useState({
     monthlyContribution: isDemo ? '150000' : '',
     currentBalance:      isDemo ? '2000000' : '',
@@ -63,14 +69,6 @@ export default function APVPage() {
   const [taxResult, setTaxResult]   = useState(null)
   const [gapResult, setGapResult]   = useState(null)
   const [arb, setArb]               = useState(null)
-  const [indInfo, setIndInfo]       = useState(null)
-
-  useEffect(() => {
-    loadIndicadores().then(ind => {
-      setIndicadores({ utm: ind.utm, uf: ind.uf })
-      setIndInfo(ind)
-    })
-  }, [])
 
   if (!isChile) return (
     <div style={{padding:32,textAlign:'center',color:'var(--th)',fontFamily:'var(--mono)',fontSize:13}}>
@@ -131,7 +129,7 @@ export default function APVPage() {
             {!isDemo && sueldoBrutoCalculado > 0 && (
               <div style={{marginTop:6,fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',lineHeight:1.5}}>
                 {!grossTouched
-                  ? <>✓ Calculado automáticamente desde tus ingresos del mes (líquido → bruto). Podés ajustarlo.</>
+                  ? <>✓ Estimado desde tus ingresos del mes (líquido → bruto, con AFP/salud/cesantía e impuesto único). Podés ajustarlo.</>
                   : <>Valor sugerido desde tus ingresos: ${sueldoBrutoCalculado.toLocaleString()} · <span style={{color:'var(--grn)',cursor:'pointer',textDecoration:'underline'}} onClick={() => { setGrossTouched(false); setApvF(p => ({...p, grossMonthly: String(sueldoBrutoCalculado)})) }}>usar valor automático</span></>}
               </div>
             )}

@@ -50,6 +50,34 @@ export function calcImpuestoAnual(rentaAnual) {
   }
 }
 
+// Impuesto único de segunda categoría (mensual, orientativo).
+// Usa la misma tabla que el anual pero en UTM: la rebaja anual (factor·UTA) / 12 = factor·UTM.
+export function calcImpuestoMensual(baseMensual) {
+  if (!baseMensual || baseMensual <= 0) return 0
+  const baseUTM = baseMensual / UTM
+  const tramo = TRAMOS.find(t => baseUTM >= t.desde && baseUTM < t.hasta) || TRAMOS[TRAMOS.length - 1]
+  const rebajaMensual = tramo.rebaja / 12
+  return Math.max(0, Math.round(baseMensual * tramo.tasa - rebajaMensual))
+}
+
+// Invierte líquido → bruto incluyendo previsional (AFP+Salud+Cesantía) e impuesto único de 2ª categoría.
+// El líquido es monótono creciente en el bruto y lineal por tramos, así que se resuelve por bisección.
+export function calcBrutoDesdeLiquido(liquidoMensual) {
+  if (!liquidoMensual || liquidoMensual <= 0) return 0
+  const netoDe = bruto => {
+    const prev = calcDescuentos(bruto).total
+    const base = Math.max(0, bruto - prev)
+    return bruto - prev - calcImpuestoMensual(base)
+  }
+  let lo = liquidoMensual, hi = liquidoMensual * 2.5
+  for (let i = 0; i < 60; i++) {
+    const mid = (lo + hi) / 2
+    if (netoDe(mid) < liquidoMensual) lo = mid
+    else hi = mid
+  }
+  return Math.round((lo + hi) / 2)
+}
+
 export function calcBeneficioAPV({ sueldoBrutoMensual, bonoAnual = 0, apvMensual }) {
   if (!sueldoBrutoMensual || sueldoBrutoMensual <= 0) return null
   if (!apvMensual || apvMensual <= 0) return null
