@@ -151,10 +151,10 @@ const config = {
   // Aparece en el footer de Ajustes y en los reportes.
   legalDisclaimer: 'Orientación general sobre finanzas personales. No constituye asesoría financiera, tributaria ni legal certificada. Consulta a un profesional para decisiones financieras importantes.',
 
-  // ── PLAN / TIER (para features gating) ────────────────────────────────────
-  // Cambia según la licencia que estés distribuyendo.
-  // 'starter' | 'pro' | 'enterprise'
-  plan: 'pro',
+  // ── PLAN / TIER (fallback para features gating) ───────────────────────────
+  // El plan REAL viene de la licencia validada (usePlan → getLicensePlan()).
+  // Esto es solo el fallback si no hay licencia cacheada. 'personal' | 'pro' | 'enterprise'
+  plan: 'personal',
 
 }
 

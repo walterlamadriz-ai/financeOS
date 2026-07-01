@@ -1,31 +1,18 @@
 // src/hooks/usePlan.js
-// Determina el plan activo leyendo la licencia guardada en settings.
-// Prioridad: licencia FNOS-XXXX en settings > config.plan > 'starter'
+// El plan activo se toma del plan de la LICENCIA validada (getLicensePlan del
+// validador, cacheado en fnos_license_v2 tras validar contra Supabase).
+// - Modo demo (?demo=true): se muestran todas las features (showcase) → 'pro'.
+// - Fallback si no hay licencia cacheada: config.plan.
 //
-// Formato de licencia: FNOS-XXXX-XXXX-XXXX (validado por licenseValidator.js)
-// El plan se informa por el prefijo del segmento 2:
-//   FNOS-PRO-…   → 'pro'
-//   FNOS-ENT-…   → 'enterprise'
-//   FNOS-STD-… o cualquier otra → 'starter'
-// Si no hay licencia guardada se usa config.plan como fallback.
+// Reemplaza la lógica vieja que leía settings.licenseKey (nunca se seteaba) y
+// derivaba el plan del prefijo de la clave (imposible con FNOS-XXXX-XXXX-XXXX).
 
-import { useApp } from '../context/AppContext.jsx'
+import { getLicensePlan } from '../utils/licenseValidator.js'
 import config from '../config.js'
 
 export function usePlan() {
-  const ctx = useApp() || {}
-  const settings = ctx.settings || {}
-  const licenseKey = (settings.licenseKey || '').toUpperCase().trim()
-
-  let plan = config.plan || 'starter'
-
-  if (licenseKey.startsWith('FNOS-')) {
-    const parts = licenseKey.split('-')
-    const seg2 = parts[1] || ''
-    if (seg2 === 'ENT') plan = 'enterprise'
-    else if (seg2 === 'PRO' || config.plan === 'pro') plan = 'pro'
-    else plan = 'starter'
-  }
+  const isDemo = typeof window !== 'undefined' && window.location.search.includes('demo=true')
+  const plan = isDemo ? 'pro' : (getLicensePlan() || config.plan || 'personal')
 
   return {
     plan,
