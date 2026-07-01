@@ -234,6 +234,7 @@ export default function Onboarding({ onComplete }) {
     { code: 'MX', flag: '🇲🇽', label: 'México',    currency: 'MXN' },
     { code: 'AR', flag: '🇦🇷', label: 'Argentina', currency: 'ARS' },
     { code: 'CO', flag: '🇨🇴', label: 'Colombia',  currency: 'COP' },
+    { code: 'EC',    flag: '🇪🇨', label: 'Ecuador',        currency: 'USD' },
     { code: 'PE',    flag: '🇵🇪', label: 'Perú',           currency: 'PEN' },
     { code: 'VE',    flag: '🇻🇪', label: 'Venezuela',      currency: 'VES' },
     { code: 'US',    flag: '🇺🇸', label: 'Estados Unidos', currency: 'USD' },
