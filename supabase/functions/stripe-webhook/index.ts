@@ -112,10 +112,27 @@ Deno.serve(async (req) => {
   let event: any;
   try { event = JSON.parse(raw); } catch { return new Response("bad json", { status: 400 }); }
 
+  // Blindaje: solo eventos LIVE reales emiten licencia. Un evento de TEST (o un
+  // endpoint de test todavía conectado) NO debe mintear una clave real en producción.
+  if (event?.type === "checkout.session.completed" && event?.livemode !== true) {
+    console.warn(`Evento de TEST ignorado (no se emite licencia): session=${event?.data?.object?.id}`);
+    return new Response(JSON.stringify({ received: true, ignored: "test_event" }), {
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   if (event?.type === "checkout.session.completed") {
     const session = event.data?.object ?? {};
+    // Solo checkouts realmente pagados y con un monto válido (evita $0 / pruebas).
+    const amount = session.amount_total ?? 0;
+    if (session.payment_status !== "paid" || amount < 1499) {
+      console.warn(`Checkout ignorado: payment_status=${session.payment_status} amount=${amount} session=${session.id}`);
+      return new Response(JSON.stringify({ received: true, ignored: "unpaid_or_zero" }), {
+        headers: { "Content-Type": "application/json" },
+      });
+    }
     const email = session.customer_details?.email ?? session.customer_email ?? null;
-    const plan = planFromAmount(session.amount_total ?? null);
+    const plan = planFromAmount(amount);
     const key = generateKey();
     try {
       await issueLicense(key, plan, email, session.id ?? null);
