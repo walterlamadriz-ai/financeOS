@@ -28,10 +28,18 @@ export function setIndicadores({ utm, uf }) {
   if (uf  && uf  > 0)   UF  = uf
 }
 
+// Topes imponibles (actualizar anualmente — valores ref. 2025/2026)
+const TOPE_AFP_SALUD_UF = 87.8   // AFP + salud
+const TOPE_CESANTIA_UF  = 131.9  // seguro de cesantía
+
 export function calcDescuentos(sueldoBrutoMensual) {
-  const afp      = Math.round(sueldoBrutoMensual * 0.10)
-  const salud    = Math.round(sueldoBrutoMensual * 0.07)
-  const cesantia = Math.round(sueldoBrutoMensual * 0.006)
+  // AFP (10%) y salud (7%) se calculan sobre el sueldo topado a 87,8 UF;
+  // cesantía (0,6%) sobre el tope de 131,9 UF. Sobre el tope no hay descuento obligatorio.
+  const baseAfpSalud = Math.min(sueldoBrutoMensual, TOPE_AFP_SALUD_UF * UF)
+  const baseCesantia = Math.min(sueldoBrutoMensual, TOPE_CESANTIA_UF * UF)
+  const afp      = Math.round(baseAfpSalud * 0.10)
+  const salud    = Math.round(baseAfpSalud * 0.07)
+  const cesantia = Math.round(baseCesantia * 0.006)
   const total    = afp + salud + cesantia
   const liquido  = sueldoBrutoMensual - total
   return { afp, salud, cesantia, total, liquido }
