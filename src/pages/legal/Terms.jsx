@@ -143,7 +143,7 @@ export default function Terms() {
 
         <div className={s.section}>
           <h2>11. Contacto</h2>
-          <p>Para consultas sobre estos términos: <strong>maxnovaluciglobal@gmail.com</strong></p>
+          <p>Para consultas sobre estos términos: <strong>soporte@financeospro.com</strong></p>
         </div>
 
         <div className={s.section}>
@@ -151,7 +151,7 @@ export default function Terms() {
           <p>
             El incumplimiento de estos términos o de los términos de licencia puede resultar
             en la revocación del derecho de uso sin reembolso. Para regularizar situaciones
-            fuera de los límites del plan adquirido, contactar <strong>maxnovaluciglobal@gmail.com</strong>{' '}
+            fuera de los límites del plan adquirido, contactar <strong>soporte@financeospro.com</strong>{' '}
             antes de que ocurra el incumplimiento.
           </p>
         </div>

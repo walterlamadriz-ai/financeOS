@@ -143,7 +143,7 @@ export default function Privacy() {
         <div className={s.section}>
           <h2>10. Contacto</h2>
           <p>
-            Para consultas relacionadas con privacidad: <strong>maxnovaluciglobal@gmail.com</strong>
+            Para consultas relacionadas con privacidad: <strong>soporte@financeospro.com</strong>
           </p>
         </div>
 
