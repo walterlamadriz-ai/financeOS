@@ -116,7 +116,7 @@ export default function License() {
           <h2>Contacto para licencias</h2>
           <p>
             Para consultas sobre upgrade de plan, uso no contemplado o licencias
-            personalizadas: <strong>soporte@financeospro.com</strong>
+            personalizadas: <strong>support@financeospro.com</strong>
           </p>
         </div>
 

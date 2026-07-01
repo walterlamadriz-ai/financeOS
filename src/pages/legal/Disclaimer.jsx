@@ -85,7 +85,7 @@ export default function Disclaimer() {
         </div>
 
         <div className={s.legalNotice}>
-          Para consultas: <strong>soporte@financeospro.com</strong> ·
+          Para consultas: <strong>support@financeospro.com</strong> ·
           Revisado por MAXNOVA & LUCI Global LLC · 2025
         </div>
 

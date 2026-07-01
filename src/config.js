@@ -12,7 +12,7 @@ const config = {
     name:        'FinanceOS',           // Nombre que aparece en sidebar y título
     tagline:     'Tu dinero, bajo control total',
     version:     '1.5.0',
-    supportEmail:'soporte@financeospro.com',  // Aparece en Ajustes > soporte
+    supportEmail:'support@financeospro.com',  // Aparece en Ajustes > soporte
     website:     'https://www.financeospro.com',
     logoText:    'FO',                  // Iniciales para favicon SVG si no hay imagen
   },
