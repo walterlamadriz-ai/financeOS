@@ -7,7 +7,9 @@ import { CURRENCY_SYMBOLS } from '../shared/constants.js'
 import { generateGoalSuggestions, totalMonthlyContribution } from '../../utils/goalSuggestions.js'
 
 export default function Goals({ setPage }) {
-  const { goals, addGoal, delGoal, updateGoal, incomes, expenses, settings } = useApp()
+  const { goals, addGoal, delGoal, updateGoal, incomes: _incAll, expenses: _expAll, settings } = useApp()
+  const incomes = (_incAll || []).filter(r => !r?.inv)   // "disponible para ahorrar" personal: excluye inversión
+  const expenses = (_expAll || []).filter(r => !r?.inv)
   const [show, setShow]               = useState(false)
   const [f, setF]                     = useState({ name:'', target:'', saved:'', targetDate:'', priority:'Media', color:'#1a6b4a' })
   const [err, setErr]                 = useState('')

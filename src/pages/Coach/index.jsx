@@ -96,7 +96,9 @@ function KpiBar({ label, value, pct, color }) {
 
 // ── COMPONENTE PRINCIPAL ───────────────────────────────────────────────────
 export default function Coach() {
-  const { incomes, expenses, budgets, debts, goals, settings } = useApp()
+  const { incomes: _incAll, expenses: _expAll, budgets, debts, goals, settings } = useApp()
+  const incomes = (_incAll || []).filter(r => !r?.inv)   // panorama personal: excluye inversión
+  const expenses = (_expAll || []).filter(r => !r?.inv)
   const { subs } = useSubscriptionMetrics()
 
   const metrics = useMemo(() =>
@@ -281,7 +283,9 @@ export default function Coach() {
 
 // ── EXPORT HOOK PARA INTEGRACIÓN ──────────────────────────────────────────
 export function useCoachSignals() {
-  const { incomes, expenses, budgets, debts, goals, settings } = useApp()
+  const { incomes: _incAll, expenses: _expAll, budgets, debts, goals, settings } = useApp()
+  const incomes = (_incAll || []).filter(r => !r?.inv)   // panorama personal: excluye inversión
+  const expenses = (_expAll || []).filter(r => !r?.inv)
   const { subs } = useSubscriptionMetrics()
   const metrics = useMemo(() =>
     calcCoachMetrics({ incomes, expenses, budgets, debts, goals, subs, settings }),

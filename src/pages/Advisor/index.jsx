@@ -263,7 +263,9 @@ function AdvisorNotes({ notes, onSave }) {
 
 // ── MAIN COMPONENT ────────────────────────────────────────────────────────────
 export default function Advisor() {
-  const { incomes, expenses, budgets, debts, goals, settings, updateSettings } = useApp()
+  const { incomes: _incAll, expenses: _expAll, budgets, debts, goals, settings, updateSettings } = useApp()
+  const incomes = (_incAll || []).filter(r => !r?.inv)   // Modo Asesor personal: excluye inversión
+  const expenses = (_expAll || []).filter(r => !r?.inv)
   const sym = CURRENCY_SYMBOLS[settings.currency] || '$'
 
   // Leer y guardar notas del asesor en settings (local)

@@ -16,8 +16,10 @@ const pct0 = (n) => ((Number(n) || 0) * 100).toFixed(0) + '%'
 
 export default function Dashboard({ setPage }) {
   const ctx      = useApp() || {}
-  const incomes  = Array.isArray(ctx.incomes)       ? ctx.incomes       : []
-  const expenses = Array.isArray(ctx.expenses)      ? ctx.expenses      : []
+  // Panorama PERSONAL: excluye movimientos marcados como inversión (r.inv) de todos
+  // los cálculos del dashboard (ingresos, gastos, balance, tasa de ahorro, score, señales).
+  const incomes  = Array.isArray(ctx.incomes)       ? ctx.incomes.filter(r => !r?.inv)  : []
+  const expenses = Array.isArray(ctx.expenses)      ? ctx.expenses.filter(r => !r?.inv) : []
   const budgets  = Array.isArray(ctx.budgets)       ? ctx.budgets       : []
   const goals    = Array.isArray(ctx.goals)         ? ctx.goals         : []
   const settings = (ctx.settings && typeof ctx.settings === 'object') ? ctx.settings : {}

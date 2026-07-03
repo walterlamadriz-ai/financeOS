@@ -20,7 +20,9 @@ import {
 } from 'recharts'
 
 export default function Reports() {
-  const { incomes, expenses, budgets, debts: allDebts, subscriptions: allSubs, settings } = useApp()
+  const { incomes: _incAll, expenses: _expAll, budgets, debts: allDebts, subscriptions: allSubs, settings } = useApp()
+  const incomes = (_incAll || []).filter(r => !r?.inv)   // reporte personal: excluye inversión
+  const expenses = (_expAll || []).filter(r => !r?.inv)
   const sym        = CURRENCY_SYMBOLS[settings.currency] || '$'
   const subMetrics = useSubscriptionMetrics()
   const { isPro }  = usePlan()

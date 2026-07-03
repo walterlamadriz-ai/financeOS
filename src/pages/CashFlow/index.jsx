@@ -29,7 +29,9 @@ const ChartTooltip = ({ active, payload, label, sym }) => {
 }
 
 export default function CashFlow({ setPage }) {
-  const { incomes, expenses, budgets, settings } = useApp()
+  const { incomes: _incAll, expenses: _expAll, budgets, settings } = useApp()
+  const incomes = (_incAll || []).filter(r => !r?.inv)   // proyección personal: excluye inversión
+  const expenses = (_expAll || []).filter(r => !r?.inv)
   const sym = CURRENCY_SYMBOLS[settings.currency] || '$'
 
   // ── Detectar recurrentes ──────────────────────────────────────────────────
