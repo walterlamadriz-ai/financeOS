@@ -302,6 +302,10 @@ export default function Movements({ setPage }) {
     monthExp.reduce((s,e) => s + (Number(e.amount)||0), 0)
   , [monthExp])
 
+  const invExp     = useMemo(() =>
+    monthExp.filter(e => e.inv).reduce((s,e) => s + (Number(e.amount)||0), 0)
+  , [monthExp])
+
   const totalSubs  = useMemo(() =>
     activeSubs.reduce((s,sub) => s + toMonthly(Number(sub.amount)||0, sub.frequency), 0)
   , [activeSubs])
@@ -408,7 +412,7 @@ export default function Movements({ setPage }) {
         gap:10, marginBottom:20 }}>
         {[
           { label:'Ingresos',      value:fmtM(totalInc, sym),      color:'var(--accent,#00d4aa)' },
-          { label:'Gastos únicos', value:fmtM(totalExp, sym),      color:'var(--red)' },
+          { label:'Gastos únicos', value:fmtM(totalExp, sym),      color:'var(--red)', sub: invExp > 0 ? `💼 ${fmtM(invExp, sym)} inversión` : null },
           { label:'Recurrentes',   value:fmtM(totalSubs, sym),     color:'var(--amb,#f5a623)' },
           { label:'Total egresos', value:fmtM(totalEgresos, sym),  color:'var(--red)' },
           { label:'Disponible',    value:fmtM(balance, sym),       color: balance >= 0 ? 'var(--accent,#00d4aa)' : 'var(--red)' },
@@ -419,6 +423,7 @@ export default function Movements({ setPage }) {
             <div style={{ fontFamily:'var(--mono)', fontSize:16, fontWeight:700, color:k.color }}>
               {k.value}
             </div>
+            {k.sub && <div style={{ fontFamily:'var(--mono)', fontSize:9, color:'var(--th)', marginTop:3 }}>{k.sub}</div>}
           </div>
         ))}
       </div>
@@ -591,7 +596,7 @@ export default function Movements({ setPage }) {
                 <div style={{ flex:1, minWidth:0 }}>
                   <div style={{ fontSize:12, color:'var(--tx)', fontWeight:500,
                     overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
-                    {e.description || e.category}
+                    {e.inv ? '💼 ' : ''}{e.description || e.category}
                   </div>
                   <div style={{ fontSize:10, color:'var(--th)', fontFamily:'var(--mono)' }}>
                     {e.subcategory

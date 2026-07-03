@@ -19,6 +19,7 @@ export default function Income() {
   const sym         = CURRENCY_SYMBOLS[settings.currency] || '$'
   const total       = useMemo(() => filtered.reduce((s, r) => s + r.amount, 0), [filtered])
   const fixed       = useMemo(() => filtered.filter(r => r.recurrence !== 'Único').reduce((s, r) => s + r.amount, 0), [filtered])
+  const investment  = useMemo(() => filtered.filter(r => r.inv).reduce((s, r) => s + r.amount, 0), [filtered])
 
   async function saveEdit(r) {
     if (!editForm.source?.trim() || !editForm.amount || Number(editForm.amount) <= 0) return
@@ -45,7 +46,7 @@ export default function Income() {
         <MonthSelector incomes={incomes} expenses={[]} />
       </div>
       <div className="kpi-row" style={{ gridTemplateColumns: 'repeat(3,1fr)' }}>
-        <KPI label="Total mes" value={fmtMoney(total, sym)} color="green" />
+        <KPI label="Total mes" value={fmtMoney(total, sym)} color="green" sub={investment > 0 ? `de los cuales 💼 ${fmtMoney(investment, sym)} inversión` : undefined} />
         <KPI label="Fijo"      value={fmtMoney(fixed, sym)} sub={total > 0 ? (fixed/total*100).toFixed(1)+'% del total' : '-'} />
         <KPI label="Variable"  value={fmtMoney(total - fixed, sym)} sub={total > 0 ? ((total-fixed)/total*100).toFixed(1)+'% del total' : '-'} />
       </div>
@@ -115,8 +116,8 @@ export default function Income() {
                   </div>
                 ) : (
                   <div key={r.id}>
-                    <TxRow dot={CAT_COLORS[r.category]||'#888'} name={r.source}
-                      meta={`${r.category} · ${r.date.slice(5).replace('-','/')}${r.recurrence!=='Único'?' · '+r.recurrence:''}`}
+                    <TxRow dot={CAT_COLORS[r.category]||'#888'} name={`${r.inv?'💼 ':''}${r.source}`}
+                      meta={`${r.category} · ${r.date.slice(5).replace('-','/')}${r.recurrence!=='Único'?' · '+r.recurrence:''}${r.inv?' · inversión':''}`}
                       amount={fmtMoney(r.amount,sym)} isIncome
                       onDelete={()=>delIncome(r.id)}
                       onEdit={()=>{setEditingId(r.id);setEditForm({source:r.source,amount:r.amount,date:r.date,category:r.category,recurrence:r.recurrence,notes:r.notes||''})}} />
