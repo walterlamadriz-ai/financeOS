@@ -24,11 +24,13 @@ alter table public.licenses enable row level security;
 
 -- 4) RPC pública que valida una clave. Recibe la clave en texto, la hashea aquí.
 --    Devuelve { valid: bool, plan: text }. No expone la tabla ni permite enumerar.
+-- IMPORTANTE: search_path DEBE incluir `extensions` — pgcrypto (digest) vive ahí.
+-- Con solo `public`, digest() no resuelve y la validación falla (incidente 2026-07-01).
 create or replace function public.validate_license(p_key text)
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   v_hash text;
@@ -71,7 +73,7 @@ create or replace function public.issue_license(
 returns void
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions  -- extensions: pgcrypto (digest)
 as $$
 begin
   insert into public.licenses (key_hash, plan, email, stripe_session_id)
