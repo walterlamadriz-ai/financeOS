@@ -142,6 +142,10 @@ function FormGasto({ onSave, onCancel, sym }) {
           <select style={inp} value={f.type} onChange={e => set('type', e.target.value)}>
             <option>Necesidad</option><option>Deseo</option></select></div>
       </div>
+      <label style={{ display:'flex', alignItems:'center', gap:8, fontSize:12, color:'var(--tm)', cursor:'pointer', marginBottom:12 }}>
+        <input type="checkbox" checked={!!f.inv} onChange={e => set('inv', e.target.checked)} />
+        💼 Es de inversión (ej. hipoteca de una propiedad en arriendo) — no cuenta en mi presupuesto personal
+      </label>
       <div style={{ display:'flex', gap:8, justifyContent:'flex-end' }}>
         <button onClick={onCancel} style={{ background:'none', border:'.5px solid var(--brd)',
           borderRadius:6, padding:'6px 14px', fontSize:12, color:'var(--th)', cursor:'pointer' }}>

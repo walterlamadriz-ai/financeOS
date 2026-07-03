@@ -65,6 +65,10 @@ export default function Income() {
             <FormGroup label="Recurrencia"><select value={f.recurrence} onChange={e => setF(p => ({ ...p, recurrence: e.target.value }))}>{RECURRENCES.map(r => <option key={r}>{r}</option>)}</select></FormGroup>
           </FormRow>
           <FormGroup label="Notas"><input type="text" value={f.notes} placeholder="opcional" onChange={e => setF(p => ({ ...p, notes: e.target.value }))} /></FormGroup>
+          <label style={{ display:'flex', alignItems:'center', gap:8, fontSize:12, color:'var(--tm)', cursor:'pointer', margin:'4px 0 10px' }}>
+            <input type="checkbox" checked={!!f.inv} onChange={e => setF(p => ({ ...p, inv: e.target.checked }))} />
+            💼 Es de inversión (ej. arriendo de una propiedad) — no cuenta en mi presupuesto personal
+          </label>
           <div style={{ display: 'flex', gap: 8 }}>
             <Btn variant="primary" onClick={submit} disabled={saving}>{saving ? 'Guardando…' : '+ Registrar'}</Btn>
             <Btn variant="ghost" onClick={() => { setF({ source: '', amount: '', date: today(), category: 'Salario', recurrence: 'Único', notes: '' }); setErr('') }}>Limpiar</Btn>

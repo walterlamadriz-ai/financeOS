@@ -23,9 +23,10 @@ export default function Budgets() {
     return m === 1 ? `${y - 1}-12` : `${y}-${String(m - 1).padStart(2, '0')}`
   }, [activeMonth])
 
-  const mExpenses     = useMemo(() => expenses.filter(r => r.date?.startsWith(activeMonth)), [expenses, activeMonth])
-  const prevExpenses  = useMemo(() => expenses.filter(r => r.date?.startsWith(prevMonth)),   [expenses, prevMonth])
-  const mIncomes      = useMemo(() => incomes.filter(r => r.date?.startsWith(activeMonth)), [incomes, activeMonth])
+  // El presupuesto personal excluye los movimientos marcados como inversión (r.inv)
+  const mExpenses     = useMemo(() => expenses.filter(r => r.date?.startsWith(activeMonth) && !r.inv), [expenses, activeMonth])
+  const prevExpenses  = useMemo(() => expenses.filter(r => r.date?.startsWith(prevMonth) && !r.inv),   [expenses, prevMonth])
+  const mIncomes      = useMemo(() => incomes.filter(r => r.date?.startsWith(activeMonth) && !r.inv), [incomes, activeMonth])
   const ingresoNeto   = useMemo(() => mIncomes.reduce((s, r) => s + r.amount, 0), [mIncomes])
   const expByCat      = useMemo(() => { const m = {}; mExpenses.forEach(e => { m[e.category] = (m[e.category] || 0) + e.amount }); return m }, [mExpenses])
   const prevExpByCat  = useMemo(() => { const m = {}; prevExpenses.forEach(e => { m[e.category] = (m[e.category] || 0) + e.amount }); return m }, [prevExpenses])
@@ -68,7 +69,7 @@ export default function Budgets() {
   return (
     <div className="stack">
       <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-        <PageHeader title="Presupuestos" sub={`Límites mensuales · ${monthLabel(activeMonth)}`} />
+        <PageHeader title="Presupuestos" sub={`Límites mensuales · ${monthLabel(activeMonth)} · los movimientos marcados como inversión 💼 no cuentan aquí`} />
         <MonthSelector incomes={[]} expenses={expenses} />
         <button
           onClick={toggleRollover}

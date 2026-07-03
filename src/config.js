@@ -65,6 +65,8 @@ const config = {
     'Ropa',
     'Tecnología',
     'Mascota',
+    'Inversión',
+    'Propiedad',
     'Otro',
   ],
 
@@ -82,6 +84,7 @@ const config = {
     Ropa:            '#d4537e',
     Tecnología:      '#1a5a8a',
     Mascota:         '#9a6500',
+    Propiedad:       '#7a5cc0',
     Otro:            '#888780',
     Salario:         '#1a6b4a',
     Freelance:       '#4a9ad4',
