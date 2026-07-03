@@ -4,7 +4,7 @@ import { useDemo } from './DemoContext.jsx'
 
 export default function DemoBanner() {
   const { setScenario } = useDemo()
-  const [scenario, setLocal] = useState('dificil')
+  const [scenario, setLocal] = useState('exitoso')
 
   function toggle() {
     const next = scenario === 'dificil' ? 'exitoso' : 'dificil'
@@ -87,7 +87,7 @@ export default function DemoBanner() {
             alignItems: 'center',
           }}
         >
-          Obtener →
+          Comprar →
         </a>
 
       </div>

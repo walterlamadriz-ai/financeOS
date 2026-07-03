@@ -94,7 +94,7 @@ function DemoBottomCTA() {
           fontSize: 13, fontWeight: 700, cursor: 'pointer', flexShrink: 0,
         }}
       >
-        Obtener FinanceOS →
+        Comprar FinanceOS →
       </button>
       <button
         onClick={dismiss}

@@ -43,6 +43,7 @@ const uid = () => Math.random().toString(36).slice(2, 10)
 export function DemoProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, {
     ...DEMO_STATE,
+    incomes: DEMO_INCOMES_EXITOSO, // arranca en un mes positivo (aspiracional); el toggle lleva a 'mes difícil'
     loading: false,
     toast: null,
   })
