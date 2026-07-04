@@ -97,7 +97,7 @@ function FormGasto({ onSave, onCancel, sym, projects = [] }) {
       <div style={{ fontSize:13, fontWeight:600, color:'var(--tx)', marginBottom:12 }}>
         💳 Nuevo gasto único
       </div>
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:10 }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))', gap:10, marginBottom:10 }}>
         <div><label style={lbl}>Descripción</label>
           <input style={inp} value={f.description} placeholder="Ej: Supermercado"
             onChange={e => set('description', e.target.value)}/></div>
@@ -142,9 +142,9 @@ function FormGasto({ onSave, onCancel, sym, projects = [] }) {
           <select style={inp} value={f.type} onChange={e => set('type', e.target.value)}>
             <option>Necesidad</option><option>Deseo</option></select></div>
       </div>
-      <label style={{ display:'flex', alignItems:'center', gap:8, fontSize:12, color:'var(--tm)', cursor:'pointer', marginBottom:12 }}>
-        <input type="checkbox" checked={!!f.inv} onChange={e => set('inv', e.target.checked)} />
-        💼 Es de inversión (ej. hipoteca de una propiedad en arriendo) — no cuenta en mi presupuesto personal
+      <label style={{ display:'flex', alignItems:'flex-start', gap:8, fontSize:12, color:'var(--tm)', cursor:'pointer', marginBottom:12, lineHeight:1.4 }}>
+        <input type="checkbox" checked={!!f.inv} onChange={e => set('inv', e.target.checked)} style={{ width:16, height:16, flexShrink:0, marginTop:1 }} />
+        <span style={{ minWidth:0 }}>💼 Es de inversión (ej. hipoteca de una propiedad en arriendo) — no cuenta en mi presupuesto personal</span>
       </label>
       <div style={{ marginBottom:12 }}>
         <label style={lbl}>Propiedad / proyecto (opcional)</label>
@@ -189,7 +189,7 @@ function FormSub({ onSave, onCancel }) {
       <div style={{ fontSize:13, fontWeight:600, color:'var(--tx)', marginBottom:12 }}>
         🔄 Nuevo pago recurrente
       </div>
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:10 }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))', gap:10, marginBottom:10 }}>
         <div><label style={lbl}>Nombre</label>
           <input style={inp} value={f.name} placeholder="Ej: Netflix"
             onChange={e => set('name', e.target.value)}/></div>

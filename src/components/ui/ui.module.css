@@ -62,6 +62,8 @@
 .fg { margin-bottom: 10px; }
 .fl { font-size: 10px; font-family: var(--mono); color: var(--tm); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
 .frow { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.frow > * { min-width: 0; }  /* permite que los inputs (ej. fecha) encojan sin desbordar */
+@media (max-width: 480px) { .frow { grid-template-columns: 1fr; } }  /* móvil: una columna */
 
 /* ALERT */
 .alert { border-radius: var(--r); padding: 10px 12px; font-size: 11px; display: flex; align-items: flex-start; gap: 6px; }

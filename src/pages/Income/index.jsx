@@ -68,9 +68,9 @@ export default function Income() {
             <FormGroup label="Recurrencia"><select value={f.recurrence} onChange={e => setF(p => ({ ...p, recurrence: e.target.value }))}>{RECURRENCES.map(r => <option key={r}>{r}</option>)}</select></FormGroup>
           </FormRow>
           <FormGroup label="Notas"><input type="text" value={f.notes} placeholder="opcional" onChange={e => setF(p => ({ ...p, notes: e.target.value }))} /></FormGroup>
-          <label style={{ display:'flex', alignItems:'center', gap:8, fontSize:12, color:'var(--tm)', cursor:'pointer', margin:'4px 0 10px' }}>
-            <input type="checkbox" checked={!!f.inv} onChange={e => setF(p => ({ ...p, inv: e.target.checked }))} />
-            💼 Es de inversión (ej. arriendo de una propiedad) — no cuenta en mi presupuesto personal
+          <label style={{ display:'flex', alignItems:'flex-start', gap:8, fontSize:12, color:'var(--tm)', cursor:'pointer', margin:'4px 0 10px', lineHeight:1.4 }}>
+            <input type="checkbox" checked={!!f.inv} onChange={e => setF(p => ({ ...p, inv: e.target.checked }))} style={{ width:16, height:16, flexShrink:0, marginTop:1 }} />
+            <span style={{ minWidth:0 }}>💼 Es de inversión (ej. arriendo de una propiedad) — no cuenta en mi presupuesto personal</span>
           </label>
           <FormGroup label="Propiedad / proyecto (opcional)">
             <input type="text" list="fnos-projects" value={f.project || ''} placeholder="ej. Depto Bogotá" onChange={e => setF(p => ({ ...p, project: e.target.value }))} />
