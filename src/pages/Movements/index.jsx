@@ -312,6 +312,13 @@ export default function Movements({ setPage }) {
     monthExp.filter(e => e.inv).reduce((s,e) => s + (Number(e.amount)||0), 0)
   , [monthExp])
 
+  // Flujos PERSONALES del mes (excluyen inversión 💼) — para el "Disponible", coherente con el Dashboard
+  const invInc     = useMemo(() =>
+    incomes.filter(r => r?.date?.startsWith(activeMonth) && r.inv).reduce((s,r) => s + (Number(r.amount)||0), 0)
+  , [incomes, activeMonth])
+  const personalInc = totalInc - invInc
+  const personalExp = totalExp - invExp
+
   // Nombres de propiedades/proyectos ya usados (autocompletar en el form)
   const projectOptions = useMemo(() => [...new Set([...incomes, ...expenses].map(r => r?.project).filter(Boolean))], [incomes, expenses])
 
@@ -328,7 +335,9 @@ export default function Movements({ setPage }) {
   , [debts])
 
   const totalEgresos = totalExp + totalSubs
-  const balance      = totalInc - totalEgresos - totalDebt
+  // Disponible PERSONAL = ingresos personales − gastos personales − suscripciones − deudas
+  // (excluye inversión 💼, coherente con el Balance neto del Dashboard)
+  const balance      = personalInc - personalExp - totalSubs - totalDebt
 
   // Lista unificada cronológica — gastos del mes + recurrentes con badge
   const unifiedList = useMemo(() => {
@@ -420,11 +429,11 @@ export default function Movements({ setPage }) {
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(130px,1fr))',
         gap:10, marginBottom:20 }}>
         {[
-          { label:'Ingresos',      value:fmtM(totalInc, sym),      color:'var(--accent,#00d4aa)' },
+          { label:'Ingresos',      value:fmtM(totalInc, sym),      color:'var(--accent,#00d4aa)', sub: invInc > 0 ? `💼 ${fmtM(invInc, sym)} inversión` : null },
           { label:'Gastos únicos', value:fmtM(totalExp, sym),      color:'var(--red)', sub: invExp > 0 ? `💼 ${fmtM(invExp, sym)} inversión` : null },
           { label:'Recurrentes',   value:fmtM(totalSubs, sym),     color:'var(--amb,#f5a623)' },
           { label:'Total egresos', value:fmtM(totalEgresos, sym),  color:'var(--red)' },
-          { label:'Disponible',    value:fmtM(balance, sym),       color: balance >= 0 ? 'var(--accent,#00d4aa)' : 'var(--red)' },
+          { label:'Disponible',    value:fmtM(balance, sym),       color: balance >= 0 ? 'var(--accent,#00d4aa)' : 'var(--red)', sub: (invInc > 0 || invExp > 0) ? 'personal · excl. 💼' : 'tras deudas y subs' },
         ].map((k,i) => (
           <div key={i} style={kpiBox}>
             <div style={{ fontFamily:'var(--mono)', fontSize:9, color:'var(--th)',
