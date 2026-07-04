@@ -401,10 +401,21 @@ export default function Dashboard({ setPage }) {
     return { label:'Ver diagnóstico', page:'coach', tone:'accent' }
   }
 
+  // Flujo de inversión/propiedades (💼) del mes activo — para el "flujo total real"
+  const propFlow = useMemo(() => {
+    const raw = (arr) => (Array.isArray(arr) ? arr : [])
+    const inMonth = (r) => r?.inv && r?.date?.startsWith(activeMonth)
+    const inc = raw(ctx.incomes).filter(inMonth).reduce((s, r) => s + (Number(r.amount) || 0), 0)
+    const exp = raw(ctx.expenses).filter(inMonth).reduce((s, r) => s + (Number(r.amount) || 0), 0)
+    return { net: inc - exp, has: inc > 0 || exp > 0 }
+  }, [ctx.incomes, ctx.expenses, activeMonth])
+  const flujoTotal = kpis.balance + propFlow.net
+
   const KPIS = [
     { label:'Ingresos',       value:`${sym}${fmt(kpis.totalInc)}`,  color:'var(--accent)', sub:`${kpis.incCount} registros`,                                                          delta: kpis.delta.inc,  invertDelta: false, raw: kpis.totalInc },
     { label:'Gastos',         value:`${sym}${fmt(kpis.totalExp)}`,  color:'var(--red)',    sub:`${kpis.expCount} registros`,                                                          delta: kpis.delta.exp,  invertDelta: true,  raw: kpis.totalExp },
     { label:'Balance neto',   value:`${sym}${fmt(kpis.balance)}`,   color:kpis.balance >= 0 ? 'var(--accent)' : 'var(--red)', sub:(kpis.totalDebt + kpis.totalSubs > 0) ? `Tras deudas/subs: ${sym}${fmt(kpis.freeFlow)}` : (kpis.balance >= 0 ? 'Ingresos − gastos' : 'Gastos > ingresos'),      delta: kpis.delta.bal,  invertDelta: false, raw: kpis.balance },
+    ...(propFlow.has ? [{ label:'Flujo total', value:`${sym}${fmt(flujoTotal)}`, color: flujoTotal >= 0 ? 'var(--accent)' : 'var(--red)', sub:`Personal + propiedades (💼 ${propFlow.net >= 0 ? '+' : '−'}${sym}${fmt(Math.abs(propFlow.net))})`, delta: null, invertDelta: false, raw: flujoTotal }] : []),
     { label:'Tasa de ahorro', value:pct(kpis.savingRate),           color:kpis.savingRate >= 0.2 ? 'var(--accent)' : kpis.savingRate >= 0 ? 'var(--amb)' : 'var(--red)', sub:'del ingreso', delta: kpis.delta.save, invertDelta: false, raw: null },
     { label:'Suscripciones',  value:`${sym}${fmt(subMonthly)}/mes`, color:'var(--amb)',    sub:`${sym}${fmt(subMonthly * 12)}/año estimado`,                                          delta: null,            invertDelta: false, raw: subMonthly },
   ]

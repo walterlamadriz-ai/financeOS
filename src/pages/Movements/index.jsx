@@ -570,14 +570,14 @@ export default function Movements({ setPage }) {
               </button>
             </div>
           )}
-          <div style={{ maxHeight:320, overflowY:'auto' }}>
+          <div style={{ maxHeight:460, overflowY:'auto' }}>
             {listExp.length === 0 ? (
               <div style={{ padding:'20px', textAlign:'center', fontSize:12,
                 color:'var(--th)', fontFamily:'var(--mono)' }}>
                 {drillCat ? `Sin gastos en "${drillCat}" este mes` : 'Sin gastos este mes'}
               </div>
-            ) : listExp.slice(0,10).map((e,i) => editingId === e.id ? (
-              <div key={e.id} style={{padding:'10px 14px',borderBottom:i<Math.min(listExp.length,10)-1?'.5px solid var(--brd)':'none',background:'rgba(232,65,66,.03)'}}>
+            ) : listExp.map((e,i) => editingId === e.id ? (
+              <div key={e.id} style={{padding:'10px 14px',borderBottom:i<listExp.length-1?'.5px solid var(--brd)':'none',background:'rgba(232,65,66,.03)'}}>
                 <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6,marginBottom:6}}>
                   <input type="text" value={editForm.description||''} placeholder="Descripción"
                     onChange={ev=>setEditForm(f=>({...f,description:ev.target.value}))}
@@ -608,7 +608,7 @@ export default function Movements({ setPage }) {
             ) : (
               <div key={e.id} style={{ display:'flex', alignItems:'center', gap:8,
                 padding:'8px 14px',
-                borderBottom: i < Math.min(listExp.length,10)-1 ? '.5px solid var(--brd)' : 'none' }}>
+                borderBottom: i < listExp.length-1 ? '.5px solid var(--brd)' : 'none' }}>
                 <div style={{ width:6, height:6, borderRadius:'50%', flexShrink:0,
                   background: CAT_COLORS[e.category]||'#888' }}/>
                 <div style={{ flex:1, minWidth:0 }}>
@@ -658,7 +658,7 @@ export default function Movements({ setPage }) {
             <div style={{ fontSize:11, fontWeight:700, color:'var(--amb,#f5a623)',
               fontFamily:'var(--mono)' }}>{fmtM(totalSubs, sym)}/mes</div>
           </div>
-          <div style={{ maxHeight:320, overflowY:'auto' }}>
+          <div style={{ maxHeight:460, overflowY:'auto' }}>
             {activeSubs.length === 0 ? (
               <div style={{ padding:'20px', textAlign:'center', fontSize:12,
                 color:'var(--th)', fontFamily:'var(--mono)' }}>
