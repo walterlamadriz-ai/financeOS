@@ -93,7 +93,34 @@ export default function CashFlow({ setPage }) {
     return { today, daysInMonth, daysLeft, dailyInc, dailyExp, projInc, projExp, projBal, totalBudget, pctMonthElapsed, pctBudgetUsed, pace }
   }, [activeMonth, curInc, curExp, budgets])
 
-  const monthlyNetFlow = monthlyRecInc - monthlyRecExp
+  // ── Estimación mensual REALISTA: promedio de los últimos meses con datos ──────
+  // Incluye TODOS los movimientos (recurrentes + únicos/variables), porque los
+  // gastos "Único" de un mes normalmente se repiten con variaciones el mes siguiente.
+  const monthsWithData = useMemo(() => {
+    const set = new Set()
+    incomes.forEach(r => r.date && set.add(r.date.slice(0, 7)))
+    expenses.forEach(r => r.date && set.add(r.date.slice(0, 7)))
+    return [...set].sort()
+  }, [incomes, expenses])
+
+  const monthlyEstimate = useMemo(() => {
+    const nowMonth = new Date().toISOString().slice(0, 7)
+    // Preferimos meses COMPLETOS (distintos del mes en curso); si no hay, usamos lo que haya
+    let months = monthsWithData.filter(m => m < nowMonth)
+    let partial = false
+    if (months.length === 0) { months = monthsWithData.slice(); partial = true }
+    const last = months.slice(-3) // últimos 3 meses
+    const sumMonth = (arr, m) => arr.filter(r => r.date?.startsWith(m)).reduce((s, r) => s + (Number(r.amount) || 0), 0)
+    const avg = a => a.length ? a.reduce((s, x) => s + x, 0) / a.length : 0
+    return {
+      avgInc: avg(last.map(m => sumMonth(incomes, m))),
+      avgExp: avg(last.map(m => sumMonth(expenses, m))),
+      monthsUsed: last.length,
+      partial,
+    }
+  }, [incomes, expenses, monthsWithData])
+
+  const monthlyNetFlow = monthlyEstimate.avgInc - monthlyEstimate.avgExp
 
   // ── Proyección 6 meses hacia adelante ────────────────────────────────────
   const projectionData = useMemo(() => {
@@ -106,14 +133,14 @@ export default function CashFlow({ setPage }) {
       d.setMonth(d.getMonth() + i)
       const label = months[d.getMonth()] + ' ' + d.getFullYear().toString().slice(2)
       if (i === 0) {
-        result.push({ mes: label, Balance: balance, Ingresos: monthlyRecInc, Gastos: monthlyRecExp, actual: true })
+        result.push({ mes: label, Balance: balance, Ingresos: monthlyEstimate.avgInc, Gastos: monthlyEstimate.avgExp, actual: true })
       } else {
         balance += monthlyNetFlow
-        result.push({ mes: label, Balance: balance, Ingresos: monthlyRecInc, Gastos: monthlyRecExp })
+        result.push({ mes: label, Balance: balance, Ingresos: monthlyEstimate.avgInc, Gastos: monthlyEstimate.avgExp })
       }
     }
     return result
-  }, [curBal, monthlyRecInc, monthlyRecExp, monthlyNetFlow])
+  }, [curBal, monthlyEstimate, monthlyNetFlow])
 
   // ── Hitos de 30/60/90 días ────────────────────────────────────────────────
   const bal30  = curBal + monthlyNetFlow
@@ -124,27 +151,33 @@ export default function CashFlow({ setPage }) {
   const axisStyle = { fill: 'var(--th)', fontSize: 10 }
   const gridStyle = { stroke: 'rgba(0,0,0,0.05)', strokeDasharray: '3 3' }
 
-  const hasData = recurringInc.length > 0 || recurringExp.length > 0
+  const hasData = monthsWithData.length > 0
 
   return (
     <div className="stack">
       <PageHeader
         title="Proyección de flujo de caja"
-        sub="Basado en tus ingresos y gastos recurrentes detectados"
+        sub="Basado en el promedio real de tus últimos meses (ingresos y gastos, incluidos los variables)"
       />
 
       {!hasData && (
         <Alert type="info">
           <div style={{ marginBottom: setPage ? 10 : 0 }}>
-            <strong>Para activar la proyección:</strong> marca tus ingresos o gastos fijos (arriendo, servicios, sueldo) con recurrencia "Mensual", "Quincenal" o "Semanal".
-            El sistema los detecta y proyecta tu flujo a 30, 60 y 90 días.
+            <strong>Para activar la proyección:</strong> registrá tus ingresos y gastos del mes.
+            La app usa el promedio de tus últimos meses para proyectar tu flujo a 30, 60 y 90 días.
           </div>
           {setPage && (
             <button onClick={() => setPage('movements')}
               style={{ background:'var(--accent)', color:'#0f1923', border:'none', borderRadius:7, padding:'7px 14px', fontSize:12, fontWeight:700, fontFamily:'var(--mono)', cursor:'pointer' }}>
-              Marcar mis gastos fijos →
+              Registrar movimientos →
             </button>
           )}
+        </Alert>
+      )}
+
+      {hasData && (monthlyEstimate.partial || monthlyEstimate.monthsUsed < 2) && (
+        <Alert type="warn">
+          → La proyección usa {monthlyEstimate.partial ? 'solo el mes en curso (aún parcial)' : `${monthlyEstimate.monthsUsed} mes de historial`}. Se vuelve más precisa a medida que acumulás meses completos.
         </Alert>
       )}
 
@@ -363,8 +396,8 @@ export default function CashFlow({ setPage }) {
       )}
 
       <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', padding: '4px 0', lineHeight: 1.5 }}>
-        * Proyección calculada sobre ingresos y gastos marcados como recurrentes. No incluye
-        gastos únicos futuros ni eventos imprevistos. Atención: no usar en modo incógnito —
+        * Proyección basada en el promedio de tus últimos hasta 3 meses con datos (incluye
+        gastos variables, no solo los recurrentes). No predice eventos imprevistos. Atención: no usar en modo incógnito —
         los datos se borran al cerrar esa sesión. Orientación general — no constituye
         asesoría financiera, tributaria ni de inversión.
       </div>
