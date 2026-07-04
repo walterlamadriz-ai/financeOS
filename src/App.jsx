@@ -17,6 +17,7 @@ const Income        = lazy(() => import('./pages/Income/index.jsx'))
 const Budgets       = lazy(() => import('./pages/Budgets/index.jsx'))
 const Debts         = lazy(() => import('./pages/Debts/index.jsx'))
 const Goals         = lazy(() => import('./pages/Goals/index.jsx'))
+const Projects      = lazy(() => import('./pages/Projects/index.jsx'))
 const Reports       = lazy(() => import('./pages/Reports/index.jsx'))
 const Settings      = lazy(() => import('./pages/Settings/index.jsx'))
 const Advisor       = lazy(() => import('./pages/Advisor/index.jsx'))
@@ -69,6 +70,7 @@ function Inner() {
       case 'budgets':       return <Budgets />
       case 'debts':         return <Debts />
       case 'goals':         return <Goals setPage={setPage}/>
+      case 'projects':      return <Projects />
       case 'cashflow':      return <CashFlow setPage={setPage}/>
       case 'reports':       return <Reports />
       case 'settings':      return <Settings />

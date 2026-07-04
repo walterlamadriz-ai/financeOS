@@ -16,6 +16,7 @@ const NAV = [
     { id: 'budgets', ic: '▤', lb: 'Presupuestos' },
     { id: 'debts',   ic: '⊖', lb: 'Deudas' },
     { id: 'goals',   ic: '◎', lb: 'Metas' },
+    { id: 'projects', ic: '🏢', lb: 'Propiedades' },
     { id: 'apv',     ic: '🇨🇱', lb: 'APV Chile', countries: ['CL'] },
     { id: 'deducciones', ic: '🧾', lb: 'Deducciones', countries: ['EC', 'PE'] },
     { id: 'ahorrofiscal', ic: '🏦', lb: 'Ahorro fiscal', countries: ['MX', 'CO', 'US', 'ES'] },

@@ -7,7 +7,9 @@ import { CURRENCY_SYMBOLS, monthLabel } from '../shared/constants.js'
 import MonthSelector from '../shared/MonthSelector.jsx'
 
 export default function Income() {
-  const { incomes, addIncome, delIncome, updateIncome, settings } = useApp()
+  const { incomes, expenses, addIncome, delIncome, updateIncome, settings } = useApp()
+  // Nombres de propiedades/proyectos ya usados (para autocompletar)
+  const projectOptions = useMemo(() => [...new Set([...(incomes||[]), ...(expenses||[])].map(r => r?.project).filter(Boolean))], [incomes, expenses])
   const [f, setF]       = useState({ source: '', amount: '', date: today(), category: 'Salario', recurrence: 'Único', notes: '' })
   const [err, setErr]   = useState('')
   const [saving, setSaving]   = useState(false)
@@ -70,6 +72,10 @@ export default function Income() {
             <input type="checkbox" checked={!!f.inv} onChange={e => setF(p => ({ ...p, inv: e.target.checked }))} />
             💼 Es de inversión (ej. arriendo de una propiedad) — no cuenta en mi presupuesto personal
           </label>
+          <FormGroup label="Propiedad / proyecto (opcional)">
+            <input type="text" list="fnos-projects" value={f.project || ''} placeholder="ej. Depto Bogotá" onChange={e => setF(p => ({ ...p, project: e.target.value }))} />
+            <datalist id="fnos-projects">{projectOptions.map(p => <option key={p} value={p} />)}</datalist>
+          </FormGroup>
           <div style={{ display: 'flex', gap: 8 }}>
             <Btn variant="primary" onClick={submit} disabled={saving}>{saving ? 'Guardando…' : '+ Registrar'}</Btn>
             <Btn variant="ghost" onClick={() => { setF({ source: '', amount: '', date: today(), category: 'Salario', recurrence: 'Único', notes: '' }); setErr('') }}>Limpiar</Btn>

@@ -72,10 +72,10 @@ const CAT_COLORS = {
 }
 
 // ── Formulario Gasto ──────────────────────────────────────────────────────────
-function FormGasto({ onSave, onCancel, sym }) {
+function FormGasto({ onSave, onCancel, sym, projects = [] }) {
   const [f, setF] = useState({
     description:'', amount:'', date:todayStr(),
-    category:'Alimentación', subcategory:'', method:'Débito', type:'Necesidad', notes:''
+    category:'Alimentación', subcategory:'', method:'Débito', type:'Necesidad', notes:'', project:''
   })
   const set = (k,v) => setF(p => ({ ...p, [k]:v }))
   const inp = { background:'var(--sur)', border:'.5px solid var(--brd)', borderRadius:6,
@@ -146,6 +146,12 @@ function FormGasto({ onSave, onCancel, sym }) {
         <input type="checkbox" checked={!!f.inv} onChange={e => set('inv', e.target.checked)} />
         💼 Es de inversión (ej. hipoteca de una propiedad en arriendo) — no cuenta en mi presupuesto personal
       </label>
+      <div style={{ marginBottom:12 }}>
+        <label style={lbl}>Propiedad / proyecto (opcional)</label>
+        <input style={inp} list="fnos-projects-exp" value={f.project} placeholder="ej. Depto Bogotá"
+          onChange={e => set('project', e.target.value)}/>
+        <datalist id="fnos-projects-exp">{projects.map(p => <option key={p} value={p} />)}</datalist>
+      </div>
       <div style={{ display:'flex', gap:8, justifyContent:'flex-end' }}>
         <button onClick={onCancel} style={{ background:'none', border:'.5px solid var(--brd)',
           borderRadius:6, padding:'6px 14px', fontSize:12, color:'var(--th)', cursor:'pointer' }}>
@@ -305,6 +311,9 @@ export default function Movements({ setPage }) {
   const invExp     = useMemo(() =>
     monthExp.filter(e => e.inv).reduce((s,e) => s + (Number(e.amount)||0), 0)
   , [monthExp])
+
+  // Nombres de propiedades/proyectos ya usados (autocompletar en el form)
+  const projectOptions = useMemo(() => [...new Set([...incomes, ...expenses].map(r => r?.project).filter(Boolean))], [incomes, expenses])
 
   const totalSubs  = useMemo(() =>
     activeSubs.reduce((s,sub) => s + toMonthly(Number(sub.amount)||0, sub.frequency), 0)
@@ -498,7 +507,7 @@ export default function Movements({ setPage }) {
           </div>
         )}
 
-        {showGasto && <FormGasto sym={sym} onSave={handleSaveGasto} onCancel={() => setShowGasto(false)}/>}
+        {showGasto && <FormGasto sym={sym} projects={projectOptions} onSave={handleSaveGasto} onCancel={() => setShowGasto(false)}/>}
         {showSub   && <FormSub              onSave={handleSaveSub}   onCancel={() => setShowSub(false)}/>}
       </div>
 
