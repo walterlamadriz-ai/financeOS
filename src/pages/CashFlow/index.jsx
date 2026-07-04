@@ -68,31 +68,6 @@ export default function CashFlow({ setPage }) {
   const curExp  = expenses.filter(r => r.date?.startsWith(activeMonth)).reduce((s, r) => s + r.amount, 0)
   const curBal  = curInc - curExp
 
-  // ── Proyección fin de mes (ritmo diario) ──────────────────────────────────
-  const eomProjection = useMemo(() => {
-    const now      = new Date()
-    const [y, m]   = activeMonth.split('-').map(Number)
-    const daysInMonth = new Date(y, m, 0).getDate()
-    // Día actual si el mes activo es el presente; si es pasado, usamos el último día
-    const today    = (now.getFullYear() === y && now.getMonth() + 1 === m)
-                     ? now.getDate()
-                     : daysInMonth
-    const daysLeft = daysInMonth - today
-    const dailyInc = today > 0 ? curInc / today : 0
-    const dailyExp = today > 0 ? curExp / today : 0
-    const projInc  = curInc  + dailyInc * daysLeft
-    const projExp  = curExp  + dailyExp * daysLeft
-    const projBal  = projInc - projExp
-    const totalBudget = budgets.reduce((s, b) => s + (b.limit || 0), 0)
-    const pctMonthElapsed = today / daysInMonth
-    const pctBudgetUsed   = totalBudget > 0 ? curExp / totalBudget : null
-    // Ritmo: si el % de presupuesto gastado > % de mes transcurrido → adelantado en gasto
-    const pace = pctBudgetUsed !== null
-      ? pctBudgetUsed - pctMonthElapsed
-      : null
-    return { today, daysInMonth, daysLeft, dailyInc, dailyExp, projInc, projExp, projBal, totalBudget, pctMonthElapsed, pctBudgetUsed, pace }
-  }, [activeMonth, curInc, curExp, budgets])
-
   // ── Estimación mensual REALISTA: promedio de los últimos meses con datos ──────
   // Incluye TODOS los movimientos (recurrentes + únicos/variables), porque los
   // gastos "Único" de un mes normalmente se repiten con variaciones el mes siguiente.
@@ -121,6 +96,37 @@ export default function CashFlow({ setPage }) {
   }, [incomes, expenses, monthsWithData])
 
   const monthlyNetFlow = monthlyEstimate.avgInc - monthlyEstimate.avgExp
+
+  // ── Proyección fin de mes ─────────────────────────────────────────────────
+  const eomProjection = useMemo(() => {
+    const now      = new Date()
+    const [y, m]   = activeMonth.split('-').map(Number)
+    const daysInMonth = new Date(y, m, 0).getDate()
+    const today    = (now.getFullYear() === y && now.getMonth() + 1 === m)
+                     ? now.getDate()
+                     : daysInMonth
+    const daysLeft = daysInMonth - today
+    const pctMonthElapsed = today / daysInMonth
+    const dailyExp = today > 0 ? curExp / today : 0
+
+    // Ingreso: el salario NO es un flujo diario → no se extrapola por ritmo.
+    // Esperamos al menos lo ya recibido, o tu ingreso mensual típico (lo que sea mayor).
+    const projInc = Math.max(curInc, monthlyEstimate.avgInc || curInc)
+
+    // Gasto: mezcla entre el promedio histórico (estable) y el ritmo diario actual,
+    // ponderada por cuánto mes transcurrió. A principio de mes pesa el promedio (menos ruido);
+    // hacia fin de mes pesa el gasto real acumulado.
+    const paceExp = curExp + dailyExp * daysLeft
+    const projExp = monthlyEstimate.avgExp > 0
+      ? Math.round(pctMonthElapsed * paceExp + (1 - pctMonthElapsed) * monthlyEstimate.avgExp)
+      : Math.round(paceExp)
+
+    const projBal  = projInc - projExp
+    const totalBudget = budgets.reduce((s, b) => s + (b.limit || 0), 0)
+    const pctBudgetUsed   = totalBudget > 0 ? curExp / totalBudget : null
+    const pace = pctBudgetUsed !== null ? pctBudgetUsed - pctMonthElapsed : null
+    return { today, daysInMonth, daysLeft, dailyExp, projInc, projExp, projBal, totalBudget, pctMonthElapsed, pctBudgetUsed, pace }
+  }, [activeMonth, curInc, curExp, budgets, monthlyEstimate])
 
   // ── Proyección 6 meses hacia adelante ────────────────────────────────────
   const projectionData = useMemo(() => {
