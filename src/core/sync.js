@@ -68,8 +68,14 @@ export async function pullNow() {
   const key = getLicenseKey()
   const r = await rpc('sync_pull', { p_key: key })
   if (!r || !r.ok || r.empty || !r.blob) return null
-  const payload = await decryptData(r.blob, key)
-  return { payload, updatedAt: Number(r.updated_at) || 0 }
+  try {
+    const payload = await decryptData(r.blob, key)
+    if (!payload || typeof payload !== 'object') return null
+    return { payload, updatedAt: Number(r.updated_at) || 0 }
+  } catch {
+    // Blob no descifrable (ajeno/corrupto): lo ignoramos y dejamos que gane lo local
+    return null
+  }
 }
 
 // ── Marca un cambio local y agenda un push con debounce ───────────────────────
