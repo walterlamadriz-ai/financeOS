@@ -522,7 +522,7 @@ export default function Movements({ setPage }) {
 
       {/* Gráficos unificados */}
       {(monthExp.length > 0 || activeSubs.length > 0) && (
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16, marginBottom:16 }}>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(260px, 1fr))', gap:16, marginBottom:16 }}>
           <ChartCard title="Top egresos del mes" minHeight={180}>
             <HorizontalBars records={topBarRecords} sym={sym} maxItems={8}/>
           </ChartCard>
@@ -547,7 +547,7 @@ export default function Movements({ setPage }) {
       )}
 
       {/* Dos secciones compactas separadas */}
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16, marginBottom:16 }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(260px, 1fr))', gap:16, marginBottom:16 }}>
 
         {/* Gastos únicos */}
         <div style={{ background:'var(--sur)', border:'.5px solid var(--brd)',
@@ -578,7 +578,7 @@ export default function Movements({ setPage }) {
               </div>
             ) : listExp.map((e,i) => editingId === e.id ? (
               <div key={e.id} style={{padding:'10px 14px',borderBottom:i<listExp.length-1?'.5px solid var(--brd)':'none',background:'rgba(232,65,66,.03)'}}>
-                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6,marginBottom:6}}>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(130px,1fr))',gap:6,marginBottom:6}}>
                   <input type="text" value={editForm.description||''} placeholder="Descripción"
                     onChange={ev=>setEditForm(f=>({...f,description:ev.target.value}))}
                     style={{gridColumn:'1/-1',padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
@@ -672,7 +672,7 @@ export default function Movements({ setPage }) {
                 if (editingSubId === sub.id) {
                   return (
                     <div key={sub.id} style={{padding:'10px 14px',borderBottom:i<arr.length-1?'.5px solid var(--brd)':'none',background:'rgba(245,166,35,.05)'}}>
-                      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6,marginBottom:6}}>
+                      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(130px,1fr))',gap:6,marginBottom:6}}>
                         <input type="text" value={editSubForm.name||''} placeholder="Nombre"
                           onChange={ev=>setEditSubForm(f=>({...f,name:ev.target.value}))}
                           style={{gridColumn:'1/-1',padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
