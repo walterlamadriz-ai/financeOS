@@ -6,10 +6,11 @@ import { BackupWarning } from '../../components/legal/MicroCopy.jsx'
 import BackupManager from '../../components/backup/BackupManager.jsx'
 import TemplateSelector from '../../components/templates/TemplateSelector.jsx'
 import { CURRENCY_OPTIONS, DEFAULT_USD_RATES } from '../shared/constants.js'
-import { clearLicense, getLicensePlan } from '../../utils/licenseValidator.js'
+import { clearLicense, getLicensePlan, getLicenseKey } from '../../utils/licenseValidator.js'
+import { isSyncEnabled, syncMeta, syncAvailable } from '../../core/sync.js'
 
 export default function Settings() {
-  const { settings, updateSettings, clearAll, loadDemo, exportCSV } = useApp()
+  const { settings, updateSettings, clearAll, loadDemo, exportCSV, enableSync, disableSync } = useApp()
   const [installPrompt, setInstallPrompt] = useState(null)
   const [installed, setInstalled] = useState(false)
 
@@ -167,6 +168,10 @@ export default function Settings() {
         <BackupManager />
       </Card>
       <Card>
+        <CardHeader title="Sincronización entre dispositivos" />
+        <SyncSection enableSync={enableSync} disableSync={disableSync} />
+      </Card>
+      <Card>
         <CardHeader title="Otras acciones" />
         <div style={srow}>
           <div><div style={slbl}>Exportar CSV</div><div style={ssub}>Ingresos y gastos · compatible Excel</div></div>
@@ -216,6 +221,62 @@ export default function Settings() {
       <div style={{padding:'10px 12px',background:'var(--sur2)',borderRadius:'var(--r)',border:'0.5px solid var(--brd)',fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',lineHeight:1.7,marginTop:8}}>
         FinanceOS v1.5 · MAXNOVA & LUCI Global LLC · Datos locales · Sin servidor · No asesoría financiera certificada
       </div>
+    </div>
+  )
+}
+
+// ── Sincronización entre dispositivos (opt-in, ligada a la licencia, cifrada) ──
+function SyncSection({ enableSync, disableSync }) {
+  const [on, setOn]       = useState(isSyncEnabled())
+  const [busy, setBusy]   = useState(false)
+  const [tick, setTick]   = useState(0) // refresca el estado tras acciones
+  const available = syncAvailable()
+  const hasKey    = !!getLicenseKey()
+  const meta      = syncMeta()
+  const lastSync  = meta.lastPushedAt || meta.lastPulledAt || meta.lastLocalChange
+  const lastTxt   = lastSync ? new Date(lastSync).toLocaleString() : '—'
+
+  async function toggle() {
+    if (busy) return
+    setBusy(true)
+    try {
+      if (on) { disableSync(); setOn(false) }
+      else {
+        const r = await enableSync()
+        setOn(!!(r && r.ok))
+      }
+    } finally { setBusy(false); setTick(t => t + 1) }
+  }
+
+  const lbl = { fontSize: 13, color: 'var(--tx)', fontWeight: 500 }
+  const sub = { fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', lineHeight: 1.6, marginTop: 4 }
+
+  return (
+    <div>
+      {!hasKey ? (
+        <div style={sub}>La sincronización requiere una licencia activa. Activá tu clave para usarla.</div>
+      ) : !available ? (
+        <div style={sub}>La sincronización no está disponible en este entorno.</div>
+      ) : (
+        <>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+            <div>
+              <div style={lbl}>{on ? '✓ Sincronización activada' : 'Sincronizar PC ↔ teléfono'}</div>
+              <div style={sub}>
+                {on
+                  ? `Última sincronización: ${lastTxt}`
+                  : 'Mantené tus datos iguales en todos tus dispositivos con la misma licencia.'}
+              </div>
+            </div>
+            <Btn variant={on ? 'ghost' : 'primary'} onClick={toggle} disabled={busy}>
+              {busy ? '…' : on ? 'Desactivar' : 'Activar'}
+            </Btn>
+          </div>
+          <div style={{ ...sub, marginTop: 10, padding: '8px 10px', background: 'var(--sur2)', borderRadius: 'var(--r)', border: '0.5px solid var(--brd)' }}>
+            🔒 Cifrado de extremo a extremo: tus datos se guardan cifrados con una llave derivada de tu clave; el servidor no puede leerlos. Ligado a tu licencia, sin cuenta ni contraseña. Última edición gana entre dispositivos.
+          </div>
+        </>
+      )}
     </div>
   )
 }

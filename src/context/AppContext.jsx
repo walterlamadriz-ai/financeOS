@@ -7,13 +7,14 @@
 //   5. activeMonth en settings para filtro por mes
 //   6. Loading states para acciones async
 
-import { createContext, useContext, useReducer, useEffect, useCallback, useState } from 'react'
+import { createContext, useContext, useReducer, useEffect, useCallback, useState, useRef } from 'react'
 import {
   dbGetAll, dbAdd, dbDelete, clearAllData,
   getSettings, saveSettings, exportAllData, importAllData,
   isUsingFallback, DEFAULT_SETTINGS,
 } from '../core/db/index.js'
 import { uid, SEED_INCOMES, SEED_EXPENSES, SEED_BUDGETS, SEED_DEBTS, SEED_GOALS } from '../utils/index.js'
+import { markLocalChange, pullAndApplyIfNewer, isSyncEnabled, setSyncEnabled, initialSync, pushNow } from '../core/sync.js'
 
 export const AppContext = createContext(null)
 
@@ -66,27 +67,47 @@ export function AppProvider({ children }) {
     setTimeout(() => dispatch({ type: 'SET_TOAST', toast: null }), 3500)
   }, [])
 
+  // ── Re-hidratar desde la DB (reutilizado por hydrate inicial y por el sync) ────
+  const rehydrate = useCallback(async () => {
+    const [incomes, expenses, budgets, debts, goals, subscriptions, settings] = await Promise.all([
+      dbGetAll('incomes'), dbGetAll('expenses'), dbGetAll('budgets'),
+      dbGetAll('debts'),   dbGetAll('goals'),    dbGetAll('subscriptions'), getSettings(),
+    ])
+    dispatch({ type: 'HYDRATE', payload: { incomes, expenses, budgets, debts, goals, subscriptions, settings } })
+    document.documentElement.setAttribute('data-theme', settings.theme || 'light')
+  }, [])
+
   // ── Hydrate from DB on mount ──────────────────────────────────────────────────
+  const hydratedRef = useRef(false)
   useEffect(() => {
     async function hydrate() {
       try {
-        const [incomes, expenses, budgets, debts, goals, subscriptions, settings] = await Promise.all([
-          dbGetAll('incomes'), dbGetAll('expenses'), dbGetAll('budgets'),
-          dbGetAll('debts'),   dbGetAll('goals'),    dbGetAll('subscriptions'), getSettings(),
-        ])
-        dispatch({ type: 'HYDRATE', payload: { incomes, expenses, budgets, debts, goals, subscriptions, settings } })
-        document.documentElement.setAttribute('data-theme', settings.theme || 'light')
+        await rehydrate()
         if (isUsingFallback()) {
           showToast('Modo compatibilidad activo (localStorage). Los datos se guardan localmente.', 'ok')
+        }
+        hydratedRef.current = true
+        // Sync opcional: si está activo, baja los cambios de otros dispositivos (no-op si apagado)
+        if (isSyncEnabled()) {
+          pullAndApplyIfNewer(rehydrate)
+            .then(r => { if (r?.applied) showToast('Datos sincronizados desde otro dispositivo.', 'ok') })
+            .catch(() => {})
         }
       } catch (e) {
         console.error('Hydration error:', e)
         dispatch({ type: 'HYDRATE', payload: {} })
+        hydratedRef.current = true
         showToast('Error al cargar datos. Intenta recargar la página.', 'error')
       }
     }
     hydrate()
-  }, [])
+  }, [rehydrate])
+
+  // ── Observa cambios locales → agenda push al sync (no-op si sync apagado) ──────
+  useEffect(() => {
+    if (!hydratedRef.current) return  // no dispara durante la hidratación inicial
+    markLocalChange()
+  }, [state.incomes, state.expenses, state.budgets, state.debts, state.goals, state.subscriptions])
 
   // ── Actions — FIX: DB primero, luego dispatch ─────────────────────────────────
 
@@ -255,6 +276,25 @@ export function AppProvider({ children }) {
     }
   }, [showToast])
 
+  // ── Controles de sync (opt-in) para Ajustes ──────────────────────────────────
+  const enableSync = useCallback(async () => {
+    setSyncEnabled(true)
+    try {
+      const r = await initialSync(rehydrate)
+      showToast(r?.applied ? 'Sincronización activada · datos actualizados desde la nube.' : 'Sincronización activada · tus datos están en la nube.', 'ok')
+      return { ok: true, applied: !!r?.applied }
+    } catch (e) {
+      setSyncEnabled(false)
+      showToast('No se pudo activar el sync. Revisa tu conexión e intenta de nuevo.', 'error')
+      return { ok: false }
+    }
+  }, [rehydrate, showToast])
+
+  const disableSync = useCallback(() => {
+    setSyncEnabled(false)
+    showToast('Sincronización desactivada. Tus datos siguen en este dispositivo.', 'ok')
+  }, [showToast])
+
   const clearAll = useCallback(async () => {
     try {
       await clearAllData()
@@ -403,6 +443,7 @@ export function AppProvider({ children }) {
     updateSettings,
     clearAll,   loadDemo,
     exportData, exportCSV,  importData,
+    enableSync, disableSync,
     showToast,
   }
 

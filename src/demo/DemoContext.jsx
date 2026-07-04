@@ -154,6 +154,9 @@ export function DemoProvider({ children }) {
     updateSettings,
     clearAll,   loadDemo,
     exportData, exportCSV,  importData,
+    // Sync no disponible en demo (no-ops)
+    enableSync: async () => { showToast('El sync no está disponible en el demo.', 'ok'); return { ok:false } },
+    disableSync: () => {},
     showToast,  setScenario,
   }
 
