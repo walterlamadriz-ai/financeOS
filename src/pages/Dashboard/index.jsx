@@ -50,8 +50,9 @@ export default function Dashboard({ setPage }) {
         return s + amt
       }, 0)
       const totalDebt = debts.reduce((s, d) => s + (Number(d.minPayment) || 0), 0)
-      const balance = totalInc - totalExp - totalDebt - totalSubs
-      return { totalInc, totalExp, totalDebt, totalSubs, balance,
+      const balance  = totalInc - totalExp                        // Balance neto = ingresos − gastos
+      const freeFlow = totalInc - totalExp - totalDebt - totalSubs // Disponible tras deudas y suscripciones
+      return { totalInc, totalExp, totalDebt, totalSubs, balance, freeFlow,
                savingRate: totalInc > 0 ? Math.max(0, balance) / totalInc : 0,
                incCount: inc.length, expCount: exp.length }
     }
@@ -403,7 +404,7 @@ export default function Dashboard({ setPage }) {
   const KPIS = [
     { label:'Ingresos',       value:`${sym}${fmt(kpis.totalInc)}`,  color:'var(--accent)', sub:`${kpis.incCount} registros`,                                                          delta: kpis.delta.inc,  invertDelta: false, raw: kpis.totalInc },
     { label:'Gastos',         value:`${sym}${fmt(kpis.totalExp)}`,  color:'var(--red)',    sub:`${kpis.expCount} registros`,                                                          delta: kpis.delta.exp,  invertDelta: true,  raw: kpis.totalExp },
-    { label:'Balance neto',   value:`${sym}${fmt(kpis.balance)}`,   color:kpis.balance >= 0 ? 'var(--accent)' : 'var(--red)', sub:kpis.balance >= 0 ? 'Positivo' : 'Negativo',      delta: kpis.delta.bal,  invertDelta: false, raw: kpis.balance },
+    { label:'Balance neto',   value:`${sym}${fmt(kpis.balance)}`,   color:kpis.balance >= 0 ? 'var(--accent)' : 'var(--red)', sub:(kpis.totalDebt + kpis.totalSubs > 0) ? `Tras deudas/subs: ${sym}${fmt(kpis.freeFlow)}` : (kpis.balance >= 0 ? 'Ingresos − gastos' : 'Gastos > ingresos'),      delta: kpis.delta.bal,  invertDelta: false, raw: kpis.balance },
     { label:'Tasa de ahorro', value:pct(kpis.savingRate),           color:kpis.savingRate >= 0.2 ? 'var(--accent)' : kpis.savingRate >= 0 ? 'var(--amb)' : 'var(--red)', sub:'del ingreso', delta: kpis.delta.save, invertDelta: false, raw: null },
     { label:'Suscripciones',  value:`${sym}${fmt(subMonthly)}/mes`, color:'var(--amb)',    sub:`${sym}${fmt(subMonthly * 12)}/año estimado`,                                          delta: null,            invertDelta: false, raw: subMonthly },
   ]

@@ -65,7 +65,8 @@ export default function Reports() {
     return s+amt
   }, 0), [allSubs])
   const totalDebt    = useMemo(() => (Array.isArray(allDebts)?allDebts:[]).reduce((s,d) => s+(Number(d.minPayment)||0), 0), [allDebts])
-  const balance      = totalIncome - totalExpense - totalDebt - totalSubs
+  const balance      = totalIncome - totalExpense                          // Balance neto = ingresos − gastos
+  const freeFlow     = totalIncome - totalExpense - totalDebt - totalSubs   // Disponible tras deudas y suscripciones
   const savingRate   = totalIncome > 0 ? Math.max(0, balance)/totalIncome : 0
   const necesidad    = useMemo(() => mExpenses.filter(r=>r.type==='Necesidad').reduce((s,r) => s+r.amount, 0), [mExpenses])
   const deseos       = useMemo(() => mExpenses.filter(r=>r.type==='Deseo').reduce((s,r) => s+r.amount, 0), [mExpenses])
@@ -136,7 +137,7 @@ export default function Reports() {
         )}
       </div>
       <div className="kpi-row">
-        <KPI label="Balance neto"  value={fmtMoney(balance,sym)} color={balance>=0?'green':'red'} />
+        <KPI label="Balance neto"  value={fmtMoney(balance,sym)} color={balance>=0?'green':'red'} sub={(totalDebt+totalSubs>0) ? `Tras deudas/subs: ${fmtMoney(freeFlow,sym)}` : 'Ingresos − gastos'} />
         <KPI label="Tasa ahorro"   value={fmtPct(savingRate)} color={savingRate>=0.25?'green':savingRate>=0.1?'amber':'red'} sub={`Meta: ${settings.savingGoalPct||25}%`} />
         <KPI label="Ingresos"      value={fmtMoney(totalIncome,sym)} />
         <KPI label="Suscripciones" value={fmtMoney(totalSubs,sym)} color="amber" sub="pagos recurrentes" />
