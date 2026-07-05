@@ -15,8 +15,11 @@ create table if not exists public.licenses (
   email             text,
   stripe_session_id text unique,
   created_at        timestamptz not null default now(),
-  activated_at      timestamptz
+  activated_at      timestamptz,
+  expires_at        timestamptz   -- NULL = licencia perpetua (pagada); con fecha = prueba temporal
 );
+-- Para bases ya existentes: agrega la columna si falta
+alter table public.licenses add column if not exists expires_at timestamptz;
 
 -- 3) RLS: nadie accede a la tabla directamente; solo vía la función RPC
 alter table public.licenses enable row level security;
@@ -51,12 +54,19 @@ begin
     return jsonb_build_object('valid', false);
   end if;
 
+  -- Licencias de prueba: si vencieron, rechazar
+  if v_row.expires_at is not null and v_row.expires_at < now() then
+    return jsonb_build_object('valid', false, 'expired', true);
+  end if;
+
   -- Marcar primera activación (no sobrescribe si ya estaba activada)
   update public.licenses
      set activated_at = coalesce(activated_at, now())
    where key_hash = v_hash;
 
-  return jsonb_build_object('valid', true, 'plan', v_row.plan);
+  return jsonb_build_object('valid', true, 'plan', v_row.plan,
+    'expires_at', case when v_row.expires_at is null then null
+                       else extract(epoch from v_row.expires_at) * 1000 end);
 end;
 $$;
 

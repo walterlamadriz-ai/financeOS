@@ -40,7 +40,7 @@ async function verifyOnline(key) {
     })
     if (!res.ok) return { offline: true, httpError: res.status } // RPC 404 / red → tratar como offline
     const data = await res.json()
-    if (data && data.valid) return { valid: true, plan: data.plan || 'personal' }
+    if (data && data.valid) return { valid: true, plan: data.plan || 'personal', exp: data.expires_at ? Number(data.expires_at) : null }
     return { valid: false }
   } catch { return { offline: true } }
 }
@@ -52,7 +52,7 @@ export async function validateLicense(key) {
   if (!KEY_RE.test(clean)) return false
 
   const r = await verifyOnline(clean)
-  if (r.valid) { writeCache({ key: clean, plan: r.plan, ts: Date.now() }); return true }
+  if (r.valid) { writeCache({ key: clean, plan: r.plan, exp: r.exp ?? null, ts: Date.now() }); return true }
   if (r.offline) {
     // Sin red / RPC caída: aceptar SOLO si coincide con la clave ya activada (no "hay cualquier cache")
     const c = readCache()
@@ -65,11 +65,13 @@ export async function validateLicense(key) {
 export function isLicenseActive() {
   const c = readCache()
   if (!c || !c.key) return false
+  // Expiración (licencias de prueba): si venció, desloguear de inmediato — sin llamar al server
+  if (c.exp && Date.now() > c.exp) { clearLicense(); return false }
   // Re-validación silenciosa en background si venció el TTL (no bloquea el arranque)
   if (Date.now() - (c.ts || 0) > REVALIDATE_MS) {
     verifyOnline(c.key).then(r => {
-      if (r.valid) writeCache({ key: c.key, plan: r.plan, ts: Date.now() })
-      else if (r.valid === false) clearLicense() // licencia revocada → desloguear
+      if (r.valid) writeCache({ key: c.key, plan: r.plan, exp: r.exp ?? null, ts: Date.now() })
+      else if (r.valid === false) clearLicense() // revocada o vencida → desloguear
       // offline: dejar la cache como está
     }).catch(() => {})
   }
