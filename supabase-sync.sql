@@ -29,7 +29,8 @@ begin
     return jsonb_build_object('ok', false, 'error', 'bad_args');
   end if;
   v_hash := encode(digest(upper(trim(p_key)), 'sha256'), 'hex');
-  if not exists (select 1 from public.licenses where key_hash = v_hash and status = 'active') then
+  if not exists (select 1 from public.licenses where key_hash = v_hash and status = 'active'
+                and (expires_at is null or expires_at > now())) then
     return jsonb_build_object('ok', false, 'error', 'invalid_license');
   end if;
   insert into public.synced_data (key_hash, blob, updated_at, saved_at)
@@ -50,7 +51,8 @@ as $$
 declare v_hash text; v_row public.synced_data%rowtype;
 begin
   v_hash := encode(digest(upper(trim(p_key)), 'sha256'), 'hex');
-  if not exists (select 1 from public.licenses where key_hash = v_hash and status = 'active') then
+  if not exists (select 1 from public.licenses where key_hash = v_hash and status = 'active'
+                and (expires_at is null or expires_at > now())) then
     return jsonb_build_object('ok', false, 'error', 'invalid_license');
   end if;
   select * into v_row from public.synced_data where key_hash = v_hash;
