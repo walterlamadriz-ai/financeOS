@@ -5,6 +5,7 @@ import { KPI, Card, CardHeader, TxRow, FormGroup, FormRow, Btn, Alert, PageHeade
 import { fmtMoney, CAT_COLORS, CATS_INCOME, RECURRENCES, today } from '../../utils/index.js'
 import { CURRENCY_SYMBOLS, monthLabel } from '../shared/constants.js'
 import MonthSelector from '../shared/MonthSelector.jsx'
+import { parseTransactionText } from '../../utils/smsParser.js'
 
 export default function Income() {
   const { incomes, expenses, addIncome, delIncome, updateIncome, settings } = useApp()
@@ -15,6 +16,26 @@ export default function Income() {
   const [saving, setSaving]   = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [editForm, setEditForm]   = useState({})
+  const [showPaste, setShowPaste] = useState(false)
+  const [pasteText, setPasteText] = useState('')
+  const [pasteMsg, setPasteMsg]   = useState(null)
+
+  function detectFromPaste() {
+    const r = parseTransactionText(pasteText)
+    if (!r || (r.amount == null && !r.merchant)) {
+      setPasteMsg({ ok:false, text:'No se pudo detectar el monto ni el origen. Completa el formulario manualmente.' })
+      return
+    }
+    if (r.amount != null) setF(p => ({ ...p, amount: String(r.amount) }))
+    if (r.merchant) setF(p => ({ ...p, source: r.merchant }))
+    if (r.date) setF(p => ({ ...p, date: r.date }))
+    if (r.type === 'expense') {
+      setPasteMsg({ ok:false, text:'⚠ Este texto parece un cargo/compra, no un ingreso. Verifica que sea correcto o regístralo en Egresos.' })
+    } else {
+      setPasteMsg({ ok:true, text: r.confidence === 'high' ? '✓ Detectado — revisa los datos antes de guardar.' : '⚠ Detección parcial — revisa y completa lo que falte.' })
+    }
+    setShowPaste(false)
+  }
 
   const activeMonth = settings.activeMonth || new Date().toISOString().slice(0, 7)
   const filtered    = useMemo(() => incomes.filter(r => r.date?.startsWith(activeMonth)), [incomes, activeMonth])
@@ -56,6 +77,35 @@ export default function Income() {
         <Card>
           <CardHeader title="Nuevo ingreso" />
           {err && <Alert type="danger">⚠ {err}</Alert>}
+
+          <div style={{ marginBottom:12 }}>
+            {!showPaste ? (
+              <button type="button" onClick={() => { setShowPaste(true); setPasteMsg(null) }}
+                style={{ background:'var(--sur2,#f4f4f0)', border:'.5px dashed var(--brd2)', borderRadius:6,
+                  padding:'7px 12px', fontSize:12, color:'var(--tm)', cursor:'pointer', width:'100%', textAlign:'left' }}>
+                📋 Pegar mensaje del banco (abono/transferencia) →
+              </button>
+            ) : (
+              <div style={{ background:'var(--sur2,#f4f4f0)', border:'.5px solid var(--brd2)', borderRadius:8, padding:10 }}>
+                <textarea value={pasteText} onChange={e => setPasteText(e.target.value)} rows={3}
+                  placeholder='Ej: "Recibiste un abono por $200.000..."'
+                  style={{ width:'100%', boxSizing:'border-box', padding:'7px 9px', fontSize:12, borderRadius:6, border:'.5px solid var(--brd2)' }} />
+                <div style={{ display:'flex', gap:8, marginTop:8 }}>
+                  <Btn variant="primary" size="sm" onClick={detectFromPaste} disabled={!pasteText.trim()}>Detectar →</Btn>
+                  <Btn variant="ghost" size="sm" onClick={() => { setShowPaste(false); setPasteText('') }}>Cancelar</Btn>
+                </div>
+                <div style={{ fontSize:9, color:'var(--th)', fontFamily:'var(--mono)', marginTop:6, lineHeight:1.5 }}>
+                  100% local — no se envía a ningún servidor. Orientativo: revisa antes de guardar.
+                </div>
+              </div>
+            )}
+            {pasteMsg && (
+              <div style={{ marginTop:8, fontSize:11, color: pasteMsg.ok ? 'var(--grn)' : '#e84142', fontFamily:'var(--mono)' }}>
+                {pasteMsg.text}
+              </div>
+            )}
+          </div>
+
           <FormGroup label="Fuente / descripción">
             <input type="text" value={f.source} placeholder="ej. Salario, Freelance cliente A" onChange={e => setF(p => ({ ...p, source: e.target.value }))} />
           </FormGroup>

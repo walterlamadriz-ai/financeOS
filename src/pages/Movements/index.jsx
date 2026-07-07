@@ -7,6 +7,7 @@ import MoneyFlow from '../../components/charts/MoneyFlow.jsx'
 import ChartCard from '../../components/charts/ChartCard.jsx'
 import HorizontalBars from '../../components/charts/HorizontalBars.jsx'
 import CategoryDonut from '../../components/charts/CategoryDonut.jsx'
+import { parseTransactionText } from '../../utils/smsParser.js'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36)
@@ -91,12 +92,71 @@ function FormGasto({ onSave, onCancel, sym, projects = [] }) {
     set('subcategory', '') // reset subcategory when category changes
   }
 
+  // ── Pegar SMS/notificación del banco → prellenar el formulario ──────────────
+  const [showPaste, setShowPaste] = useState(false)
+  const [pasteText, setPasteText] = useState('')
+  const [pasteMsg, setPasteMsg] = useState(null) // {ok:bool, text:string}
+
+  function detectFromPaste() {
+    const r = parseTransactionText(pasteText)
+    if (!r || (r.amount == null && !r.merchant)) {
+      setPasteMsg({ ok:false, text:'No se pudo detectar el monto ni el comercio. Completa el formulario manualmente.' })
+      return
+    }
+    if (r.amount != null) set('amount', String(r.amount))
+    if (r.merchant) set('description', r.merchant)
+    if (r.date) set('date', r.date)
+    setPasteMsg({ ok:true, text: r.confidence === 'high'
+      ? '✓ Detectado — revisa los datos antes de guardar.'
+      : '⚠ Detección parcial — revisa y completa lo que falte.' })
+    setShowPaste(false)
+  }
+
   return (
     <div style={{ background:'var(--sur)', border:'.5px solid var(--brd)',
       borderRadius:'var(--r)', padding:'16px', marginBottom:12 }}>
       <div style={{ fontSize:13, fontWeight:600, color:'var(--tx)', marginBottom:12 }}>
         💳 Nuevo gasto único
       </div>
+
+      {/* Pegar SMS/notificación del banco */}
+      <div style={{ marginBottom:12 }}>
+        {!showPaste ? (
+          <button type="button" onClick={() => { setShowPaste(true); setPasteMsg(null) }}
+            style={{ background:'var(--sur2)', border:'.5px dashed var(--brd2)', borderRadius:6,
+              padding:'7px 12px', fontSize:12, color:'var(--tm)', cursor:'pointer', width:'100%', textAlign:'left' }}>
+            📋 Pegar mensaje del banco (SMS o notificación) →
+          </button>
+        ) : (
+          <div style={{ background:'var(--sur2)', border:'.5px solid var(--brd2)', borderRadius:8, padding:10 }}>
+            <label style={lbl}>Pega aquí el texto del SMS o notificación</label>
+            <textarea value={pasteText} onChange={e => setPasteText(e.target.value)} rows={3}
+              placeholder='Ej: "Compra por $15.990 en FARMACIAS AHUMADA..."'
+              style={{ ...inp, fontFamily:'var(--sans)', resize:'vertical' }} />
+            <div style={{ display:'flex', gap:8, marginTop:8 }}>
+              <button type="button" onClick={detectFromPaste} disabled={!pasteText.trim()}
+                style={{ background:'var(--grn)', color:'#fff', border:'none', borderRadius:6,
+                  padding:'6px 14px', fontSize:12, fontWeight:600, cursor: pasteText.trim() ? 'pointer' : 'default', opacity: pasteText.trim() ? 1 : .5 }}>
+                Detectar →
+              </button>
+              <button type="button" onClick={() => { setShowPaste(false); setPasteText('') }}
+                style={{ background:'none', border:'.5px solid var(--brd)', borderRadius:6,
+                  padding:'6px 14px', fontSize:12, color:'var(--th)', cursor:'pointer' }}>
+                Cancelar
+              </button>
+            </div>
+            <div style={{ fontSize:9, color:'var(--th)', fontFamily:'var(--mono)', marginTop:6, lineHeight:1.5 }}>
+              100% local — el texto se procesa en tu dispositivo, no se envía a ningún servidor. Orientativo: siempre revisa los datos antes de guardar.
+            </div>
+          </div>
+        )}
+        {pasteMsg && (
+          <div style={{ marginTop:8, fontSize:11, color: pasteMsg.ok ? 'var(--grn)' : '#e84142', fontFamily:'var(--mono)' }}>
+            {pasteMsg.text}
+          </div>
+        )}
+      </div>
+
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))', gap:10, marginBottom:10 }}>
         <div><label style={lbl}>Descripción</label>
           <input style={inp} value={f.description} placeholder="Ej: Supermercado"
