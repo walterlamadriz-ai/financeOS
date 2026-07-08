@@ -1,6 +1,6 @@
 // src/components/LicenseGate.jsx
 import { useState } from 'react'
-import { validateLicense } from '../utils/licenseValidator.js'
+import { validateLicense, setLicenseEmail } from '../utils/licenseValidator.js'
 
 const PLANS = [
   {
@@ -32,6 +32,7 @@ async function startCheckout(product) {
 
 export default function LicenseGate({ onActivate }) {
   const [key, setKey]           = useState('')
+  const [email, setEmail]       = useState('')
   const [loading, setLoading]   = useState(false)
   const [buying, setBuying]     = useState(null)
   const [error, setError]       = useState('')
@@ -45,6 +46,8 @@ export default function LicenseGate({ onActivate }) {
     try {
       const valid = await validateLicense(clean)
       if (valid) {
+        // Best-effort: asocia el email para avisos/soporte. No bloquea la activación si falla.
+        if (email.trim()) setLicenseEmail(email).catch(() => {})
         onActivate()
       } else {
         setError('Clave inválida. Verifica que la copiaste completa desde el email de confirmación.')
@@ -117,6 +120,19 @@ export default function LicenseGate({ onActivate }) {
             autoFocus
             spellCheck={false}
           />
+
+          <input
+            style={{ width: '100%', padding: '10px 14px', border: '1px solid var(--brd,#e0e0d8)', borderRadius: 8, fontSize: 13, fontFamily: 'var(--body)', background: 'var(--bg)', color: 'var(--ink)', marginBottom: 4, boxSizing: 'border-box', outline: 'none' }}
+            type="email"
+            placeholder="Tu email (opcional — avisos y soporte)"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleActivate()}
+            spellCheck={false}
+          />
+          <div style={{ fontSize: 10, color: '#999', fontFamily: 'var(--mono)', marginBottom: 10, lineHeight: 1.5 }}>
+            Solo para avisarte antes de que venza tu prueba o si necesitás soporte. Nunca vemos tus datos financieros.
+          </div>
 
           {error && (
             <div style={{ fontSize: 11, color: '#c0392b', marginBottom: 10, fontFamily: 'var(--mono)', padding: '8px 12px', background: 'rgba(192,57,43,.07)', borderRadius: 7, lineHeight: 1.5 }}>

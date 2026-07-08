@@ -82,3 +82,27 @@ export function saveLicense(_key) {}                       // no-op: validateLic
 export function getLicenseKey()  { return readCache()?.key  || '' }
 export function getLicensePlan() { return readCache()?.plan || 'personal' }
 export function clearLicense()   { try { localStorage.removeItem(LS_V2) } catch {} }
+
+// Asocia un email a la licencia activa (best-effort: no bloquea la activación si falla).
+// Se usa en el momento de activar la clave, para poder contactar al cliente
+// (avisos de vencimiento en pruebas, novedades, soporte).
+export async function setLicenseEmail(email) {
+  const clean = String(email || '').trim()
+  if (!clean || !SUPABASE_URL || !SUPABASE_ANON) return false
+  const key = getLicenseKey()
+  if (!key) return false
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/set_license_email`, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_ANON,
+        Authorization: `Bearer ${SUPABASE_ANON}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ p_key: key, p_email: clean }),
+    })
+    if (!res.ok) return false
+    const data = await res.json()
+    return !!(data && data.ok)
+  } catch { return false }
+}
