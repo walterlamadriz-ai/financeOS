@@ -17,6 +17,7 @@ const Budgets       = lazy(() => import('../pages/Budgets/index.jsx'))
 const Debts         = lazy(() => import('../pages/Debts/index.jsx'))
 const Goals         = lazy(() => import('../pages/Goals/index.jsx'))
 const Projects      = lazy(() => import('../pages/Projects/index.jsx'))
+const NetWorth      = lazy(() => import('../pages/NetWorth/index.jsx'))
 const Reports       = lazy(() => import('../pages/Reports/index.jsx'))
 const Settings      = lazy(() => import('../pages/Settings/index.jsx'))
 const Advisor       = lazy(() => import('../pages/Advisor/index.jsx'))
@@ -122,6 +123,7 @@ function DemoInner() {
       case 'debts':         return <Debts />
       case 'goals':         return <Goals />
       case 'projects':      return <Projects />
+      case 'networth':      return <NetWorth />
       case 'cashflow':      return <CashFlow setPage={setPage}/>
       case 'reports':       return <Reports />
       case 'settings':      return <Settings />

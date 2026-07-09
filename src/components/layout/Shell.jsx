@@ -24,6 +24,7 @@ const NAV = [
     { id: 'multimoneda', ic: '💱', lb: 'Multimoneda', countries: ['VE'] },
   ] },
   { sec: 'Análisis', items: [
+    { id: 'networth', ic: '💎', lb: 'Patrimonio neto' },
     { id: 'coach',    ic: '⚕', lb: 'Diagnóstico' },
     { id: 'reports',  ic: '⊞', lb: 'Reportes' },
     { id: 'cashflow', ic: '⟶', lb: 'Proyección' },
