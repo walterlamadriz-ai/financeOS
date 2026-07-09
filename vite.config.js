@@ -32,6 +32,9 @@ export default defineConfig({
         ]
       },
       workbox: {
+        // Inyecta los listeners de push/notificationclick al SW autogenerado,
+        // sin tocar la lógica de caché/offline (ver public/push-sw.js).
+        importScripts: ['push-sw.js'],
         navigateFallback: '/app/index.html',
         navigateFallbackDenylist: [/^\/api/, /^\/(?!app)/],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,

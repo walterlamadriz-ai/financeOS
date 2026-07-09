@@ -8,6 +8,7 @@ import TemplateSelector from '../../components/templates/TemplateSelector.jsx'
 import { CURRENCY_OPTIONS, DEFAULT_USD_RATES } from '../shared/constants.js'
 import { clearLicense, getLicensePlan, getLicenseKey } from '../../utils/licenseValidator.js'
 import { isSyncEnabled, syncMeta, syncAvailable } from '../../core/sync.js'
+import { pushSupported, isPushEnabled, enablePush, disablePush } from '../../core/push.js'
 
 export default function Settings() {
   const { settings, updateSettings, clearAll, loadDemo, exportCSV, enableSync, disableSync } = useApp()
@@ -173,6 +174,10 @@ export default function Settings() {
         <SyncSection enableSync={enableSync} disableSync={disableSync} />
       </Card>
       <Card>
+        <CardHeader title="Notificaciones" />
+        <PushSection />
+      </Card>
+      <Card>
         <CardHeader title="Otras acciones" />
         <div style={srow}>
           <div><div style={slbl}>Exportar CSV</div><div style={ssub}>Ingresos y gastos · compatible Excel</div></div>
@@ -276,6 +281,60 @@ function SyncSection({ enableSync, disableSync }) {
           <div style={{ ...sub, marginTop: 10, padding: '8px 10px', background: 'var(--sur2)', borderRadius: 'var(--r)', border: '0.5px solid var(--brd)' }}>
             🔒 Cifrado de extremo a extremo: tus datos se guardan cifrados con una llave derivada de tu clave; el servidor no puede leerlos. Ligado a tu licencia, sin cuenta ni contraseña. Última edición gana entre dispositivos.
           </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+// ── Notificaciones push (opt-in, ligadas a la licencia) ────────────────────────
+function PushSection() {
+  const [on, setOn]     = useState(isPushEnabled())
+  const [busy, setBusy] = useState(false)
+  const [msg, setMsg]   = useState('')
+  const hasKey    = !!getLicenseKey()
+  const supported = pushSupported()
+
+  const lbl = { fontSize: 13, color: 'var(--tx)', fontWeight: 500 }
+  const sub = { fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', lineHeight: 1.6, marginTop: 4 }
+
+  async function toggle() {
+    if (busy) return
+    setBusy(true); setMsg('')
+    try {
+      if (on) {
+        await disablePush()
+        setOn(false)
+      } else {
+        const r = await enablePush()
+        if (r.ok) { setOn(true) }
+        else {
+          setMsg(r.error === 'permission_denied'
+            ? 'Bloqueaste los avisos en tu navegador. Activalos desde la configuración del sitio para poder usarlos.'
+            : 'No se pudo activar. Intenta de nuevo.')
+        }
+      }
+    } finally { setBusy(false) }
+  }
+
+  return (
+    <div>
+      {!hasKey ? (
+        <div style={sub}>Requiere una licencia activa.</div>
+      ) : !supported ? (
+        <div style={sub}>Tu navegador no soporta notificaciones push.</div>
+      ) : (
+        <>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+            <div>
+              <div style={lbl}>{on ? '✓ Avisos activados' : 'Recordatorios'}</div>
+              <div style={sub}>Solo avisos de sistema: vencimiento de licencia, recordatorio de uso. Nunca vemos tus datos financieros.</div>
+            </div>
+            <Btn variant={on ? 'ghost' : 'primary'} onClick={toggle} disabled={busy}>
+              {busy ? '…' : on ? 'Desactivar' : 'Activar'}
+            </Btn>
+          </div>
+          {msg && <div style={{ ...sub, color: '#c0392b', marginTop: 8 }}>{msg}</div>}
         </>
       )}
     </div>
