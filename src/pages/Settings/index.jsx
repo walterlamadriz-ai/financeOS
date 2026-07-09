@@ -81,6 +81,7 @@ export default function Settings() {
             <option value="VE">🇻🇪 Venezuela</option>
             <option value="US">🇺🇸 USA</option>
             <option value="ES">🇪🇸 España</option>
+            <option value="PT">🇵🇹 Portugal</option>
             <option value="OTHER">🌎 Otro</option>
           </select>
         </div>

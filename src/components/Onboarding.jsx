@@ -239,6 +239,7 @@ export default function Onboarding({ onComplete }) {
     { code: 'VE',    flag: '🇻🇪', label: 'Venezuela',      currency: 'VES' },
     { code: 'US',    flag: '🇺🇸', label: 'Estados Unidos', currency: 'USD' },
     { code: 'ES',    flag: '🇪🇸', label: 'España',          currency: 'EUR' },
+    { code: 'PT',    flag: '🇵🇹', label: 'Portugal',        currency: 'EUR' },
     { code: 'OTHER', flag: '🌎', label: 'Otro',            currency: 'USD' },
   ]
   if (step === 3) return (
