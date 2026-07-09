@@ -9,9 +9,11 @@ import { CURRENCY_OPTIONS, DEFAULT_USD_RATES } from '../shared/constants.js'
 import { clearLicense, getLicensePlan, getLicenseKey } from '../../utils/licenseValidator.js'
 import { isSyncEnabled, syncMeta, syncAvailable } from '../../core/sync.js'
 import { pushSupported, isPushEnabled, enablePush, disablePush } from '../../core/push.js'
+import { useT } from '../../i18n/useT.js'
 
 export default function Settings() {
   const { settings, updateSettings, clearAll, loadDemo, exportCSV, enableSync, disableSync } = useApp()
+  const { t } = useT()
   const [installPrompt, setInstallPrompt] = useState(null)
   const [installed, setInstalled] = useState(false)
 
@@ -54,24 +56,25 @@ export default function Settings() {
 
   return (
     <div className="stack">
-      <PageHeader title="Ajustes" sub="Personalización y gestión de datos" />
+      <PageHeader title={t('settings.title')} sub={t('settings.sub')} />
       <Card>
-        <CardHeader title="Preferencias" />
+        <CardHeader title={t('settings.preferences')} />
         <div style={srow}>
-          <div><div style={slbl}>Moneda</div><div style={ssub}>Símbolo y formato</div></div>
+          <div><div style={slbl}>{t('settings.currency.label')}</div><div style={ssub}>{t('settings.currency.sub')}</div></div>
           <select style={{width:'auto'}} value={settings.currency||'CLP'} onChange={e=>updateSettings({...settings,currency:e.target.value})}>
             {CURRENCY_OPTIONS.map(c=><option key={c.code} value={c.code}>{c.label}</option>)}
           </select>
         </div>
         <div style={srow}>
-          <div><div style={slbl}>Idioma</div><div style={ssub}>Español / English</div></div>
+          <div><div style={slbl}>{t('settings.language.label')}</div><div style={ssub}>{t('settings.language.sub')}</div></div>
           <select style={{width:'auto'}} value={settings.language||'es'} onChange={e=>updateSettings({...settings,language:e.target.value})}>
             <option value="es">Español</option>
             <option value="en">English</option>
+            <option value="pt">Português</option>
           </select>
         </div>
         <div style={srow}>
-          <div><div style={slbl}>País</div><div style={ssub}>Activa funciones regionales</div></div>
+          <div><div style={slbl}>{t('settings.country.label')}</div><div style={ssub}>{t('settings.country.sub')}</div></div>
           <select style={{width:'auto'}} value={settings.country||'CL'} onChange={e=>updateSettings({...settings,country:e.target.value})}>
             <option value="CL">🇨🇱 Chile</option>
             <option value="MX">🇲🇽 México</option>
@@ -87,18 +90,18 @@ export default function Settings() {
           </select>
         </div>
         <div style={srow}>
-          <div><div style={slbl}>Tema visual</div><div style={ssub}>Claro u oscuro</div></div>
+          <div><div style={slbl}>{t('settings.theme.label')}</div><div style={ssub}>{t('settings.theme.sub')}</div></div>
           <div style={{display:'flex',gap:6}}>
-            <Btn variant={settings.theme==='light'?'primary':'ghost'} size="sm" onClick={()=>updateSettings({...settings,theme:'light'})}>Claro</Btn>
-            <Btn variant={settings.theme==='dark' ?'primary':'ghost'} size="sm" onClick={()=>updateSettings({...settings,theme:'dark' })}>Oscuro</Btn>
+            <Btn variant={settings.theme==='light'?'primary':'ghost'} size="sm" onClick={()=>updateSettings({...settings,theme:'light'})}>{t('settings.theme.light')}</Btn>
+            <Btn variant={settings.theme==='dark' ?'primary':'ghost'} size="sm" onClick={()=>updateSettings({...settings,theme:'dark' })}>{t('settings.theme.dark')}</Btn>
           </div>
         </div>
 
         {/* Moneda secundaria */}
         <div style={srow}>
           <div>
-            <div style={slbl}>Mostrar equivalente en USD</div>
-            <div style={ssub}>KPIs del Dashboard muestran tu moneda + US$ simultáneamente</div>
+            <div style={slbl}>{t('settings.dualCurrency.label')}</div>
+            <div style={ssub}>{t('settings.dualCurrency.sub')}</div>
           </div>
           <button
             onClick={() => {
@@ -123,8 +126,8 @@ export default function Settings() {
         {settings.showDualCurrency && settings.currency !== 'USD' && (
           <div style={{...srow, borderBottom:'none', flexDirection:'column', alignItems:'flex-start', gap:10}}>
             <div>
-              <div style={slbl}>Tipo de cambio — 1 USD = ? {settings.currency || 'CLP'}</div>
-              <div style={ssub}>Actualiza el valor manualmente cuando cambie. Orientativo, no para uso financiero formal.</div>
+              <div style={slbl}>{t('settings.exchangeRate.label', { currency: settings.currency || 'CLP' })}</div>
+              <div style={ssub}>{t('settings.exchangeRate.sub')}</div>
             </div>
             <div style={{display:'flex', alignItems:'center', gap:8, width:'100%'}}>
               <input
@@ -136,11 +139,11 @@ export default function Settings() {
                   background:'var(--sur2)', color:'var(--tx)', fontSize:13, fontFamily:'var(--mono)'}}
               />
               <span style={{fontSize:12, color:'var(--th)', fontFamily:'var(--mono)', whiteSpace:'nowrap'}}>
-                {settings.currency || 'CLP'} por 1 USD
+                {t('settings.exchangeRate.perUsd', { currency: settings.currency || 'CLP' })}
               </span>
               <Btn variant="ghost" size="sm"
                 onClick={() => updateSettings({...settings, usdRate: DEFAULT_USD_RATES[settings.currency] || 1})}>
-                Restablecer
+                {t('settings.exchangeRate.reset')}
               </Btn>
             </div>
             {settings.usdRate > 0 && (
@@ -159,47 +162,47 @@ export default function Settings() {
         )}
       </Card>
       <Card>
-        <CardHeader title="Plantillas por perfil" />
+        <CardHeader title={t('settings.templates.title')} />
         <div style={{fontSize:11,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:12,lineHeight:1.5}}>
-          Selecciona un perfil para configurar categorías y presupuestos sugeridos. Tus datos registrados no se modifican.
+          {t('settings.templates.sub')}
         </div>
         <TemplateSelector />
       </Card>
       <Card>
-        <CardHeader title="Respaldo y restauración" />
+        <CardHeader title={t('settings.backup.title')} />
         <BackupManager />
       </Card>
       <Card>
-        <CardHeader title="Sincronización entre dispositivos" />
+        <CardHeader title={t('settings.sync.title')} />
         <SyncSection enableSync={enableSync} disableSync={disableSync} />
       </Card>
       <Card>
-        <CardHeader title="Notificaciones" />
+        <CardHeader title={t('settings.push.title')} />
         <PushSection />
       </Card>
       <Card>
-        <CardHeader title="Otras acciones" />
+        <CardHeader title={t('settings.otherActions.title')} />
         <div style={srow}>
-          <div><div style={slbl}>Exportar CSV</div><div style={ssub}>Ingresos y gastos · compatible Excel</div></div>
-          <Btn variant="ghost" size="sm" onClick={exportCSV}>Descargar CSV</Btn>
+          <div><div style={slbl}>{t('settings.exportCsv.label')}</div><div style={ssub}>{t('settings.exportCsv.sub')}</div></div>
+          <Btn variant="ghost" size="sm" onClick={exportCSV}>{t('settings.exportCsv.btn')}</Btn>
         </div>
         <div style={srow}>
-          <div><div style={slbl}>Cargar datos demo</div><div style={ssub}>Sobrescribe con datos de ejemplo</div></div>
-          <Btn variant="ghost" size="sm" onClick={loadDemo}>Cargar demo</Btn>
+          <div><div style={slbl}>{t('settings.loadDemo.label')}</div><div style={ssub}>{t('settings.loadDemo.sub')}</div></div>
+          <Btn variant="ghost" size="sm" onClick={loadDemo}>{t('settings.loadDemo.btn')}</Btn>
         </div>
         <div style={srow}>
-          <div><div style={slbl}>Reiniciar onboarding</div><div style={ssub}>Volver al asistente de configuración inicial</div></div>
-          <Btn variant="ghost" size="sm" onClick={()=>updateSettings({...settings,onboardingDone:false})}>Reiniciar</Btn>
+          <div><div style={slbl}>{t('settings.resetOnboarding.label')}</div><div style={ssub}>{t('settings.resetOnboarding.sub')}</div></div>
+          <Btn variant="ghost" size="sm" onClick={()=>updateSettings({...settings,onboardingDone:false})}>{t('settings.resetOnboarding.btn')}</Btn>
         </div>
         {!isDemo && (
           <div style={srow}>
-            <div><div style={slbl}>Licencia · plan {getLicensePlan() === 'pro' ? 'Pro' : 'Personal'}</div><div style={ssub}>Desactivar en este dispositivo · tus datos NO se borran</div></div>
-            <Btn variant="ghost" size="sm" onClick={handleDeactivate}>Desactivar licencia</Btn>
+            <div><div style={slbl}>{t('settings.license.label', { plan: getLicensePlan() === 'pro' ? 'Pro' : 'Personal' })}</div><div style={ssub}>{t('settings.license.sub')}</div></div>
+            <Btn variant="ghost" size="sm" onClick={handleDeactivate}>{t('settings.license.btn')}</Btn>
           </div>
         )}
         <div style={{...srow,borderBottom:'none'}}>
-          <div><div style={slbl}>Borrar todos los datos</div><div style={ssub}>Acción irreversible · sin recuperación posible</div></div>
-          <Btn variant="danger" size="sm" onClick={handleClear}>Borrar todo</Btn>
+          <div><div style={slbl}>{t('settings.clearAll.label')}</div><div style={ssub}>{t('settings.clearAll.sub')}</div></div>
+          <Btn variant="danger" size="sm" onClick={handleClear}>{t('settings.clearAll.btn')}</Btn>
         </div>
       </Card>
       <Card>
@@ -213,13 +216,13 @@ export default function Settings() {
       </Card>
       {(installPrompt || installed) && (
         <Card>
-          <CardHeader title="Instalar como app" />
+          <CardHeader title={t('settings.install.title')} />
           <div style={{...srow, borderBottom:'none'}}>
             <div>
-              <div style={slbl}>{installed ? '✓ App instalada' : 'Agregar a pantalla de inicio'}</div>
-              <div style={ssub}>{installed ? 'FinanceOS funciona como app nativa en este dispositivo.' : 'Instalá FinanceOS como PWA para acceso sin navegador y modo offline total.'}</div>
+              <div style={slbl}>{installed ? t('settings.install.installed.label') : t('settings.install.pending.label')}</div>
+              <div style={ssub}>{installed ? t('settings.install.installed.sub') : t('settings.install.pending.sub')}</div>
             </div>
-            {!installed && <Btn variant="ghost" size="sm" onClick={handleInstall}>Instalar →</Btn>}
+            {!installed && <Btn variant="ghost" size="sm" onClick={handleInstall}>{t('settings.install.btn')}</Btn>}
           </div>
         </Card>
       )}
@@ -233,6 +236,7 @@ export default function Settings() {
 
 // ── Sincronización entre dispositivos (opt-in, ligada a la licencia, cifrada) ──
 function SyncSection({ enableSync, disableSync }) {
+  const { t } = useT()
   const [on, setOn]       = useState(isSyncEnabled())
   const [busy, setBusy]   = useState(false)
   const [tick, setTick]   = useState(0) // refresca el estado tras acciones
@@ -260,26 +264,24 @@ function SyncSection({ enableSync, disableSync }) {
   return (
     <div>
       {!hasKey ? (
-        <div style={sub}>La sincronización requiere una licencia activa. Activá tu clave para usarla.</div>
+        <div style={sub}>{t('settings.sync.noLicense')}</div>
       ) : !available ? (
-        <div style={sub}>La sincronización no está disponible en este entorno.</div>
+        <div style={sub}>{t('settings.sync.unavailable')}</div>
       ) : (
         <>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
             <div>
-              <div style={lbl}>{on ? '✓ Sincronización activada' : 'Sincronizar PC ↔ teléfono'}</div>
+              <div style={lbl}>{on ? t('settings.sync.on') : t('settings.sync.off')}</div>
               <div style={sub}>
-                {on
-                  ? `Última sincronización: ${lastTxt}`
-                  : 'Mantené tus datos iguales en todos tus dispositivos con la misma licencia.'}
+                {on ? t('settings.sync.lastSync', { time: lastTxt }) : t('settings.sync.offDesc')}
               </div>
             </div>
             <Btn variant={on ? 'ghost' : 'primary'} onClick={toggle} disabled={busy}>
-              {busy ? '…' : on ? 'Desactivar' : 'Activar'}
+              {busy ? t('settings.sync.busy') : on ? t('settings.sync.disable') : t('settings.sync.enable')}
             </Btn>
           </div>
           <div style={{ ...sub, marginTop: 10, padding: '8px 10px', background: 'var(--sur2)', borderRadius: 'var(--r)', border: '0.5px solid var(--brd)' }}>
-            🔒 Cifrado de extremo a extremo: tus datos se guardan cifrados con una llave derivada de tu clave; el servidor no puede leerlos. Ligado a tu licencia, sin cuenta ni contraseña. Última edición gana entre dispositivos.
+            {t('settings.sync.e2e')}
           </div>
         </>
       )}
@@ -289,6 +291,7 @@ function SyncSection({ enableSync, disableSync }) {
 
 // ── Notificaciones push (opt-in, ligadas a la licencia) ────────────────────────
 function PushSection() {
+  const { t } = useT()
   const [on, setOn]     = useState(isPushEnabled())
   const [busy, setBusy] = useState(false)
   const [msg, setMsg]   = useState('')
@@ -310,8 +313,8 @@ function PushSection() {
         if (r.ok) { setOn(true) }
         else {
           setMsg(r.error === 'permission_denied'
-            ? 'Bloqueaste los avisos en tu navegador. Activalos desde la configuración del sitio para poder usarlos.'
-            : 'No se pudo activar. Intenta de nuevo.')
+            ? t('settings.push.permissionDenied')
+            : t('settings.push.genericError'))
         }
       }
     } finally { setBusy(false) }
@@ -320,18 +323,18 @@ function PushSection() {
   return (
     <div>
       {!hasKey ? (
-        <div style={sub}>Requiere una licencia activa.</div>
+        <div style={sub}>{t('settings.push.noLicense')}</div>
       ) : !supported ? (
-        <div style={sub}>Tu navegador no soporta notificaciones push.</div>
+        <div style={sub}>{t('settings.push.unsupported')}</div>
       ) : (
         <>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
             <div>
-              <div style={lbl}>{on ? '✓ Avisos activados' : 'Recordatorios'}</div>
-              <div style={sub}>Solo avisos de sistema: vencimiento de licencia, recordatorio de uso. Nunca vemos tus datos financieros.</div>
+              <div style={lbl}>{on ? t('settings.push.on') : t('settings.push.off')}</div>
+              <div style={sub}>{t('settings.push.desc')}</div>
             </div>
             <Btn variant={on ? 'ghost' : 'primary'} onClick={toggle} disabled={busy}>
-              {busy ? '…' : on ? 'Desactivar' : 'Activar'}
+              {busy ? t('settings.sync.busy') : on ? t('settings.sync.disable') : t('settings.sync.enable')}
             </Btn>
           </div>
           {msg && <div style={{ ...sub, color: '#c0392b', marginTop: 8 }}>{msg}</div>}
