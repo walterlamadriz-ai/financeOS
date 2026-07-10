@@ -9,6 +9,8 @@
 
 export const translations = {
   es: {
+    'reports.diag.linkText': "⚕ ¿Cómo está tu salud financiera? Score, señales del mes y checklist están en el Diagnóstico.",
+    'reports.diag.linkBtn': "Ver diagnóstico completo →",
     'adv.tl.saving': "Tasa de ahorro",
     'adv.tl.saving.green': "{pct} — supera el mínimo recomendado (20%)",
     'adv.tl.saving.yellow': "{pct} — por debajo del 20% recomendado",
@@ -962,6 +964,8 @@ export const translations = {
     'settings.install.btn': 'Instalar →',
   },
   en: {
+    'reports.diag.linkText': "⚕ How's your financial health? Score, monthly signals, and checklist live in the Diagnosis.",
+    'reports.diag.linkBtn': "See full diagnosis →",
     'adv.tl.saving': "Savings rate",
     'adv.tl.saving.green': "{pct} — above the recommended minimum (20%)",
     'adv.tl.saving.yellow': "{pct} — below the recommended 20%",
@@ -1915,6 +1919,8 @@ export const translations = {
     'settings.install.btn': 'Install →',
   },
   pt: {
+    'reports.diag.linkText': "⚕ Como está sua saúde financeira? Pontuação, sinais do mês e checklist estão no Diagnóstico.",
+    'reports.diag.linkBtn': "Ver diagnóstico completo →",
     'adv.tl.saving': "Taxa de poupança",
     'adv.tl.saving.green': "{pct} — supera o mínimo recomendado (20%)",
     'adv.tl.saving.yellow': "{pct} — abaixo dos 20% recomendados",

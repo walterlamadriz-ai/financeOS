@@ -20,7 +20,7 @@ import {
   AreaChart, Area, ReferenceLine, ResponsiveContainer, Legend,
 } from 'recharts'
 
-export default function Reports() {
+export default function Reports({ setPage }) {
   const { t } = useT()
   const { incomes: _incAll, expenses: _expAll, budgets, debts: allDebts, subscriptions: allSubs, settings } = useApp()
   const incomes = (_incAll || []).filter(r => !r?.inv)   // reporte personal: excluye inversión
@@ -95,8 +95,6 @@ export default function Reports() {
     return evaluateCoach(metrics)
   }, [incomes, expenses, budgets, allDebts, allSubs, settings, mIncomes.length, mExpenses.length])
 
-  const SEV_COLOR = { warning: 'var(--red)', attention: 'var(--amb)', info: 'var(--accent)' }
-  const SEV_ICON  = { warning: '⊗', attention: '⚠', info: '◈' }
 
   const axisStyle = {fill:'var(--th)',fontSize:10}
   const gridStyle = {stroke:'rgba(0,0,0,0.05)',strokeDasharray:'3 3'}
@@ -272,27 +270,16 @@ export default function Reports() {
           <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',marginTop:8}}>{t('reports.subs.disclaimer')}</div>
         </Card>
       )}
+      {/* La lista completa de señales vive en la página Diagnóstico (evita duplicar información) */}
       {coachSignals.length > 0 && (
-        <Card>
-          <CardHeader title={t('reports.diag.title')} />
-          <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',marginBottom:12}}>{t('reports.diag.note')}</div>
-          <div style={{display:'flex',flexDirection:'column',gap:10}}>
-            {coachSignals.map((s,i) => (
-              <div key={i} style={{borderLeft:`3px solid ${SEV_COLOR[s.severity]}`,paddingLeft:10}}>
-                <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:2}}>
-                  <span style={{color:SEV_COLOR[s.severity],fontSize:12}}>{SEV_ICON[s.severity]}</span>
-                  <span style={{fontSize:10,fontWeight:600,fontFamily:'var(--mono)',color:SEV_COLOR[s.severity],textTransform:'uppercase',letterSpacing:'.4px'}}>
-                    {s.severity === 'warning' ? t('coach.sev.warning') : s.severity === 'attention' ? t('coach.sev.attention') : t('dash.sev.info')}
-                  </span>
-                  <span style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',marginLeft:'auto'}}>{s.category}</span>
-                </div>
-                <div style={{fontSize:13,fontWeight:600,color:'var(--tx)',marginBottom:2}}>{s.title}</div>
-                <div style={{fontSize:12,color:'var(--tm)',lineHeight:1.5}}>{s.msg}</div>
-                {s.action && <div style={{fontSize:11,fontFamily:'var(--mono)',color:'var(--grn2)',marginTop:4}}>→ {s.action}</div>}
-              </div>
-            ))}
-          </div>
-        </Card>
+        <div style={{padding:'12px 16px',background:'var(--sur)',border:'.5px solid var(--brd)',borderRadius:'var(--r)',display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,flexWrap:'wrap'}}>
+          <span style={{fontSize:12,color:'var(--th)',fontFamily:'var(--mono)',flex:1,minWidth:200,lineHeight:1.5}}>{t('reports.diag.linkText')}</span>
+          {setPage && (
+            <button onClick={() => setPage('coach')} style={{background:'none',border:'.5px solid var(--brd2)',borderRadius:7,padding:'6px 14px',fontSize:12,fontWeight:600,color:'var(--accent)',cursor:'pointer',fontFamily:'var(--mono)',whiteSpace:'nowrap',flexShrink:0}}>
+              {t('reports.diag.linkBtn')}
+            </button>
+          )}
+        </div>
       )}
       <ReportsDisclaimer />
     </div>
