@@ -6,6 +6,7 @@
 import { useState, useMemo } from 'react'
 import useSubscriptionMetrics from '../../hooks/useSubscriptionMetrics.js'
 import { useApp } from '../../context/AppContext.jsx'
+import { useT } from '../../i18n/useT.js'
 import { Card, CardHeader, Alert } from '../../components/ui/index.jsx'
 import { fmtMoney, fmtPct } from '../../utils/index.js'
 import ProGate from '../../components/ui/ProGate.jsx'
@@ -20,80 +21,80 @@ const CURRENCY_SYMBOLS = { CLP: '$', USD: 'US$', EUR: '€', VES: 'Bs.', MXN: '$
 // Verde:    condición saludable
 // Amarillo: atención recomendada
 // Rojo:     riesgo detectado
-function calcTrafficLight(metrics) {
+function calcTrafficLight(metrics, t) {
   const signals = []
 
   // 1. Tasa de ahorro
   if (metrics.savingRate >= 0.20) {
-    signals.push({ id: 'saving', label: 'Tasa de ahorro', status: 'green',  value: fmtPct(metrics.savingRate), note: `${fmtPct(metrics.savingRate)} — supera el mínimo recomendado (20%)` })
+    signals.push({ id: 'saving', label: t('adv.tl.saving'), status: 'green',  value: fmtPct(metrics.savingRate), note: t('adv.tl.saving.green', { pct: fmtPct(metrics.savingRate) }) })
   } else if (metrics.savingRate >= 0.10) {
-    signals.push({ id: 'saving', label: 'Tasa de ahorro', status: 'yellow', value: fmtPct(metrics.savingRate), note: `${fmtPct(metrics.savingRate)} — por debajo del 20% recomendado` })
+    signals.push({ id: 'saving', label: t('adv.tl.saving'), status: 'yellow', value: fmtPct(metrics.savingRate), note: t('adv.tl.saving.yellow', { pct: fmtPct(metrics.savingRate) }) })
   } else {
-    signals.push({ id: 'saving', label: 'Tasa de ahorro', status: 'red',    value: fmtPct(metrics.savingRate), note: `${fmtPct(metrics.savingRate)} — nivel crítico` })
+    signals.push({ id: 'saving', label: t('adv.tl.saving'), status: 'red',    value: fmtPct(metrics.savingRate), note: t('adv.tl.saving.red', { pct: fmtPct(metrics.savingRate) }) })
   }
 
   // 2. Ratio deuda / ingreso mensual
   const debtRatio = metrics.mIncome > 0 ? metrics.totalDebt / (metrics.mIncome * 12) : 0
   if (debtRatio <= 0.30) {
-    signals.push({ id: 'debt', label: 'Carga de deuda', status: 'green',  value: fmtPct(debtRatio), note: `Deuda equivale al ${fmtPct(debtRatio)} del ingreso anual` })
+    signals.push({ id: 'debt', label: t('adv.tl.debt'), status: 'green',  value: fmtPct(debtRatio), note: t('adv.tl.debt.green', { pct: fmtPct(debtRatio) }) })
   } else if (debtRatio <= 0.60) {
-    signals.push({ id: 'debt', label: 'Carga de deuda', status: 'yellow', value: fmtPct(debtRatio), note: `Deuda equivale al ${fmtPct(debtRatio)} del ingreso anual — revisar` })
+    signals.push({ id: 'debt', label: t('adv.tl.debt'), status: 'yellow', value: fmtPct(debtRatio), note: t('adv.tl.debt.yellow', { pct: fmtPct(debtRatio) }) })
   } else {
-    signals.push({ id: 'debt', label: 'Carga de deuda', status: 'red',    value: fmtPct(debtRatio), note: `Deuda equivale al ${fmtPct(debtRatio)} del ingreso anual — nivel elevado` })
+    signals.push({ id: 'debt', label: t('adv.tl.debt'), status: 'red',    value: fmtPct(debtRatio), note: t('adv.tl.debt.red', { pct: fmtPct(debtRatio) }) })
   }
 
   // 3. Flujo neto del mes
   if (metrics.mBalance > 0) {
-    signals.push({ id: 'flow', label: 'Flujo neto mensual', status: 'green',  value: fmtMoney(metrics.mBalance, metrics.sym), note: 'Flujo positivo este mes' })
+    signals.push({ id: 'flow', label: t('adv.tl.flow'), status: 'green',  value: fmtMoney(metrics.mBalance, metrics.sym), note: t('adv.tl.flow.green') })
   } else if (metrics.mBalance === 0) {
-    signals.push({ id: 'flow', label: 'Flujo neto mensual', status: 'yellow', value: fmtMoney(0, metrics.sym), note: 'Ingresos y gastos equilibrados exactamente' })
+    signals.push({ id: 'flow', label: t('adv.tl.flow'), status: 'yellow', value: fmtMoney(0, metrics.sym), note: t('adv.tl.flow.yellow') })
   } else {
-    signals.push({ id: 'flow', label: 'Flujo neto mensual', status: 'red',    value: fmtMoney(metrics.mBalance, metrics.sym), note: 'Flujo negativo — gastos superan ingresos' })
+    signals.push({ id: 'flow', label: t('adv.tl.flow'), status: 'red',    value: fmtMoney(metrics.mBalance, metrics.sym), note: t('adv.tl.flow.red') })
   }
 
   // 4. Metas con progreso
   const goalsOk = metrics.goals.filter(g => g.saved / g.target >= 0.25).length
   const goalsTotal = metrics.goals.length
   if (goalsTotal === 0) {
-    signals.push({ id: 'goals', label: 'Metas de ahorro', status: 'yellow', value: '0 metas', note: 'No hay metas definidas — recomendar establecer prioridades' })
+    signals.push({ id: 'goals', label: t('adv.tl.goals'), status: 'yellow', value: t('adv.tl.goals.none'), note: t('adv.tl.goals.noneNote') })
   } else if (goalsOk >= goalsTotal * 0.5) {
-    signals.push({ id: 'goals', label: 'Metas de ahorro', status: 'green',  value: `${goalsOk}/${goalsTotal}`, note: `${goalsOk} de ${goalsTotal} metas con avance adecuado` })
+    signals.push({ id: 'goals', label: t('adv.tl.goals'), status: 'green',  value: `${goalsOk}/${goalsTotal}`, note: t('adv.tl.goals.okNote', { ok: goalsOk, total: goalsTotal }) })
   } else {
-    signals.push({ id: 'goals', label: 'Metas de ahorro', status: 'yellow', value: `${goalsOk}/${goalsTotal}`, note: `Solo ${goalsOk} de ${goalsTotal} metas tienen avance suficiente` })
+    signals.push({ id: 'goals', label: t('adv.tl.goals'), status: 'yellow', value: `${goalsOk}/${goalsTotal}`, note: t('adv.tl.goals.lowNote', { ok: goalsOk, total: goalsTotal }) })
   }
 
   // 5. Presupuestos excedidos
   const overBudget = metrics.overBudgetCount
   if (overBudget === 0 && metrics.budgets.length > 0) {
-    signals.push({ id: 'budgets', label: 'Presupuestos', status: 'green',  value: 'Al día', note: 'Ningún presupuesto excedido este mes' })
+    signals.push({ id: 'budgets', label: t('adv.tl.budgets'), status: 'green',  value: t('adv.tl.budgets.ok'), note: t('adv.tl.budgets.okNote') })
   } else if (overBudget > 0) {
-    signals.push({ id: 'budgets', label: 'Presupuestos', status: overBudget >= 2 ? 'red' : 'yellow', value: `${overBudget} excedidos`, note: `${overBudget} categoría(s) superaron el límite mensual` })
+    signals.push({ id: 'budgets', label: t('adv.tl.budgets'), status: overBudget >= 2 ? 'red' : 'yellow', value: t('adv.tl.budgets.over', { n: overBudget }), note: t('adv.tl.budgets.overNote', { n: overBudget }) })
   }
 
   return signals
 }
 
 // ── ALERTAS AUTOMÁTICAS ──────────────────────────────────────────────────────
-function calcAlerts(metrics) {
+function calcAlerts(metrics, t) {
   const alerts = []
 
   if (metrics.savingRate < 0.10 && metrics.mIncome > 0)
-    alerts.push({ type: 'danger', text: `Tasa de ahorro crítica (${fmtPct(metrics.savingRate)}). Revisar gastos fijos y discrecionales con el cliente.` })
+    alerts.push({ type: 'danger', text: t('adv.alert.savingCritical', { pct: fmtPct(metrics.savingRate) }) })
 
   if (metrics.mBalance < 0)
-    alerts.push({ type: 'danger', text: `Flujo neto negativo este mes: ${fmtMoney(metrics.mBalance, metrics.sym)}. El cliente está gastando más de lo que ingresa.` })
+    alerts.push({ type: 'danger', text: t('adv.alert.negativeFlow', { v: fmtMoney(metrics.mBalance, metrics.sym) }) })
 
   const highRateDebt = metrics.debts.filter(d => d.rate > 15)
   if (highRateDebt.length > 0)
-    alerts.push({ type: 'warn', text: `${highRateDebt.length} deuda(s) con tasa superior al 15% (${highRateDebt.map(d => d.creditor).join(', ')}). Evaluar refinanciamiento o prepago.` })
+    alerts.push({ type: 'warn', text: t('adv.alert.highRate', { n: highRateDebt.length, names: highRateDebt.map(d => d.creditor).join(', ') }) })
 
   if (metrics.overBudgetCount >= 2)
-    alerts.push({ type: 'warn', text: `${metrics.overBudgetCount} presupuestos excedidos. Patrón de gasto por encima de los límites establecidos.` })
+    alerts.push({ type: 'warn', text: t('adv.alert.overBudget', { n: metrics.overBudgetCount }) })
 
   const deseos = metrics.monthExpenses.filter(e => e.type === 'Deseo').reduce((s, e) => s + e.amount, 0)
   const deseosRatio = metrics.mIncome > 0 ? deseos / metrics.mIncome : 0
   if (deseosRatio > 0.35 && metrics.mIncome > 0)
-    alerts.push({ type: 'warn', text: `Gastos discrecionales (deseos) representan el ${fmtPct(deseosRatio)} del ingreso. La regla 50/30/20 sugiere máximo 30%.` })
+    alerts.push({ type: 'warn', text: t('adv.alert.wants', { pct: fmtPct(deseosRatio) }) })
 
   const urgentDebts = metrics.debts.filter(d => {
     if (!d.dueDate) return false
@@ -101,25 +102,26 @@ function calcAlerts(metrics) {
     return days >= 0 && days <= 10
   })
   if (urgentDebts.length > 0)
-    alerts.push({ type: 'warn', text: `${urgentDebts.length} pago(s) de deuda vencen en los próximos 10 días: ${urgentDebts.map(d => d.creditor).join(', ')}.` })
+    alerts.push({ type: 'warn', text: t('adv.alert.dueSoon', { n: urgentDebts.length, names: urgentDebts.map(d => d.creditor).join(', ') }) })
 
   const emergencyGoal = metrics.goals.find(g => g.name?.toLowerCase().includes('emergencia') || g.name?.toLowerCase().includes('emergency'))
   if (!emergencyGoal)
-    alerts.push({ type: 'info', text: 'No hay meta de fondo de emergencia definida. Se recomienda establecer como prioridad alta (3-6 meses de gastos fijos).' })
+    alerts.push({ type: 'info', text: t('adv.alert.noEmergency') })
   else if (emergencyGoal.saved / emergencyGoal.target < 0.5)
-    alerts.push({ type: 'info', text: `Fondo de emergencia al ${fmtPct(emergencyGoal.saved / emergencyGoal.target)}. Meta recomendada: completar al menos el 50% antes de avanzar con otras metas.` })
+    alerts.push({ type: 'info', text: t('adv.alert.emergencyLow', { pct: fmtPct(emergencyGoal.saved / emergencyGoal.target) }) })
 
   if (metrics.goals.length === 0)
-    alerts.push({ type: 'info', text: 'No hay metas de ahorro definidas. Trabajar con el cliente en definir al menos 2 prioridades concretas.' })
+    alerts.push({ type: 'info', text: t('adv.alert.noGoals') })
 
   return alerts
 }
 
 // ── SEMÁFORO VISUAL ──────────────────────────────────────────────────────────
 function TrafficLight({ signals }) {
+  const { t } = useT()
   const colors = { green: '#1aa368', yellow: '#d4982a', red: '#e05a4a' }
   const bg     = { green: '#e4f5ec', yellow: '#faeeda', red: '#fdf0ee' }
-  const labels = { green: 'Saludable', yellow: 'Atención', red: 'Riesgo' }
+  const labels = { green: t('adv.status.green'), yellow: t('adv.status.yellow'), red: t('adv.status.red') }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -148,7 +150,7 @@ function TrafficLight({ signals }) {
         </div>
       ))}
       <p style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: 4, lineHeight: 1.5 }}>
-        * Señales orientativas basadas en los datos registrados. No constituyen diagnóstico financiero certificado.
+        {t('adv.tl.disclaimer')}
       </p>
     </div>
   )
@@ -170,6 +172,7 @@ function AdvisorKPI({ label, value, sub, color = 'var(--tx)' }) {
 
 // ── ADVISOR NOTES — comentarios y próximos pasos ─────────────────────────────
 function AdvisorNotes({ notes, onSave }) {
+  const { t } = useT()
   const [comments, setComments] = useState(notes.comments || '')
   const [nextSteps, setNextSteps] = useState(notes.nextSteps || '')
   const [meetingDate, setMeetingDate] = useState(notes.meetingDate || '')
@@ -200,27 +203,27 @@ function AdvisorNotes({ notes, onSave }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         <div>
-          <label style={lbl}>Nombre del cliente</label>
-          <input style={inp} value={clientName} onChange={e => setClientName(e.target.value)} placeholder="Ej: María González" />
+          <label style={lbl}>{t('adv.notes.clientName')}</label>
+          <input style={inp} value={clientName} onChange={e => setClientName(e.target.value)} placeholder={t('adv.notes.clientNamePh')} />
         </div>
         <div>
-          <label style={lbl}>Próxima reunión</label>
+          <label style={lbl}>{t('adv.notes.nextMeeting')}</label>
           <input style={{ ...inp }} type="date" value={meetingDate} onChange={e => setMeetingDate(e.target.value)} />
         </div>
       </div>
 
       <div>
-        <label style={lbl}>Observaciones del asesor</label>
+        <label style={lbl}>{t('adv.notes.comments')}</label>
         <textarea
           style={ta}
           value={comments}
           onChange={e => setComments(e.target.value)}
-          placeholder="Notas sobre la situación financiera del cliente, patrones observados, contexto relevante para la reunión..."
+          placeholder={t('adv.notes.commentsPh')}
         />
       </div>
 
       <div>
-        <label style={lbl}>Próximos pasos recomendados</label>
+        <label style={lbl}>{t('adv.notes.nextSteps')}</label>
         <textarea
           style={{ ...ta, minHeight: 70 }}
           value={nextSteps}
@@ -228,7 +231,7 @@ function AdvisorNotes({ notes, onSave }) {
           placeholder="1. Revisar gastos de entretenimiento&#10;2. Definir meta de fondo de emergencia&#10;3. Evaluar refinanciamiento tarjeta BancoEstado"
         />
         <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: 4 }}>
-          Sugerencia: usa numeración para ordenar por prioridad.
+          {t('adv.notes.nextStepsHint')}
         </div>
       </div>
 
@@ -241,11 +244,11 @@ function AdvisorNotes({ notes, onSave }) {
             cursor: 'pointer', fontFamily: 'var(--syne, sans-serif)',
           }}
         >
-          {saved ? '✓ Guardado' : 'Guardar notas'}
+          {saved ? t('adv.notes.saved') : t('adv.notes.save')}
         </button>
         {notes.updatedAt && (
           <span style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)' }}>
-            Última actualización: {new Date(notes.updatedAt).toLocaleDateString('es-CL')}
+            {t('adv.notes.updated', { d: new Date(notes.updatedAt).toLocaleDateString('es-CL') })}
           </span>
         )}
       </div>
@@ -255,7 +258,7 @@ function AdvisorNotes({ notes, onSave }) {
         padding: '8px 10px', background: 'var(--sur2)',
         borderRadius: 6, borderLeft: '2px solid var(--brd2)', lineHeight: 1.5,
       }}>
-        🔒 Las notas se guardan localmente en este dispositivo. No se transmiten a ningún servidor.
+        {t('adv.notes.local')}
       </div>
     </div>
   )
@@ -263,6 +266,7 @@ function AdvisorNotes({ notes, onSave }) {
 
 // ── MAIN COMPONENT ────────────────────────────────────────────────────────────
 export default function Advisor() {
+  const { t } = useT()
   const { incomes: _incAll, expenses: _expAll, budgets, debts, goals, settings, updateSettings } = useApp()
   const incomes = (_incAll || []).filter(r => !r?.inv)   // Modo Asesor personal: excluye inversión
   const expenses = (_expAll || []).filter(r => !r?.inv)
@@ -300,7 +304,7 @@ export default function Advisor() {
       })
     } catch (e) {
       console.error('PDF error:', e)
-      setPdfError('Error al generar el PDF. Intenta de nuevo.')
+      setPdfError(t('adv.pdf.error'))
     } finally {
       setPdfLoading(false)
     }
@@ -337,14 +341,14 @@ export default function Advisor() {
   const avgGoalPct = goalsProgress.length > 0 ? goalsProgress.reduce((s, g) => s + g.pct, 0) / goalsProgress.length : 0
 
   const metrics = { savingRate, mIncome, mExpense, mBalance, totalDebt, goals, budgets, overBudgetCount, monthExpenses, debts, sym }
-  const signals = useMemo(() => calcTrafficLight(metrics), [savingRate, mIncome, mBalance, totalDebt, overBudgetCount, goals.length])
-  const alerts  = useMemo(() => calcAlerts(metrics),       [savingRate, mIncome, mBalance, debts, monthExpenses, goals, overBudgetCount])
+  const signals = useMemo(() => calcTrafficLight(metrics, t), [savingRate, mIncome, mBalance, totalDebt, overBudgetCount, goals.length, settings.language])
+  const alerts  = useMemo(() => calcAlerts(metrics, t),       [savingRate, mIncome, mBalance, debts, monthExpenses, goals, overBudgetCount, settings.language])
 
   // Score general (0-100) basado en semáforos
   const scoreMap = { green: 100, yellow: 50, red: 0 }
   const score = signals.length > 0 ? Math.round(signals.reduce((s, sig) => s + scoreMap[sig.status], 0) / signals.length) : 0
   const scoreColor = score >= 70 ? '#1aa368' : score >= 40 ? '#d4982a' : '#e05a4a'
-  const scoreLabel = score >= 70 ? 'Situación saludable' : score >= 40 ? 'Requiere atención' : 'Situación de riesgo'
+  const scoreLabel = score >= 70 ? t('adv.score.healthy') : score >= 40 ? t('adv.score.attention') : t('adv.score.risk')
 
   const noData = mIncome === 0 && mExpense === 0 && debts.length === 0
 
@@ -354,23 +358,23 @@ export default function Advisor() {
           count: subCount, alerts: subAlerts, activeSubs } = subMetrics
 
   return (
-    <ProGate feature="Modo Asesor">
+    <ProGate feature="Modo Asesor">{/* nombre de feature interno */}
     <div className="stack">
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
-            <h1 style={{ fontSize: 16, fontWeight: 600, letterSpacing: '-0.3px' }}>Modo Asesor</h1>
+            <h1 style={{ fontSize: 16, fontWeight: 600, letterSpacing: '-0.3px' }}>{t('adv.title')}</h1>
             <div style={{
               fontSize: 9, fontFamily: 'var(--mono)', fontWeight: 600,
               background: 'var(--grn-bg)', color: 'var(--grn)',
               padding: '2px 8px', borderRadius: 20, letterSpacing: '0.5px',
             }}>
-              VISTA PROFESIONAL
+              {t('adv.badge')}
             </div>
           </div>
           <p style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)' }}>
-            Diagnóstico · Alertas · Notas · Preparación de reunión · {monthLabel(activeMonth)}
+            {t('adv.sub', { month: monthLabel(activeMonth) })}
           </p>
         </div>
         <select
@@ -394,9 +398,9 @@ export default function Advisor() {
           fontSize: 13, color: 'var(--tm)', lineHeight: 1.6, textAlign: 'center',
         }}>
           <div style={{ fontSize: 24, marginBottom: 8 }}>◈</div>
-          <div style={{ fontWeight: 600, marginBottom: 4 }}>Sin datos para analizar</div>
+          <div style={{ fontWeight: 600, marginBottom: 4 }}>{t('adv.empty.title')}</div>
           <div style={{ fontSize: 12, color: 'var(--th)' }}>
-            Registra ingresos, gastos y deudas para ver el diagnóstico completo del cliente.
+            {t('adv.empty.sub')}
           </div>
         </div>
       )}
@@ -418,22 +422,20 @@ export default function Advisor() {
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 15, fontWeight: 700, color: scoreColor, marginBottom: 3 }}>{scoreLabel}</div>
                 <div style={{ fontSize: 12, color: 'var(--tm)', lineHeight: 1.5 }}>
-                  {advisorNotes.clientName ? `Cliente: ${advisorNotes.clientName} · ` : ''}
-                  {signals.filter(s => s.status === 'green').length} indicadores saludables,{' '}
-                  {signals.filter(s => s.status === 'yellow').length} requieren atención,{' '}
-                  {signals.filter(s => s.status === 'red').length} en riesgo.
+                  {advisorNotes.clientName ? t('adv.score.client', { name: advisorNotes.clientName }) : ''}
+                  {t('adv.score.summary', { g: signals.filter(s => s.status === 'green').length, y: signals.filter(s => s.status === 'yellow').length, r: signals.filter(s => s.status === 'red').length })}
                 </div>
                 {advisorNotes.meetingDate && (
                   <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: 4 }}>
-                    Próxima reunión: {new Date(advisorNotes.meetingDate + 'T12:00').toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' })}
+                    {t('adv.score.nextMeeting', { d: new Date(advisorNotes.meetingDate + 'T12:00').toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' }) })}
                   </div>
                 )}
               </div>
               <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
                 {[
-                  { c: '#1aa368', l: 'Saludable' },
-                  { c: '#d4982a', l: 'Atención' },
-                  { c: '#e05a4a', l: 'Riesgo' },
+                  { c: '#1aa368', l: t('adv.status.green') },
+                  { c: '#d4982a', l: t('adv.status.yellow') },
+                  { c: '#e05a4a', l: t('adv.status.red') },
                 ].map(i => (
                   <div key={i.l} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)' }}>
                     <div style={{ width: 7, height: 7, borderRadius: '50%', background: i.c }} />
@@ -446,33 +448,32 @@ export default function Advisor() {
 
           {/* KPIs */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 8 }}>
-            <AdvisorKPI label="Ingreso mes" value={fmtMoney(mIncome, sym)} color="var(--grn)" />
-            <AdvisorKPI label="Gasto mes" value={fmtMoney(mExpense, sym)} color={mExpense > mIncome ? '#e05a4a' : 'var(--tx)'} />
-            <AdvisorKPI label="Flujo neto" value={fmtMoney(mBalance, sym)} color={mBalance >= 0 ? 'var(--grn)' : '#e05a4a'} />
-            <AdvisorKPI label="Tasa ahorro" value={fmtPct(savingRate)} color={savingRate >= 0.2 ? 'var(--grn)' : savingRate >= 0.1 ? '#d4982a' : '#e05a4a'} sub="Meta: 20%+" />
-            <AdvisorKPI label="Deuda total" value={fmtMoney(totalDebt, sym)} color={totalDebt > 0 ? '#d4982a' : 'var(--grn)'} sub={totalDebt > 0 ? `Min: ${fmtMoney(totalMinPayments, sym)}/mes` : 'Sin deudas'} />
-            <AdvisorKPI label="Metas activas" value={goals.length} sub={`Avance prom: ${fmtPct(avgGoalPct)}`} />
-            <AdvisorKPI label="Presupuestos" value={overBudgetCount > 0 ? `${overBudgetCount} excedidos` : 'Al día'} color={overBudgetCount > 0 ? '#e05a4a' : 'var(--grn)'} />
+            <AdvisorKPI label={t('adv.kpi.income')} value={fmtMoney(mIncome, sym)} color="var(--grn)" />
+            <AdvisorKPI label={t('adv.kpi.expense')} value={fmtMoney(mExpense, sym)} color={mExpense > mIncome ? '#e05a4a' : 'var(--tx)'} />
+            <AdvisorKPI label={t('adv.kpi.flow')} value={fmtMoney(mBalance, sym)} color={mBalance >= 0 ? 'var(--grn)' : '#e05a4a'} />
+            <AdvisorKPI label={t('adv.kpi.savingRate')} value={fmtPct(savingRate)} color={savingRate >= 0.2 ? 'var(--grn)' : savingRate >= 0.1 ? '#d4982a' : '#e05a4a'} sub={t('adv.kpi.savingGoal')} />
+            <AdvisorKPI label={t('adv.kpi.debt')} value={fmtMoney(totalDebt, sym)} color={totalDebt > 0 ? '#d4982a' : 'var(--grn)'} sub={totalDebt > 0 ? t('adv.kpi.minPerMonth', { v: fmtMoney(totalMinPayments, sym) }) : t('adv.kpi.noDebts')} />
+            <AdvisorKPI label={t('adv.kpi.goals')} value={goals.length} sub={t('adv.kpi.avgProgress', { pct: fmtPct(avgGoalPct) })} />
+            <AdvisorKPI label={t('adv.kpi.budgets')} value={overBudgetCount > 0 ? t('adv.kpi.budgetsOver', { n: overBudgetCount }) : t('adv.kpi.budgetsOk')} color={overBudgetCount > 0 ? '#e05a4a' : 'var(--grn)'} />
           </div>
 
           {/* Semáforo */}
           <Card>
-            <CardHeader title="Semáforo financiero" />
+            <CardHeader title={t('adv.trafficTitle')} />
             <TrafficLight signals={signals} />
           </Card>
 
           {/* Alertas automáticas */}
           {alerts.length > 0 && (
             <Card>
-              <CardHeader title={`Alertas automáticas (${alerts.length})`} />
+              <CardHeader title={t('adv.alertsTitle', { n: alerts.length })} />
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {alerts.map((a, i) => (
                   <Alert key={i} type={a.type}>{a.text}</Alert>
                 ))}
               </div>
               <p style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: 8, lineHeight: 1.5 }}>
-                * Alertas generadas automáticamente a partir de los datos registrados. Son señales orientativas —
-                no constituyen diagnóstico financiero certificado ni recomendaciones de inversión.
+                {t('adv.alertsDisclaimer')}
               </p>
             </Card>
           )}
@@ -480,7 +481,7 @@ export default function Advisor() {
           {/* Desglose deudas */}
           {debts.length > 0 && (
             <Card>
-              <CardHeader title="Deudas activas" />
+              <CardHeader title={t('adv.debtsTitle')} />
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {debts.map(d => {
                   const pct = d.initial > 0 ? (d.initial - d.balance) / d.initial : 0
@@ -493,19 +494,19 @@ export default function Advisor() {
                         <div>
                           <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx)' }}>{d.creditor}</div>
                           <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)' }}>
-                            TAE: {d.rate}% · Pago mínimo: {fmtMoney(d.minPayment || 0, sym)}/mes
+                            {t('adv.debts.rateLine', { rate: d.rate, v: fmtMoney(d.minPayment || 0, sym) })}
                           </div>
                         </div>
                         <div style={{ textAlign: 'right' }}>
                           <div style={{ fontSize: 13, fontWeight: 700, color: '#d4982a', fontFamily: 'var(--mono)' }}>{fmtMoney(d.balance, sym)}</div>
-                          <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)' }}>pendiente</div>
+                          <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)' }}>{t('adv.debts.pending')}</div>
                         </div>
                       </div>
                       <div style={{ height: 4, background: 'var(--brd)', borderRadius: 2, overflow: 'hidden' }}>
                         <div style={{ height: '100%', width: `${Math.min(pct * 100, 100)}%`, background: 'var(--grn)', borderRadius: 2 }} />
                       </div>
                       <div style={{ fontSize: 9, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: 3 }}>
-                        {fmtPct(pct)} pagado · Vence: {d.dueDate || '—'}
+                        {t('adv.debts.paidDue', { pct: fmtPct(pct), d: d.dueDate || '—' })}
                       </div>
                     </div>
                   )
@@ -517,7 +518,7 @@ export default function Advisor() {
           {/* Metas */}
           {goals.length > 0 && (
             <Card>
-              <CardHeader title="Avance de metas" />
+              <CardHeader title={t('adv.goalsTitle')} />
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {goals.map(g => {
                   const pct = g.target > 0 ? Math.min(g.saved / g.target, 1) : 0
@@ -533,7 +534,7 @@ export default function Advisor() {
                         <div style={{ height: '100%', width: `${pct * 100}%`, background: g.color || 'var(--grn)', borderRadius: 3 }} />
                       </div>
                       <div style={{ fontSize: 9, color: 'var(--th)', fontFamily: 'var(--mono)' }}>
-                        {fmtPct(pct)} completado · Fecha objetivo: {g.targetDate || '—'} · Prioridad: {g.priority || '—'}
+                        {t('adv.goals.line', { pct: fmtPct(pct), d: g.targetDate || '—', p: g.priority || '—' })}
                       </div>
                     </div>
                   )
@@ -546,14 +547,14 @@ export default function Advisor() {
 
       {/* Notas del asesor — siempre visible */}
       <Card>
-        <CardHeader title="Notas del asesor y próximos pasos" />
+        <CardHeader title={t('adv.notesTitle')} />
         <AdvisorNotes notes={advisorNotes} onSave={saveNotes} />
       </Card>
 
       {/* Plantilla del cliente */}
       <Card>
-        <CardHeader title="Perfil del cliente" />
-        <TemplateSelector compact onApplied={(t) => showToast(`Plantilla "${t.name}" aplicada.`, 'ok')} />
+        <CardHeader title={t('adv.profileTitle')} />
+        <TemplateSelector compact />
       </Card>
 
       {/* Preview PDF + CTA */}
@@ -561,14 +562,14 @@ export default function Advisor() {
         {/* Preview mini del reporte */}
         <div style={{background:'#fff',padding:'16px 20px',borderBottom:'0.5px solid rgba(0,0,0,.08)'}}>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
-            <div style={{fontSize:11,fontWeight:700,color:'#1a1a1a',letterSpacing:.5}}>REPORTE FINANCIERO · VISTA PREVIA</div>
+            <div style={{fontSize:11,fontWeight:700,color:'#1a1a1a',letterSpacing:.5}}>{t('adv.pdf.preview')}</div>
             <div style={{fontSize:9,color:'#888',fontFamily:'monospace'}}>FinanceOS Pro</div>
           </div>
           <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8,marginBottom:12}}>
             {[
-              {l:'Ingresos mes',    v:fmtMoney(mIncome, sym), c:'#1a6b4a'},
-              {l:'Gastos mes',      v:fmtMoney(mExpense, sym), c:'#e05a4a'},
-              {l:'Tasa de ahorro',  v:fmtPct(mIncome>0?(mIncome-mExpense)/mIncome:0), c:'#1a6b4a'},
+              {l:t('adv.pdf.income'),    v:fmtMoney(mIncome, sym), c:'#1a6b4a'},
+              {l:t('adv.pdf.expense'),      v:fmtMoney(mExpense, sym), c:'#e05a4a'},
+              {l:t('adv.pdf.savingRate'),  v:fmtPct(mIncome>0?(mIncome-mExpense)/mIncome:0), c:'#1a6b4a'},
             ].map((item,i) => (
               <div key={i} style={{background:'#f8f9fa',borderRadius:6,padding:'8px 10px'}}>
                 <div style={{fontSize:8,color:'#888',marginBottom:2,textTransform:'uppercase',letterSpacing:.5}}>{item.l}</div>
@@ -577,16 +578,16 @@ export default function Advisor() {
             ))}
           </div>
           <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
-            {['✓ Semáforo financiero','✓ Alertas automáticas','✓ Deudas activas','✓ Metas de ahorro','✓ Notas del asesor'].map((t,i) => (
-              <span key={i} style={{fontSize:9,padding:'2px 8px',borderRadius:10,background:'rgba(26,107,74,.08)',color:'#1a6b4a',fontFamily:'monospace'}}>{t}</span>
+            {t('adv.pdf.chips').split('|').map((chip,i) => (
+              <span key={i} style={{fontSize:9,padding:'2px 8px',borderRadius:10,background:'rgba(26,107,74,.08)',color:'#1a6b4a',fontFamily:'monospace'}}>{chip}</span>
             ))}
           </div>
         </div>
         {/* CTA */}
         <div style={{padding:'14px 20px',background:'var(--grn-bg)',display:'flex',alignItems:'center',gap:14,flexWrap:'wrap'}}>
           <div style={{flex:1}}>
-            <div style={{fontSize:13,fontWeight:600,color:'var(--tx)',marginBottom:2}}>Exportar reporte PDF profesional</div>
-            <div style={{fontSize:11,color:'var(--th)',fontFamily:'var(--mono)'}}>Listo para compartir con el cliente en 1 click.</div>
+            <div style={{fontSize:13,fontWeight:600,color:'var(--tx)',marginBottom:2}}>{t('adv.pdf.ctaTitle')}</div>
+            <div style={{fontSize:11,color:'var(--th)',fontFamily:'var(--mono)'}}>{t('adv.pdf.ctaSub')}</div>
             {pdfError && <div style={{fontSize:11,color:'#e05a4a',fontFamily:'var(--mono)',marginTop:4}}>{pdfError}</div>}
           </div>
           <button
@@ -594,7 +595,7 @@ export default function Advisor() {
             disabled={pdfLoading || noData}
             style={{background:pdfLoading?'var(--sur)':'var(--grn)',color:pdfLoading?'var(--th)':'#fff',border:'none',borderRadius:6,padding:'10px 20px',fontSize:12,fontWeight:600,cursor:pdfLoading||noData?'not-allowed':'pointer',fontFamily:'var(--syne, sans-serif)',flexShrink:0,opacity:noData?0.5:1,transition:'all .15s'}}
           >
-            {pdfLoading ? 'Generando PDF…' : '↓ Exportar PDF'}
+            {pdfLoading ? t('adv.pdf.generating') : t('adv.pdf.export')}
           </button>
         </div>
       </div>
@@ -603,17 +604,17 @@ export default function Advisor() {
       {subCount > 0 && (
         <div style={{ background: 'var(--sur)', border: '.5px solid var(--brd)', borderRadius: 'var(--r)', padding: '16px', marginBottom: 0 }}>
           <div style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.8px', marginBottom: 2 }}>
-            Gastos recurrentes estimados
+            {t('adv.subs.title')}
           </div>
           <div style={{ fontSize: 9, fontFamily: 'var(--mono)', color: 'var(--th)', marginBottom: 10 }}>
-            Gasto proyectado · no incluido en gastos registrados · orientativo
+            {t('adv.subs.note')}
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px,1fr))', gap: 8, marginBottom: 12 }}>
             {[
-              { label: 'Gasto mensual', value: `${sym}${subMonthly.toLocaleString('es-CL', {maximumFractionDigits:0})}` },
-              { label: 'Gasto anual',   value: `${sym}${subAnnual.toLocaleString('es-CL', {maximumFractionDigits:0})}` },
-              { label: 'Activas',       value: `${activeSubs.length}` },
-              { label: '% del ingreso', value: mIncome > 0 ? `${(subPct*100).toFixed(1)}%` : '—' },
+              { label: t('adv.subs.monthly'), value: `${sym}${subMonthly.toLocaleString('es-CL', {maximumFractionDigits:0})}` },
+              { label: t('adv.subs.annual'),   value: `${sym}${subAnnual.toLocaleString('es-CL', {maximumFractionDigits:0})}` },
+              { label: t('adv.subs.active'),       value: `${activeSubs.length}` },
+              { label: t('adv.subs.pctIncome'), value: mIncome > 0 ? `${(subPct*100).toFixed(1)}%` : '—' },
             ].map(m => (
               <div key={m.label} style={{ background: 'var(--sur2)', borderRadius: 6, padding: '8px 10px', border: '.5px solid var(--brd)' }}>
                 <div style={{ fontSize: 9, fontFamily: 'var(--mono)', color: 'var(--th)', marginBottom: 2, textTransform: 'uppercase', letterSpacing: '.5px' }}>{m.label}</div>
@@ -632,7 +633,7 @@ export default function Advisor() {
             </div>
           )}
           <div style={{ fontSize: 9, fontFamily: 'var(--mono)', color: 'var(--th)', marginTop: 10 }}>
-            Las sugerencias son orientativas y no constituyen asesoría financiera.
+            {t('adv.subs.disclaimer')}
           </div>
         </div>
       )}

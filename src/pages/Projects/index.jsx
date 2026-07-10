@@ -128,6 +128,11 @@ export default function Projects() {
                         </span>
                       </div>
                       {mort > 0 && <Row label={t('projects.linkedMortgage')} value={`-${fmtMoney(mort, sym)}`} color="#e84142" />}
+                      {val > 0 && mort === 0 && (
+                        <div style={{ fontSize: 10, color: 'var(--amb, #b45309)', fontFamily: 'var(--mono)', lineHeight: 1.5, padding: '6px 8px', background: 'rgba(245,166,35,.08)', border: '.5px solid rgba(245,166,35,.25)', borderRadius: 6 }}>
+                          {t('projects.noMortgageHint')}
+                        </div>
+                      )}
                       {val > 0 && (
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                           <span style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '.5px' }}>{t('projects.equity')}</span>
