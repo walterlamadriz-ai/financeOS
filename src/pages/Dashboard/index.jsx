@@ -609,7 +609,7 @@ export default function Dashboard({ setPage }) {
       {/* Proyección fin de mes */}
       {!compact && (kpis.totalInc > 0 || kpis.totalExp > 0) && (() => {
         // Cálculo compartido con la página Proyección — mismos números en ambas vistas
-        const { today, daysInMonth, daysLeft, dailyExp, projInc, projExp, projBal } =
+        const { today, daysInMonth, daysLeft, dailyExp, projInc, projExp, projBal, avgExp, avgExpMonths } =
           projectEndOfMonth({ incomes, expenses, activeMonth })
         const pctMonth = (today / daysInMonth * 100).toFixed(0)
         const over     = projBal < 0
@@ -637,6 +637,11 @@ export default function Dashboard({ setPage }) {
             <div style={{ height:4, borderRadius:2, background:'var(--brd2)', overflow:'hidden', marginBottom:4 }}>
               <div style={{ height:'100%', width:`${pctMonth}%`, background: over ? 'var(--red)' : 'var(--accent)', borderRadius:2, transition:'.3s' }} />
             </div>
+            {avgExp > 0 && avgExpMonths > 0 && (
+              <div style={{ fontSize:10, fontFamily:'var(--mono)', color:'var(--th)', marginBottom:4, opacity:.8 }}>
+                {t('dash.proj.basis', { cur: `${sym}${fmt(kpis.totalExp)}`, n: avgExpMonths, avg: `${sym}${fmt(avgExp)}` })}
+              </div>
+            )}
             <div style={{ display:'flex', justifyContent:'space-between', fontSize:11, fontFamily:'var(--mono)', color:'var(--th)' }}>
               <span>{t('dash.proj.elapsed', { pct: pctMonth })}</span>
               {setPage && <span style={{ color:'var(--accent)', cursor:'pointer' }} onClick={() => setPage('cashflow')}>{t('dash.proj.viewFull')}</span>}

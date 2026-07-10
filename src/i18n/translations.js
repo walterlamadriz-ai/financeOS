@@ -9,6 +9,7 @@
 
 export const translations = {
   es: {
+    'dash.proj.basis': "Base: gastado {cur} + ritmo diario, mezclado con tu promedio de {n} mes(es): {avg}/mes",
     'adv.kpi.netWorth': "Patrimonio neto",
     'adv.kpi.netWorthSub': "Activos {a} − Pasivos {p}",
     'tpl.pyme.tagline': "Para dueños que mezclan finanzas personales y del negocio",
@@ -1074,6 +1075,7 @@ export const translations = {
     'settings.install.btn': 'Instalar →',
   },
   en: {
+    'dash.proj.basis': "Basis: spent {cur} + daily pace, blended with your {n}-month average: {avg}/mo",
     'adv.kpi.netWorth': "Net worth",
     'adv.kpi.netWorthSub': "Assets {a} − Liabilities {p}",
     'tpl.pyme.tagline': "For a small business or side venture",
@@ -2139,6 +2141,7 @@ export const translations = {
     'settings.install.btn': 'Install →',
   },
   pt: {
+    'dash.proj.basis': "Base: gasto {cur} + ritmo diário, mesclado com sua média de {n} mês(es): {avg}/mês",
     'adv.kpi.netWorth': "Patrimônio líquido",
     'adv.kpi.netWorthSub': "Ativos {a} − Passivos {p}",
     'tpl.pyme.tagline': "Para um pequeno negócio ou empreendimento paralelo",

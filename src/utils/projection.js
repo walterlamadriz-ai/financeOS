@@ -21,15 +21,19 @@ export function projectEndOfMonth({ incomes, expenses, activeMonth }) {
   const curInc = sumMonth(incomes, activeMonth)
   const curExp = sumMonth(expenses, activeMonth)
 
-  // Promedios de hasta 3 meses completos anteriores al mes en curso
+  // Promedios de hasta 3 meses completos anteriores al mes en curso.
+  // IMPORTANTE: cada promedio usa SOLO meses que tienen datos de ese tipo —
+  // un mes con ingresos pero sin gastos registrados NO diluye el promedio de
+  // gastos (típico al empezar a usar la app), y viceversa.
   const nowMonth = new Date().toISOString().slice(0, 7)
-  const monthsWithData = [...new Set([...(incomes || []), ...(expenses || [])].map(r => r?.date?.slice(0, 7)).filter(Boolean))].sort()
-  let months = monthsWithData.filter(m => m < nowMonth)
-  if (months.length === 0) months = monthsWithData.slice()
-  const last = months.slice(-3)
+  const monthsOf = (arr) => [...new Set((arr || []).map(r => r?.date?.slice(0, 7)).filter(Boolean))].sort()
+  const completeOrAll = (ms) => { const prev = ms.filter(m => m < nowMonth); return (prev.length ? prev : ms).slice(-3) }
   const avg = a => a.length ? a.reduce((s, x) => s + x, 0) / a.length : 0
-  const avgInc = avg(last.map(m => sumMonth(incomes, m)))
-  const avgExp = avg(last.map(m => sumMonth(expenses, m)))
+  const incMonths = completeOrAll(monthsOf(incomes))
+  const expMonths = completeOrAll(monthsOf(expenses))
+  const avgInc = avg(incMonths.map(m => sumMonth(incomes, m)))
+  const avgExp = avg(expMonths.map(m => sumMonth(expenses, m)))
+  const avgExpMonths = expMonths.filter(m => m < nowMonth).length
 
   const dailyExp = today > 0 ? curExp / today : 0
   const paceExp  = curExp + dailyExp * daysLeft
@@ -40,5 +44,5 @@ export function projectEndOfMonth({ incomes, expenses, activeMonth }) {
   const projInc  = Math.max(curInc, avgInc || curInc)
   const projBal  = projInc - projExp
 
-  return { today, daysInMonth, daysLeft, pctElapsed, dailyExp, curInc, curExp, avgInc, avgExp, projInc, projExp, projBal }
+  return { today, daysInMonth, daysLeft, pctElapsed, dailyExp, curInc, curExp, avgInc, avgExp, avgExpMonths, projInc, projExp, projBal }
 }
