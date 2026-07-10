@@ -4,6 +4,7 @@
 
 import { useState, useCallback, useMemo } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
+import { useT } from '../../i18n/useT.js'
 import { dbGetAll, dbAdd } from '../../core/db/index.js'
 import { uid } from '../../utils/index.js'
 import { detectBankTemplate, applyTemplate, BANK_TEMPLATES } from './bankTemplates.js'
@@ -68,11 +69,13 @@ const s = {
   warn: { background: 'rgba(245,166,35,.1)', border: '.5px solid var(--amb)', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: 'var(--amb)', fontFamily: 'var(--mono)', marginBottom: 16 },
 }
 
-const STEPS = ['Importar archivo', 'Mapear columnas', 'Revisar', 'Importar']
+// keys de traducción
+const STEPS = ['imp.step.upload', 'imp.step.map', 'imp.step.review', 'imp.step.import']
 const fmt = (n) => (n || 0).toLocaleString('es-CL', { maximumFractionDigits: 0 })
 
 export default function ImportMovements() {
   const { settings } = useApp()
+  const { t } = useT()
   const sym = { CLP:'$', USD:'US$', EUR:'€', VES:'Bs.', MXN:'$', ARS:'$', COP:'$' }[settings?.currency] || '$'
   const isDemo = !!settings?.isDemo
 
@@ -98,14 +101,14 @@ export default function ImportMovements() {
   async function handleFile(f) {
     const ext = f.name.split('.').pop().toLowerCase()
     if (!['csv', 'xlsx', 'xls'].includes(ext)) {
-      setWarning('Formato no soportado. Se aceptan archivos .csv, .xlsx y .xls')
+      setWarning(t('imp.err.format'))
       return
     }
     setWarning(null)
     setLoading(true)
     try {
       const result = await parseFile(f)
-      if (result.rows.length === 0) { setWarning('El archivo no contiene filas válidas.'); return }
+      if (result.rows.length === 0) { setWarning(t('imp.err.empty')); return }
       const suggested = detectColumns(result.headers)
       const bankTemplate = detectBankTemplate(result.headers)
       setFile(f)
@@ -135,10 +138,10 @@ export default function ImportMovements() {
         })
         if (suggested.debit && suggested.credit) setModeConfig({ mode: 'debit_credit', negativeIsExpense: true })
       }
-      if (result.totalLines > MAX_ROWS) setWarning(`El archivo tiene ${result.totalLines} filas. Se procesarán solo las primeras ${MAX_ROWS}.`)
+      if (result.totalLines > MAX_ROWS) setWarning(t('imp.warn.maxRows', { n: result.totalLines, max: MAX_ROWS }))
       setStep(1)
     } catch (err) {
-      setWarning('Error al leer el archivo: ' + err.message)
+      setWarning(t('imp.err.read', { msg: err.message }))
     } finally {
       setLoading(false)
     }
@@ -181,7 +184,7 @@ export default function ImportMovements() {
       setResult(batch)
       setStep(3)
     } catch (err) {
-      setWarning('Error al importar: ' + err.message)
+      setWarning(t('imp.err.import', { msg: err.message }))
     } finally {
       setImporting(false)
     }
@@ -207,14 +210,14 @@ export default function ImportMovements() {
   return (
     <div style={s.page}>
       <div style={s.header}>
-        <div style={s.eyebrow}>Herramientas</div>
-        <h1 style={s.h1}>Importar movimientos</h1>
-        <p style={s.sub}>Carga movimientos desde tu banco (CSV, XLSX o XLS) o exportados desde una planilla.</p>
+        <div style={s.eyebrow}>{t('imp.eyebrow')}</div>
+        <h1 style={s.h1}>{t('imp.title')}</h1>
+        <p style={s.sub}>{t('imp.sub')}</p>
       </div>
 
       <div style={s.steps}>
         {STEPS.map((name, i) => (
-          <div key={i} style={s.step(step === i, step > i)}>{step > i ? '✓ ' : `${i+1}. `}{name}</div>
+          <div key={i} style={s.step(step === i, step > i)}>{step > i ? '✓ ' : `${i+1}. `}{t(name)}</div>
         ))}
       </div>
 
@@ -224,7 +227,7 @@ export default function ImportMovements() {
       {step === 0 && (
         <>
           <div style={s.card}>
-            <div style={s.cardTitle}>Sube un archivo descargado desde tu banco</div>
+            <div style={s.cardTitle}>{t('imp.upload.title')}</div>
             <div
               style={s.dropzone(drag)}
               onDragOver={e => { e.preventDefault(); setDrag(true) }}
@@ -233,11 +236,11 @@ export default function ImportMovements() {
               onClick={() => document.getElementById('csv-input').click()}
             >
               {loading
-                ? <div style={{ color: 'var(--th)', fontFamily: 'var(--mono)', fontSize: 13 }}>Leyendo archivo…</div>
+                ? <div style={{ color: 'var(--th)', fontFamily: 'var(--mono)', fontSize: 13 }}>{t('imp.upload.reading')}</div>
                 : <>
                     <div style={{ fontSize: 28, marginBottom: 10, color: 'var(--th)' }}>↑</div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tx)', marginBottom: 4 }}>Arrastra el archivo aquí o haz clic para seleccionarlo</div>
-                    <div style={{ fontSize: 12, color: 'var(--th)', fontFamily: 'var(--mono)' }}>Archivos .csv, .xlsx y .xls · máximo {MAX_ROWS} filas</div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tx)', marginBottom: 4 }}>{t('imp.upload.drop')}</div>
+                    <div style={{ fontSize: 12, color: 'var(--th)', fontFamily: 'var(--mono)' }}>{t('imp.upload.formats', { max: MAX_ROWS })}</div>
                   </>
               }
             </div>
@@ -245,19 +248,19 @@ export default function ImportMovements() {
               onChange={e => e.target.files[0] && handleFile(e.target.files[0])} />
             <div style={s.privacy}>
               <span>◑</span>
-              <span>El archivo se procesa localmente en tu navegador. FinanceOS no envía tus movimientos a servidores.</span>
+              <span>{t('imp.upload.privacy')}</span>
             </div>
             <div style={s.hint}>
               <span>→</span>
-              <span>Se aceptan archivos .csv, .xlsx y .xls directamente desde tu banco.</span>
+              <span>{t('imp.upload.hint')}</span>
             </div>
           </div>
 
           {/* Panel bancos soportados */}
           <div style={s.card}>
-            <div style={s.cardTitle}>Bancos con detección automática</div>
+            <div style={s.cardTitle}>{t('imp.banks.title')}</div>
             <p style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', marginBottom: 14 }}>
-              Al subir el archivo de estos bancos, FinanceOS mapea las columnas automáticamente.
+              {t('imp.banks.sub')}
             </p>
             {[
               { label: '🇨🇱 Chile', banks: BANK_TEMPLATES.filter(b => b.country === 'CL') },
@@ -277,19 +280,19 @@ export default function ImportMovements() {
               </div>
             ))}
             <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: 4 }}>
-              ¿Tu banco no aparece? Podés igualmente subir el archivo y mapear las columnas manualmente.
+              {t('imp.banks.notListed')}
             </div>
           </div>
 
           {history.length > 0 && (
             <div style={s.card}>
-              <div style={s.cardTitle}>Historial de importaciones</div>
+              <div style={s.cardTitle}>{t('imp.history.title')}</div>
               <div style={{ overflowX: 'auto' }}>
                 <table style={s.table}>
                   <thead><tr>
-                    <th style={s.th}>Archivo</th><th style={s.th}>Fecha</th>
-                    <th style={s.th}>Importados</th><th style={s.th}>Ingresos</th>
-                    <th style={s.th}>Gastos</th><th style={s.th}>Omitidos</th>
+                    <th style={s.th}>{t('imp.history.file')}</th><th style={s.th}>{t('imp.history.date')}</th>
+                    <th style={s.th}>{t('imp.history.imported')}</th><th style={s.th}>{t('imp.history.income')}</th>
+                    <th style={s.th}>{t('imp.history.expenses')}</th><th style={s.th}>{t('imp.history.skipped')}</th>
                   </tr></thead>
                   <tbody>{history.map((b, i) => (
                     <tr key={i}>
@@ -308,7 +311,7 @@ export default function ImportMovements() {
 
           {history.length === 0 && (
             <div style={{ textAlign: 'center', padding: 32, color: 'var(--th)', fontSize: 13, fontFamily: 'var(--mono)' }}>
-              Aún no has importado movimientos. Descarga un archivo desde tu banco y súbelo aquí.
+              {t('imp.history.empty')}
             </div>
           )}
         </>
@@ -322,28 +325,28 @@ export default function ImportMovements() {
             <div style={{display:'flex',alignItems:'center',gap:12,padding:'12px 14px',background:'rgba(10,92,62,.07)',border:'0.5px solid rgba(10,92,62,.2)',borderRadius:8,marginBottom:16}}>
               <div style={{fontSize:22,flexShrink:0}}>{detectedBank.flag}</div>
               <div style={{flex:1}}>
-                <div style={{fontSize:12,fontWeight:600,color:'var(--grn)',marginBottom:2}}>✓ Detectamos formato {detectedBank.name}</div>
-                <div style={{fontSize:11,color:'var(--th)',fontFamily:'var(--mono)'}}>{detectedBank.hint} · Columnas mapeadas automáticamente</div>
+                <div style={{fontSize:12,fontWeight:600,color:'var(--grn)',marginBottom:2}}>{t('imp.map.detected', { bank: detectedBank.name })}</div>
+                <div style={{fontSize:11,color:'var(--th)',fontFamily:'var(--mono)'}}>{detectedBank.hint} · {t('imp.map.autoMapped')}</div>
               </div>
-              <div style={{fontSize:10,padding:'3px 8px',borderRadius:4,background:'rgba(10,92,62,.1)',color:'var(--grn)',fontFamily:'var(--mono)',flexShrink:0}}>Auto</div>
+              <div style={{fontSize:10,padding:'3px 8px',borderRadius:4,background:'rgba(10,92,62,.1)',color:'var(--grn)',fontFamily:'var(--mono)',flexShrink:0}}>{t('imp.map.auto')}</div>
             </div>
           ) : (
             <div style={{display:'flex',alignItems:'center',gap:10,padding:'10px 14px',background:'var(--sur2)',border:'0.5px solid var(--brd)',borderRadius:8,marginBottom:16}}>
               <div style={{fontSize:18}}>📄</div>
-              <div style={{fontSize:11,color:'var(--th)',fontFamily:'var(--mono)'}}>Banco no detectado — verifica el mapeo de columnas manualmente.</div>
+              <div style={{fontSize:11,color:'var(--th)',fontFamily:'var(--mono)'}}>{t('imp.map.notDetected')}</div>
             </div>
           )}
-          <div style={s.cardTitle}>Confirma el mapeo de columnas</div>
+          <div style={s.cardTitle}>{t('imp.map.title')}</div>
           <p style={{ fontSize: 12, color: 'var(--th)', fontFamily: 'var(--mono)', marginBottom: 16 }}>
-            {detectedBank ? 'Mapeo aplicado automáticamente. Podés ajustar si algo no coincide.' : 'FinanceOS detectó las columnas automáticamente. Confirma o corrige el mapeo antes de continuar.'}
+            {detectedBank ? t('imp.map.subAuto') : t('imp.map.subManual')}
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
-            {[{ key: 'date', label: 'Fecha *' }, { key: 'description', label: 'Descripción *' }].map(({ key, label }) => (
+            {[{ key: 'date', label: t('imp.map.date') }, { key: 'description', label: t('imp.map.desc') }].map(({ key, label }) => (
               <div key={key}>
                 <div style={s.label}>{label}</div>
                 <select style={s.select} value={mapping[key] || ''} onChange={e => setMapping(m => ({ ...m, [key]: e.target.value }))}>
-                  <option value="">— Sin asignar —</option>
+                  <option value="">{t('imp.map.unassigned')}</option>
                   {parsed.headers.map(h => <option key={h} value={h}>{h}</option>)}
                 </select>
               </div>
@@ -351,9 +354,9 @@ export default function ImportMovements() {
           </div>
 
           <div style={{ marginBottom: 16 }}>
-            <div style={s.label}>Formato de monto</div>
+            <div style={s.label}>{t('imp.map.amountFormat')}</div>
             <div style={{ display: 'flex', gap: 16, marginBottom: 12 }}>
-              {[['single', 'Columna única'], ['debit_credit', 'Débito / Crédito separados']].map(([val, lbl]) => (
+              {[['single', t('imp.map.single')], ['debit_credit', t('imp.map.debitCredit')]].map(([val, lbl]) => (
                 <label key={val} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, cursor: 'pointer', color: 'var(--tx)' }}>
                   <input type="radio" name="mode" value={val} checked={modeConfig.mode === val}
                     onChange={() => setModeConfig(c => ({ ...c, mode: val }))} />
@@ -365,18 +368,18 @@ export default function ImportMovements() {
             {modeConfig.mode === 'single' && (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div>
-                  <div style={s.label}>Columna monto *</div>
+                  <div style={s.label}>{t('imp.map.amountCol')}</div>
                   <select style={s.select} value={mapping.amount || ''} onChange={e => setMapping(m => ({ ...m, amount: e.target.value }))}>
-                    <option value="">— Sin asignar —</option>
+                    <option value="">{t('imp.map.unassigned')}</option>
                     {parsed.headers.map(h => <option key={h} value={h}>{h}</option>)}
                   </select>
                 </div>
                 <div>
-                  <div style={s.label}>Monto negativo es</div>
+                  <div style={s.label}>{t('imp.map.negativeIs')}</div>
                   <select style={s.select} value={modeConfig.negativeIsExpense ? 'expense' : 'income'}
                     onChange={e => setModeConfig(c => ({ ...c, negativeIsExpense: e.target.value === 'expense' }))}>
-                    <option value="expense">Gasto</option>
-                    <option value="income">Ingreso</option>
+                    <option value="expense">{t('imp.map.expense')}</option>
+                    <option value="income">{t('imp.map.income')}</option>
                   </select>
                 </div>
               </div>
@@ -385,16 +388,16 @@ export default function ImportMovements() {
             {modeConfig.mode === 'debit_credit' && (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div>
-                  <div style={s.label}>Columna débito (gasto)</div>
+                  <div style={s.label}>{t('imp.map.debitCol')}</div>
                   <select style={s.select} value={mapping.debit || ''} onChange={e => setMapping(m => ({ ...m, debit: e.target.value }))}>
-                    <option value="">— Sin asignar —</option>
+                    <option value="">{t('imp.map.unassigned')}</option>
                     {parsed.headers.map(h => <option key={h} value={h}>{h}</option>)}
                   </select>
                 </div>
                 <div>
-                  <div style={s.label}>Columna crédito (ingreso)</div>
+                  <div style={s.label}>{t('imp.map.creditCol')}</div>
                   <select style={s.select} value={mapping.credit || ''} onChange={e => setMapping(m => ({ ...m, credit: e.target.value }))}>
-                    <option value="">— Sin asignar —</option>
+                    <option value="">{t('imp.map.unassigned')}</option>
                     {parsed.headers.map(h => <option key={h} value={h}>{h}</option>)}
                   </select>
                 </div>
@@ -403,18 +406,18 @@ export default function ImportMovements() {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
-            {[{ key: 'category', label: 'Categoría (opcional)' }, { key: 'account', label: 'Cuenta (opcional)' }].map(({ key, label }) => (
+            {[{ key: 'category', label: t('imp.map.categoryOpt') }, { key: 'account', label: t('imp.map.accountOpt') }].map(({ key, label }) => (
               <div key={key}>
                 <div style={s.label}>{label}</div>
                 <select style={s.select} value={mapping[key] || ''} onChange={e => setMapping(m => ({ ...m, [key]: e.target.value }))}>
-                  <option value="">— No importar —</option>
+                  <option value="">{t('imp.map.noImport')}</option>
                   {parsed.headers.map(h => <option key={h} value={h}>{h}</option>)}
                 </select>
               </div>
             ))}
           </div>
 
-          <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', marginBottom: 8 }}>VISTA PREVIA — PRIMERAS 3 FILAS</div>
+          <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', marginBottom: 8 }}>{t('imp.map.preview')}</div>
           <div style={{ overflowX: 'auto', marginBottom: 16 }}>
             <table style={s.table}>
               <thead><tr>{parsed.headers.map(h => <th key={h} style={s.th}>{h}</th>)}</tr></thead>
@@ -425,11 +428,11 @@ export default function ImportMovements() {
           </div>
 
           <div style={s.btnRow}>
-            <button style={{ ...s.btn, ...s.btnSecondary }} onClick={() => setStep(0)}>← Volver</button>
+            <button style={{ ...s.btn, ...s.btnSecondary }} onClick={() => setStep(0)}>{t('imp.back')}</button>
             <button style={{ ...s.btn, ...s.btnPrimary }}
               disabled={!mapping.date || !mapping.description || (modeConfig.mode === 'single' && !mapping.amount) || (modeConfig.mode === 'debit_credit' && !mapping.debit && !mapping.credit)}
               onClick={handlePreview}>
-              Revisar movimientos →
+              {t('imp.map.next')}
             </button>
           </div>
         </div>
@@ -439,20 +442,20 @@ export default function ImportMovements() {
       {step === 2 && (
         <>
           <div style={s.card}>
-            <div style={s.cardTitle}>Resumen de importación</div>
+            <div style={s.cardTitle}>{t('imp.review.title')}</div>
             <div style={s.summaryGrid}>
-              <div style={s.summaryItem}><div style={s.summaryLabel}>Total filas</div><div style={s.summaryVal}>{stats.total}</div></div>
-              <div style={s.summaryItem}><div style={s.summaryLabel}>Válidos</div><div style={{ ...s.summaryVal, color: 'var(--accent)' }}>{stats.valid}</div></div>
-              <div style={s.summaryItem}><div style={s.summaryLabel}>Duplicados</div><div style={{ ...s.summaryVal, color: 'var(--amb)' }}>{stats.duplicate}</div></div>
-              <div style={s.summaryItem}><div style={s.summaryLabel}>Con error</div><div style={{ ...s.summaryVal, color: 'var(--red)' }}>{stats.error}</div></div>
-              <div style={s.summaryItem}><div style={s.summaryLabel}>Ingresos est.</div><div style={{ ...s.summaryVal, color: 'var(--accent)', fontSize: 13 }}>{sym}{fmt(stats.incomeAmt)}</div></div>
-              <div style={s.summaryItem}><div style={s.summaryLabel}>Gastos est.</div><div style={{ ...s.summaryVal, color: 'var(--red)', fontSize: 13 }}>{sym}{fmt(stats.expenseAmt)}</div></div>
+              <div style={s.summaryItem}><div style={s.summaryLabel}>{t('imp.review.total')}</div><div style={s.summaryVal}>{stats.total}</div></div>
+              <div style={s.summaryItem}><div style={s.summaryLabel}>{t('imp.review.valid')}</div><div style={{ ...s.summaryVal, color: 'var(--accent)' }}>{stats.valid}</div></div>
+              <div style={s.summaryItem}><div style={s.summaryLabel}>{t('imp.review.dup')}</div><div style={{ ...s.summaryVal, color: 'var(--amb)' }}>{stats.duplicate}</div></div>
+              <div style={s.summaryItem}><div style={s.summaryLabel}>{t('imp.review.error')}</div><div style={{ ...s.summaryVal, color: 'var(--red)' }}>{stats.error}</div></div>
+              <div style={s.summaryItem}><div style={s.summaryLabel}>{t('imp.review.incomeEst')}</div><div style={{ ...s.summaryVal, color: 'var(--accent)', fontSize: 13 }}>{sym}{fmt(stats.incomeAmt)}</div></div>
+              <div style={s.summaryItem}><div style={s.summaryLabel}>{t('imp.review.expenseEst')}</div><div style={{ ...s.summaryVal, color: 'var(--red)', fontSize: 13 }}>{sym}{fmt(stats.expenseAmt)}</div></div>
             </div>
             <div style={{ display: 'flex', gap: 10, marginBottom: 4 }}>
               {[
-                ['Solo válidos', () => setRows(r => r.map(row => ({ ...row, _include: row.status === 'valid' })))],
-                ['Incluir todos', () => setRows(r => r.map(row => ({ ...row, _include: true })))],
-                ['Ninguno', () => setRows(r => r.map(row => ({ ...row, _include: false })))],
+                [t('imp.review.onlyValid'), () => setRows(r => r.map(row => ({ ...row, _include: row.status === 'valid' })))],
+                [t('imp.review.all'), () => setRows(r => r.map(row => ({ ...row, _include: true })))],
+                [t('imp.review.none'), () => setRows(r => r.map(row => ({ ...row, _include: false })))],
               ].map(([label, fn]) => (
                 <button key={label} style={{ ...s.btn, ...s.btnSecondary, fontSize: 12 }} onClick={fn}>{label}</button>
               ))}
@@ -463,8 +466,8 @@ export default function ImportMovements() {
             <table style={s.table}>
               <thead><tr>
                 <th style={{ ...s.th, width: 32 }}></th>
-                <th style={s.th}>Fecha</th><th style={s.th}>Descripción</th>
-                <th style={s.th}>Monto</th><th style={s.th}>Tipo</th><th style={s.th}>Estado</th>
+                <th style={s.th}>{t('imp.review.thDate')}</th><th style={s.th}>{t('imp.review.thDesc')}</th>
+                <th style={s.th}>{t('imp.review.thAmount')}</th><th style={s.th}>{t('imp.review.thType')}</th><th style={s.th}>{t('imp.review.thStatus')}</th>
               </tr></thead>
               <tbody>{rows.map((row, i) => (
                 <tr key={i} style={{ opacity: row._include ? 1 : .45 }}>
@@ -472,9 +475,9 @@ export default function ImportMovements() {
                   <td style={{ ...s.td, color: 'var(--th)' }}>{row.date || '—'}</td>
                   <td style={{ ...s.td, color: 'var(--tx)', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.description || '—'}</td>
                   <td style={{ ...s.td, color: row.type === 'income' ? 'var(--accent)' : 'var(--red)', fontWeight: 600 }}>{row.type === 'income' ? '+' : '−'}{sym}{fmt(row.amount)}</td>
-                  <td style={{ ...s.td, color: 'var(--th)' }}>{row.type === 'income' ? 'Ingreso' : 'Gasto'}</td>
+                  <td style={{ ...s.td, color: 'var(--th)' }}>{row.type === 'income' ? t('imp.review.typeIncome') : t('imp.review.typeExpense')}</td>
                   <td style={s.td}>
-                    <span style={s.badge(row.status)}>{row.status === 'valid' ? 'Válido' : row.status === 'duplicate' ? 'Duplicado' : 'Error'}</span>
+                    <span style={s.badge(row.status)}>{row.status === 'valid' ? t('imp.review.stValid') : row.status === 'duplicate' ? t('imp.review.stDup') : t('imp.review.stError')}</span>
                     {row.errors?.length > 0 && <div style={{ fontSize: 10, color: 'var(--red)', marginTop: 2 }}>{row.errors.join(', ')}</div>}
                   </td>
                 </tr>
@@ -483,17 +486,17 @@ export default function ImportMovements() {
           </div>
 
           <div style={{ background: 'rgba(0,212,170,.06)', border: '.5px solid rgba(0,212,170,.2)', borderRadius: 8, padding: '12px 14px', fontSize: 12, color: 'var(--tx)', fontFamily: 'var(--mono)', marginBottom: 16 }}>
-            Estos movimientos se guardarán como ingresos y gastos dentro de FinanceOS. Puedes omitir duplicados o filas con error antes de continuar.
+            {t('imp.review.note')}
           </div>
 
           <div style={s.btnRow}>
-            <button style={{ ...s.btn, ...s.btnSecondary }} onClick={() => setStep(1)}>← Volver</button>
+            <button style={{ ...s.btn, ...s.btnSecondary }} onClick={() => setStep(1)}>{t('imp.back')}</button>
             <button style={{ ...s.btn, ...s.btnPrimary, opacity: importing ? .6 : 1 }}
               disabled={importing || stats.toImport === 0} onClick={handleImport}>
-              {importing ? 'Importando…' : `Importar ${stats.toImport} movimiento${stats.toImport !== 1 ? 's' : ''} →`}
+              {importing ? t('imp.review.importing') : t('imp.review.importN', { n: stats.toImport })}
             </button>
           </div>
-          <div style={s.disclaimer}>Esta función ayuda a importar y organizar movimientos. No constituye asesoría financiera, tributaria, legal ni de inversión.</div>
+          <div style={s.disclaimer}>{t('imp.review.disclaimer')}</div>
         </>
       )}
 
@@ -503,22 +506,22 @@ export default function ImportMovements() {
           {result?.demo ? (
             <div style={{ textAlign: 'center', padding: 24 }}>
               <div style={{ fontSize: 28, marginBottom: 12 }}>◈</div>
-              <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--tx)', marginBottom: 8 }}>Modo demo activo</div>
-              <p style={{ fontSize: 13, color: 'var(--th)', fontFamily: 'var(--mono)' }}>En el modo demo no se guardan datos reales.</p>
+              <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--tx)', marginBottom: 8 }}>{t('imp.done.demoTitle')}</div>
+              <p style={{ fontSize: 13, color: 'var(--th)', fontFamily: 'var(--mono)' }}>{t('imp.done.demoText')}</p>
             </div>
           ) : (
             <div style={{ textAlign: 'center', padding: 24 }}>
               <div style={{ fontSize: 28, marginBottom: 12, color: 'var(--accent)' }}>✓</div>
               <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--tx)', marginBottom: 8 }}>
-                {result?.importedRows} movimiento{result?.importedRows !== 1 ? 's' : ''} importado{result?.importedRows !== 1 ? 's' : ''}
+                {t('imp.done.imported', { n: result?.importedRows })}
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, margin: '20px auto', maxWidth: 400 }}>
-                <div style={s.summaryItem}><div style={s.summaryLabel}>Ingresos</div><div style={{ ...s.summaryVal, color: 'var(--accent)', fontSize: 14 }}>{sym}{fmt(result?.totalIncome)}</div></div>
-                <div style={s.summaryItem}><div style={s.summaryLabel}>Gastos</div><div style={{ ...s.summaryVal, color: 'var(--red)', fontSize: 14 }}>{sym}{fmt(result?.totalExpense)}</div></div>
-                <div style={s.summaryItem}><div style={s.summaryLabel}>Omitidos</div><div style={{ ...s.summaryVal, color: 'var(--th)', fontSize: 14 }}>{(result?.skippedRows||0)+(result?.duplicateRows||0)}</div></div>
+                <div style={s.summaryItem}><div style={s.summaryLabel}>{t('imp.history.income')}</div><div style={{ ...s.summaryVal, color: 'var(--accent)', fontSize: 14 }}>{sym}{fmt(result?.totalIncome)}</div></div>
+                <div style={s.summaryItem}><div style={s.summaryLabel}>{t('imp.history.expenses')}</div><div style={{ ...s.summaryVal, color: 'var(--red)', fontSize: 14 }}>{sym}{fmt(result?.totalExpense)}</div></div>
+                <div style={s.summaryItem}><div style={s.summaryLabel}>{t('imp.history.skipped')}</div><div style={{ ...s.summaryVal, color: 'var(--th)', fontSize: 14 }}>{(result?.skippedRows||0)+(result?.duplicateRows||0)}</div></div>
               </div>
-              <p style={{ fontSize: 13, color: 'var(--th)', fontFamily: 'var(--mono)', marginBottom: 16 }}>Los movimientos ya aparecen en Dashboard e Ingresos/Gastos.</p>
-              <button style={{ ...s.btn, ...s.btnPrimary }} onClick={reset}>Importar otro archivo</button>
+              <p style={{ fontSize: 13, color: 'var(--th)', fontFamily: 'var(--mono)', marginBottom: 16 }}>{t('imp.done.visible')}</p>
+              <button style={{ ...s.btn, ...s.btnPrimary }} onClick={reset}>{t('imp.done.again')}</button>
             </div>
           )}
         </div>
