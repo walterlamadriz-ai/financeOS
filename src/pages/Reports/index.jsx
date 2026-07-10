@@ -2,6 +2,7 @@
 import { useMemo, useState } from 'react'
 import { pdf } from '@react-pdf/renderer'
 import { useApp } from '../../context/AppContext.jsx'
+import { useT } from '../../i18n/useT.js'
 import { KPI, Card, CardHeader, Alert, Empty, PageHeader } from '../../components/ui/index.jsx'
 import { fmtMoney, fmtPct } from '../../utils/index.js'
 import { ReportsDisclaimer } from '../../components/legal/MicroCopy.jsx'
@@ -20,6 +21,7 @@ import {
 } from 'recharts'
 
 export default function Reports() {
+  const { t } = useT()
   const { incomes: _incAll, expenses: _expAll, budgets, debts: allDebts, subscriptions: allSubs, settings } = useApp()
   const incomes = (_incAll || []).filter(r => !r?.inv)   // reporte personal: excluye inversión
   const expenses = (_expAll || []).filter(r => !r?.inv)
@@ -103,7 +105,7 @@ export default function Reports() {
   return (
     <div className="stack">
       <div style={{display:'flex',alignItems:'center',flexWrap:'wrap',gap:8}}>
-        <PageHeader title="Reportes" sub={`${monthLabel(activeMonth)} · orientación general, no asesoría certificada`} />
+        <PageHeader title={t('reports.title')} sub={t('reports.sub', { month: monthLabel(activeMonth) })} />
         <MonthSelector incomes={incomes} expenses={expenses} />
         {isPro ? (
           <button
@@ -117,7 +119,7 @@ export default function Reports() {
               transition:'.2s', flexShrink:0,
             }}
           >
-            {pdfLoading ? '⏳ Generando…' : '⬇ Descargar PDF'}
+            {pdfLoading ? t('reports.pdf.generating') : t('reports.pdf.download')}
           </button>
         ) : (
           <a
@@ -132,50 +134,50 @@ export default function Reports() {
               textDecoration:'none', flexShrink:0, whiteSpace:'nowrap',
             }}
           >
-            ◑ PDF — Plan Pro →
+            {t('reports.pdf.pro')}
           </a>
         )}
       </div>
       <div className="kpi-row">
-        <KPI label="Balance neto"  value={fmtMoney(balance,sym)} color={balance>=0?'green':'red'} sub={(totalDebt+totalSubs>0) ? `Tras deudas/subs: ${fmtMoney(freeFlow,sym)}` : 'Ingresos − gastos'} />
-        <KPI label="Tasa ahorro"   value={fmtPct(savingRate)} color={savingRate>=0.25?'green':savingRate>=0.1?'amber':'red'} sub={`Meta: ${settings.savingGoalPct||25}%`} />
-        <KPI label="Ingresos"      value={fmtMoney(totalIncome,sym)} />
-        <KPI label="Suscripciones" value={fmtMoney(totalSubs,sym)} color="amber" sub="pagos recurrentes" />
-        <KPI label="Gastos"        value={fmtMoney(totalExpense,sym)} color="red" />
+        <KPI label={t('reports.kpi.balance')}  value={fmtMoney(balance,sym)} color={balance>=0?'green':'red'} sub={(totalDebt+totalSubs>0) ? t('reports.kpi.afterDebts', { v: fmtMoney(freeFlow,sym) }) : t('reports.kpi.incMinusExp')} />
+        <KPI label={t('reports.kpi.savingRate')}   value={fmtPct(savingRate)} color={savingRate>=0.25?'green':savingRate>=0.1?'amber':'red'} sub={t('reports.kpi.goal', { pct: settings.savingGoalPct||25 })} />
+        <KPI label={t('reports.kpi.income')}      value={fmtMoney(totalIncome,sym)} />
+        <KPI label={t('reports.kpi.subs')} value={fmtMoney(totalSubs,sym)} color="amber" sub={t('reports.kpi.subsSub')} />
+        <KPI label={t('reports.kpi.expenses')}        value={fmtMoney(totalExpense,sym)} color="red" />
       </div>
       <div className="grid2">
         <Card>
-          <CardHeader title="Flujo de dinero del mes" />
+          <CardHeader title={t('reports.chart.flow')} />
           <MoneyFlow incomes={mIncomes} expenses={mExpenses} subscriptions={Array.isArray(allSubs)?allSubs:[]} debts={Array.isArray(allDebts)?allDebts:[]} sym={sym} />
         </Card>
         <Card>
-          <CardHeader title="Gastos por categoría" />
+          <CardHeader title={t('reports.chart.byCat')} />
           <CategoryDonut records={mExpenses} sym={sym} maxCategories={6} />
         </Card>
         <Card>
-          <CardHeader title="Regla 50/30/20" />
-          {totalIncome === 0 ? <Empty text="Registra ingresos para ver el análisis" /> : (() => {
+          <CardHeader title={t('reports.rule.title')} />
+          {totalIncome === 0 ? <Empty text={t('reports.rule.empty')} /> : (() => {
             const rules = [
-              {label:'Necesidades + Deudas', actual:necesidad+totalDebt, ideal:totalIncome*0.5, color:'var(--grn)', max:50},
-              {label:'Deseos',               actual:deseos,              ideal:totalIncome*0.3, color:'var(--amb)', max:30},
-              {label:'Ahorro',               actual:Math.max(0,balance), ideal:totalIncome*0.2, color:'var(--blu)', max:20},
+              {id:'needs', label:t('reports.rule.needs'), actual:necesidad+totalDebt, ideal:totalIncome*0.5, color:'var(--grn)', max:50},
+              {id:'wants', label:t('reports.rule.wants'),               actual:deseos,              ideal:totalIncome*0.3, color:'var(--amb)', max:30},
+              {id:'savings', label:t('reports.rule.savings'),               actual:Math.max(0,balance), ideal:totalIncome*0.2, color:'var(--blu)', max:20},
             ]
             return (
               <div style={{display:'flex',flexDirection:'column',gap:14}}>
                 {rules.map(r => {
                   const actualPct = totalIncome>0 ? r.actual/totalIncome*100 : 0
-                  const ok = r.label==='Ahorro' ? actualPct>=r.max : actualPct<=r.max
+                  const ok = r.id==='savings' ? actualPct>=r.max : actualPct<=r.max
                   return (
                     <div key={r.label}>
                       <div style={{display:'flex',justifyContent:'space-between',marginBottom:4,fontSize:12}}>
                         <span style={{fontWeight:500}}>{r.label}</span>
-                        <span style={{fontFamily:'var(--mono)',color:ok?'var(--grn)':'var(--red)',fontSize:11}}>{actualPct.toFixed(1)}% / {r.max}% ideal {ok?'✓':'⚠'}</span>
+                        <span style={{fontFamily:'var(--mono)',color:ok?'var(--grn)':'var(--red)',fontSize:11}}>{t('reports.rule.idealPct', { actual: actualPct.toFixed(1), max: r.max, mark: ok?'✓':'⚠' })}</span>
                       </div>
                       <div style={{height:8,background:'var(--sur3)',borderRadius:4,overflow:'hidden'}}>
                         <div style={{height:'100%',width:Math.min(actualPct/r.max*100,100)+'%',background:ok?r.color:'var(--red)',borderRadius:4,transition:'width .4s'}}/>
                       </div>
                       <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginTop:2,display:'flex',justifyContent:'space-between'}}>
-                        <span>{fmtMoney(r.actual,sym)}</span><span>ideal: {fmtMoney(r.ideal,sym)}</span>
+                        <span>{fmtMoney(r.actual,sym)}</span><span>{t('reports.rule.ideal', { v: fmtMoney(r.ideal,sym) })}</span>
                       </div>
                     </div>
                   )
@@ -185,8 +187,8 @@ export default function Reports() {
           })()}
         </Card>
         <Card>
-          <CardHeader title="Tendencia 6 meses — Ingresos vs Gastos" />
-          {trendData.every(d=>d.Ingresos===0&&d.Gastos===0) ? <Empty text="Registra ingresos y gastos para ver la tendencia" /> : (
+          <CardHeader title={t('reports.trend.title')} />
+          {trendData.every(d=>d.Ingresos===0&&d.Gastos===0) ? <Empty text={t('reports.trend.empty')} /> : (
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={trendData} barGap={4} barCategoryGap="30%">
                 <CartesianGrid {...gridStyle}/>
@@ -194,16 +196,16 @@ export default function Reports() {
                 <YAxis tick={axisStyle} axisLine={false} tickLine={false} tickFormatter={v=>v>=1000000?(v/1000000).toFixed(1)+'M':v>=1000?(v/1000).toFixed(0)+'K':v}/>
                 <RTooltip contentStyle={ttStyle}/>
                 <Legend wrapperStyle={{fontSize:11,fontFamily:'var(--mono)',paddingTop:8}}/>
-                <Bar dataKey="Ingresos" fill="var(--grn)" radius={[3,3,0,0]} opacity={0.85}/>
-                <Bar dataKey="Gastos"   fill="var(--red)" radius={[3,3,0,0]} opacity={0.75}/>
+                <Bar dataKey="Ingresos" name={t('reports.trend.income')} fill="var(--grn)" radius={[3,3,0,0]} opacity={0.85}/>
+                <Bar dataKey="Gastos"   name={t('reports.trend.expenses')} fill="var(--red)" radius={[3,3,0,0]} opacity={0.75}/>
               </BarChart>
             </ResponsiveContainer>
           )}
         </Card>
       </div>
       <Card>
-        <CardHeader title="Evolución del ahorro mensual" />
-        {trendData.every(d=>d.Ahorro===0) ? <Empty text="Sin datos de ahorro aún" /> : (
+        <CardHeader title={t('reports.savings.title')} />
+        {trendData.every(d=>d.Ahorro===0) ? <Empty text={t('reports.savings.empty')} /> : (
           <ResponsiveContainer width="100%" height={160}>
             <AreaChart data={trendData}>
               <defs>
@@ -217,37 +219,37 @@ export default function Reports() {
               <YAxis tick={axisStyle} axisLine={false} tickLine={false} tickFormatter={v=>v>=1000000?(v/1000000).toFixed(1)+'M':v>=1000?(v/1000).toFixed(0)+'K':v}/>
               <RTooltip contentStyle={ttStyle}/>
               <ReferenceLine y={0} stroke="var(--brd2)"/>
-              <Area type="monotone" dataKey="Ahorro" name="Ahorro neto" stroke="var(--grn)" strokeWidth={2} fill="url(#ahorroGrad)"/>
+              <Area type="monotone" dataKey="Ahorro" name={t('reports.savings.series')} stroke="var(--grn)" strokeWidth={2} fill="url(#ahorroGrad)"/>
             </AreaChart>
           </ResponsiveContainer>
         )}
       </Card>
       <Card>
-        <CardHeader title="Recomendaciones automáticas" />
+        <CardHeader title={t('reports.reco.title')} />
         <div style={{display:'flex',flexDirection:'column',gap:8}}>
           {totalIncome===0
-            ? <Alert type="info">Registra tus ingresos y gastos para ver recomendaciones personalizadas.</Alert>
+            ? <Alert type="info">{t('reports.reco.empty')}</Alert>
             : savingRate>=0.25
-              ? <Alert type="ok">✓ Tu tasa de ahorro ({fmtPct(savingRate)}) supera la meta del {settings.savingGoalPct||25}%. Considera destinar el excedente a metas prioritarias o reducir deuda de alto interés.</Alert>
-              : <Alert type="warn">→ Tasa de ahorro actual: {fmtPct(savingRate)}. Para llegar al {settings.savingGoalPct||25}% necesitas {balance<0?'reducir gastos en '+fmtMoney(-balance+totalIncome*(settings.savingGoalPct/100||0.25),sym):'ahorrar '+fmtMoney(neededToSave,sym)+' más este mes'}.</Alert>
+              ? <Alert type="ok">{t('reports.reco.aboveGoal', { rate: fmtPct(savingRate), goal: settings.savingGoalPct||25 })}</Alert>
+              : <Alert type="warn">{balance<0 ? t('reports.reco.belowGoal.reduce', { rate: fmtPct(savingRate), goal: settings.savingGoalPct||25, v: fmtMoney(-balance+totalIncome*(settings.savingGoalPct/100||0.25),sym) }) : t('reports.reco.belowGoal.save', { rate: fmtPct(savingRate), goal: settings.savingGoalPct||25, v: fmtMoney(neededToSave,sym) })}</Alert>
           }
           {overBudget.length>0
-            ? <Alert type="danger">⚠ {overBudget.map(b=>b.category).join(', ')} excedieron su presupuesto mensual.</Alert>
-            : budgets.length>0 && <Alert type="ok">✓ Todos los presupuestos están dentro del límite mensual.</Alert>
+            ? <Alert type="danger">{t('reports.reco.overBudget', { cats: overBudget.map(b=>b.category).join(', ') })}</Alert>
+            : budgets.length>0 && <Alert type="ok">{t('reports.reco.budgetsOk')}</Alert>
           }
-          {deseos>0 && totalExpense>0 && <Alert type="warn">→ Gastos "deseo": {fmtMoney(deseos,sym)} ({fmtPct(deseos/totalExpense)}). Regla 50/30/20 sugiere máximo 30% del ingreso neto.</Alert>}
+          {deseos>0 && totalExpense>0 && <Alert type="warn">{t('reports.reco.wants', { v: fmtMoney(deseos,sym), pct: fmtPct(deseos/totalExpense) })}</Alert>}
         </div>
       </Card>
       {subMetrics.count > 0 && (
         <Card>
-          <CardHeader title="Suscripciones — gasto estimado" />
-          <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',marginBottom:12}}>Gasto proyectado · no incluido en los gastos registrados del mes</div>
+          <CardHeader title={t('reports.subs.title')} />
+          <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',marginBottom:12}}>{t('reports.subs.note')}</div>
           <div style={{display:'flex',gap:10,flexWrap:'wrap',marginBottom:12}}>
             {[
-              {lb:'Gasto mensual estimado',v:fmtMoney(subMetrics.monthly,sym)},
-              {lb:'Gasto anual estimado',  v:fmtMoney(subMetrics.annual,sym)},
-              {lb:'Servicios activos',     v:`${subMetrics.count}`},
-              ...(subMetrics.monthlyIncome>0?[{lb:'% del ingreso',v:`${(subMetrics.pct*100).toFixed(1)}%`}]:[]),
+              {lb:t('reports.subs.monthly'),v:fmtMoney(subMetrics.monthly,sym)},
+              {lb:t('reports.subs.annual'),  v:fmtMoney(subMetrics.annual,sym)},
+              {lb:t('reports.subs.count'),     v:`${subMetrics.count}`},
+              ...(subMetrics.monthlyIncome>0?[{lb:t('reports.subs.pctIncome'),v:`${(subMetrics.pct*100).toFixed(1)}%`}]:[]),
             ].map(m=>(
               <div key={m.lb} style={{flex:'1 1 110px',background:'var(--sur2)',borderRadius:6,padding:'8px 10px',border:'.5px solid var(--brd)'}}>
                 <div style={{fontSize:9,fontFamily:'var(--mono)',color:'var(--th)',textTransform:'uppercase',letterSpacing:'.5px',marginBottom:2}}>{m.lb}</div>
@@ -257,30 +259,30 @@ export default function Reports() {
           </div>
           {subMetrics.byCategory.length>0 && (
             <div style={{marginBottom:12}}>
-              <div style={{fontSize:9,fontFamily:'var(--mono)',color:'var(--th)',textTransform:'uppercase',letterSpacing:'.5px',marginBottom:7}}>Por categoría</div>
+              <div style={{fontSize:9,fontFamily:'var(--mono)',color:'var(--th)',textTransform:'uppercase',letterSpacing:'.5px',marginBottom:7}}>{t('reports.subs.byCat')}</div>
               {subMetrics.byCategory.map(([cat,data])=>(
                 <div key={cat} style={{display:'flex',justifyContent:'space-between',padding:'4px 0',borderBottom:'.5px solid var(--brd)',fontSize:12}}>
                   <span style={{color:'var(--tm)'}}>{cat}</span>
-                  <span style={{fontFamily:'var(--mono)',color:'var(--tx)'}}>{fmtMoney(data.monthly,sym)}/mes · {data.count} servicio{data.count>1?'s':''}</span>
+                  <span style={{fontFamily:'var(--mono)',color:'var(--tx)'}}>{t('reports.subs.perMonthCount', { v: fmtMoney(data.monthly,sym), n: data.count })}</span>
                 </div>
               ))}
             </div>
           )}
           {subMetrics.alerts.map((a,i)=><Alert key={i} type={a.type==='duplicate'?'warn':'info'}>{a.msg}</Alert>)}
-          <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',marginTop:8}}>Las sugerencias son orientativas y no constituyen asesoría financiera.</div>
+          <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',marginTop:8}}>{t('reports.subs.disclaimer')}</div>
         </Card>
       )}
       {coachSignals.length > 0 && (
         <Card>
-          <CardHeader title="⚕ Diagnóstico del mes" />
-          <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',marginBottom:12}}>Señales orientativas · no constituyen asesoría financiera</div>
+          <CardHeader title={t('reports.diag.title')} />
+          <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',marginBottom:12}}>{t('reports.diag.note')}</div>
           <div style={{display:'flex',flexDirection:'column',gap:10}}>
             {coachSignals.map((s,i) => (
               <div key={i} style={{borderLeft:`3px solid ${SEV_COLOR[s.severity]}`,paddingLeft:10}}>
                 <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:2}}>
                   <span style={{color:SEV_COLOR[s.severity],fontSize:12}}>{SEV_ICON[s.severity]}</span>
                   <span style={{fontSize:10,fontWeight:600,fontFamily:'var(--mono)',color:SEV_COLOR[s.severity],textTransform:'uppercase',letterSpacing:'.4px'}}>
-                    {s.severity === 'warning' ? 'Revisar' : s.severity === 'attention' ? 'Atención' : 'Info'}
+                    {s.severity === 'warning' ? t('coach.sev.warning') : s.severity === 'attention' ? t('coach.sev.attention') : t('dash.sev.info')}
                   </span>
                   <span style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',marginLeft:'auto'}}>{s.category}</span>
                 </div>

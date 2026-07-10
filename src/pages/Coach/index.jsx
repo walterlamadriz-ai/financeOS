@@ -5,15 +5,18 @@
 
 import { useMemo } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
+import { useT } from '../../i18n/useT.js'
 import { evaluateCoach, calcCoachMetrics, COACH_CONFIG } from '../../data/coachRules.js'
 import useSubscriptionMetrics from '../../hooks/useSubscriptionMetrics.js'
 
 // ── ICONO POR SEVERIDAD ────────────────────────────────────────────────────
 const SEV_ICON  = { info: '◈', attention: '⚠', warning: '⊗' }
-const SEV_LABEL = { info: 'Información', attention: 'Atención', warning: 'Revisar' }
+// keys de traducción
+const SEV_LABEL = { info: 'coach.sev.info', attention: 'coach.sev.attention', warning: 'coach.sev.warning' }
 
 // ── TARJETA DE SEÑAL ───────────────────────────────────────────────────────
 function SignalCard({ signal }) {
+  const { t } = useT()
   const color = COACH_CONFIG.severityColors[signal.severity] || 'var(--th)'
   return (
     <div style={{
@@ -24,7 +27,7 @@ function SignalCard({ signal }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
         <span style={{ color, fontSize: 13 }}>{SEV_ICON[signal.severity]}</span>
         <span style={{ fontSize: 11, fontWeight: 600, color, fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '.5px' }}>
-          {SEV_LABEL[signal.severity]}
+          {t(SEV_LABEL[signal.severity])}
         </span>
         <span style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', marginLeft: 'auto' }}>
           {signal.category}
@@ -96,6 +99,7 @@ function KpiBar({ label, value, pct, color }) {
 
 // ── COMPONENTE PRINCIPAL ───────────────────────────────────────────────────
 export default function Coach() {
+  const { t } = useT()
   const { incomes: _incAll, expenses: _expAll, budgets, debts, goals, settings } = useApp()
   const incomes = (_incAll || []).filter(r => !r?.inv)   // panorama personal: excluye inversión
   const expenses = (_expAll || []).filter(r => !r?.inv)
@@ -119,26 +123,26 @@ export default function Coach() {
   // Score orientativo 0-100
   const score = Math.max(0, 100 - warnings.length * 20 - attentions.length * 8)
   const scoreColor = score >= 80 ? 'var(--grn)' : score >= 60 ? 'var(--amb)' : 'var(--red)'
-  const scoreLabel = score >= 80 ? 'Pocas señales activas' : score >= 60 ? 'Algunas señales para revisar' : 'Varias señales activas'
+  const scoreLabel = score >= 80 ? t('coach.score.few') : score >= 60 ? t('coach.score.some') : t('coach.score.many')
 
   return (
     <div>
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
         <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--grn)', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: 6 }}>
-          Diagnóstico financiero
+          {t('coach.kicker')}
         </div>
         <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--tx)', letterSpacing: '-.5px', marginBottom: 4 }}>
-          Señales del mes
+          {t('coach.title')}
         </h1>
         <p style={{ fontSize: 12, color: 'var(--th)', fontFamily: 'var(--mono)', marginBottom: 4 }}>
-          Señales orientativas basadas en tus datos · {metrics.activeMonth}
+          {t('coach.sub', { month: metrics.activeMonth })}
           <span style={{display:'block',fontSize:10,color:'var(--th)',marginTop:4,fontFamily:'var(--mono)'}}>
-            Indicadores orientativos. No constituyen asesoría financiera, tributaria ni legal.
+            {t('coach.disclaimerShort')}
           </span>
         </p>
         <p style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', background: 'var(--sur2)', padding: '5px 9px', borderRadius: 6, display: 'inline-block' }}>
-          Generado localmente · sin IA externa · sin envío de datos
+          {t('coach.localBadge')}
         </p>
       </div>
 
@@ -151,33 +155,33 @@ export default function Coach() {
           </div>
           <div style={{ fontSize: 9, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: 2 }}>/100</div>
           <div style={{ fontSize: 10, fontWeight: 600, color: scoreColor, marginTop: 4 }}>{scoreLabel}</div>
-          <div style={{ fontSize: 9, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: 3, lineHeight: 1.4, textAlign: 'center' }}>Basado en reglas<br/>configurables · orientativo</div>
+          <div style={{ fontSize: 9, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: 3, lineHeight: 1.4, textAlign: 'center' }}>{t('coach.score.note')}</div>
         </div>
 
         {/* KPIs */}
         <div>
           <KpiBar
-            label="Tasa de ahorro"
+            label={t('coach.kpi.savingRate')}
             value={fmtP(metrics.savingsRate)}
             pct={Math.max(0, metrics.savingsRate)}
             color={metrics.savingsRate >= 0.20 ? 'var(--grn)' : metrics.savingsRate >= 0.10 ? 'var(--amb)' : 'var(--red)'}
           />
           <KpiBar
-            label="Suscripciones / ingreso"
+            label={t('coach.kpi.subsRatio')}
             value={fmtP(metrics.subscriptionRatio)}
             pct={metrics.subscriptionRatio}
             color={metrics.subscriptionRatio < 0.07 ? 'var(--grn)' : metrics.subscriptionRatio < 0.12 ? 'var(--amb)' : 'var(--red)'}
           />
           <KpiBar
-            label="Carga de deuda / ingreso anual"
+            label={t('coach.kpi.debtLoad')}
             value={fmtP(metrics.debtLoad)}
             pct={metrics.debtLoad}
             color={metrics.debtLoad < 0.30 ? 'var(--grn)' : metrics.debtLoad < 0.50 ? 'var(--amb)' : 'var(--red)'}
           />
           {metrics.monthlyExpense > 0 && (
             <KpiBar
-              label="Fondo de emergencia"
-              value={`${metrics.emergencyFundMonths.toFixed(1)} meses`}
+              label={t('coach.kpi.emergency')}
+              value={t('coach.kpi.months', { n: metrics.emergencyFundMonths.toFixed(1) })}
               pct={metrics.emergencyFundMonths / 6}
               color={metrics.emergencyFundMonths >= 3 ? 'var(--grn)' : metrics.emergencyFundMonths >= 1 ? 'var(--amb)' : 'var(--red)'}
             />
@@ -190,17 +194,17 @@ export default function Coach() {
         <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
           {warnings.length > 0 && (
             <div style={{ padding: '6px 12px', background: 'var(--red-bg, #fdf0ee)', border: '.5px solid var(--red)', borderRadius: 20, fontSize: 11, color: 'var(--red)', fontFamily: 'var(--mono)' }}>
-              ⊗ {warnings.length} para revisar
+              {t('coach.badge.review', { n: warnings.length })}
             </div>
           )}
           {attentions.length > 0 && (
             <div style={{ padding: '6px 12px', background: 'var(--amb-bg, #faeeda)', border: '.5px solid var(--amb)', borderRadius: 20, fontSize: 11, color: 'var(--amb)', fontFamily: 'var(--mono)' }}>
-              ⚠ {attentions.length} atención
+              {t('coach.badge.attention', { n: attentions.length })}
             </div>
           )}
           {infos.length > 0 && (
             <div style={{ padding: '6px 12px', background: 'var(--grn-bg)', border: '.5px solid var(--grn)', borderRadius: 20, fontSize: 11, color: 'var(--grn)', fontFamily: 'var(--mono)' }}>
-              ◈ {infos.length} info
+              {t('coach.badge.info', { n: infos.length })}
             </div>
           )}
         </div>
@@ -213,9 +217,9 @@ export default function Coach() {
       {signals.length === 0 ? (
         <div style={{ background: 'var(--sur)', border: '.5px solid var(--brd)', borderRadius: 'var(--r)', padding: '28px', textAlign: 'center' }}>
           <div style={{ fontSize: 20, marginBottom: 8 }}>◈</div>
-          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tx)', marginBottom: 4 }}>Sin señales activas</div>
+          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tx)', marginBottom: 4 }}>{t('coach.empty.title')}</div>
           <div style={{ fontSize: 12, color: 'var(--th)', fontFamily: 'var(--mono)' }}>
-            Registrá ingresos, gastos y datos del mes para ver el análisis completo.
+            {t('coach.empty.sub')}
           </div>
         </div>
       ) : (
@@ -223,7 +227,7 @@ export default function Coach() {
           {warnings.length > 0 && (
             <div style={{ marginBottom: 16 }}>
               <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--red)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 8 }}>
-                ⊗ Para revisar
+                {t('coach.section.review')}
               </div>
               {warnings.map(s => <SignalCard key={s.id} signal={s} />)}
             </div>
@@ -231,7 +235,7 @@ export default function Coach() {
           {attentions.length > 0 && (
             <div style={{ marginBottom: 16 }}>
               <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--amb)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 8 }}>
-                ⚠ Atención
+                {t('coach.section.attention')}
               </div>
               {attentions.map(s => <SignalCard key={s.id} signal={s} />)}
             </div>
@@ -239,7 +243,7 @@ export default function Coach() {
           {infos.length > 0 && (
             <div style={{ marginBottom: 16 }}>
               <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--grn)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 8 }}>
-                ◈ Información
+                {t('coach.section.info')}
               </div>
               {infos.map(s => <SignalCard key={s.id} signal={s} />)}
             </div>
@@ -250,17 +254,17 @@ export default function Coach() {
       {/* Checklist mensual */}
       {signals.length >= 0 && (() => {
         const items = [
-          { done: (incomes.filter(r => r?.date?.startsWith(settings?.activeMonth || '')).length > 0), label: 'Registrar ingresos del mes' },
-          { done: (expenses.filter(r => r?.date?.startsWith(settings?.activeMonth || '')).length > 0), label: 'Registrar gastos del mes' },
-          { done: (budgets.length > 0), label: 'Tener al menos un presupuesto activo' },
-          { done: (goals.length > 0), label: 'Tener al menos una meta financiera' },
-          { done: (signals.filter(s => s.severity === 'warning').length === 0), label: 'Sin señales críticas activas' },
+          { done: (incomes.filter(r => r?.date?.startsWith(settings?.activeMonth || '')).length > 0), label: t('coach.check.incomes') },
+          { done: (expenses.filter(r => r?.date?.startsWith(settings?.activeMonth || '')).length > 0), label: t('coach.check.expenses') },
+          { done: (budgets.length > 0), label: t('coach.check.budget') },
+          { done: (goals.length > 0), label: t('coach.check.goal') },
+          { done: (signals.filter(s => s.severity === 'warning').length === 0), label: t('coach.check.noWarnings') },
         ]
         const doneCount = items.filter(i => i.done).length
         return (
           <div style={{ background: 'var(--sur)', border: '.5px solid var(--brd)', borderRadius: 'var(--r)', padding: '14px 16px', marginBottom: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-              <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.8px' }}>Checklist del mes</div>
+              <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.8px' }}>{t('coach.check.title')}</div>
               <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: doneCount === items.length ? 'var(--accent)' : 'var(--th)' }}>{doneCount}/{items.length}</span>
             </div>
             {items.map((it, i) => (
@@ -275,7 +279,7 @@ export default function Coach() {
 
       {/* Disclaimer completo al pie */}
       <div style={{ padding: '10px 12px', background: 'var(--sur2)', border: '.5px solid var(--brd)', borderRadius: 'var(--r)', fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', lineHeight: 1.6, marginTop: 8 }}>
-        Este diagnóstico es generado localmente a partir de los datos que ingresaste. No constituye asesoría financiera, tributaria, contable ni de inversión. No reemplaza la consulta con profesionales certificados. Las señales y el score son orientativos y se basan en umbrales configurables. MAXNOVA &amp; LUCI Global LLC no asume responsabilidad por decisiones tomadas con base en este diagnóstico.
+        {t('coach.disclaimerFull')}
       </div>
     </div>
   )
