@@ -110,7 +110,7 @@ export default function Coach() {
     [incomes, expenses, budgets, debts, goals, subs, settings]
   )
 
-  const signals = useMemo(() => evaluateCoach(metrics), [metrics])
+  const signals = useMemo(() => evaluateCoach(metrics, t), [metrics, settings.language])
 
   const warnings    = signals.filter(s => s.severity === 'warning')
   const attentions  = signals.filter(s => s.severity === 'attention')
@@ -287,6 +287,7 @@ export default function Coach() {
 
 // ── EXPORT HOOK PARA INTEGRACIÓN ──────────────────────────────────────────
 export function useCoachSignals() {
+  const { t } = useT()
   const { incomes: _incAll, expenses: _expAll, budgets, debts, goals, settings } = useApp()
   const incomes = (_incAll || []).filter(r => !r?.inv)   // panorama personal: excluye inversión
   const expenses = (_expAll || []).filter(r => !r?.inv)
@@ -295,6 +296,6 @@ export function useCoachSignals() {
     calcCoachMetrics({ incomes, expenses, budgets, debts, goals, subs, settings }),
     [incomes, expenses, budgets, debts, goals, subs, settings]
   )
-  const signals = useMemo(() => evaluateCoach(metrics), [metrics])
+  const signals = useMemo(() => evaluateCoach(metrics, t), [metrics, settings.language])
   return { signals, metrics }
 }

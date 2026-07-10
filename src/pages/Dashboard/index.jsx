@@ -179,7 +179,7 @@ export default function Dashboard({ setPage }) {
   const topSignals = useMemo(() => {
     if (kpis.incCount === 0 && kpis.expCount === 0) return []
     const metrics = calcCoachMetrics({ incomes, expenses, budgets, debts, goals, subs, settings })
-    return evaluateCoach(metrics).slice(0, 2)
+    return evaluateCoach(metrics, t).slice(0, 2)
   }, [incomes, expenses, budgets, debts, goals, subs, settings, kpis.incCount, kpis.expCount])
 
   // ── Puntaje de salud financiera ───────────────────────────────────────────
@@ -189,8 +189,8 @@ export default function Dashboard({ setPage }) {
       savingRate: kpis.savingRate,
       budgets, expenses, debts, goals, subs, incomes,
       activeMonth,
-    })
-  }, [kpis.savingRate, kpis.incCount, kpis.expCount, budgets, expenses, debts, goals, subs, incomes, activeMonth])
+    }, t)
+  }, [kpis.savingRate, kpis.incCount, kpis.expCount, budgets, expenses, debts, goals, subs, incomes, activeMonth, settings.language])
 
   // ── Historial de score semanal (localStorage) ────────────────────────────
   const SCORE_KEY = 'fos_score_history'

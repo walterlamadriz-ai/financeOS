@@ -2,7 +2,12 @@
 // Puntaje de salud financiera 0-100 basado en 5 componentes de 20 pts c/u
 // Resultado es orientativo — no constituye asesoría financiera.
 
-export function calcFinancialScore({ savingRate, budgets, expenses, debts, goals, subs, incomes, activeMonth }) {
+import { translations } from '../i18n/translations.js'
+
+function esFallback(key) { return translations.es?.[key] ?? key }
+
+export function calcFinancialScore({ savingRate, budgets, expenses, debts, goals, subs, incomes, activeMonth }, t) {
+  const tr = t || esFallback
   let score = 0
   const breakdown = []
 
@@ -11,7 +16,7 @@ export function calcFinancialScore({ savingRate, budgets, expenses, debts, goals
   const sr = Number(savingRate) || 0
   const srPts = sr >= 0.20 ? 20 : sr >= 0.05 ? 10 : sr >= 0 ? 5 : 0
   score += srPts
-  breakdown.push({ label: 'Tasa de ahorro', pts: srPts, max: 20 })
+  breakdown.push({ label: tr('score.savingRate'), pts: srPts, max: 20 })
 
   // 2. Control de presupuestos (0-20)
   // 20pts = ningún presupuesto excedido, -4 por cada uno excedido
@@ -22,7 +27,7 @@ export function calcFinancialScore({ savingRate, budgets, expenses, debts, goals
   const exceeded = budgetArr.filter(b => (expByCat[b.category] || 0) > (Number(b.limit) || 0)).length
   const budgetPts = Math.max(0, 20 - exceeded * 5)
   score += budgetPts
-  breakdown.push({ label: 'Presupuestos', pts: budgetPts, max: 20 })
+  breakdown.push({ label: tr('score.budgets'), pts: budgetPts, max: 20 })
 
   // 3. Carga de deuda (0-20)
   // 20pts = sin deuda, 15pts = <20% ingreso anual, 10pts = 20-50%, 0pts = >50%
@@ -34,7 +39,7 @@ export function calcFinancialScore({ savingRate, budgets, expenses, debts, goals
   const debtLoad = annualIncome > 0 ? totalDebt / annualIncome : (totalDebt > 0 ? 1 : 0)
   const debtPts = totalDebt === 0 ? 20 : debtLoad < 0.20 ? 15 : debtLoad < 0.50 ? 10 : 0
   score += debtPts
-  breakdown.push({ label: 'Carga de deuda', pts: debtPts, max: 20 })
+  breakdown.push({ label: tr('score.debtLoad'), pts: debtPts, max: 20 })
 
   // 4. Metas activas (0-20)
   // 20pts = ≥1 meta con progreso >0, 10pts = meta creada sin progreso, 0pts = sin metas
@@ -42,7 +47,7 @@ export function calcFinancialScore({ savingRate, budgets, expenses, debts, goals
   const goalsWithProgress = goalArr.filter(g => Number(g.saved) > 0).length
   const goalPts = goalsWithProgress > 0 ? 20 : goalArr.length > 0 ? 10 : 0
   score += goalPts
-  breakdown.push({ label: 'Metas', pts: goalPts, max: 20 })
+  breakdown.push({ label: tr('score.goals'), pts: goalPts, max: 20 })
 
   // 5. Control de suscripciones (0-20)
   // 20pts = <5% ingresos, 10pts = 5-10%, 5pts = 10-20%, 0pts = >20%
@@ -58,9 +63,9 @@ export function calcFinancialScore({ savingRate, budgets, expenses, debts, goals
   const subRatio = monthlyIncome > 0 ? subMonthly / monthlyIncome : 0
   const subPts = subRatio < 0.05 ? 20 : subRatio < 0.10 ? 10 : subRatio < 0.20 ? 5 : 0
   score += subPts
-  breakdown.push({ label: 'Suscripciones', pts: subPts, max: 20 })
+  breakdown.push({ label: tr('score.subs'), pts: subPts, max: 20 })
 
-  const label = score >= 80 ? 'Excelente' : score >= 60 ? 'Bueno' : score >= 40 ? 'Regular' : 'Crítico'
+  const label = score >= 80 ? tr('score.excellent') : score >= 60 ? tr('score.good') : score >= 40 ? tr('score.fair') : tr('score.critical')
   const color = score >= 80 ? 'var(--accent)' : score >= 60 ? 'var(--grn2)' : score >= 40 ? 'var(--amb)' : 'var(--red)'
 
   return { score, label, color, breakdown }

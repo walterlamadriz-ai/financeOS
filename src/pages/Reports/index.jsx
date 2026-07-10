@@ -100,7 +100,7 @@ export default function Reports({ setPage }) {
   const coachSignals = useMemo(() => {
     if (mIncomes.length === 0 && mExpenses.length === 0) return []
     const metrics = calcCoachMetrics({ incomes, expenses, budgets, debts: allDebts, goals: [], subs: allSubs, settings })
-    return evaluateCoach(metrics)
+    return evaluateCoach(metrics, t)
   }, [incomes, expenses, budgets, allDebts, allSubs, settings, mIncomes.length, mExpenses.length])
 
 

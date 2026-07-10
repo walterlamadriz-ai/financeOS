@@ -1,4 +1,5 @@
 // src/data/coachRules.js
+import { translations } from '../i18n/translations.js'
 // Motor de reglas del FinanceOS Coach
 // Configurable sin tocar componentes React
 // Cada regla: id, categoría, condición, severidad, mensaje, acción sugerida
@@ -38,95 +39,95 @@ export const COACH_RULES = [
   // ── FLUJO DE CAJA ──────────────────────────────────────────────────────────
   {
     id: 'cashflow_positive',
-    category: 'Flujo de caja',
-    evaluate: (m) => m.cashFlow > 0 ? {
+    category: 'ccat.cashflow',
+    evaluate: (m, tr) => m.cashFlow > 0 ? {
       severity: 'info',
-      title: 'Flujo positivo este mes',
-      msg: `Tu balance neto es positivo: ${m.sym}${fmt(m.cashFlow)}. Buen trabajo manteniendo ingresos por encima de gastos.`,
-      action: 'Considerá destinar parte de este excedente a una meta de ahorro.',
+      title: tr('cr.cashflowPos.title'),
+      msg: tr('cr.cashflowPos.msg', { v: `${m.sym}${fmt(m.cashFlow)}` }),
+      action: tr('cr.cashflowPos.action'),
     } : null,
   },
   {
     id: 'cashflow_negative',
-    category: 'Flujo de caja',
-    evaluate: (m) => m.cashFlow < 0 ? {
+    category: 'ccat.cashflow',
+    evaluate: (m, tr) => m.cashFlow < 0 ? {
       severity: 'warning',
-      title: 'Flujo negativo este mes',
-      msg: `Tus gastos superaron tus ingresos en ${m.sym}${fmt(Math.abs(m.cashFlow))} este mes.`,
-      action: 'Revisá en qué categorías de gastos hubo más movimiento este mes.',
+      title: tr('cr.cashflowNeg.title'),
+      msg: tr('cr.cashflowNeg.msg', { v: `${m.sym}${fmt(Math.abs(m.cashFlow))}` }),
+      action: tr('cr.cashflowNeg.action'),
     } : null,
   },
   {
     id: 'no_income',
-    category: 'Flujo de caja',
-    evaluate: (m) => m.monthlyIncome === 0 ? {
+    category: 'ccat.cashflow',
+    evaluate: (m, tr) => m.monthlyIncome === 0 ? {
       severity: 'attention',
-      title: 'Sin ingresos registrados',
-      msg: 'No hay ingresos registrados para este mes. El análisis puede estar incompleto.',
-      action: 'Registrá tus ingresos del mes para obtener métricas completas.',
+      title: tr('cr.noIncome.title'),
+      msg: tr('cr.noIncome.msg'),
+      action: tr('cr.noIncome.action'),
     } : null,
   },
 
   // ── TASA DE AHORRO ─────────────────────────────────────────────────────────
   {
     id: 'savings_good',
-    category: 'Ahorro',
-    evaluate: (m) => m.monthlyIncome > 0 && m.savingsRate >= COACH_CONFIG.thresholds.savingsRateGood ? {
+    category: 'ccat.savings',
+    evaluate: (m, tr) => m.monthlyIncome > 0 && m.savingsRate >= COACH_CONFIG.thresholds.savingsRateGood ? {
       severity: 'info',
-      title: 'Tasa de ahorro saludable',
-      msg: `Tu tasa de ahorro este mes es del ${pct(m.savingsRate)}, por encima del objetivo del ${pct(COACH_CONFIG.thresholds.savingsRateGood)}.`,
-      action: 'Revisá si podés asignar parte del excedente a una meta específica.',
+      title: tr('cr.savGood.title'),
+      msg: tr('cr.savGood.msg', { rate: pct(m.savingsRate), goal: pct(COACH_CONFIG.thresholds.savingsRateGood) }),
+      action: tr('cr.savGood.action'),
     } : null,
   },
   {
     id: 'savings_warn',
-    category: 'Ahorro',
-    evaluate: (m) => m.monthlyIncome > 0 && m.savingsRate >= 0 && m.savingsRate < COACH_CONFIG.thresholds.savingsRateWarn ? {
+    category: 'ccat.savings',
+    evaluate: (m, tr) => m.monthlyIncome > 0 && m.savingsRate >= 0 && m.savingsRate < COACH_CONFIG.thresholds.savingsRateWarn ? {
       severity: 'attention',
-      title: 'Tasa de ahorro baja',
-      msg: `Tu tasa de ahorro es del ${pct(m.savingsRate)}, por debajo del mínimo recomendado del ${pct(COACH_CONFIG.thresholds.savingsRateWarn)}.`,
-      action: 'Evaluá si hay gastos variables que podrían reducirse este mes.',
+      title: tr('cr.savWarn.title'),
+      msg: tr('cr.savWarn.msg', { rate: pct(m.savingsRate), min: pct(COACH_CONFIG.thresholds.savingsRateWarn) }),
+      action: tr('cr.savWarn.action'),
     } : null,
   },
   {
     id: 'savings_negative',
-    category: 'Ahorro',
-    evaluate: (m) => m.monthlyIncome > 0 && m.savingsRate < 0 ? {
+    category: 'ccat.savings',
+    evaluate: (m, tr) => m.monthlyIncome > 0 && m.savingsRate < 0 ? {
       severity: 'warning',
-      title: 'Sin ahorro este mes',
-      msg: `Los gastos superaron los ingresos. La tasa de ahorro es negativa (${pct(m.savingsRate)}).`,
-      action: 'Revisá los gastos del mes por categoría para identificar oportunidades de ajuste.',
+      title: tr('cr.savNeg.title'),
+      msg: tr('cr.savNeg.msg', { rate: pct(m.savingsRate) }),
+      action: tr('cr.savNeg.action'),
     } : null,
   },
 
   // ── SUSCRIPCIONES ──────────────────────────────────────────────────────────
   {
     id: 'subscriptions_high',
-    category: 'Suscripciones',
-    evaluate: (m) => m.subscriptionRatio >= COACH_CONFIG.thresholds.subscriptionRatioHigh ? {
+    category: 'ccat.subs',
+    evaluate: (m, tr) => m.subscriptionRatio >= COACH_CONFIG.thresholds.subscriptionRatioHigh ? {
       severity: 'warning',
-      title: 'Alto gasto en suscripciones',
-      msg: `Tus suscripciones representan el ${pct(m.subscriptionRatio)} de tus ingresos mensuales (${m.sym}${fmt(m.subscriptionMonthly)}/mes · ${m.sym}${fmt(m.subscriptionAnnual)}/año).`,
-      action: 'Revisá la sección Suscripciones para identificar servicios que podrían evaluarse.',
+      title: tr('cr.subsHigh.title'),
+      msg: tr('cr.subsHigh.msg', { pct: pct(m.subscriptionRatio), m: `${m.sym}${fmt(m.subscriptionMonthly)}`, a: `${m.sym}${fmt(m.subscriptionAnnual)}` }),
+      action: tr('cr.subsHigh.action'),
     } : null,
   },
   {
     id: 'subscriptions_warn',
-    category: 'Suscripciones',
-    evaluate: (m) => m.subscriptionRatio >= COACH_CONFIG.thresholds.subscriptionRatioWarn && m.subscriptionRatio < COACH_CONFIG.thresholds.subscriptionRatioHigh ? {
+    category: 'ccat.subs',
+    evaluate: (m, tr) => m.subscriptionRatio >= COACH_CONFIG.thresholds.subscriptionRatioWarn && m.subscriptionRatio < COACH_CONFIG.thresholds.subscriptionRatioHigh ? {
       severity: 'attention',
-      title: 'Suscripciones en zona de atención',
-      msg: `Tus suscripciones representan el ${pct(m.subscriptionRatio)} de tus ingresos. Gasto anual estimado: ${m.sym}${fmt(m.subscriptionAnnual)}.`,
-      action: 'Considerá revisar si todos los servicios activos se usan regularmente.',
+      title: tr('cr.subsWarn.title'),
+      msg: tr('cr.subsWarn.msg', { pct: pct(m.subscriptionRatio), a: `${m.sym}${fmt(m.subscriptionAnnual)}` }),
+      action: tr('cr.subsWarn.action'),
     } : null,
   },
   {
     id: 'subscriptions_info',
-    category: 'Suscripciones',
-    evaluate: (m) => m.subscriptionCount > 0 && m.subscriptionRatio < COACH_CONFIG.thresholds.subscriptionRatioWarn ? {
+    category: 'ccat.subs',
+    evaluate: (m, tr) => m.subscriptionCount > 0 && m.subscriptionRatio < COACH_CONFIG.thresholds.subscriptionRatioWarn ? {
       severity: 'info',
-      title: 'Suscripciones bajo control',
-      msg: `Tenés ${m.subscriptionCount} suscripción${m.subscriptionCount > 1 ? 'es' : ''} activa${m.subscriptionCount > 1 ? 's' : ''} (${m.sym}${fmt(m.subscriptionMonthly)}/mes · ${pct(m.subscriptionRatio)} del ingreso).`,
+      title: tr('cr.subsInfo.title'),
+      msg: tr('cr.subsInfo.msg', { n: m.subscriptionCount, m: `${m.sym}${fmt(m.subscriptionMonthly)}`, pct: pct(m.subscriptionRatio) }),
       action: null,
     } : null,
   },
@@ -134,97 +135,97 @@ export const COACH_RULES = [
   // ── PRESUPUESTOS ───────────────────────────────────────────────────────────
   {
     id: 'budget_exceeded',
-    category: 'Presupuestos',
-    evaluate: (m) => m.budgetsExceeded > 0 ? {
+    category: 'ccat.budgets',
+    evaluate: (m, tr) => m.budgetsExceeded > 0 ? {
       severity: 'warning',
-      title: `${m.budgetsExceeded} presupuesto${m.budgetsExceeded > 1 ? 's' : ''} excedido${m.budgetsExceeded > 1 ? 's' : ''}`,
-      msg: `Superaste el límite en ${m.budgetsExceeded} categoría${m.budgetsExceeded > 1 ? 's' : ''} de presupuesto este mes.`,
-      action: 'Revisá la sección Presupuestos para ver qué categorías se excedieron.',
+      title: tr('cr.budExceeded.title', { n: m.budgetsExceeded }),
+      msg: tr('cr.budExceeded.msg', { n: m.budgetsExceeded }),
+      action: tr('cr.budExceeded.action'),
     } : null,
   },
   {
     id: 'budget_near',
-    category: 'Presupuestos',
-    evaluate: (m) => m.budgetsNearLimit > 0 && m.budgetsExceeded === 0 ? {
+    category: 'ccat.budgets',
+    evaluate: (m, tr) => m.budgetsNearLimit > 0 && m.budgetsExceeded === 0 ? {
       severity: 'attention',
-      title: `${m.budgetsNearLimit} presupuesto${m.budgetsNearLimit > 1 ? 's' : ''} cerca del límite`,
-      msg: `${m.budgetsNearLimit} categoría${m.budgetsNearLimit > 1 ? 's' : ''} está${m.budgetsNearLimit > 1 ? 'n' : ''} por encima del 90% del presupuesto asignado.`,
-      action: 'Prestá atención a esas categorías antes de cerrar el mes.',
+      title: tr('cr.budNear.title', { n: m.budgetsNearLimit }),
+      msg: tr('cr.budNear.msg', { n: m.budgetsNearLimit }),
+      action: tr('cr.budNear.action'),
     } : null,
   },
 
   // ── DEUDAS ─────────────────────────────────────────────────────────────────
   {
     id: 'debt_high',
-    category: 'Deudas',
-    evaluate: (m) => m.monthlyIncome > 0 && m.debtLoad >= COACH_CONFIG.thresholds.debtLoadHigh ? {
+    category: 'ccat.debts',
+    evaluate: (m, tr) => m.monthlyIncome > 0 && m.debtLoad >= COACH_CONFIG.thresholds.debtLoadHigh ? {
       severity: 'warning',
-      title: 'Carga de deuda elevada',
-      msg: `Tu deuda total es de ${m.sym}${fmt(m.totalDebt)}, equivalente al ${pct(m.debtLoad)} de tus ingresos anuales estimados.`,
-      action: 'Revisá la sección Deudas para ver qué deuda tiene mayor tasa de interés.',
+      title: tr('cr.debtHigh.title'),
+      msg: tr('cr.debtHigh.msg', { v: `${m.sym}${fmt(m.totalDebt)}`, pct: pct(m.debtLoad) }),
+      action: tr('cr.debtHigh.action'),
     } : null,
   },
   {
     id: 'debt_warn',
-    category: 'Deudas',
-    evaluate: (m) => m.monthlyIncome > 0 && m.debtLoad >= COACH_CONFIG.thresholds.debtLoadWarn && m.debtLoad < COACH_CONFIG.thresholds.debtLoadHigh ? {
+    category: 'ccat.debts',
+    evaluate: (m, tr) => m.monthlyIncome > 0 && m.debtLoad >= COACH_CONFIG.thresholds.debtLoadWarn && m.debtLoad < COACH_CONFIG.thresholds.debtLoadHigh ? {
       severity: 'attention',
-      title: 'Deuda en zona de atención',
-      msg: `Tu deuda representa el ${pct(m.debtLoad)} de tus ingresos anuales estimados.`,
-      action: 'Evaluá si los pagos mínimos están cubiertos en tu presupuesto mensual.',
+      title: tr('cr.debtWarn.title'),
+      msg: tr('cr.debtWarn.msg', { pct: pct(m.debtLoad) }),
+      action: tr('cr.debtWarn.action'),
     } : null,
   },
 
   // ── FONDO DE EMERGENCIA ────────────────────────────────────────────────────
   {
     id: 'emergency_fund_good',
-    category: 'Fondo de emergencia',
-    evaluate: (m) => m.emergencyFundMonths >= COACH_CONFIG.thresholds.emergencyFundMonthsGood ? {
+    category: 'ccat.emergency',
+    evaluate: (m, tr) => m.emergencyFundMonths >= COACH_CONFIG.thresholds.emergencyFundMonthsGood ? {
       severity: 'info',
-      title: 'Fondo de emergencia saludable',
-      msg: `Tu fondo de emergencia cubre aproximadamente ${m.emergencyFundMonths.toFixed(1)} meses de gastos.`,
+      title: tr('cr.emGood.title'),
+      msg: tr('cr.emGood.msg', { n: m.emergencyFundMonths.toFixed(1) }),
       action: null,
     } : null,
   },
   {
     id: 'emergency_fund_warn',
-    category: 'Fondo de emergencia',
-    evaluate: (m) => m.emergencyFundMonths > 0 && m.emergencyFundMonths < COACH_CONFIG.thresholds.emergencyFundMonthsGood ? {
+    category: 'ccat.emergency',
+    evaluate: (m, tr) => m.emergencyFundMonths > 0 && m.emergencyFundMonths < COACH_CONFIG.thresholds.emergencyFundMonthsGood ? {
       severity: 'attention',
-      title: 'Fondo de emergencia insuficiente',
-      msg: `Tu fondo de emergencia cubre ${m.emergencyFundMonths.toFixed(1)} mes${m.emergencyFundMonths < 2 ? '' : 'es'} de gastos. Lo recomendado es al menos 3 meses.`,
-      action: 'Considerá asignar parte del ahorro mensual a una meta de fondo de emergencia.',
+      title: tr('cr.emWarn.title'),
+      msg: tr('cr.emWarn.msg', { n: m.emergencyFundMonths.toFixed(1) }),
+      action: tr('cr.emWarn.action'),
     } : null,
   },
   {
     id: 'emergency_fund_none',
-    category: 'Fondo de emergencia',
-    evaluate: (m) => m.emergencyFundMonths === 0 && m.monthlyExpense > 0 ? {
+    category: 'ccat.emergency',
+    evaluate: (m, tr) => m.emergencyFundMonths === 0 && m.monthlyExpense > 0 ? {
       severity: 'warning',
-      title: 'Sin fondo de emergencia identificado',
-      msg: 'No se detectó una meta de fondo de emergencia. Tener 3 meses de gastos reservados es una base financiera importante.',
-      action: 'Creá una meta específica llamada "Fondo de emergencia" en la sección Metas.',
+      title: tr('cr.emNone.title'),
+      msg: tr('cr.emNone.msg'),
+      action: tr('cr.emNone.action'),
     } : null,
   },
 
   // ── METAS ──────────────────────────────────────────────────────────────────
   {
     id: 'goals_progress_warn',
-    category: 'Metas',
-    evaluate: (m) => m.goalsStalled > 0 ? {
+    category: 'ccat.goals',
+    evaluate: (m, tr) => m.goalsStalled > 0 ? {
       severity: 'attention',
-      title: `${m.goalsStalled} meta${m.goalsStalled > 1 ? 's' : ''} con poco avance`,
-      msg: `${m.goalsStalled} meta${m.goalsStalled > 1 ? 's' : ''} tiene${m.goalsStalled > 1 ? 'n' : ''} menos del 25% de progreso.`,
-      action: 'Revisá la sección Metas para ver las fechas objetivo y ajustar el plan de ahorro.',
+      title: tr('cr.goalsWarn.title', { n: m.goalsStalled }),
+      msg: tr('cr.goalsWarn.msg', { n: m.goalsStalled }),
+      action: tr('cr.goalsWarn.action'),
     } : null,
   },
   {
     id: 'goals_good',
-    category: 'Metas',
-    evaluate: (m) => m.goalsOnTrack > 0 && m.goalsStalled === 0 ? {
+    category: 'ccat.goals',
+    evaluate: (m, tr) => m.goalsOnTrack > 0 && m.goalsStalled === 0 ? {
       severity: 'info',
-      title: 'Metas en progreso',
-      msg: `Tenés ${m.goalsOnTrack} meta${m.goalsOnTrack > 1 ? 's' : ''} activa${m.goalsOnTrack > 1 ? 's' : ''} con avance positivo.`,
+      title: tr('cr.goalsGood.title'),
+      msg: tr('cr.goalsGood.msg', { n: m.goalsOnTrack }),
       action: null,
     } : null,
   },
@@ -232,31 +233,31 @@ export const COACH_RULES = [
   // ── BACKUP ─────────────────────────────────────────────────────────────────
   {
     id: 'backup_warn',
-    category: 'Respaldo',
-    evaluate: (m) => m.daysSinceBackup >= COACH_CONFIG.thresholds.backupDaysWarn && m.daysSinceBackup < COACH_CONFIG.thresholds.backupDaysHigh ? {
+    category: 'ccat.backup',
+    evaluate: (m, tr) => m.daysSinceBackup >= COACH_CONFIG.thresholds.backupDaysWarn && m.daysSinceBackup < COACH_CONFIG.thresholds.backupDaysHigh ? {
       severity: 'attention',
-      title: 'Backup pendiente',
-      msg: `Hace ${m.daysSinceBackup} días que no creás un respaldo de tus datos.`,
-      action: 'Exportá un backup JSON desde Ajustes antes de cerrar el mes.',
+      title: tr('cr.backupWarn.title'),
+      msg: tr('cr.backupWarn.msg', { n: m.daysSinceBackup }),
+      action: tr('cr.backupWarn.action'),
     } : null,
   },
   {
     id: 'backup_high',
-    category: 'Respaldo',
-    evaluate: (m) => m.daysSinceBackup >= COACH_CONFIG.thresholds.backupDaysHigh ? {
+    category: 'ccat.backup',
+    evaluate: (m, tr) => m.daysSinceBackup >= COACH_CONFIG.thresholds.backupDaysHigh ? {
       severity: 'warning',
-      title: 'Backup muy desactualizado',
-      msg: `Hace ${m.daysSinceBackup} días sin respaldo. Si perdés el navegador o cambiás de dispositivo, podrías perder todos tus datos.`,
-      action: 'Creá un backup JSON desde Ajustes ahora mismo.',
+      title: tr('cr.backupHigh.title'),
+      msg: tr('cr.backupHigh.msg', { n: m.daysSinceBackup }),
+      action: tr('cr.backupHigh.action'),
     } : null,
   },
   {
     id: 'backup_ok',
-    category: 'Respaldo',
-    evaluate: (m) => m.daysSinceBackup >= 0 && m.daysSinceBackup < COACH_CONFIG.thresholds.backupDaysWarn ? {
+    category: 'ccat.backup',
+    evaluate: (m, tr) => m.daysSinceBackup >= 0 && m.daysSinceBackup < COACH_CONFIG.thresholds.backupDaysWarn ? {
       severity: 'info',
-      title: 'Respaldo al día',
-      msg: `Tu último backup fue hace ${m.daysSinceBackup} días.`,
+      title: tr('cr.backupOk.title'),
+      msg: tr('cr.backupOk.msg', { n: m.daysSinceBackup }),
       action: null,
     } : null,
   },
@@ -267,13 +268,21 @@ function fmt(n) { return (n || 0).toLocaleString('es-CL', { maximumFractionDigit
 function pct(n) { return ((n || 0) * 100).toFixed(1) + '%' }
 
 // ── EVALUADOR DE REGLAS ───────────────────────────────────────────────────────
-export function evaluateCoach(metrics) {
+// Fallback: si no se pasa t (p.ej. llamadas antiguas), resuelve las keys en español.
+function esFallback(key, vars) {
+  const str = translations.es?.[key] ?? key
+  if (!vars) return str
+  return str.replace(/\{(\w+)\}/g, (_, k) => (vars[k] != null ? vars[k] : `{${k}}`))
+}
+
+export function evaluateCoach(metrics, t) {
+  const tr = t || esFallback
   const results = []
   for (const rule of COACH_RULES) {
     try {
-      const result = rule.evaluate(metrics)
+      const result = rule.evaluate(metrics, tr)
       if (result) {
-        results.push({ id: rule.id, category: rule.category, ...result })
+        results.push({ id: rule.id, category: tr(rule.category), ...result })
       }
     } catch (e) {
       console.warn(`Coach rule ${rule.id} error:`, e)
