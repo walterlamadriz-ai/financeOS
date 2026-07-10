@@ -33,7 +33,10 @@ export function projectEndOfMonth({ incomes, expenses, activeMonth }) {
 
   const dailyExp = today > 0 ? curExp / today : 0
   const paceExp  = curExp + dailyExp * daysLeft
-  const projExp  = avgExp > 0 ? Math.round(pctElapsed * paceExp + (1 - pctElapsed) * avgExp) : Math.round(paceExp)
+  const blended  = avgExp > 0 ? Math.round(pctElapsed * paceExp + (1 - pctElapsed) * avgExp) : Math.round(paceExp)
+  // Piso lógico: la proyección nunca puede ser menor que lo YA gastado
+  // (si este mes vas por encima de tu histórico, la mezcla no debe "descontar" gasto real).
+  const projExp  = Math.max(blended, Math.round(curExp))
   const projInc  = Math.max(curInc, avgInc || curInc)
   const projBal  = projInc - projExp
 

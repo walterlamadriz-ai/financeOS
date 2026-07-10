@@ -22,7 +22,7 @@ export const TEMPLATES = [
       { category: 'Salud',           pct: 5,  note: 'Seguro, médicos, farmacia' },
     ],
     suggestedGoals: [
-      { name: 'Fondo de emergencia', note: '3-6 meses de gastos fijos', priority: 'Alta' },
+      { name: 'Fondo de emergencia', note: '3 meses de gastos fijos (ampliable a 6)', priority: 'Alta' },
       { name: 'Ahorro mensual',      note: 'Meta mínima 20% del ingreso', priority: 'Alta' },
     ],
     alerts: [
@@ -52,7 +52,7 @@ export const TEMPLATES = [
       { category: 'Entretenimiento',   pct: 8,  note: 'Salidas familiares' },
     ],
     suggestedGoals: [
-      { name: 'Fondo de emergencia familiar', note: '6 meses de gastos del hogar', priority: 'Alta' },
+      { name: 'Fondo de emergencia familiar', note: '3 meses de gastos del hogar (ampliable a 6)', priority: 'Alta' },
       { name: 'Vacaciones familiares',         note: 'Meta anual compartida',        priority: 'Media' },
       { name: 'Educación futura hijos',        note: 'Ahorro de largo plazo',         priority: 'Alta' },
     ],
@@ -83,14 +83,14 @@ export const TEMPLATES = [
       { category: 'Marketing propio',    pct: 3,  note: 'Ads, web, materiales' },
     ],
     suggestedGoals: [
-      { name: 'Fondo de emergencia',     note: '6 meses (ingresos variables = más riesgo)', priority: 'Alta' },
+      { name: 'Fondo de emergencia',     note: '3-6 meses (ingresos variables = más riesgo)', priority: 'Alta' },
       { name: 'Provisión impuestos',     note: 'Reserva trimestral o anual',                priority: 'Alta' },
       { name: 'Equipamiento profesional', note: 'Computador, cámara, herramientas',         priority: 'Media' },
     ],
     alerts: [
       'Ingreso del mes por debajo del promedio de los últimos 3 meses',
       'Sin provisión para impuestos registrada',
-      'Fondo de emergencia menor a 6 meses de gastos fijos',
+      'Fondo de emergencia menor a 3 meses de gastos fijos',
     ],
     keyMetrics: ['Ingreso promedio mensual', 'Variabilidad de ingresos', 'Tasa de ahorro efectiva'],
     advisorTip: 'El freelancer tiende a subestimar impuestos y sobreestimar ingresos recurrentes. Trabajar el hábito de provisión desde el primer mes.',

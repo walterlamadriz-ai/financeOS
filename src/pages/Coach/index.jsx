@@ -182,7 +182,7 @@ export default function Coach() {
             <KpiBar
               label={t('coach.kpi.emergency')}
               value={t('coach.kpi.months', { n: metrics.emergencyFundMonths.toFixed(1) })}
-              pct={metrics.emergencyFundMonths / 6}
+              pct={metrics.emergencyFundMonths / 3}
               color={metrics.emergencyFundMonths >= 3 ? 'var(--grn)' : metrics.emergencyFundMonths >= 1 ? 'var(--amb)' : 'var(--red)'}
             />
           )}
