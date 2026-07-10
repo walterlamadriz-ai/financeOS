@@ -4,6 +4,7 @@
 
 import { useMemo } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
+import { useT } from '../../i18n/useT.js'
 import { KPI, Card, CardHeader, Alert, Empty, ProgressBar, PageHeader } from '../../components/ui/index.jsx'
 import { fmtMoney, fmtPct } from '../../utils/index.js'
 import {
@@ -29,6 +30,7 @@ const ChartTooltip = ({ active, payload, label, sym }) => {
 }
 
 export default function CashFlow({ setPage }) {
+  const { t } = useT()
   const { incomes: _incAll, expenses: _expAll, budgets, settings } = useApp()
   const incomes = (_incAll || []).filter(r => !r?.inv)   // proyección personal: excluye inversión
   const expenses = (_expAll || []).filter(r => !r?.inv)
@@ -162,20 +164,19 @@ export default function CashFlow({ setPage }) {
   return (
     <div className="stack">
       <PageHeader
-        title="Proyección de flujo de caja"
-        sub="Basado en el promedio real de tus últimos meses (ingresos y gastos, incluidos los variables)"
+        title={t('cf.title')}
+        sub={t('cf.sub')}
       />
 
       {!hasData && (
         <Alert type="info">
           <div style={{ marginBottom: setPage ? 10 : 0 }}>
-            <strong>Para activar la proyección:</strong> registrá tus ingresos y gastos del mes.
-            La app usa el promedio de tus últimos meses para proyectar tu flujo a 30, 60 y 90 días.
+            <strong>{t('cf.empty.strong')}</strong>{t('cf.empty.text')}
           </div>
           {setPage && (
             <button onClick={() => setPage('movements')}
               style={{ background:'var(--accent)', color:'#0f1923', border:'none', borderRadius:7, padding:'7px 14px', fontSize:12, fontWeight:700, fontFamily:'var(--mono)', cursor:'pointer' }}>
-              Registrar movimientos →
+              {t('cf.empty.btn')}
             </button>
           )}
         </Alert>
@@ -183,7 +184,7 @@ export default function CashFlow({ setPage }) {
 
       {hasData && (monthlyEstimate.partial || monthlyEstimate.monthsUsed < 2) && (
         <Alert type="warn">
-          → La proyección usa {monthlyEstimate.partial ? 'solo el mes en curso (aún parcial)' : `${monthlyEstimate.monthsUsed} mes de historial`}. Se vuelve más precisa a medida que acumulás meses completos.
+          {t('cf.partial.text', { src: monthlyEstimate.partial ? t('cf.partial.currentOnly') : t('cf.partial.nMonths', { n: monthlyEstimate.monthsUsed }) })}
         </Alert>
       )}
 
@@ -191,19 +192,19 @@ export default function CashFlow({ setPage }) {
       {(curInc > 0 || curExp > 0) && (() => {
         const { today, daysInMonth, daysLeft, dailyExp, projInc, projExp, projBal, totalBudget, pctMonthElapsed, pctBudgetUsed, pace } = eomProjection
         const paceColor = pace === null ? 'var(--th)' : pace > 0.08 ? 'var(--red)' : pace > 0 ? 'var(--amb)' : 'var(--accent)'
-        const paceLabel = pace === null ? '—' : pace > 0.08 ? 'Ritmo acelerado' : pace > 0 ? 'Ritmo levemente alto' : 'Ritmo saludable'
+        const paceLabel = pace === null ? '—' : pace > 0.08 ? t('cf.pace.fast') : pace > 0 ? t('cf.pace.high') : t('cf.pace.ok')
         const barPct    = Math.min(pctMonthElapsed * 100, 100)
         const budgetBarPct = pctBudgetUsed !== null ? Math.min(pctBudgetUsed * 100, 100) : null
         return (
           <Card>
-            <CardHeader title={`Proyección fin de mes — ${activeMonth}`} />
+            <CardHeader title={t('cf.eom.title', { month: activeMonth })} />
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10, marginBottom: 16 }}>
               {[
-                { label: 'Día actual', value: `${today} / ${daysInMonth}`, sub: `${daysLeft} días restantes`, color: 'var(--tx)' },
-                { label: 'Gasto diario', value: `${sym}${Math.round(dailyExp).toLocaleString('es-CL')}`, sub: 'promedio hasta hoy', color: 'var(--red)' },
-                { label: 'Ingreso proyectado', value: `${sym}${Math.round(projInc).toLocaleString('es-CL')}`, sub: 'al 31 a este ritmo', color: 'var(--accent)' },
-                { label: 'Gasto proyectado', value: `${sym}${Math.round(projExp).toLocaleString('es-CL')}`, sub: 'al 31 a este ritmo', color: 'var(--red)' },
-                { label: 'Balance proyectado', value: `${sym}${Math.round(projBal).toLocaleString('es-CL')}`, sub: projBal >= 0 ? 'positivo' : 'déficit', color: projBal >= 0 ? 'var(--accent)' : 'var(--red)' },
+                { label: t('cf.eom.day'), value: t('cf.eom.dayValue', { d: today, n: daysInMonth }), sub: t('cf.eom.daysLeft', { n: daysLeft }), color: 'var(--tx)' },
+                { label: t('cf.eom.dailyExp'), value: `${sym}${Math.round(dailyExp).toLocaleString('es-CL')}`, sub: t('cf.eom.avgToDate'), color: 'var(--red)' },
+                { label: t('cf.eom.projInc'), value: `${sym}${Math.round(projInc).toLocaleString('es-CL')}`, sub: t('cf.eom.atPace'), color: 'var(--accent)' },
+                { label: t('cf.eom.projExp'), value: `${sym}${Math.round(projExp).toLocaleString('es-CL')}`, sub: t('cf.eom.atPace'), color: 'var(--red)' },
+                { label: t('cf.eom.projBal'), value: `${sym}${Math.round(projBal).toLocaleString('es-CL')}`, sub: projBal >= 0 ? t('cf.eom.positive') : t('cf.eom.deficit'), color: projBal >= 0 ? 'var(--accent)' : 'var(--red)' },
               ].map(k => (
                 <div key={k.label} style={{ background: 'var(--sur2)', borderRadius: 8, padding: '10px 12px', border: '.5px solid var(--brd)' }}>
                   <div style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 4 }}>{k.label}</div>
@@ -217,7 +218,7 @@ export default function CashFlow({ setPage }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--th)', marginBottom: 4 }}>
-                  <span>% mes transcurrido</span>
+                  <span>{t('cf.eom.monthElapsed')}</span>
                   <span>{barPct.toFixed(0)}%</span>
                 </div>
                 <div style={{ height: 6, borderRadius: 3, background: 'var(--brd2)', overflow: 'hidden' }}>
@@ -227,14 +228,14 @@ export default function CashFlow({ setPage }) {
               {budgetBarPct !== null && (
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--th)', marginBottom: 4 }}>
-                    <span>% presupuesto gastado</span>
+                    <span>{t('cf.eom.budgetUsed')}</span>
                     <span style={{ color: paceColor }}>{budgetBarPct.toFixed(0)}% · {paceLabel}</span>
                   </div>
                   <div style={{ height: 6, borderRadius: 3, background: 'var(--brd2)', overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${budgetBarPct}%`, background: paceColor, borderRadius: 3, transition: '.3s' }} />
                   </div>
                   <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: 4 }}>
-                    Presupuesto total: {sym}{totalBudget.toLocaleString('es-CL')} · Gastado hasta hoy: {sym}{Math.round(curExp).toLocaleString('es-CL')}
+                    {t('cf.eom.budgetLine', { total: sym+totalBudget.toLocaleString('es-CL'), spent: sym+Math.round(curExp).toLocaleString('es-CL') })}
                   </div>
                 </div>
               )}
@@ -243,13 +244,12 @@ export default function CashFlow({ setPage }) {
             {/* Alerta de ritmo */}
             {pace !== null && pace > 0.08 && (
               <div style={{ marginTop: 12, padding: '8px 12px', background: 'rgba(255,77,106,.07)', border: '.5px solid rgba(255,77,106,.25)', borderRadius: 8, fontSize: 11, color: 'var(--red)', fontFamily: 'var(--mono)' }}>
-                ⚠ Vas {(pace * 100).toFixed(0)}% por encima del ritmo esperado. A este paso gastarías {sym}{Math.round(projExp).toLocaleString('es-CL')} este mes
-                {totalBudget > 0 ? ` (${sym}${Math.round(projExp - totalBudget).toLocaleString('es-CL')} sobre el presupuesto).` : '.'}
+                {t('cf.alert.over', { pct: (pace * 100).toFixed(0), proj: sym+Math.round(projExp).toLocaleString('es-CL'), overBudget: totalBudget > 0 ? t('cf.alert.overBudgetPart', { v: sym+Math.round(projExp - totalBudget).toLocaleString('es-CL') }) : '' })}
               </div>
             )}
             {pace !== null && pace <= 0 && curExp > 0 && (
               <div style={{ marginTop: 12, padding: '8px 12px', background: 'rgba(0,212,170,.06)', border: '.5px solid rgba(0,212,170,.2)', borderRadius: 8, fontSize: 11, color: 'var(--accent)', fontFamily: 'var(--mono)' }}>
-                ✓ Ritmo de gasto saludable — vas {Math.abs((pace * 100).toFixed(0))}% por debajo del ritmo esperado del mes.
+                {t('cf.alert.under', { pct: Math.abs((pace * 100).toFixed(0)) })}
               </div>
             )}
           </Card>
@@ -258,20 +258,20 @@ export default function CashFlow({ setPage }) {
 
       {/* KPIs de proyección */}
       <div className="kpi-row">
-        <KPI label="Flujo neto mensual"
+        <KPI label={t('cf.kpi.netFlow')}
           value={fmtMoney(monthlyNetFlow, sym)}
           color={monthlyNetFlow > 0 ? 'green' : monthlyNetFlow < 0 ? 'red' : 'default'}
-          sub={trend === 'positivo' ? '↑ Tendencia positiva' : trend === 'negativo' ? '↓ Revisar gastos' : 'Sin cambio'} />
-        <KPI label="Saldo en 30 días"  value={fmtMoney(bal30, sym)}  color={bal30 > 0 ? 'green' : 'red'} />
-        <KPI label="Saldo en 60 días"  value={fmtMoney(bal60, sym)}  color={bal60 > 0 ? 'green' : 'red'} />
-        <KPI label="Saldo en 90 días"  value={fmtMoney(bal90, sym)}  color={bal90 > 0 ? 'green' : 'red'} />
+          sub={trend === 'positivo' ? t('cf.kpi.trendUp') : trend === 'negativo' ? t('cf.kpi.trendDown') : t('cf.kpi.trendFlat')} />
+        <KPI label={t('cf.kpi.bal30')}  value={fmtMoney(bal30, sym)}  color={bal30 > 0 ? 'green' : 'red'} />
+        <KPI label={t('cf.kpi.bal60')}  value={fmtMoney(bal60, sym)}  color={bal60 > 0 ? 'green' : 'red'} />
+        <KPI label={t('cf.kpi.bal90')}  value={fmtMoney(bal90, sym)}  color={bal90 > 0 ? 'green' : 'red'} />
       </div>
 
       {/* Gráfico de proyección */}
       <Card>
-        <CardHeader title="Balance proyectado — próximos 6 meses" />
+        <CardHeader title={t('cf.chart.title')} />
         {!hasData
-          ? <Empty text="Sin datos recurrentes para proyectar" />
+          ? <Empty text={t('cf.chart.empty')} />
           : (
             <ResponsiveContainer width="100%" height={220}>
               <AreaChart data={projectionData}>
@@ -291,7 +291,7 @@ export default function CashFlow({ setPage }) {
                   tickFormatter={v => v >= 1000000 ? (v/1000000).toFixed(1)+'M' : v >= 1000 ? (v/1000).toFixed(0)+'K' : v} />
                 <Tooltip content={<ChartTooltip sym={sym} />} />
                 <ReferenceLine y={0} stroke="var(--red)" strokeDasharray="4 2" strokeWidth={1.5} />
-                <Area type="monotone" dataKey="Balance" name="Balance proyectado"
+                <Area type="monotone" dataKey="Balance" name={t('cf.chart.series')}
                   stroke={monthlyNetFlow >= 0 ? 'var(--grn)' : 'var(--red)'}
                   strokeWidth={2}
                   fill={monthlyNetFlow >= 0 ? 'url(#balGrad)' : 'url(#balGradNeg)'} />
@@ -305,9 +305,9 @@ export default function CashFlow({ setPage }) {
       <div className="grid2">
 
         <Card>
-          <CardHeader title={`Ingresos recurrentes detectados (${recurringInc.length})`} />
+          <CardHeader title={t('cf.recInc.title', { n: recurringInc.length })} />
           {recurringInc.length === 0
-            ? <Empty text="Sin ingresos recurrentes" />
+            ? <Empty text={t('cf.recInc.empty')} />
             : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
                 {recurringInc.map(r => {
@@ -321,14 +321,14 @@ export default function CashFlow({ setPage }) {
                         <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)' }}>{r.recurrence} · {r.category}</div>
                       </div>
                       <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: 12, fontFamily: 'var(--mono)', fontWeight: 500, color: 'var(--grn)' }}>+{fmtMoney(mensual, sym)}/mes</div>
-                        <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)' }}>{fmtMoney(r.amount, sym)} original</div>
+                        <div style={{ fontSize: 12, fontFamily: 'var(--mono)', fontWeight: 500, color: 'var(--grn)' }}>+{t('cf.rec.perMonth', { v: fmtMoney(mensual, sym) })}</div>
+                        <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)' }}>{t('cf.rec.original', { v: fmtMoney(r.amount, sym) })}</div>
                       </div>
                     </div>
                   )
                 })}
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', fontSize: 12, fontWeight: 600, borderTop: '0.5px solid var(--brd2)', marginTop: 2 }}>
-                  <span>Total mensual</span>
+                  <span>{t('cf.rec.totalMonthly')}</span>
                   <span style={{ color: 'var(--grn)', fontFamily: 'var(--mono)' }}>+{fmtMoney(monthlyRecInc, sym)}</span>
                 </div>
               </div>
@@ -337,9 +337,9 @@ export default function CashFlow({ setPage }) {
         </Card>
 
         <Card>
-          <CardHeader title={`Gastos recurrentes detectados (${recurringExp.length})`} />
+          <CardHeader title={t('cf.recExp.title', { n: recurringExp.length })} />
           {recurringExp.length === 0
-            ? <Empty text="Sin gastos recurrentes" />
+            ? <Empty text={t('cf.recExp.empty')} />
             : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
                 {recurringExp.map(r => {
@@ -353,14 +353,14 @@ export default function CashFlow({ setPage }) {
                         <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)' }}>{r.recurrence} · {r.category}</div>
                       </div>
                       <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: 12, fontFamily: 'var(--mono)', fontWeight: 500, color: 'var(--red)' }}>-{fmtMoney(mensual, sym)}/mes</div>
-                        <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)' }}>{fmtMoney(r.amount, sym)} original</div>
+                        <div style={{ fontSize: 12, fontFamily: 'var(--mono)', fontWeight: 500, color: 'var(--red)' }}>-{t('cf.rec.perMonth', { v: fmtMoney(mensual, sym) })}</div>
+                        <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)' }}>{t('cf.rec.original', { v: fmtMoney(r.amount, sym) })}</div>
                       </div>
                     </div>
                   )
                 })}
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', fontSize: 12, fontWeight: 600, borderTop: '0.5px solid var(--brd2)', marginTop: 2 }}>
-                  <span>Total mensual</span>
+                  <span>{t('cf.rec.totalMonthly')}</span>
                   <span style={{ color: 'var(--red)', fontFamily: 'var(--mono)' }}>-{fmtMoney(monthlyRecExp, sym)}</span>
                 </div>
               </div>
@@ -373,28 +373,26 @@ export default function CashFlow({ setPage }) {
       {/* Análisis del flujo */}
       {hasData && (
         <Card>
-          <CardHeader title="Análisis del flujo" />
+          <CardHeader title={t('cf.analysis.title')} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {monthlyNetFlow > 0 && (
               <Alert type="ok">
-                ✓ Tu flujo neto mensual recurrente es +{fmtMoney(monthlyNetFlow, sym)}. A este ritmo, en 3 meses tendrás {fmtMoney(bal90, sym)}.
+                {t('cf.analysis.positive', { v: fmtMoney(monthlyNetFlow, sym), b90: fmtMoney(bal90, sym) })}
               </Alert>
             )}
             {monthlyNetFlow < 0 && (
               <Alert type="danger">
-                ⚠ Tus gastos recurrentes superan tus ingresos recurrentes en {fmtMoney(-monthlyNetFlow, sym)}/mes.
-                En 90 días el saldo sería {fmtMoney(bal90, sym)}. Revisa qué suscripciones o gastos fijos puedes reducir.
+                {t('cf.analysis.negative', { v: fmtMoney(-monthlyNetFlow, sym), b90: fmtMoney(bal90, sym) })}
               </Alert>
             )}
             {monthlyNetFlow === 0 && (
               <Alert type="warn">
-                → Tu flujo neto recurrente es cero. Tus ingresos y gastos fijos se equilibran exactamente.
+                {t('cf.analysis.zero')}
               </Alert>
             )}
             {recurringExp.length > 0 && (
               <Alert type="info">
-                → Suscripciones y gastos recurrentes detectados: {recurringExp.length} ítems sumando {fmtMoney(monthlyRecExp, sym)}/mes
-                ({fmtPct(monthlyRecInc > 0 ? monthlyRecExp / monthlyRecInc : 0)} de tus ingresos recurrentes).
+                {t('cf.analysis.recap', { n: recurringExp.length, v: fmtMoney(monthlyRecExp, sym), pct: fmtPct(monthlyRecInc > 0 ? monthlyRecExp / monthlyRecInc : 0) })}
               </Alert>
             )}
           </div>
@@ -402,10 +400,7 @@ export default function CashFlow({ setPage }) {
       )}
 
       <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', padding: '4px 0', lineHeight: 1.5 }}>
-        * Proyección basada en el promedio de tus últimos hasta 3 meses con datos (incluye
-        gastos variables, no solo los recurrentes). No predice eventos imprevistos. Atención: no usar en modo incógnito —
-        los datos se borran al cerrar esa sesión. Orientación general — no constituye
-        asesoría financiera, tributaria ni de inversión.
+        {t('cf.disclaimer')}
       </div>
     </div>
   )
