@@ -10,6 +10,7 @@ import CategoryDonut from '../../components/charts/CategoryDonut.jsx'
 import MoneyFlow from '../../components/charts/MoneyFlow.jsx'
 import { evaluateCoach, calcCoachMetrics } from '../../data/coachRules.js'
 import { calcFinancialScore } from '../../utils/financialScore.js'
+import { pendingDebtMonthly } from '../../utils/personal.js'
 
 const fmt  = (n) => (Number(n) || 0).toLocaleString('es-CL', { maximumFractionDigits: 0 })
 const pct  = (n) => ((Number(n) || 0) * 100).toFixed(1) + '%'
@@ -51,7 +52,8 @@ export default function Dashboard({ setPage }) {
         if (f === 'weekly') return s + amt * 4.33
         return s + amt
       }, 0)
-      const totalDebt = debts.reduce((s, d) => s + (Number(d.minPayment) || 0), 0)
+      // Solo deudas personales (no las de propiedades) y sin contar cuotas ya registradas como gasto
+      const totalDebt = pendingDebtMonthly(debts, exp)
       const balance  = totalInc - totalExp                        // Balance neto = ingresos − gastos
       const freeFlow = totalInc - totalExp - totalDebt - totalSubs // Disponible tras deudas y suscripciones
       return { totalInc, totalExp, totalDebt, totalSubs, balance, freeFlow,

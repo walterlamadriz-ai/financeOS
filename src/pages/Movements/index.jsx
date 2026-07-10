@@ -9,6 +9,7 @@ import ChartCard from '../../components/charts/ChartCard.jsx'
 import HorizontalBars from '../../components/charts/HorizontalBars.jsx'
 import CategoryDonut from '../../components/charts/CategoryDonut.jsx'
 import { parseTransactionText } from '../../utils/smsParser.js'
+import { pendingDebtMonthly } from '../../utils/personal.js'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36)
@@ -393,9 +394,11 @@ export default function Movements({ setPage }) {
     activeSubs.reduce((s,sub) => s + toAnnual(Number(sub.amount)||0, sub.frequency), 0)
   , [activeSubs])
 
+  // Deudas: solo personales (excluye hipotecas de propiedades) y restando las
+  // cuotas ya registradas como egreso del mes (categoría 'Deudas') — sin duplicar.
   const totalDebt  = useMemo(() =>
-    debts.reduce((s,d) => s + (Number(d.minPayment)||0), 0)
-  , [debts])
+    pendingDebtMonthly(debts, monthExp)
+  , [debts, monthExp])
 
   const totalEgresos = totalExp + totalSubs
   // Disponible PERSONAL = ingresos personales − gastos personales − suscripciones − deudas

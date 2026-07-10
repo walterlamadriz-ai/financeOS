@@ -6,6 +6,7 @@ import { useT } from '../../i18n/useT.js'
 import { KPI, Card, CardHeader, Alert, Empty, PageHeader } from '../../components/ui/index.jsx'
 import { fmtMoney, fmtPct } from '../../utils/index.js'
 import { ReportsDisclaimer } from '../../components/legal/MicroCopy.jsx'
+import { pendingDebtMonthly } from '../../utils/personal.js'
 import { CURRENCY_SYMBOLS, monthLabel } from '../shared/constants.js'
 import MonthSelector from '../shared/MonthSelector.jsx'
 import MoneyFlow from '../../components/charts/MoneyFlow.jsx'
@@ -66,7 +67,8 @@ export default function Reports({ setPage }) {
     if(f==='weekly') return s+amt*4.33
     return s+amt
   }, 0), [allSubs])
-  const totalDebt    = useMemo(() => (Array.isArray(allDebts)?allDebts:[]).reduce((s,d) => s+(Number(d.minPayment)||0), 0), [allDebts])
+  // Solo deudas personales y sin duplicar cuotas ya registradas como gasto del mes
+  const totalDebt    = useMemo(() => pendingDebtMonthly(allDebts, mExpenses), [allDebts, mExpenses])
   const balance      = totalIncome - totalExpense                          // Balance neto = ingresos − gastos
   const freeFlow     = totalIncome - totalExpense - totalDebt - totalSubs   // Disponible tras deudas y suscripciones
   const savingRate   = totalIncome > 0 ? Math.max(0, balance)/totalIncome : 0
