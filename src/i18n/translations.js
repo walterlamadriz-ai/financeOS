@@ -9,6 +9,8 @@
 
 export const translations = {
   es: {
+    'goals.emergencyAdjust': "💡 Recomendación actual: 3 meses de tus gastos = {v}",
+    'goals.emergencyAdjustBtn': "Ajustar objetivo →",
     'dash.proj.basis': "Base: gastado {cur} + ritmo diario, mezclado con tu promedio de {n} mes(es): {avg}/mes",
     'adv.kpi.netWorth': "Patrimonio neto",
     'adv.kpi.netWorthSub': "Activos {a} − Pasivos {p}",
@@ -1075,6 +1077,8 @@ export const translations = {
     'settings.install.btn': 'Instalar →',
   },
   en: {
+    'goals.emergencyAdjust': "💡 Current recommendation: 3 months of your expenses = {v}",
+    'goals.emergencyAdjustBtn': "Adjust target →",
     'dash.proj.basis': "Basis: spent {cur} + daily pace, blended with your {n}-month average: {avg}/mo",
     'adv.kpi.netWorth': "Net worth",
     'adv.kpi.netWorthSub': "Assets {a} − Liabilities {p}",
@@ -2141,6 +2145,8 @@ export const translations = {
     'settings.install.btn': 'Install →',
   },
   pt: {
+    'goals.emergencyAdjust': "💡 Recomendação atual: 3 meses dos seus gastos = {v}",
+    'goals.emergencyAdjustBtn': "Ajustar objetivo →",
     'dash.proj.basis': "Base: gasto {cur} + ritmo diário, mesclado com sua média de {n} mês(es): {avg}/mês",
     'adv.kpi.netWorth': "Patrimônio líquido",
     'adv.kpi.netWorthSub': "Ativos {a} − Passivos {p}",

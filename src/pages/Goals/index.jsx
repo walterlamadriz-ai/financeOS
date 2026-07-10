@@ -6,6 +6,7 @@ import { KPI, Card, CardHeader, FormGroup, FormRow, Btn, Alert, PageHeader } fro
 import { fmtMoney, fmtPct } from '../../utils/index.js'
 import { CURRENCY_SYMBOLS } from '../shared/constants.js'
 import { generateGoalSuggestions, totalMonthlyContribution } from '../../utils/goalSuggestions.js'
+import { projectEndOfMonth } from '../../utils/projection.js'
 
 export default function Goals({ setPage }) {
   const { goals, addGoal, delGoal, updateGoal, incomes: _incAll, expenses: _expAll, settings } = useApp()
@@ -33,6 +34,17 @@ export default function Goals({ setPage }) {
   const gastoMensualGoals = useMemo(() => {
     return (expenses || []).filter(r => r.date?.startsWith(activeMonth)).reduce((s,r) => s+r.amount, 0)
   }, [expenses, activeMonth])
+
+  // Base para la recomendación de fondo de emergencia (3 meses de gastos):
+  // promedio de meses con gastos (sin dilución), o el gasto del mes / ingreso como fallback.
+  const emergencyBase = useMemo(() => {
+    const { avgExp } = projectEndOfMonth({ incomes, expenses, activeMonth })
+    return avgExp > 0 ? avgExp : (gastoMensualGoals > 0 ? gastoMensualGoals : ingresoNetoGoals)
+  }, [incomes, expenses, activeMonth, gastoMensualGoals, ingresoNetoGoals])
+  const isEmergencyGoal = (g) => {
+    const n = (g.name || '').toLowerCase()
+    return n.includes('emergencia') || n.includes('emergency') || n.includes('emergên') || n.includes('fondo') || n.includes('fundo')
+  }
 
   const totalTarget = useMemo(() => goals.reduce((s,g) => s+g.target, 0), [goals])
   const totalSaved  = useMemo(() => goals.reduce((s,g) => s+g.saved, 0), [goals])
@@ -244,6 +256,22 @@ export default function Goals({ setPage }) {
                   <div style={{height:8,background:'var(--brd)',borderRadius:4,overflow:'hidden',marginBottom:8}}>
                     <div style={{height:'100%',width:(p*100)+'%',background:clr,borderRadius:4,transition:'width .4s'}}/>
                   </div>
+                  {/* Meta de emergencia creada con la recomendación anterior (6 meses):
+                      ofrecer ajuste de un tap a la recomendación vigente (3 meses de gastos) */}
+                  {(() => {
+                    if (!isEmergencyGoal(g) || emergencyBase <= 0) return null
+                    const recommended = Math.round(emergencyBase * 3)
+                    if (recommended <= 0 || Math.abs(g.target - recommended) / recommended < 0.15) return null
+                    return (
+                      <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap',padding:'6px 10px',marginBottom:8,background:'rgba(245,166,35,.07)',border:'.5px solid rgba(245,166,35,.25)',borderRadius:6}}>
+                        <span style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--amb,#b45309)',flex:1,minWidth:180}}>{t('goals.emergencyAdjust', { v: fmtMoney(recommended, sym) })}</span>
+                        <button onClick={() => updateGoal({ ...g, target: recommended, saved: Math.min(g.saved, recommended) })}
+                          style={{background:'none',border:'.5px solid var(--amb,#b45309)',borderRadius:6,padding:'3px 10px',fontSize:10,fontWeight:600,color:'var(--amb,#b45309)',cursor:'pointer',fontFamily:'var(--mono)',whiteSpace:'nowrap'}}>
+                          {t('goals.emergencyAdjustBtn')}
+                        </button>
+                      </div>
+                    )
+                  })()}
                   <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
                     <div style={{display:'flex',gap:6,alignItems:'center'}}>
                       <span style={{fontSize:11,fontFamily:'var(--mono)',color:clr,fontWeight:600}}>{fmtMoney(g.saved,sym)}</span>
