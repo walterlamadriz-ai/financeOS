@@ -73,7 +73,7 @@ export default function ReportPDF({ data }) {
     sym, month, monthLabel,
     totalIncome, totalExpense, totalSubs, totalDebt, balance, savingRate,
     savingGoalPct, necesidad, deseos, expByCat, trendData,
-    overBudget, currency, generatedAt,
+    overBudget, currency, generatedAt, netWorth,
   } = data
 
   const catEntries = Object.entries(expByCat)
@@ -155,6 +155,13 @@ export default function ReportPDF({ data }) {
               <Text style={s.kpiLabel}>Pagos deuda</Text>
               <Text style={[s.kpiVal, { color: RED, fontSize: 11 }]}>{fmt(totalDebt, sym)}/mes</Text>
             </View>
+            {netWorth && (
+              <View style={s.kpiBox}>
+                <Text style={s.kpiLabel}>Patrimonio neto (hoy)</Text>
+                <Text style={[s.kpiVal, { color: netWorth.netWorth >= 0 ? ACCENT : RED, fontSize: 11 }]}>{fmt(netWorth.netWorth, sym)}</Text>
+                <Text style={s.kpiSub}>Activos {fmt(netWorth.totalActivos, sym)} − Pasivos {fmt(netWorth.totalPasivos, sym)}</Text>
+              </View>
+            )}
             <View style={s.kpiBox}>
               <Text style={s.kpiLabel}>Necesidades</Text>
               <Text style={[s.kpiVal, { fontSize: 11 }]}>{fmt(necesidad, sym)}</Text>

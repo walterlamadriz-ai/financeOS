@@ -7,6 +7,7 @@ import { KPI, Card, CardHeader, Alert, Empty, PageHeader } from '../../component
 import { fmtMoney, fmtPct } from '../../utils/index.js'
 import { ReportsDisclaimer } from '../../components/legal/MicroCopy.jsx'
 import { pendingDebtMonthly } from '../../utils/personal.js'
+import { calcNetWorth } from '../../utils/netWorth.js'
 import { CURRENCY_SYMBOLS, monthLabel } from '../shared/constants.js'
 import MonthSelector from '../shared/MonthSelector.jsx'
 import MoneyFlow from '../../components/charts/MoneyFlow.jsx'
@@ -23,7 +24,7 @@ import {
 
 export default function Reports({ setPage }) {
   const { t } = useT()
-  const { incomes: _incAll, expenses: _expAll, budgets, debts: allDebts, subscriptions: allSubs, settings } = useApp()
+  const { incomes: _incAll, expenses: _expAll, budgets, debts: allDebts, subscriptions: allSubs, goals: allGoals, settings } = useApp()
   const incomes = (_incAll || []).filter(r => !r?.inv)   // reporte personal: excluye inversión
   const expenses = (_expAll || []).filter(r => !r?.inv)
   const sym        = CURRENCY_SYMBOLS[settings.currency] || '$'
@@ -31,6 +32,10 @@ export default function Reports({ setPage }) {
   const { isPro }  = usePlan()
   const [pdfLoading, setPdfLoading] = useState(false)
   const activeMonth = settings.activeMonth || new Date().toISOString().slice(0, 7)
+
+  // Patrimonio neto (stock a HOY) — cálculo compartido con la página Patrimonio
+  const nw = useMemo(() => calcNetWorth({ goals: allGoals, debts: allDebts, incomes: _incAll, expenses: _expAll, settings }),
+    [allGoals, allDebts, _incAll, _expAll, settings])
 
   async function downloadPDF() {
     setPdfLoading(true)
@@ -41,6 +46,7 @@ export default function Reports({ setPage }) {
         savingGoalPct: settings.savingGoalPct || 25,
         necesidad, deseos, expByCat, trendData, overBudget,
         currency: settings.currency || 'CLP',
+        netWorth: nw.hasData ? nw : null,
         generatedAt: new Date().toLocaleDateString('es-CL', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }),
       }
       const blob = await pdf(<ReportPDF data={data} />).toBlob()
@@ -272,6 +278,24 @@ export default function Reports({ setPage }) {
           <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',marginTop:8}}>{t('reports.subs.disclaimer')}</div>
         </Card>
       )}
+      {/* Resumen de patrimonio (stock a hoy) — el desglose vive en la página Patrimonio */}
+      {nw.hasData && (
+        <div style={{padding:'12px 16px',background:'var(--sur)',border:'.5px solid var(--brd)',borderRadius:'var(--r)',display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,flexWrap:'wrap'}}>
+          <div style={{flex:1,minWidth:200}}>
+            <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',textTransform:'uppercase',letterSpacing:'.8px',marginBottom:3}}>{t('reports.networth.title')}</div>
+            <div style={{fontSize:20,fontWeight:700,fontFamily:'var(--mono)',color: nw.netWorth >= 0 ? 'var(--grn)' : 'var(--red)'}}>
+              {nw.netWorth >= 0 ? '' : '-'}{fmtMoney(Math.abs(nw.netWorth), sym)}
+            </div>
+            <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',marginTop:2}}>{t('reports.networth.formula', { a: fmtMoney(nw.totalActivos, sym), p: fmtMoney(nw.totalPasivos, sym) })}</div>
+          </div>
+          {setPage && (
+            <button onClick={() => setPage('networth')} style={{background:'none',border:'.5px solid var(--brd2)',borderRadius:7,padding:'6px 14px',fontSize:12,fontWeight:600,color:'var(--accent)',cursor:'pointer',fontFamily:'var(--mono)',whiteSpace:'nowrap',flexShrink:0}}>
+              {t('reports.networth.detail')}
+            </button>
+          )}
+        </div>
+      )}
+
       {/* La lista completa de señales vive en la página Diagnóstico (evita duplicar información) */}
       {coachSignals.length > 0 && (
         <div style={{padding:'12px 16px',background:'var(--sur)',border:'.5px solid var(--brd)',borderRadius:'var(--r)',display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,flexWrap:'wrap'}}>

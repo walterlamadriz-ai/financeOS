@@ -9,6 +9,9 @@
 
 export const translations = {
   es: {
+    'reports.networth.title': "💎 Patrimonio neto (hoy)",
+    'reports.networth.formula': "Activos {a} − Pasivos {p} · foto actual, no depende del mes seleccionado",
+    'reports.networth.detail': "Ver detalle →",
     'reports.diag.linkText': "⚕ ¿Cómo está tu salud financiera? Score, señales del mes y checklist están en el Diagnóstico.",
     'reports.diag.linkBtn': "Ver diagnóstico completo →",
     'adv.tl.saving': "Tasa de ahorro",
@@ -964,6 +967,9 @@ export const translations = {
     'settings.install.btn': 'Instalar →',
   },
   en: {
+    'reports.networth.title': "💎 Net worth (today)",
+    'reports.networth.formula': "Assets {a} − Liabilities {p} · current snapshot, independent of the selected month",
+    'reports.networth.detail': "See detail →",
     'reports.diag.linkText': "⚕ How's your financial health? Score, monthly signals, and checklist live in the Diagnosis.",
     'reports.diag.linkBtn': "See full diagnosis →",
     'adv.tl.saving': "Savings rate",
@@ -1919,6 +1925,9 @@ export const translations = {
     'settings.install.btn': 'Install →',
   },
   pt: {
+    'reports.networth.title': "💎 Patrimônio líquido (hoje)",
+    'reports.networth.formula': "Ativos {a} − Passivos {p} · foto atual, não depende do mês selecionado",
+    'reports.networth.detail': "Ver detalhe →",
     'reports.diag.linkText': "⚕ Como está sua saúde financeira? Pontuação, sinais do mês e checklist estão no Diagnóstico.",
     'reports.diag.linkBtn': "Ver diagnóstico completo →",
     'adv.tl.saving': "Taxa de poupança",
