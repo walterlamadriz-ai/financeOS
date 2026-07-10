@@ -1,6 +1,7 @@
 // src/pages/Budgets/index.jsx — v1.5
 import { useState, useMemo } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
+import { useT } from '../../i18n/useT.js'
 import { KPI, Card, CardHeader, FormGroup, FormRow, Btn, Alert, PageHeader } from '../../components/ui/index.jsx'
 import { fmtMoney, fmtPct, CATS_EXPENSE } from '../../utils/index.js'
 import { CURRENCY_SYMBOLS, monthLabel } from '../shared/constants.js'
@@ -8,6 +9,7 @@ import MonthSelector from '../shared/MonthSelector.jsx'
 
 export default function Budgets() {
   const { budgets, addBudget, delBudget, expenses, incomes, settings, updateSettings } = useApp()
+  const { t } = useT()
   const [f, setF]     = useState({ category: 'Vivienda', limit: '' })
   const [err, setErr] = useState('')
   const sym           = CURRENCY_SYMBOLS[settings.currency] || '$'
@@ -55,8 +57,8 @@ export default function Budgets() {
   const overBudget    = useMemo(() => budgets.filter(b => (expByCat[b.category] || 0) > (effectiveLimitByCat[b.category] || b.limit)), [budgets, expByCat, effectiveLimitByCat])
 
   async function submit() {
-    if (!f.limit || Number(f.limit) <= 0)             { setErr('Ingresa un límite válido'); return }
-    if (budgets.find(b => b.category === f.category)) { setErr('Ya existe presupuesto para esta categoría'); return }
+    if (!f.limit || Number(f.limit) <= 0)             { setErr(t('budgets.err.limit')); return }
+    if (budgets.find(b => b.category === f.category)) { setErr(t('budgets.err.exists')); return }
     setErr('')
     await addBudget({ ...f, limit: Number(f.limit) })
     setF({ category: 'Vivienda', limit: '' })
@@ -69,11 +71,11 @@ export default function Budgets() {
   return (
     <div className="stack">
       <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-        <PageHeader title="Presupuestos" sub={`Límites mensuales · ${monthLabel(activeMonth)} · los movimientos marcados como inversión 💼 no cuentan aquí`} />
+        <PageHeader title={t('budgets.title')} sub={t('budgets.sub', { month: monthLabel(activeMonth) })} />
         <MonthSelector incomes={[]} expenses={expenses} />
         <button
           onClick={toggleRollover}
-          title="Rollover: lo no gastado el mes anterior se suma al límite de este mes"
+          title={t('budgets.rollover.title')}
           style={{
             marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6,
             background: rolloverOn ? 'rgba(0,212,170,.1)' : 'var(--sur2)',
@@ -93,61 +95,61 @@ export default function Budgets() {
               width: 10, height: 10, borderRadius: '50%', background: '#fff', transition: '.2s',
             }} />
           </span>
-          Rollover {rolloverOn ? 'ON' : 'OFF'}
+          {rolloverOn ? t('budgets.rollover.on') : t('budgets.rollover.off')}
         </button>
       </div>
       {rolloverOn && (
         <div style={{ padding: '8px 12px', background: 'rgba(0,212,170,.06)', border: '.5px solid rgba(0,212,170,.2)', borderRadius: 8, fontSize: 11, color: 'var(--accent)', fontFamily: 'var(--mono)', lineHeight: 1.6 }}>
-          ↻ Rollover activo — lo no gastado en {monthLabel(prevMonth)} se suma al límite de {monthLabel(activeMonth)}.
+          {t('budgets.rollover.banner', { prev: monthLabel(prevMonth), cur: monthLabel(activeMonth) })}
         </div>
       )}
       <div className="kpi-row" style={{ gridTemplateColumns: 'repeat(4,1fr)' }}>
-        <KPI label="Presupuesto total"     value={fmtMoney(totalBudget, sym)} />
-        <KPI label="Gastado (con presup.)" value={fmtMoney(totalBudgeted, sym)} color="red" sub={totalBudget > 0 ? fmtPct(totalBudgeted/totalBudget) : '-'} />
-        <KPI label="Categorías excedidas"  value={overBudget.length} color={overBudget.length > 0 ? 'red' : 'green'} sub={overBudget.length > 0 ? 'revisar' : 'todo en orden'} />
-        <KPI label="Cobertura con ingresos" value={ingresoNeto > 0 ? fmtPct(totalBudget/ingresoNeto) : '—'} color={ingresoNeto > 0 && totalBudget > ingresoNeto ? 'red' : ingresoNeto > 0 && totalBudget/ingresoNeto > 0.8 ? 'amber' : 'green'} sub={ingresoNeto > 0 ? (totalBudget > ingresoNeto ? '⚠ Supera ingresos' : totalBudget/ingresoNeto > 0.8 ? 'Sin margen de ahorro' : 'Margen saludable') : 'Sin ingresos'} />
+        <KPI label={t('budgets.kpi.total')}     value={fmtMoney(totalBudget, sym)} />
+        <KPI label={t('budgets.kpi.spent')} value={fmtMoney(totalBudgeted, sym)} color="red" sub={totalBudget > 0 ? fmtPct(totalBudgeted/totalBudget) : '-'} />
+        <KPI label={t('budgets.kpi.over')}  value={overBudget.length} color={overBudget.length > 0 ? 'red' : 'green'} sub={overBudget.length > 0 ? t('budgets.kpi.review') : t('budgets.kpi.allOk')} />
+        <KPI label={t('budgets.kpi.coverage')} value={ingresoNeto > 0 ? fmtPct(totalBudget/ingresoNeto) : '—'} color={ingresoNeto > 0 && totalBudget > ingresoNeto ? 'red' : ingresoNeto > 0 && totalBudget/ingresoNeto > 0.8 ? 'amber' : 'green'} sub={ingresoNeto > 0 ? (totalBudget > ingresoNeto ? t('budgets.kpi.exceedsIncome') : totalBudget/ingresoNeto > 0.8 ? t('budgets.kpi.noMargin') : t('budgets.kpi.healthy')) : t('budgets.kpi.noIncome')} />
       </div>
-      {overBudget.length > 0 && <Alert type="danger">⚠ {overBudget.map(b => b.category).join(', ')} superaron el límite mensual.</Alert>}
-      {ingresoNeto > 0 && totalBudget > ingresoNeto && <Alert type="danger">⚠ Tu presupuesto total ({fmtMoney(totalBudget,sym)}) supera tus ingresos netos ({fmtMoney(ingresoNeto,sym)}). Déficit: {fmtMoney(totalBudget-ingresoNeto,sym)}.</Alert>}
-      {ingresoNeto > 0 && totalBudget > 0 && totalBudget <= ingresoNeto && totalBudget/ingresoNeto > 0.8 && <Alert type="warning">⚠ Tu presupuesto usa el {fmtPct(totalBudget/ingresoNeto)} de tus ingresos. Reserva al menos 20% para ahorro.</Alert>}
+      {overBudget.length > 0 && <Alert type="danger">{t('budgets.alert.over', { cats: overBudget.map(b => b.category).join(', ') })}</Alert>}
+      {ingresoNeto > 0 && totalBudget > ingresoNeto && <Alert type="danger">{t('budgets.alert.deficit', { total: fmtMoney(totalBudget,sym), inc: fmtMoney(ingresoNeto,sym), def: fmtMoney(totalBudget-ingresoNeto,sym) })}</Alert>}
+      {ingresoNeto > 0 && totalBudget > 0 && totalBudget <= ingresoNeto && totalBudget/ingresoNeto > 0.8 && <Alert type="warning">{t('budgets.alert.tight', { pct: fmtPct(totalBudget/ingresoNeto) })}</Alert>}
 
       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:16,marginBottom:16,alignItems:'start'}}>
         <div style={{display:'flex',flexDirection:'column',gap:16}}>
           <Card>
-            <CardHeader title="Nuevo presupuesto" />
+            <CardHeader title={t('budgets.new')} />
             {err && <Alert type="danger">⚠ {err}</Alert>}
             <FormRow>
-              <FormGroup label="Categoría"><select value={f.category} onChange={e => setF(p => ({...p,category:e.target.value}))}>{CATS_EXPENSE.map(c => <option key={c}>{c}</option>)}</select></FormGroup>
-              <FormGroup label={`Límite mensual (${settings.currency||'CLP'})`}><input type="number" min="0" value={f.limit} placeholder="0" onChange={e => setF(p => ({...p,limit:e.target.value}))} /></FormGroup>
+              <FormGroup label={t('budgets.form.category')}><select value={f.category} onChange={e => setF(p => ({...p,category:e.target.value}))}>{CATS_EXPENSE.map(c => <option key={c}>{c}</option>)}</select></FormGroup>
+              <FormGroup label={t('budgets.form.limit', { currency: settings.currency||'CLP' })}><input type="number" min="0" value={f.limit} placeholder="0" onChange={e => setF(p => ({...p,limit:e.target.value}))} /></FormGroup>
             </FormRow>
-            <Btn variant="primary" onClick={submit}>+ Agregar presupuesto</Btn>
+            <Btn variant="primary" onClick={submit}>{t('budgets.form.submit')}</Btn>
           </Card>
 
           <Card>
-            <CardHeader title="💡 Modelo 50/30/20" />
+            <CardHeader title={t('budgets.model.title')} />
             {ingresoNeto > 0 ? (
               <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:12,padding:'8px 12px',background:'var(--sur2)',borderRadius:6}}>
-                <span style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)'}}>Ingreso neto {monthLabel(activeMonth)}:</span>
+                <span style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)'}}>{t('budgets.model.netIncome', { month: monthLabel(activeMonth) })}</span>
                 <span style={{fontSize:13,fontWeight:700,color:'var(--grn)',fontFamily:'var(--mono)'}}>{fmtMoney(ingresoNeto,sym)}</span>
               </div>
             ) : (
               <div style={{fontSize:10,color:'#e84142',fontFamily:'var(--mono)',marginBottom:10,padding:'6px 10px',background:'rgba(232,65,66,.06)',borderRadius:6}}>
-                ⚠ Sin ingresos en {monthLabel(activeMonth)}. Agrega ingresos primero.
+                {t('budgets.model.noIncome', { month: monthLabel(activeMonth) })}
               </div>
             )}
             {(() => {
               const inc = ingresoNeto
               const sugs = [
-                {cat:'Vivienda',pct:0.25,grupo:'Necesidades'},
-                {cat:'Alimentación',pct:0.12,grupo:'Necesidades'},
-                {cat:'Transporte',pct:0.08,grupo:'Necesidades'},
-                {cat:'Salud',pct:0.05,grupo:'Necesidades'},
-                {cat:'Entretenimiento',pct:0.08,grupo:'Estilo de vida'},
-                {cat:'Educación',pct:0.07,grupo:'Estilo de vida'},
-                {cat:'Ropa y calzado',pct:0.05,grupo:'Estilo de vida'},
-                {cat:'Restaurantes',pct:0.05,grupo:'Estilo de vida'},
-                {cat:'Otros',pct:0.05,grupo:'Estilo de vida'},
-                {cat:ahorroLabel,pct:0.20,grupo:'Ahorro/Inversión',highlight:true},
+                {cat:'Vivienda',pct:0.25,grupo:t('budgets.group.needs')},
+                {cat:'Alimentación',pct:0.12,grupo:t('budgets.group.needs')},
+                {cat:'Transporte',pct:0.08,grupo:t('budgets.group.needs')},
+                {cat:'Salud',pct:0.05,grupo:t('budgets.group.needs')},
+                {cat:'Entretenimiento',pct:0.08,grupo:t('budgets.group.lifestyle')},
+                {cat:'Educación',pct:0.07,grupo:t('budgets.group.lifestyle')},
+                {cat:'Ropa y calzado',pct:0.05,grupo:t('budgets.group.lifestyle')},
+                {cat:'Restaurantes',pct:0.05,grupo:t('budgets.group.lifestyle')},
+                {cat:'Otros',pct:0.05,grupo:t('budgets.group.lifestyle')},
+                {cat:ahorroLabel,pct:0.20,grupo:t('budgets.group.savings'),highlight:true},
               ]
               async function aplicar() {
                 for (const s of sugs) {
@@ -171,8 +173,8 @@ export default function Budgets() {
                     ))}
                   </div>
                   {inc > 0 && <>
-                    <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:8}}>Solo se crean categorías sin presupuesto.</div>
-                    <Btn variant="primary" onClick={aplicar}>Aplicar sugerencias →</Btn>
+                    <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:8}}>{t('budgets.model.onlyNew')}</div>
+                    <Btn variant="primary" onClick={aplicar}>{t('budgets.model.apply')}</Btn>
                   </>}
                 </div>
               )
@@ -181,10 +183,10 @@ export default function Budgets() {
         </div>
 
         <Card>
-          <CardHeader title={`Resumen · ${monthLabel(activeMonth)}`} />
+          <CardHeader title={t('budgets.summary', { month: monthLabel(activeMonth) })} />
           {budgets.length === 0 ? (
             <div style={{textAlign:'center',padding:'24px 0'}}>
-              <div style={{fontSize:13,color:'var(--th)',fontFamily:'var(--mono)'}}>Aún no tienes presupuestos.</div>
+              <div style={{fontSize:13,color:'var(--th)',fontFamily:'var(--mono)'}}>{t('budgets.summary.empty')}</div>
             </div>
           ) : (() => {
             const total   = budgets.reduce((s,b) => s+(effectiveLimitByCat[b.category]||b.limit), 0)
@@ -203,12 +205,12 @@ export default function Budgets() {
                       <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--brd)" strokeWidth="16"/>
                       <circle cx={cx} cy={cy} r={r} fill="none" stroke={strokeColor} strokeWidth="16" strokeDasharray={`${dash} ${circ}`} strokeDashoffset={circ/4} strokeLinecap="round"/>
                       <text x={cx} y={cy-10} textAnchor="middle" fontSize="18" fill={strokeColor} fontWeight="700" fontFamily="var(--mono)">{(pct*100).toFixed(0)}%</text>
-                      <text x={cx} y={cy+8}  textAnchor="middle" fontSize="9"  fill="var(--th)" fontFamily="var(--mono)">usado</text>
-                      <text x={cx} y={cy+22} textAnchor="middle" fontSize="8"  fill="var(--th)" fontFamily="var(--mono)">del total</text>
+                      <text x={cx} y={cy+8}  textAnchor="middle" fontSize="9"  fill="var(--th)" fontFamily="var(--mono)">{t('budgets.donut.used')}</text>
+                      <text x={cx} y={cy+22} textAnchor="middle" fontSize="8"  fill="var(--th)" fontFamily="var(--mono)">{t('budgets.donut.ofTotal')}</text>
                     </svg>
                   </div>
                   <div style={{flex:1,display:'flex',flexDirection:'column',gap:8}}>
-                    {[{lb:'PRESUPUESTO TOTAL',v:fmtMoney(total,sym),c:'var(--tx)'},{lb:'GASTADO',v:fmtMoney(gastado,sym),c:strokeColor},{lb:'DISPONIBLE',v:fmtMoney(disponible,sym),c:'var(--grn)'}].map(item => (
+                    {[{lb:t('budgets.lb.total'),v:fmtMoney(total,sym),c:'var(--tx)'},{lb:t('budgets.lb.spent'),v:fmtMoney(gastado,sym),c:strokeColor},{lb:t('budgets.lb.available'),v:fmtMoney(disponible,sym),c:'var(--grn)'}].map(item => (
                       <div key={item.lb} style={{background:'var(--sur2)',borderRadius:6,padding:'8px 12px'}}>
                         <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:2}}>{item.lb}</div>
                         <div style={{fontSize:14,fontWeight:700,color:item.c,fontFamily:'var(--mono)'}}>{item.v}</div>
@@ -217,7 +219,7 @@ export default function Budgets() {
                   </div>
                 </div>
                 <div style={{marginTop:16,paddingTop:16,borderTop:'0.5px solid var(--brd)'}}>
-                  <div style={{fontFamily:'var(--mono)',fontSize:10,letterSpacing:'1px',textTransform:'uppercase',color:'var(--grn2)',marginBottom:10}}>Avance por categoría · {monthLabel(activeMonth)}</div>
+                  <div style={{fontFamily:'var(--mono)',fontSize:10,letterSpacing:'1px',textTransform:'uppercase',color:'var(--grn2)',marginBottom:10}}>{t('budgets.byCat', { month: monthLabel(activeMonth) })}</div>
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(130px,1fr))',gap:10}}>
                     {budgets.map(b => {
                       const spent    = expByCat[b.category] || 0
@@ -241,11 +243,11 @@ export default function Budgets() {
                             <circle cx={cx2} cy={cy2} r={r2} fill="none" stroke="var(--brd)" strokeWidth="9"/>
                             <circle cx={cx2} cy={cy2} r={r2} fill="none" stroke={clr} strokeWidth="9" strokeDasharray={`${dash2} ${circ2}`} strokeDashoffset={circ2/4} strokeLinecap="round"/>
                             <text x={cx2} y={cy2-4} textAnchor="middle" fontSize="10" fill={clr} fontWeight="700" fontFamily="var(--mono)">{(p*100).toFixed(0)}%</text>
-                            <text x={cx2} y={cy2+8} textAnchor="middle" fontSize="6"  fill="var(--th)" fontFamily="var(--mono)">{over?'EXCEDIDO':warn?'ATENCIÓN':'en rango'}</text>
+                            <text x={cx2} y={cy2+8} textAnchor="middle" fontSize="6"  fill="var(--th)" fontFamily="var(--mono)">{over?t('budgets.cat.over'):warn?t('budgets.cat.warn'):t('budgets.cat.ok')}</text>
                           </svg>
                           <div style={{textAlign:'center'}}>
                             <div style={{fontSize:11,fontWeight:700,color:clr,fontFamily:'var(--mono)'}}>{fmtMoney(spent,sym)}</div>
-                            <div style={{fontSize:8,color:'var(--th)',fontFamily:'var(--mono)'}}>de {fmtMoney(effLimit,sym)}{carry > 0 ? ` (base ${fmtMoney(b.limit,sym)})` : ''}</div>
+                            <div style={{fontSize:8,color:'var(--th)',fontFamily:'var(--mono)'}}>{t('budgets.cat.of', { limit: fmtMoney(effLimit,sym) })}{carry > 0 ? t('budgets.cat.base', { base: fmtMoney(b.limit,sym) }) : ''}</div>
                           </div>
                         </div>
                       )
