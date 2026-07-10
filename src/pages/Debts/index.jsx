@@ -1,6 +1,7 @@
 // src/pages/Debts/index.jsx — v1.5
 import { useState, useMemo } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
+import { useT } from '../../i18n/useT.js'
 import { KPI, Card, CardHeader, FormGroup, FormRow, Btn, Alert, Badge, ProgressBar, PageHeader } from '../../components/ui/index.jsx'
 import { fmtMoney, fmtPct } from '../../utils/index.js'
 import { CURRENCY_SYMBOLS } from '../shared/constants.js'
@@ -149,9 +150,10 @@ function DebtPayoffSimulator({ debts, sym }) {
 }
 
 export default function Debts() {
-  const { debts, addDebt, delDebt, updateDebt, addExpense, settings } = useApp()
+  const { debts, addDebt, delDebt, updateDebt, addExpense, incomes, expenses, settings } = useApp()
+  const { t } = useT()
   const [show, setShow]             = useState(false)
-  const [f, setF]                   = useState({ creditor:'', initial:'', balance:'', minPayment:'', dueDate:'', rate:'', totalInstallments:'', paidInstallments:'' })
+  const [f, setF]                   = useState({ creditor:'', initial:'', balance:'', minPayment:'', dueDate:'', rate:'', totalInstallments:'', paidInstallments:'', project:'' })
   const [err, setErr]               = useState('')
   const [confirmPay, setConfirmPay] = useState(null)
   const [payMsg, setPayMsg]         = useState(null)
@@ -160,6 +162,11 @@ export default function Debts() {
   const totalBalance = useMemo(() => debts.reduce((s,d) => s+d.balance, 0), [debts])
   const totalMin     = useMemo(() => debts.reduce((s,d) => s+d.minPayment, 0), [debts])
   const totalPaid    = useMemo(() => debts.reduce((s,d) => s+Math.max(0,(Number(d.initial)||Number(d.balance)||0)-Number(d.balance||0)), 0), [debts])
+  const knownProjects = useMemo(() => {
+    const set = new Set()
+    ;[...(incomes||[]), ...(expenses||[])].forEach(r => { const k=(r?.project||'').trim(); if(k) set.add(k) })
+    return [...set].sort()
+  }, [incomes, expenses])
 
   async function handleRegisterPayment(d) {
     const monto = Math.min(Number(d.minPayment)||0, d.balance)
@@ -185,7 +192,7 @@ export default function Debts() {
     if (Number(f.balance) > init) { setErr('El saldo actual no puede superar el monto inicial'); return }
     setErr('')
     await addDebt({...f, initial:init, balance:Number(f.balance), minPayment:Number(f.minPayment)||0, rate:Number(f.rate)||0, totalInstallments:Number(f.totalInstallments)||0, paidInstallments:Number(f.paidInstallments)||0})
-    setF({creditor:'',initial:'',balance:'',minPayment:'',dueDate:'',rate:'',totalInstallments:'',paidInstallments:''})
+    setF({creditor:'',initial:'',balance:'',minPayment:'',dueDate:'',rate:'',totalInstallments:'',paidInstallments:'',project:''})
     setShow(false)
   }
 
@@ -228,6 +235,12 @@ export default function Debts() {
                 <FormGroup label="Cuotas totales"><input type="number" min="0" value={f.totalInstallments} placeholder="ej. 36" onChange={e => setF(p=>({...p,totalInstallments:e.target.value}))} /></FormGroup>
                 <FormGroup label="Cuotas pagadas"><input type="number" min="0" value={f.paidInstallments} placeholder="ej. 12" onChange={e => setF(p=>({...p,paidInstallments:e.target.value}))} /></FormGroup>
               </FormRow>
+              <FormRow>
+                <FormGroup label={t('debts.projectLabel')}>
+                  <input type="text" list="fnos-debt-projects" value={f.project} placeholder={t('debts.projectPlaceholder')} onChange={e => setF(p=>({...p,project:e.target.value}))} />
+                  <datalist id="fnos-debt-projects">{knownProjects.map(n => <option key={n} value={n} />)}</datalist>
+                </FormGroup>
+              </FormRow>
             </>
           )}
           <div style={{display:'flex',gap:8}}>
@@ -257,6 +270,7 @@ export default function Debts() {
               <div style={{fontSize:13,fontWeight:600,color:'var(--tx)'}}>{d.creditor}</div>
               <div style={{display:'flex',gap:6,alignItems:'center',flexWrap:'wrap',justifyContent:'flex-end'}}>
                 {d.rate > 0 && <Badge color="red">{d.rate}% TAE</Badge>}
+                {(d.project||'').trim() && <Badge color="green">🏢 {d.project}</Badge>}
                 {d.balance > 0 && d.minPayment > 0 && confirmPay !== d.id && (
                   <button onClick={() => setConfirmPay(d.id)}
                     style={{fontSize:11,padding:'2px 8px',borderRadius:4,border:'0.5px solid rgba(10,92,62,.3)',background:'rgba(10,92,62,.08)',color:'var(--grn)',cursor:'pointer',fontFamily:'var(--mono)',fontWeight:600}}>
