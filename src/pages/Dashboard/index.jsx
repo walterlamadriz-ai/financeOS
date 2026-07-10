@@ -11,6 +11,7 @@ import MoneyFlow from '../../components/charts/MoneyFlow.jsx'
 import { evaluateCoach, calcCoachMetrics } from '../../data/coachRules.js'
 import { calcFinancialScore } from '../../utils/financialScore.js'
 import { pendingDebtMonthly } from '../../utils/personal.js'
+import { projectEndOfMonth } from '../../utils/projection.js'
 
 const fmt  = (n) => (Number(n) || 0).toLocaleString('es-CL', { maximumFractionDigits: 0 })
 const pct  = (n) => ((Number(n) || 0) * 100).toFixed(1) + '%'
@@ -607,25 +608,9 @@ export default function Dashboard({ setPage }) {
 
       {/* Proyección fin de mes */}
       {!compact && (kpis.totalInc > 0 || kpis.totalExp > 0) && (() => {
-        const now = new Date()
-        const [y, mo] = activeMonth.split('-').map(Number)
-        const daysInMonth = new Date(y, mo, 0).getDate()
-        const today = (now.getFullYear() === y && now.getMonth() + 1 === mo) ? now.getDate() : daysInMonth
-        const daysLeft = daysInMonth - today
-        const dailyExp = today > 0 ? kpis.totalExp / today : 0
-        // Gasto proyectado — MISMA fórmula que la página Proyección (CashFlow):
-        // mezcla el ritmo diario actual con el promedio de hasta 3 meses completos
-        // anteriores, ponderado por cuánto mes transcurrió. Evita que una cuota
-        // mensual pagada temprano (hipoteca, arriendo) se extrapole como si fuera
-        // un gasto diario y se cuente varias veces.
-        const pctElapsed = daysInMonth > 0 ? today / daysInMonth : 1
-        const prevMonths = [...new Set(expenses.map(r => r?.date?.slice(0, 7)).filter(m => m && m < activeMonth))].sort().slice(-3)
-        const avgExp = prevMonths.length
-          ? prevMonths.reduce((s, m) => s + expenses.filter(r => r.date?.startsWith(m)).reduce((a, r) => a + (Number(r.amount) || 0), 0), 0) / prevMonths.length
-          : 0
-        const paceExp  = kpis.totalExp + dailyExp * daysLeft
-        const projExp  = avgExp > 0 ? Math.round(pctElapsed * paceExp + (1 - pctElapsed) * avgExp) : paceExp
-        const projBal  = kpis.totalInc - projExp
+        // Cálculo compartido con la página Proyección — mismos números en ambas vistas
+        const { today, daysInMonth, daysLeft, dailyExp, projInc, projExp, projBal } =
+          projectEndOfMonth({ incomes, expenses, activeMonth })
         const pctMonth = (today / daysInMonth * 100).toFixed(0)
         const over     = projBal < 0
         return (

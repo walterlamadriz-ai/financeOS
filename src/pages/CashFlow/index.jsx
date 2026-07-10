@@ -7,6 +7,7 @@ import { useApp } from '../../context/AppContext.jsx'
 import { useT } from '../../i18n/useT.js'
 import { KPI, Card, CardHeader, Alert, Empty, ProgressBar, PageHeader } from '../../components/ui/index.jsx'
 import { fmtMoney, fmtPct } from '../../utils/index.js'
+import { projectEndOfMonth } from '../../utils/projection.js'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, ReferenceLine, Legend,
@@ -101,34 +102,13 @@ export default function CashFlow({ setPage }) {
 
   // ── Proyección fin de mes ─────────────────────────────────────────────────
   const eomProjection = useMemo(() => {
-    const now      = new Date()
-    const [y, m]   = activeMonth.split('-').map(Number)
-    const daysInMonth = new Date(y, m, 0).getDate()
-    const today    = (now.getFullYear() === y && now.getMonth() + 1 === m)
-                     ? now.getDate()
-                     : daysInMonth
-    const daysLeft = daysInMonth - today
-    const pctMonthElapsed = today / daysInMonth
-    const dailyExp = today > 0 ? curExp / today : 0
-
-    // Ingreso: el salario NO es un flujo diario → no se extrapola por ritmo.
-    // Esperamos al menos lo ya recibido, o tu ingreso mensual típico (lo que sea mayor).
-    const projInc = Math.max(curInc, monthlyEstimate.avgInc || curInc)
-
-    // Gasto: mezcla entre el promedio histórico (estable) y el ritmo diario actual,
-    // ponderada por cuánto mes transcurrió. A principio de mes pesa el promedio (menos ruido);
-    // hacia fin de mes pesa el gasto real acumulado.
-    const paceExp = curExp + dailyExp * daysLeft
-    const projExp = monthlyEstimate.avgExp > 0
-      ? Math.round(pctMonthElapsed * paceExp + (1 - pctMonthElapsed) * monthlyEstimate.avgExp)
-      : Math.round(paceExp)
-
-    const projBal  = projInc - projExp
+    // Núcleo compartido con el Dashboard (mismos números en ambas vistas)
+    const core = projectEndOfMonth({ incomes, expenses, activeMonth })
     const totalBudget = budgets.reduce((s, b) => s + (b.limit || 0), 0)
-    const pctBudgetUsed   = totalBudget > 0 ? curExp / totalBudget : null
-    const pace = pctBudgetUsed !== null ? pctBudgetUsed - pctMonthElapsed : null
-    return { today, daysInMonth, daysLeft, dailyExp, projInc, projExp, projBal, totalBudget, pctMonthElapsed, pctBudgetUsed, pace }
-  }, [activeMonth, curInc, curExp, budgets, monthlyEstimate])
+    const pctBudgetUsed = totalBudget > 0 ? core.curExp / totalBudget : null
+    const pace = pctBudgetUsed !== null ? pctBudgetUsed - core.pctElapsed : null
+    return { ...core, pctMonthElapsed: core.pctElapsed, totalBudget, pctBudgetUsed, pace }
+  }, [incomes, expenses, activeMonth, budgets])
 
   // ── Proyección 6 meses hacia adelante ────────────────────────────────────
   const projectionData = useMemo(() => {

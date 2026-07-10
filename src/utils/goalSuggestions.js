@@ -17,10 +17,11 @@ export const GOAL_TEMPLATES = [
     name: 'gs.emergency.name',
     description: 'gs.emergency.desc',
     priority: 1,
-    // 6 meses de gastos (o 6x ingreso neto si no hay gastos registrados)
+    // 3 meses de gastos del mes (o 3x ingreso neto si no hay gastos registrados)
+    // Decisión Walter 2026-07-10: 3 meses es suficiente como meta inicial (antes 6)
     targetFn: ({ ingresoNeto, gastoMensual }) => {
       const base = gastoMensual > 0 ? gastoMensual : ingresoNeto
-      return Math.round(base * 6)
+      return Math.round(base * 3)
     },
     contributionPct: 0.10,
     color: '#1a6b4a',

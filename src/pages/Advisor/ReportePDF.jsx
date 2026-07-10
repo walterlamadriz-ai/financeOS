@@ -192,7 +192,7 @@ export function ReporteFinancieroPDF({ data }) {
     overBudgetCount, score, scoreLabel, scoreColor,
     advisorNotes,
     expByCategory,
-    subMonthly, subAnnual, subCount, subAlerts, subByCategory,
+    subMonthly, subAnnual, subCount, subAlerts, subByCategory, netWorth,
   } = data
 
   const steps = parseSteps(advisorNotes?.nextSteps || '')
@@ -277,6 +277,13 @@ export function ReporteFinancieroPDF({ data }) {
               <Text style={s.kpiValue}>{goals.length}</Text>
               <Text style={s.kpiSub}>{overBudgetCount > 0 ? `${overBudgetCount} presup. excedidos` : 'Presupuestos al día'}</Text>
             </View>
+            {netWorth && (
+              <View style={s.kpiBox}>
+                <Text style={s.kpiLabel}>Patrimonio neto (hoy)</Text>
+                <Text style={[s.kpiValue, { color: netWorth.netWorth >= 0 ? C.grn : C.red }]}>{fmtMoney(netWorth.netWorth, sym)}</Text>
+                <Text style={s.kpiSub}>Activos {fmtMoney(netWorth.totalActivos, sym)} − Pasivos {fmtMoney(netWorth.totalPasivos, sym)}</Text>
+              </View>
+            )}
           </View>
         </View>
 

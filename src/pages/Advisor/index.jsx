@@ -14,6 +14,7 @@ import { FinancialDisclaimer } from '../../components/legal/MicroCopy.jsx'
 import { downloadReportePDF } from './ReportePDF.jsx'
 import TemplateSelector from '../../components/templates/TemplateSelector.jsx'
 import config from '../../config.js'
+import { calcNetWorth } from '../../utils/netWorth.js'
 
 const CURRENCY_SYMBOLS = { CLP: '$', USD: 'US$', EUR: '€', VES: 'Bs.', MXN: '$', ARS: '$' }
 
@@ -301,6 +302,7 @@ export default function Advisor() {
         subMonthly, subAnnual, subCount,
         subAlerts:        subAlerts.slice(0, 3),
         subByCategory:    subMetrics?.byCategory || [],
+        netWorth:         nw.hasData ? nw : null,
       })
     } catch (e) {
       console.error('PDF error:', e)
@@ -349,6 +351,11 @@ export default function Advisor() {
   const score = signals.length > 0 ? Math.round(signals.reduce((s, sig) => s + scoreMap[sig.status], 0) / signals.length) : 0
   const scoreColor = score >= 70 ? '#1aa368' : score >= 40 ? '#d4982a' : '#e05a4a'
   const scoreLabel = score >= 70 ? t('adv.score.healthy') : score >= 40 ? t('adv.score.attention') : t('adv.score.risk')
+
+  // Patrimonio neto (stock a hoy) — opcional: solo si hay datos que lo alimenten.
+  // Usa movimientos SIN filtrar inversión (el flujo de propiedades vive en registros 💼).
+  const nw = useMemo(() => calcNetWorth({ goals, debts, incomes: _incAll, expenses: _expAll, settings }),
+    [goals, debts, _incAll, _expAll, settings])
 
   const noData = mIncome === 0 && mExpense === 0 && debts.length === 0
 
@@ -455,6 +462,7 @@ export default function Advisor() {
             <AdvisorKPI label={t('adv.kpi.debt')} value={fmtMoney(totalDebt, sym)} color={totalDebt > 0 ? '#d4982a' : 'var(--grn)'} sub={totalDebt > 0 ? t('adv.kpi.minPerMonth', { v: fmtMoney(totalMinPayments, sym) }) : t('adv.kpi.noDebts')} />
             <AdvisorKPI label={t('adv.kpi.goals')} value={goals.length} sub={t('adv.kpi.avgProgress', { pct: fmtPct(avgGoalPct) })} />
             <AdvisorKPI label={t('adv.kpi.budgets')} value={overBudgetCount > 0 ? t('adv.kpi.budgetsOver', { n: overBudgetCount }) : t('adv.kpi.budgetsOk')} color={overBudgetCount > 0 ? '#e05a4a' : 'var(--grn)'} />
+            {nw.hasData && <AdvisorKPI label={t('adv.kpi.netWorth')} value={fmtMoney(nw.netWorth, sym)} color={nw.netWorth >= 0 ? 'var(--grn)' : '#e05a4a'} sub={t('adv.kpi.netWorthSub', { a: fmtMoney(nw.totalActivos, sym), p: fmtMoney(nw.totalPasivos, sym) })} />}
           </div>
 
           {/* Semáforo */}
