@@ -2,51 +2,54 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
+import { useT } from '../../i18n/useT.js'
 import s from './shell.module.css'
 import { BackupStatusBadge } from '../backup/BackupManager.jsx'
 
+// lb = key de traducción (ver src/i18n/translations.js), no texto directo
 const NAV = [
-  { sec: 'Principal',    items: [{ id: 'dashboard', ic: '◈', lb: 'Dashboard' }] },
-  { sec: 'Movimientos',  items: [
-    { id: 'income',    ic: '↑', lb: 'Ingresos' },
-    { id: 'movements', ic: '↓', lb: 'Egresos' },
-    { id: 'import',    ic: '⇪', lb: 'Importar' },
+  { sec: 'nav.sec.main',    items: [{ id: 'dashboard', ic: '◈', lb: 'nav.dashboard' }] },
+  { sec: 'nav.sec.movements',  items: [
+    { id: 'income',    ic: '↑', lb: 'nav.income' },
+    { id: 'movements', ic: '↓', lb: 'nav.expenses' },
+    { id: 'import',    ic: '⇪', lb: 'nav.import' },
   ] },
-  { sec: 'Planificación', items: [
-    { id: 'budgets', ic: '▤', lb: 'Presupuestos' },
-    { id: 'debts',   ic: '⊖', lb: 'Deudas' },
-    { id: 'goals',   ic: '◎', lb: 'Metas' },
-    { id: 'projects', ic: '🏢', lb: 'Propiedades' },
-    { id: 'apv',     ic: '🇨🇱', lb: 'APV Chile', countries: ['CL'] },
-    { id: 'deducciones', ic: '🧾', lb: 'Deducciones', countries: ['EC', 'PE'] },
-    { id: 'ahorrofiscal', ic: '🏦', lb: 'Ahorro fiscal', countries: ['MX', 'CO', 'US', 'ES'] },
-    { id: 'inflacion',   ic: '📈', lb: 'Inflación', countries: ['AR'] },
-    { id: 'multimoneda', ic: '💱', lb: 'Multimoneda', countries: ['VE'] },
+  { sec: 'nav.sec.planning', items: [
+    { id: 'budgets', ic: '▤', lb: 'nav.budgets' },
+    { id: 'debts',   ic: '⊖', lb: 'nav.debts' },
+    { id: 'goals',   ic: '◎', lb: 'nav.goals' },
+    { id: 'projects', ic: '🏢', lb: 'nav.properties' },
+    { id: 'apv',     ic: '🇨🇱', lb: 'nav.apvChile', countries: ['CL'] },
+    { id: 'deducciones', ic: '🧾', lb: 'nav.deductions', countries: ['EC', 'PE'] },
+    { id: 'ahorrofiscal', ic: '🏦', lb: 'nav.taxSavings', countries: ['MX', 'CO', 'US', 'ES'] },
+    { id: 'inflacion',   ic: '📈', lb: 'nav.inflation', countries: ['AR'] },
+    { id: 'multimoneda', ic: '💱', lb: 'nav.multicurrency', countries: ['VE'] },
   ] },
-  { sec: 'Análisis', items: [
-    { id: 'networth', ic: '💎', lb: 'Patrimonio neto' },
-    { id: 'coach',    ic: '⚕', lb: 'Diagnóstico' },
-    { id: 'reports',  ic: '⊞', lb: 'Reportes' },
-    { id: 'cashflow', ic: '⟶', lb: 'Proyección' },
+  { sec: 'nav.sec.analysis', items: [
+    { id: 'networth', ic: '💎', lb: 'nav.netWorth' },
+    { id: 'coach',    ic: '⚕', lb: 'nav.diagnosis' },
+    { id: 'reports',  ic: '⊞', lb: 'nav.reports' },
+    { id: 'cashflow', ic: '⟶', lb: 'nav.projection' },
   ] },
-  { sec: 'Pro', items: [
-    { id: 'advisor',  ic: '◑', lb: 'Modo Asesor', proOnly: true },
+  { sec: 'nav.sec.pro', items: [
+    { id: 'advisor',  ic: '◑', lb: 'nav.advisorMode', proOnly: true },
   ] },
-  { sec: 'Cuenta', items: [
-    { id: 'settings', ic: '⊙', lb: 'Ajustes' },
+  { sec: 'nav.sec.account', items: [
+    { id: 'settings', ic: '⊙', lb: 'nav.settings' },
   ] },
 ]
 
 // Todas las secciones planas para historial
 const ALL_ITEMS = NAV.flatMap(g => g.items)
 
-// Etiqueta legible para la topbar
+// Key de traducción para la topbar (pageLabel devuelve una KEY, no texto — se traduce con t() al usarla)
 function pageLabel(id) {
   return ALL_ITEMS.find(it => it.id === id)?.lb || id
 }
 
 export default function Shell({ page, setPage, children }) {
   const { settings, updateSettings } = useApp()
+  const { t } = useT()
   const isChile = (settings.country || 'CL') === 'CL'
   const isDark = settings.theme === 'dark'
 
@@ -110,7 +113,7 @@ export default function Shell({ page, setPage, children }) {
       <>
         {NAV.map(g => (
           <div key={g.sec}>
-            <div className={s.sec}>{g.sec}</div>
+            <div className={s.sec}>{t(g.sec)}</div>
             {g.items.filter(it => !it.countries || it.countries.includes(navCountry)).map(it => (
               <div
                 key={it.id}
@@ -118,7 +121,7 @@ export default function Shell({ page, setPage, children }) {
                 onClick={() => onNavigate(it.id)}
               >
                 <span className={s.ic}>{it.ic}</span>
-                {it.lb}
+                {t(it.lb)}
                 {it.proOnly && (
                   <span style={{ marginLeft:'auto', fontSize:8, fontFamily:'var(--mono)', background:'rgba(245,166,35,.18)', color:'var(--amb)', borderRadius:4, padding:'1px 5px', letterSpacing:'.5px', fontWeight:700 }}>PRO</span>
                 )}
@@ -144,17 +147,17 @@ export default function Shell({ page, setPage, children }) {
 
         <div className={s.footer}>
           <button className={s.themeBtn} onClick={toggleTheme}>
-            {isDark ? '☀ Claro' : '◑ Oscuro'}
+            {isDark ? '☀ ' + t('settings.theme.light') : '◑ ' + t('settings.theme.dark')}
           </button>
           <div className={s.legalLinks}>
-            <span onClick={() => navigate('privacy')} className={s.legalLink}>Privacidad</span>
-            <span onClick={() => navigate('terms')} className={s.legalLink}>Términos</span>
-            <span onClick={() => navigate('disclaimer')} className={s.legalLink}>Aviso legal</span>
-            <a href='https://www.financeospro.com/docs/' target='_blank' className={s.legalLink} style={{textDecoration:'none'}}>Ayuda</a>
+            <span onClick={() => navigate('privacy')} className={s.legalLink}>{t('nav.legal.privacy')}</span>
+            <span onClick={() => navigate('terms')} className={s.legalLink}>{t('nav.legal.terms')}</span>
+            <span onClick={() => navigate('disclaimer')} className={s.legalLink}>{t('nav.legal.disclaimer')}</span>
+            <a href='https://www.financeospro.com/docs/' target='_blank' className={s.legalLink} style={{textDecoration:'none'}}>{t('nav.legal.help')}</a>
           </div>
           <div className={s.appVersion}>
             FinanceOS v1.5 · MAXNOVA & LUCI Global LLC<br/>
-            <span style={{opacity:.5}}>🔒 Sin servidor · Sin cuentas</span>
+            <span style={{opacity:.5}}>{t('nav.noServerTag')}</span>
           </div>
           <div style={{marginTop:6}}><BackupStatusBadge compact /></div>
         </div>
@@ -170,7 +173,7 @@ export default function Shell({ page, setPage, children }) {
             <div className={s.logoName}>FinanceOS</div>
             <div className={s.logoSub}>v1.5</div>
           </div>
-          <button className={s.drawerClose} onClick={() => setDrawerOpen(false)} aria-label="Cerrar menú"><span style={{fontSize:18}}>✕</span></button>
+          <button className={s.drawerClose} onClick={() => setDrawerOpen(false)} aria-label={t('nav.closeMenu')}><span style={{fontSize:18}}>✕</span></button>
         </div>
 
         <div className={s.drawerNav}>
@@ -179,7 +182,7 @@ export default function Shell({ page, setPage, children }) {
 
         <div className={s.drawerFooter}>
           <button className={s.themeBtn} onClick={toggleTheme}>
-            {isDark ? '☀ Claro' : '◑ Oscuro'}
+            {isDark ? '☀ ' + t('settings.theme.light') : '◑ ' + t('settings.theme.dark')}
           </button>
           <div style={{marginTop:8}}><BackupStatusBadge compact /></div>
         </div>
@@ -194,18 +197,18 @@ export default function Shell({ page, setPage, children }) {
             {/* Botón hamburguesa — solo móvil */}
             <button
               className={s.menuBtn}
-              onClick={() => setDrawerOpen(true)} aria-label="Abrir menú"
+              onClick={() => setDrawerOpen(true)} aria-label={t('nav.openMenu')}
             >
-              <span style={{fontSize:18}}>☰</span><span style={{fontSize:10,fontFamily:"var(--mono)",display:"block",lineHeight:1,marginTop:2}}>Menú</span>
+              <span style={{fontSize:18}}>☰</span><span style={{fontSize:10,fontFamily:"var(--mono)",display:"block",lineHeight:1,marginTop:2}}>{t('nav.menuLabel')}</span>
             </button>
             {/* Botón atrás — solo móvil, si no está en dashboard */}
             {page !== 'dashboard' && (
-              <button className={s.backBtn} onClick={goBack} aria-label="Volver">
-                ← Atrás
+              <button className={s.backBtn} onClick={goBack} aria-label={t('nav.goBack')}>
+                {t('nav.back')}
               </button>
             )}
           </div>
-          <span className={s.crumb}>{pageLabel(page)}</span>
+          <span className={s.crumb}>{t(pageLabel(page))}</span>
           <span className={s.topRight}>FinanceOS · {settings.currency || 'CLP'}</span>
         </div>
 
@@ -221,23 +224,23 @@ export default function Shell({ page, setPage, children }) {
               <button
                 className={s.fabAction}
                 onClick={() => { setFabOpen(false); navigate('income') }}
-                aria-label="Agregar ingreso"
+                aria-label={t('nav.fab.addIncome')}
               >
-                <span className={s.fabActionIc}>↑</span> Ingreso
+                <span className={s.fabActionIc}>↑</span> {t('nav.fab.income')}
               </button>
               <button
                 className={s.fabAction}
                 onClick={() => { setFabOpen(false); navigate('movements') }}
-                aria-label="Agregar egreso"
+                aria-label={t('nav.fab.addExpense')}
               >
-                <span className={s.fabActionIc}>↓</span> Egreso
+                <span className={s.fabActionIc}>↓</span> {t('nav.fab.expense')}
               </button>
             </div>
           )}
           <button
             className={s.fab}
             onClick={() => setFabOpen(o => !o)}
-            aria-label={fabOpen ? 'Cerrar acciones' : 'Agregar movimiento'}
+            aria-label={fabOpen ? t('nav.fab.close') : t('nav.fab.open')}
             aria-expanded={fabOpen}
             style={fabOpen ? { transform: 'rotate(45deg)' } : undefined}
           >
