@@ -4,10 +4,12 @@
 
 import { useState, useMemo } from 'react'
 import { useApp } from '../context/AppContext.jsx'
+import { useT } from '../i18n/useT.js'
 import TEMPLATES from '../data/templates.js'
 import { SEED_INCOMES, SEED_EXPENSES, SEED_BUDGETS, SEED_DEBTS, SEED_GOALS, uid } from '../utils/index.js'
 import { dbAdd } from '../core/db/index.js'
 
+// label/desc son KEYS de traducción (ver src/i18n/translations.js), no texto directo
 const CURRENCIES = [
   { code: 'CLP', label: 'Peso chileno',    flag: '🇨🇱' },
   { code: 'USD', label: 'Dólar',           flag: '🇺🇸' },
@@ -19,20 +21,25 @@ const CURRENCIES = [
   { code: 'COP', label: 'Peso colombiano', flag: '🇨🇴' },
 ]
 const USE_TYPES = [
-  { id: 'personal', icon: '◈', label: 'Uso personal',  desc: 'Voy a registrar mis propias finanzas' },
-  { id: 'advisor',  icon: '◑', label: 'Con clientes',   desc: 'Soy asesor, coach o contador' },
-  { id: 'demo',     icon: '⟶', label: 'Solo explorar',  desc: 'Quiero ver cómo funciona antes de usarlo' },
+  { id: 'personal', icon: '◈', label: 'onboarding.useType.personal.label', desc: 'onboarding.useType.personal.desc' },
+  { id: 'advisor',  icon: '◑', label: 'onboarding.useType.advisor.label',  desc: 'onboarding.useType.advisor.desc' },
+  { id: 'demo',     icon: '⟶', label: 'onboarding.useType.demo.label',     desc: 'onboarding.useType.demo.desc' },
 ]
 const MAIN_GOALS = [
-  { id: 'control', icon: '◈', label: 'Orden financiero',    desc: 'Saber en qué gasto mi dinero' },
-  { id: 'save',    icon: '◎', label: 'Ahorrar más',          desc: 'Tengo una meta de ahorro específica' },
-  { id: 'debt',    icon: '⊖', label: 'Salir de deudas',      desc: 'Quiero pagar mis deudas ordenadamente' },
-  { id: 'plan',    icon: '▤', label: 'Planificar el futuro',  desc: 'Quiero planificar a mediano y largo plazo' },
+  { id: 'control', icon: '◈', label: 'onboarding.goal.control.label', desc: 'onboarding.goal.control.desc' },
+  { id: 'save',    icon: '◎', label: 'onboarding.goal.save.label',    desc: 'onboarding.goal.save.desc' },
+  { id: 'debt',    icon: '⊖', label: 'onboarding.goal.debt.label',    desc: 'onboarding.goal.debt.desc' },
+  { id: 'plan',    icon: '▤', label: 'onboarding.goal.plan.label',    desc: 'onboarding.goal.plan.desc' },
 ]
 const EXPERIENCE_LEVELS = [
-  { id: 'beginner',     label: 'Principiante',  desc: 'Nunca llevé un presupuesto' },
-  { id: 'intermediate', label: 'Intermedio',     desc: 'Llevo algo de control' },
-  { id: 'advanced',     label: 'Avanzado',       desc: 'Manejo presupuestos y metas' },
+  { id: 'beginner',     label: 'onboarding.exp.beginner.label',     desc: 'onboarding.exp.beginner.desc' },
+  { id: 'intermediate', label: 'onboarding.exp.intermediate.label', desc: 'onboarding.exp.intermediate.desc' },
+  { id: 'advanced',     label: 'onboarding.exp.advanced.label',     desc: 'onboarding.exp.advanced.desc' },
+]
+const LANGUAGES = [
+  { code: 'es', flag: '🇪🇸', label: 'Español' },
+  { code: 'en', flag: '🇺🇸', label: 'English' },
+  { code: 'pt', flag: '🇵🇹', label: 'Português' },
 ]
 
 function recommendTemplate({ profileId, useType, mainGoal, hasDebts }) {
@@ -109,6 +116,7 @@ const btnG = {
 
 export default function Onboarding({ onComplete }) {
   const { settings, updateSettings } = useApp()
+  const { t } = useT()
   const TOTAL = 8
   const [step, setStep] = useState(0)
   const [loading, setLoading] = useState(false)
@@ -150,7 +158,7 @@ export default function Onboarding({ onComplete }) {
   }
 
   async function finalize(withDemo = false) {
-    const t = activeTemplate
+    const tpl = activeTemplate
     await updateSettings({
       ...settings,
       currency: answers.currency, savingGoalPct: answers.savingGoal,
@@ -159,10 +167,10 @@ export default function Onboarding({ onComplete }) {
       onboardingExperience: answers.experience, onboardingMainGoal: answers.mainGoal,
       estimatedMonthlyIncome: Number(answers.estimatedMonthlyIncome) || 0,
       activeMonth: new Date().toISOString().slice(0, 7),
-      activeTemplateId: t.id, activeTemplateName: t.name,
-      categoriesIncome: t.categoriesIncome, categoriesExpense: t.categoriesExpense,
-      templateSuggestedBudgets: t.suggestedBudgets,
-      templateAdvisorTip: t.advisorTip, templateAlerts: t.alerts,
+      activeTemplateId: tpl.id, activeTemplateName: tpl.name,
+      categoriesIncome: tpl.categoriesIncome, categoriesExpense: tpl.categoriesExpense,
+      templateSuggestedBudgets: tpl.suggestedBudgets,
+      templateAdvisorTip: tpl.advisorTip, templateAlerts: tpl.alerts,
     })
     onComplete(withDemo)
   }
@@ -170,18 +178,29 @@ export default function Onboarding({ onComplete }) {
   // Step 0 — Bienvenida
   if (step === 0) return (
     <div style={wrap}><div style={box}>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 16 }}>
+        {LANGUAGES.map(l => (
+          <button key={l.code} onClick={() => updateSettings({ ...settings, language: l.code })} style={{
+            padding: '4px 9px', borderRadius: 20, fontSize: 10, cursor: 'pointer',
+            border: (settings.language || 'es') === l.code ? '1.5px solid var(--grn)' : '0.5px solid var(--brd2)',
+            background: (settings.language || 'es') === l.code ? 'var(--grn-bg)' : 'var(--sur2)',
+            color: (settings.language || 'es') === l.code ? 'var(--grn)' : 'var(--th)',
+            fontFamily: 'var(--mono)', fontWeight: (settings.language || 'es') === l.code ? 600 : 400,
+          }}>{l.flag} {l.label}</button>
+        ))}
+      </div>
       <div style={{ textAlign: 'center', marginBottom: 22 }}>
         <div style={{ width: 52, height: 52, borderRadius: 13, margin: '0 auto 12px', background: 'var(--grn-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, color: 'var(--grn)' }}>◈</div>
-        <h1 style={{ ...h1s, textAlign: 'center' }}>Bienvenido a FinanceOS</h1>
-        <p style={{ ...subs, textAlign: 'center' }}>Configuración inicial en 2 minutos. FinanceOS se adapta a ti desde el primer día.</p>
+        <h1 style={{ ...h1s, textAlign: 'center' }}>{t('onboarding.welcome.title')}</h1>
+        <p style={{ ...subs, textAlign: 'center' }}>{t('onboarding.welcome.sub')}</p>
       </div>
       <div style={{ padding: '10px 13px', background: 'var(--grn-bg)', borderRadius: 8, border: '0.5px solid rgba(26,163,104,.2)', fontSize: 11, color: 'var(--grn)', fontFamily: 'var(--mono)', lineHeight: 1.6, marginBottom: 18 }}>
-        🔒 Tus datos se guardan solo en este dispositivo. Sin servidores, sin cuentas, sin suscripciones.
+        {t('onboarding.welcome.privacy')}
       </div>
-      <button style={btnP()} onClick={next}>Empezar configuración →</button>
-      <button style={btnG} onClick={() => finalize()}>Saltar y entrar directamente</button>
+      <button style={btnP()} onClick={next}>{t('onboarding.welcome.start')}</button>
+      <button style={btnG} onClick={() => finalize()}>{t('onboarding.welcome.skip')}</button>
       <button style={{ ...btnG, color: 'var(--grn)' }} onClick={loadDemoData} disabled={loading}>
-        {loading ? 'Cargando…' : '⟶ Explorar con datos de ejemplo'}
+        {loading ? t('onboarding.loading') : t('onboarding.welcome.demo')}
       </button>
     </div></div>
   )
@@ -190,12 +209,12 @@ export default function Onboarding({ onComplete }) {
   if (step === 1) return (
     <div style={wrap}><div style={box}>
       <ProgressBar step={1} total={TOTAL} />
-      <h2 style={h1s}>¿Cómo vas a usar FinanceOS?</h2>
-      <p style={subs}>Esto nos ayuda a mostrarte las funciones más relevantes.</p>
-      {USE_TYPES.map(u => <OptionCard key={u.id} {...u} selected={answers.useType === u.id} onClick={() => set('useType', u.id)} />)}
+      <h2 style={h1s}>{t('onboarding.useType.title')}</h2>
+      <p style={subs}>{t('onboarding.useType.sub')}</p>
+      {USE_TYPES.map(u => <OptionCard key={u.id} icon={u.icon} label={t(u.label)} desc={t(u.desc)} selected={answers.useType === u.id} onClick={() => set('useType', u.id)} />)}
       <div style={{ display: 'flex', gap: 7, marginTop: 7 }}>
-        <button style={{ ...btnG, width: 'auto', padding: '8px 14px', marginTop: 0 }} onClick={back}>← Atrás</button>
-        <button style={{ ...btnP(answers.useType === ''), flex: 1, marginTop: 0 }} disabled={answers.useType === ''} onClick={next}>Continuar →</button>
+        <button style={{ ...btnG, width: 'auto', padding: '8px 14px', marginTop: 0 }} onClick={back}>{t('nav.back')}</button>
+        <button style={{ ...btnP(answers.useType === ''), flex: 1, marginTop: 0 }} disabled={answers.useType === ''} onClick={next}>{t('onboarding.continue')}</button>
       </div>
     </div></div>
   )
@@ -204,25 +223,25 @@ export default function Onboarding({ onComplete }) {
   if (step === 2) return (
     <div style={wrap}><div style={{ ...box, maxWidth: 490 }}>
       <ProgressBar step={2} total={TOTAL} />
-      <h2 style={h1s}>¿Qué perfil describe mejor la situación?</h2>
-      <p style={subs}>{answers.useType === 'advisor' ? 'El perfil del cliente — podés cambiarlo desde el Modo Asesor.' : 'Elegí el que más se acerca — podés cambiarlo después.'}</p>
+      <h2 style={h1s}>{t('onboarding.profile.title')}</h2>
+      <p style={subs}>{answers.useType === 'advisor' ? t('onboarding.profile.sub.advisor') : t('onboarding.profile.sub.default')}</p>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7 }}>
-        {TEMPLATES.map(t => (
-          <button key={t.id} onClick={() => set('profileId', t.id)} style={{
+        {TEMPLATES.map(tpl => (
+          <button key={tpl.id} onClick={() => set('profileId', tpl.id)} style={{
             padding: '10px 11px', borderRadius: 10, cursor: 'pointer',
-            border: answers.profileId === t.id ? `1.5px solid ${t.color}` : '0.5px solid var(--brd2)',
-            background: answers.profileId === t.id ? `${t.color}0d` : 'var(--sur2)',
+            border: answers.profileId === tpl.id ? `1.5px solid ${tpl.color}` : '0.5px solid var(--brd2)',
+            background: answers.profileId === tpl.id ? `${tpl.color}0d` : 'var(--sur2)',
             textAlign: 'left', transition: 'all .15s',
           }}>
-            <div style={{ fontSize: 15, color: t.color, marginBottom: 3 }}>{t.icon}</div>
-            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx)' }}>{t.name}</div>
-            <div style={{ fontSize: 9, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: 1 }}>{t.categoriesExpense.length} categorías</div>
+            <div style={{ fontSize: 15, color: tpl.color, marginBottom: 3 }}>{tpl.icon}</div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx)' }}>{tpl.name}</div>
+            <div style={{ fontSize: 9, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: 1 }}>{t('onboarding.profile.categories', { n: tpl.categoriesExpense.length })}</div>
           </button>
         ))}
       </div>
       <div style={{ display: 'flex', gap: 7, marginTop: 10 }}>
-        <button style={{ ...btnG, width: 'auto', padding: '8px 14px', marginTop: 0 }} onClick={back}>← Atrás</button>
-        <button style={{ ...btnP(false), flex: 1, marginTop: 0 }} onClick={next}>{answers.profileId ? 'Continuar →' : 'Saltar →'}</button>
+        <button style={{ ...btnG, width: 'auto', padding: '8px 14px', marginTop: 0 }} onClick={back}>{t('nav.back')}</button>
+        <button style={{ ...btnP(false), flex: 1, marginTop: 0 }} onClick={next}>{answers.profileId ? t('onboarding.continue') : t('onboarding.skipArrow')}</button>
       </div>
     </div></div>
   )
@@ -245,8 +264,8 @@ export default function Onboarding({ onComplete }) {
   if (step === 3) return (
     <div style={wrap}><div style={box}>
       <ProgressBar step={3} total={TOTAL} />
-      <h2 style={h1s}>¿De qué país sos?</h2>
-      <p style={subs}>Activa funciones regionales — podés cambiarlo en Ajustes.</p>
+      <h2 style={h1s}>{t('onboarding.country.title')}</h2>
+      <p style={subs}>{t('onboarding.country.sub')}</p>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 7, marginBottom: 14 }}>
         {COUNTRIES.map(c => (
           <button key={c.code} onClick={() => {
@@ -265,12 +284,12 @@ export default function Onboarding({ onComplete }) {
       </div>
       {answers.country === 'CL' && (
         <div style={{ padding: '8px 10px', background: 'var(--grn-bg)', borderRadius: 8, border: '0.5px solid rgba(26,163,104,.2)', fontSize: 10, color: 'var(--grn)', fontFamily: 'var(--mono)', marginBottom: 10 }}>
-          🇨🇱 Chile: activa el simulador APV / Jubilación en Metas.
+          {t('onboarding.country.chileHint')}
         </div>
       )}
       <div style={{ display: 'flex', gap: 7, marginTop: 4 }}>
-        <button style={{ ...btnG, width: 'auto', padding: '8px 14px', marginTop: 0 }} onClick={back}>← Atrás</button>
-        <button style={{ ...btnP(false), flex: 1, marginTop: 0 }} onClick={next}>Continuar →</button>
+        <button style={{ ...btnG, width: 'auto', padding: '8px 14px', marginTop: 0 }} onClick={back}>{t('nav.back')}</button>
+        <button style={{ ...btnP(false), flex: 1, marginTop: 0 }} onClick={next}>{t('onboarding.continue')}</button>
       </div>
     </div></div>
   )
@@ -279,10 +298,10 @@ export default function Onboarding({ onComplete }) {
   if (step === 4) return (
     <div style={wrap}><div style={box}>
       <ProgressBar step={4} total={TOTAL} />
-      <h2 style={h1s}>Configuración básica</h2>
-      <p style={subs}>Ajustá la moneda y tu meta de ahorro inicial.</p>
+      <h2 style={h1s}>{t('onboarding.basics.title')}</h2>
+      <p style={subs}>{t('onboarding.basics.sub')}</p>
       <div style={{ marginBottom: 14 }}>
-        <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx)', marginBottom: 7 }}>Moneda</div>
+        <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx)', marginBottom: 7 }}>{t('settings.currency.label')}</div>
         <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
           {CURRENCIES.map(c => (
             <button key={c.code} onClick={() => set('currency', c.code)} style={{
@@ -297,19 +316,19 @@ export default function Onboarding({ onComplete }) {
       </div>
       <div style={{ marginBottom: 14 }}>
         <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx)', marginBottom: 6 }}>
-          Meta de ahorro mensual: <span style={{ color: 'var(--grn)' }}>{answers.savingGoal}%</span>
+          {t('onboarding.basics.savingGoalLabel')} <span style={{ color: 'var(--grn)' }}>{answers.savingGoal}%</span>
         </div>
         <input type="range" min={5} max={50} step={5} value={answers.savingGoal}
           onChange={e => set('savingGoal', Number(e.target.value))}
           style={{ width: '100%', accentColor: 'var(--grn)' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: 'var(--th)', fontFamily: 'var(--mono)' }}>
-          <span>5%</span><span>25% recomendado</span><span>50%</span>
+          <span>{t('onboarding.basics.min')}</span><span>{t('onboarding.basics.mid')}</span><span>{t('onboarding.basics.max')}</span>
         </div>
       </div>
       <div style={{ marginBottom: 6 }}>
-        <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx)', marginBottom: 6 }}>¿Hay deudas activas?</div>
+        <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx)', marginBottom: 6 }}>{t('onboarding.basics.hasDebts')}</div>
         <div style={{ display: 'flex', gap: 6 }}>
-          {[{ id: 'yes', label: 'Sí' }, { id: 'no', label: 'No' }].map(o => (
+          {[{ id: 'yes', label: t('onboarding.yes') }, { id: 'no', label: t('onboarding.no') }].map(o => (
             <button key={o.id} onClick={() => set('hasDebts', o.id)} style={{
               flex: 1, padding: '7px', borderRadius: 8, fontSize: 12, cursor: 'pointer',
               border: answers.hasDebts === o.id ? '1.5px solid var(--grn)' : '0.5px solid var(--brd2)',
@@ -321,8 +340,8 @@ export default function Onboarding({ onComplete }) {
         </div>
       </div>
       <div style={{ display: 'flex', gap: 7, marginTop: 10 }}>
-        <button style={{ ...btnG, width: 'auto', padding: '8px 14px', marginTop: 0 }} onClick={back}>← Atrás</button>
-        <button style={{ ...btnP(false), flex: 1, marginTop: 0 }} onClick={next}>Continuar →</button>
+        <button style={{ ...btnG, width: 'auto', padding: '8px 14px', marginTop: 0 }} onClick={back}>{t('nav.back')}</button>
+        <button style={{ ...btnP(false), flex: 1, marginTop: 0 }} onClick={next}>{t('onboarding.continue')}</button>
       </div>
     </div></div>
   )
@@ -331,17 +350,17 @@ export default function Onboarding({ onComplete }) {
   if (step === 5) return (
     <div style={wrap}><div style={box}>
       <ProgressBar step={5} total={TOTAL} />
-      <h2 style={h1s}>¿Cuánto ganás aproximadamente este mes?</h2>
-      <p style={subs}>Solo para activar tu diagnóstico desde el primer día. Podés cambiarlo cuando quieras en Ajustes.</p>
+      <h2 style={h1s}>{t('onboarding.income.title')}</h2>
+      <p style={subs}>{t('onboarding.income.sub')}</p>
       <div style={{ marginBottom: 14 }}>
         <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', marginBottom: 6 }}>
-          Ingreso mensual en {answers.currency || 'tu moneda'}
+          {t('onboarding.income.label', { currency: answers.currency || 'tu moneda' })}
         </div>
         <input
           type="number"
           min="0"
           value={answers.estimatedMonthlyIncome}
-          placeholder="ej. 3.000.000"
+          placeholder={t('onboarding.income.placeholder')}
           onChange={e => set('estimatedMonthlyIncome', e.target.value)}
           style={{
             width: '100%', padding: '10px 12px', borderRadius: 8, fontSize: 14,
@@ -351,14 +370,14 @@ export default function Onboarding({ onComplete }) {
           autoFocus
         />
         <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: 5, lineHeight: 1.5 }}>
-          Aproximado está bien — el sistema lo usa para calcular tu tasa de ahorro y presupuestos sugeridos.
+          {t('onboarding.income.hint')}
         </div>
       </div>
       <div style={{ display: 'flex', gap: 7 }}>
-        <button style={{ ...btnG, width: 'auto', padding: '8px 14px', marginTop: 0 }} onClick={back}>← Atrás</button>
-        <button style={{ ...btnP(false), flex: 1, marginTop: 0 }} onClick={next}>Continuar →</button>
+        <button style={{ ...btnG, width: 'auto', padding: '8px 14px', marginTop: 0 }} onClick={back}>{t('nav.back')}</button>
+        <button style={{ ...btnP(false), flex: 1, marginTop: 0 }} onClick={next}>{t('onboarding.continue')}</button>
       </div>
-      <button style={{ ...btnG, fontSize: 10, marginTop: 2 }} onClick={next}>Prefiero no indicarlo ahora →</button>
+      <button style={{ ...btnG, fontSize: 10, marginTop: 2 }} onClick={next}>{t('onboarding.income.skip')}</button>
     </div></div>
   )
 
@@ -366,10 +385,10 @@ export default function Onboarding({ onComplete }) {
   if (step === 6) return (
     <div style={wrap}><div style={box}>
       <ProgressBar step={6} total={TOTAL} />
-      <h2 style={h1s}>Objetivo y experiencia</h2>
-      <p style={subs}>Orientativo — podés cambiarlo en cualquier momento.</p>
-      {MAIN_GOALS.map(g => <OptionCard key={g.id} {...g} selected={answers.mainGoal === g.id} onClick={() => set('mainGoal', g.id)} />)}
-      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx)', marginTop: 12, marginBottom: 6 }}>Experiencia con finanzas</div>
+      <h2 style={h1s}>{t('onboarding.goalExp.title')}</h2>
+      <p style={subs}>{t('onboarding.goalExp.sub')}</p>
+      {MAIN_GOALS.map(g => <OptionCard key={g.id} icon={g.icon} label={t(g.label)} desc={t(g.desc)} selected={answers.mainGoal === g.id} onClick={() => set('mainGoal', g.id)} />)}
+      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx)', marginTop: 12, marginBottom: 6 }}>{t('onboarding.goalExp.experienceLabel')}</div>
       <div style={{ display: 'flex', gap: 6 }}>
         {EXPERIENCE_LEVELS.map(e => (
           <button key={e.id} onClick={() => set('experience', e.id)} style={{
@@ -379,12 +398,12 @@ export default function Onboarding({ onComplete }) {
             color: answers.experience === e.id ? 'var(--grn)' : 'var(--tm)',
             fontFamily: 'var(--syne, sans-serif)', fontWeight: answers.experience === e.id ? 600 : 400,
             textAlign: 'center',
-          }}>{e.label}</button>
+          }}>{t(e.label)}</button>
         ))}
       </div>
       <div style={{ display: 'flex', gap: 7, marginTop: 10 }}>
-        <button style={{ ...btnG, width: 'auto', padding: '8px 14px', marginTop: 0 }} onClick={back}>← Atrás</button>
-        <button style={{ ...btnP(false), flex: 1, marginTop: 0 }} onClick={next}>Ver plantilla recomendada →</button>
+        <button style={{ ...btnG, width: 'auto', padding: '8px 14px', marginTop: 0 }} onClick={back}>{t('nav.back')}</button>
+        <button style={{ ...btnP(false), flex: 1, marginTop: 0 }} onClick={next}>{t('onboarding.goalExp.next')}</button>
       </div>
     </div></div>
   )
@@ -393,8 +412,8 @@ export default function Onboarding({ onComplete }) {
   if (step === 7) return (
     <div style={wrap}><div style={box}>
       <ProgressBar step={7} total={TOTAL} />
-      <h2 style={h1s}>Plantilla recomendada</h2>
-      <p style={subs}>Basado en tus respuestas, esta configuración se adapta mejor.</p>
+      <h2 style={h1s}>{t('onboarding.template.title')}</h2>
+      <p style={subs}>{t('onboarding.template.sub')}</p>
       <div style={{ padding: '13px', borderRadius: 10, border: `1.5px solid ${activeTemplate.color}`, background: `${activeTemplate.color}08`, marginBottom: 13 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 9 }}>
           <div style={{ width: 34, height: 34, borderRadius: 8, background: `${activeTemplate.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, color: activeTemplate.color, flexShrink: 0 }}>{activeTemplate.icon}</div>
@@ -402,29 +421,33 @@ export default function Onboarding({ onComplete }) {
             <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--tx)' }}>{activeTemplate.name}</div>
             <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)' }}>{activeTemplate.tagline}</div>
           </div>
-          <div style={{ marginLeft: 'auto', fontSize: 9, padding: '2px 7px', borderRadius: 20, background: `${activeTemplate.color}18`, color: activeTemplate.color, fontFamily: 'var(--mono)', fontWeight: 600 }}>Recomendada</div>
+          <div style={{ marginLeft: 'auto', fontSize: 9, padding: '2px 7px', borderRadius: 20, background: `${activeTemplate.color}18`, color: activeTemplate.color, fontFamily: 'var(--mono)', fontWeight: 600 }}>{t('onboarding.template.badge')}</div>
         </div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {[`${activeTemplate.categoriesIncome.length} ingresos`, `${activeTemplate.categoriesExpense.length} gastos`, `${activeTemplate.suggestedBudgets.length} presupuestos`].map(s => (
+          {[
+            t('onboarding.template.incomeCount', { n: activeTemplate.categoriesIncome.length }),
+            t('onboarding.template.expenseCount', { n: activeTemplate.categoriesExpense.length }),
+            t('onboarding.template.budgetCount', { n: activeTemplate.suggestedBudgets.length }),
+          ].map(s => (
             <span key={s} style={{ fontSize: 9, fontFamily: 'var(--mono)', padding: '2px 7px', borderRadius: 20, background: 'var(--sur)', color: 'var(--th)', border: '0.5px solid var(--brd)' }}>{s}</span>
           ))}
         </div>
       </div>
-      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx)', marginBottom: 7 }}>O elegí otra:</div>
+      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx)', marginBottom: 7 }}>{t('onboarding.template.other')}</div>
       <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 12 }}>
-        {TEMPLATES.map(t => (
-          <button key={t.id} onClick={() => set('profileId', t.id === answers.profileId ? '' : t.id)} style={{
+        {TEMPLATES.map(tpl => (
+          <button key={tpl.id} onClick={() => set('profileId', tpl.id === answers.profileId ? '' : tpl.id)} style={{
             padding: '4px 9px', borderRadius: 20, fontSize: 10, cursor: 'pointer',
-            border: `0.5px solid ${activeTemplate.id === t.id ? t.color + '60' : 'var(--brd)'}`,
-            background: activeTemplate.id === t.id ? `${t.color}14` : 'var(--sur2)',
-            color: activeTemplate.id === t.id ? t.color : 'var(--th)',
-            fontFamily: 'var(--mono)', fontWeight: activeTemplate.id === t.id ? 600 : 400,
-          }}>{t.icon} {t.name}</button>
+            border: `0.5px solid ${activeTemplate.id === tpl.id ? tpl.color + '60' : 'var(--brd)'}`,
+            background: activeTemplate.id === tpl.id ? `${tpl.color}14` : 'var(--sur2)',
+            color: activeTemplate.id === tpl.id ? tpl.color : 'var(--th)',
+            fontFamily: 'var(--mono)', fontWeight: activeTemplate.id === tpl.id ? 600 : 400,
+          }}>{tpl.icon} {tpl.name}</button>
         ))}
       </div>
       <div style={{ display: 'flex', gap: 7 }}>
-        <button style={{ ...btnG, width: 'auto', padding: '8px 14px', marginTop: 0 }} onClick={back}>← Atrás</button>
-        <button style={{ ...btnP(false), flex: 1, marginTop: 0 }} onClick={next}>Ver resumen →</button>
+        <button style={{ ...btnG, width: 'auto', padding: '8px 14px', marginTop: 0 }} onClick={back}>{t('nav.back')}</button>
+        <button style={{ ...btnP(false), flex: 1, marginTop: 0 }} onClick={next}>{t('onboarding.template.next')}</button>
       </div>
     </div></div>
   )
@@ -435,16 +458,16 @@ export default function Onboarding({ onComplete }) {
       <ProgressBar step={TOTAL} total={TOTAL} />
       <div style={{ textAlign: 'center', marginBottom: 18 }}>
         <div style={{ width: 46, height: 46, borderRadius: 12, margin: '0 auto 10px', background: 'var(--grn-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, color: 'var(--grn)' }}>✓</div>
-        <h2 style={{ ...h1s, textAlign: 'center' }}>Todo listo</h2>
-        <p style={{ ...subs, textAlign: 'center' }}>Tu configuración inicial</p>
+        <h2 style={{ ...h1s, textAlign: 'center' }}>{t('onboarding.summary.title')}</h2>
+        <p style={{ ...subs, textAlign: 'center' }}>{t('onboarding.summary.sub')}</p>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 0, marginBottom: 14 }}>
         {[
-          { label: 'País', value: COUNTRIES.find(c => c.code === answers.country)?.label || answers.country },
-          { label: 'Moneda', value: CURRENCIES.find(c => c.code === answers.currency)?.label || answers.currency },
-          { label: 'Meta de ahorro', value: `${answers.savingGoal}% del ingreso` },
-          { label: 'Plantilla activa', value: activeTemplate.name },
-          { label: 'Tipo de uso', value: USE_TYPES.find(u => u.id === answers.useType)?.label || '—' },
+          { label: t('settings.country.label'), value: COUNTRIES.find(c => c.code === answers.country)?.label || answers.country },
+          { label: t('settings.currency.label'), value: CURRENCIES.find(c => c.code === answers.currency)?.label || answers.currency },
+          { label: t('onboarding.summary.savingGoal'), value: t('onboarding.summary.savingGoalValue', { pct: answers.savingGoal }) },
+          { label: t('onboarding.summary.template'), value: activeTemplate.name },
+          { label: t('onboarding.summary.useType'), value: (() => { const u = USE_TYPES.find(u => u.id === answers.useType); return u ? t(u.label) : '—' })() },
         ].map(row => (
           <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', borderBottom: '0.5px solid var(--brd)' }}>
             <span style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)' }}>{row.label}</span>
@@ -453,17 +476,17 @@ export default function Onboarding({ onComplete }) {
         ))}
       </div>
       <div style={{ padding: '9px 11px', background: '#faeeda', border: '0.5px solid rgba(133,79,11,.2)', borderRadius: 8, fontSize: 10, color: '#854f0b', fontFamily: 'var(--mono)', lineHeight: 1.5, marginBottom: 10 }}>
-        ⚠ Creá un respaldo desde Ajustes después de registrar tus primeros datos.
+        {t('onboarding.summary.backupWarning')}
       </div>
       {answers.useType === 'advisor' && (
         <div style={{ padding: '9px 11px', background: 'var(--grn-bg)', border: '0.5px solid rgba(26,163,104,.2)', borderRadius: 8, fontSize: 10, color: 'var(--grn)', fontFamily: 'var(--mono)', lineHeight: 1.5, marginBottom: 10 }}>
-          💡 El Modo Asesor está en el sidebar — semáforo, alertas y exportación PDF incluidos.
+          {t('onboarding.summary.advisorTip')}
         </div>
       )}
       <button style={btnP(loading)} onClick={() => finalize()} disabled={loading}>
-        {loading ? 'Configurando…' : 'Entrar a FinanceOS →'}
+        {loading ? t('onboarding.summary.loading') : t('onboarding.summary.enter')}
       </button>
-      <button style={btnG} onClick={back}>← Atrás</button>
+      <button style={btnG} onClick={back}>{t('nav.back')}</button>
     </div></div>
   )
 }
