@@ -38,7 +38,7 @@ export default function Goals({ setPage }) {
   const totalSaved  = useMemo(() => goals.reduce((s,g) => s+g.saved, 0), [goals])
 
   function openSuggestions() {
-    setSuggestions(generateGoalSuggestions({ ingresoNeto:ingresoNetoGoals, gastoMensual:gastoMensualGoals, existingGoals:goals }))
+    setSuggestions(generateGoalSuggestions({ ingresoNeto:ingresoNetoGoals, gastoMensual:gastoMensualGoals, existingGoals:goals }, t))
     setShowSuggest(true)
   }
 

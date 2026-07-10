@@ -1,4 +1,5 @@
 // src/utils/goalSuggestions.js
+import { translations } from '../i18n/translations.js'
 // Sugerencias de metas financieras básicas — v1.4
 // Basadas en principios financieros generales
 // NO constituyen asesoría financiera certificada
@@ -13,8 +14,8 @@ export const GOAL_TEMPLATES = [
   {
     id: 'emergency_fund',
     emoji: '🛡️',
-    name: 'Fondo de emergencia',
-    description: '6 meses de gastos fijos — red de seguridad ante imprevistos',
+    name: 'gs.emergency.name',
+    description: 'gs.emergency.desc',
     priority: 1,
     // 6 meses de gastos (o 6x ingreso neto si no hay gastos registrados)
     targetFn: ({ ingresoNeto, gastoMensual }) => {
@@ -24,25 +25,25 @@ export const GOAL_TEMPLATES = [
     contributionPct: 0.10,
     color: '#1a6b4a',
     goalPriority: 'Alta',
-    hint: 'Recomendación estándar: 3-6 meses de gastos. Priorizá esta meta primero.',
+    hint: 'gs.emergency.hint',
   },
   {
     id: 'vacations',
     emoji: '✈️',
-    name: 'Vacaciones anuales',
-    description: 'Fondo para vacaciones familiares — 1 ingreso mensual como objetivo',
+    name: 'gs.vacations.name',
+    description: 'gs.vacations.desc',
     priority: 2,
     targetFn: ({ ingresoNeto }) => Math.round(ingresoNeto * 1.5),
     contributionPct: 0.05,
     color: '#2563eb',
     goalPriority: 'Media',
-    hint: 'Ahorrando el 5% mensual alcanzás el objetivo en ~18 meses.',
+    hint: 'gs.vacations.hint',
   },
   {
     id: 'year_end',
     emoji: '🎄',
-    name: 'Fondo fiestas de fin de año',
-    description: 'Navidad, regalos y celebraciones — evitar deudas en diciembre',
+    name: 'gs.yearEnd.name',
+    description: 'gs.yearEnd.desc',
     priority: 3,
     targetFn: ({ ingresoNeto, gastoMensual }) => {
       const base = gastoMensual > 0 ? gastoMensual : ingresoNeto
@@ -51,31 +52,31 @@ export const GOAL_TEMPLATES = [
     contributionPct: 0.04,
     color: '#d4982a',
     goalPriority: 'Media',
-    hint: 'Pequeños aportes mensuales evitan el endeudamiento en fiestas.',
+    hint: 'gs.yearEnd.hint',
   },
   {
     id: 'education',
     emoji: '📚',
-    name: 'Educación y desarrollo',
-    description: 'Cursos, certificaciones o educación de hijos',
+    name: 'gs.education.name',
+    description: 'gs.education.desc',
     priority: 4,
     targetFn: ({ ingresoNeto }) => Math.round(ingresoNeto * 0.5),
     contributionPct: 0.03,
     color: '#7c3aed',
     goalPriority: 'Media',
-    hint: 'Invertir en educación genera el mayor retorno a largo plazo.',
+    hint: 'gs.education.hint',
   },
   {
     id: 'opportunity_fund',
     emoji: '💡',
-    name: 'Colchón de oportunidades',
-    description: 'Capital disponible para oportunidades de inversión o negocio',
+    name: 'gs.opportunity.name',
+    description: 'gs.opportunity.desc',
     priority: 5,
     targetFn: ({ ingresoNeto }) => Math.round(ingresoNeto * 2),
     contributionPct: 0.03,
     color: '#0891b2',
     goalPriority: 'Baja',
-    hint: 'Tener liquidez te permite aprovechar oportunidades sin endeudarte.',
+    hint: 'gs.opportunity.hint',
   },
 ]
 
@@ -87,7 +88,10 @@ export const GOAL_TEMPLATES = [
  * @param {Array}  params.existingGoals - metas ya existentes
  * @returns {Array} sugerencias con montos calculados
  */
-export function generateGoalSuggestions({ ingresoNeto, gastoMensual = 0, existingGoals = [] }) {
+function esFallback(key) { return translations.es?.[key] ?? key }
+
+export function generateGoalSuggestions({ ingresoNeto, gastoMensual = 0, existingGoals = [] }, t) {
+  const tr = t || esFallback
   if (!ingresoNeto || ingresoNeto <= 0) return []
 
   const existingNames = existingGoals.map(g =>
@@ -102,14 +106,21 @@ export function generateGoalSuggestions({ ingresoNeto, gastoMensual = 0, existin
         ? Math.ceil(target / monthlyContribution)
         : null
 
-      // Detectar si ya existe una meta similar
+      const displayName = tr(template.name)
+      // Detectar si ya existe una meta similar (en cualquier idioma soportado)
+      const localizedNames = ['es', 'en', 'pt']
+        .map(l => (translations[l]?.[template.name] || '').toLowerCase())
+        .filter(Boolean)
       const alreadyExists = existingNames.some(name =>
         name.includes(template.id.replace('_', ' ')) ||
-        name.includes(template.name.toLowerCase().slice(0, 8))
+        localizedNames.some(ln => ln && name.includes(ln.slice(0, 8)))
       )
 
       return {
         ...template,
+        name: displayName,
+        description: tr(template.description),
+        hint: tr(template.hint),
         target,
         monthlyContribution,
         monthsToGoal,

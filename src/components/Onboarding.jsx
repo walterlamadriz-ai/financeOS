@@ -234,7 +234,7 @@ export default function Onboarding({ onComplete }) {
             textAlign: 'left', transition: 'all .15s',
           }}>
             <div style={{ fontSize: 15, color: tpl.color, marginBottom: 3 }}>{tpl.icon}</div>
-            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx)' }}>{tpl.name}</div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx)' }}>{t(`tpl.${tpl.id}.name`)}</div>
             <div style={{ fontSize: 9, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: 1 }}>{t('onboarding.profile.categories', { n: tpl.categoriesExpense.length })}</div>
           </button>
         ))}
@@ -418,8 +418,8 @@ export default function Onboarding({ onComplete }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 9 }}>
           <div style={{ width: 34, height: 34, borderRadius: 8, background: `${activeTemplate.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, color: activeTemplate.color, flexShrink: 0 }}>{activeTemplate.icon}</div>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--tx)' }}>{activeTemplate.name}</div>
-            <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)' }}>{activeTemplate.tagline}</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--tx)' }}>{t(`tpl.${activeTemplate.id}.name`)}</div>
+            <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)' }}>{t(`tpl.${activeTemplate.id}.tagline`)}</div>
           </div>
           <div style={{ marginLeft: 'auto', fontSize: 9, padding: '2px 7px', borderRadius: 20, background: `${activeTemplate.color}18`, color: activeTemplate.color, fontFamily: 'var(--mono)', fontWeight: 600 }}>{t('onboarding.template.badge')}</div>
         </div>
@@ -442,7 +442,7 @@ export default function Onboarding({ onComplete }) {
             background: activeTemplate.id === tpl.id ? `${tpl.color}14` : 'var(--sur2)',
             color: activeTemplate.id === tpl.id ? tpl.color : 'var(--th)',
             fontFamily: 'var(--mono)', fontWeight: activeTemplate.id === tpl.id ? 600 : 400,
-          }}>{tpl.icon} {tpl.name}</button>
+          }}>{tpl.icon} {t(`tpl.${tpl.id}.name`)}</button>
         ))}
       </div>
       <div style={{ display: 'flex', gap: 7 }}>
@@ -466,7 +466,7 @@ export default function Onboarding({ onComplete }) {
           { label: t('settings.country.label'), value: COUNTRIES.find(c => c.code === answers.country)?.label || answers.country },
           { label: t('settings.currency.label'), value: CURRENCIES.find(c => c.code === answers.currency)?.label || answers.currency },
           { label: t('onboarding.summary.savingGoal'), value: t('onboarding.summary.savingGoalValue', { pct: answers.savingGoal }) },
-          { label: t('onboarding.summary.template'), value: activeTemplate.name },
+          { label: t('onboarding.summary.template'), value: t(`tpl.${activeTemplate.id}.name`) },
           { label: t('onboarding.summary.useType'), value: (() => { const u = USE_TYPES.find(u => u.id === answers.useType); return u ? t(u.label) : '—' })() },
         ].map(row => (
           <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', borderBottom: '0.5px solid var(--brd)' }}>

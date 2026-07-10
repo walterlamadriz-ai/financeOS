@@ -336,11 +336,11 @@ export function calcCoachMetrics({ incomes, expenses, budgets, debts, goals, sub
   const debtLoad = annualIncome > 0 ? totalDebt / annualIncome : 0
 
   // Fondo de emergencia
-  const emergencyGoal = goals.find(g =>
-    g.name?.toLowerCase().includes('emergencia') ||
-    g.name?.toLowerCase().includes('emergency') ||
-    g.name?.toLowerCase().includes('fondo')
-  )
+  const emergencyGoal = goals.find(g => {
+    const n = g.name?.toLowerCase() || ''
+    return n.includes('emergencia') || n.includes('emergency') || n.includes('emergên') ||
+           n.includes('fondo') || n.includes('fundo') || n.includes('fund')
+  })
   const emergencyFundMonths = emergencyGoal && monthlyExpense > 0
     ? (emergencyGoal.saved || 0) / monthlyExpense
     : 0

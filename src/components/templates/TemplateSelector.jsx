@@ -4,6 +4,7 @@
 
 import { useState } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
+import { useT } from '../../i18n/useT.js'
 import TEMPLATES from '../../data/templates.js'
 
 // ── MODAL BASE ─────────────────────────────────────────────────────────────
@@ -31,6 +32,7 @@ function Modal({ isOpen, onClose, children, maxWidth = 540 }) {
 
 // ── PREVIEW MODAL ──────────────────────────────────────────────────────────
 function PreviewModal({ template, onClose, onApply }) {
+  const { t: tr } = useT()
   if (!template) return null
 
   const sectionTitle = {
@@ -63,8 +65,8 @@ function PreviewModal({ template, onClose, onApply }) {
             fontSize: 18, color: template.color, flexShrink: 0,
           }}>{template.icon}</div>
           <div>
-            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--tx)' }}>{template.name}</div>
-            <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)' }}>{template.tagline}</div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--tx)' }}>{tr(`tpl.${template.id}.name`)}</div>
+            <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)' }}>{tr(`tpl.${template.id}.tagline`)}</div>
           </div>
         </div>
         <div style={{ fontSize: 12, color: 'var(--tm)', lineHeight: 1.6 }}>{template.description}</div>
@@ -217,6 +219,7 @@ function ConfirmModal({ template, hasExistingConfig, onConfirm, onCancel }) {
 
 // ── MAIN COMPONENT ─────────────────────────────────────────────────────────
 export default function TemplateSelector({ compact = false, onApplied }) {
+  const { t: tr } = useT()
   const { settings, updateSettings, addBudget, budgets } = useApp()
   const [preview,  setPreview]  = useState(null)
   const [confirm,  setConfirm]  = useState(null)
@@ -292,7 +295,7 @@ export default function TemplateSelector({ compact = false, onApplied }) {
                 fontWeight: activeTemplateId === t.id ? 600 : 400,
               }}
             >
-              {t.icon} {t.name}
+              {t.icon} {tr(`tpl.${t.id}.name`)}
             </button>
           ))}
         </div>
@@ -355,7 +358,7 @@ export default function TemplateSelector({ compact = false, onApplied }) {
                   fontSize: 14, color: t.color,
                 }}>{t.icon}</div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx)', lineHeight: 1.2 }}>{t.name}</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx)', lineHeight: 1.2 }}>{tr(`tpl.${t.id}.name`)}</div>
                   {isActive && (
                     <div style={{ fontSize: 9, fontFamily: 'var(--mono)', color: t.color, marginTop: 1 }}>Activa</div>
                   )}
@@ -364,7 +367,7 @@ export default function TemplateSelector({ compact = false, onApplied }) {
 
               {/* Tagline */}
               <div style={{ fontSize: 10, color: 'var(--th)', lineHeight: 1.4, fontFamily: 'var(--mono)' }}>
-                {t.tagline}
+                {tr(`tpl.${t.id}.tagline`)}
               </div>
 
               {/* Stats */}

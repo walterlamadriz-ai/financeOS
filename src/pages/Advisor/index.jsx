@@ -104,7 +104,7 @@ function calcAlerts(metrics, t) {
   if (urgentDebts.length > 0)
     alerts.push({ type: 'warn', text: t('adv.alert.dueSoon', { n: urgentDebts.length, names: urgentDebts.map(d => d.creditor).join(', ') }) })
 
-  const emergencyGoal = metrics.goals.find(g => g.name?.toLowerCase().includes('emergencia') || g.name?.toLowerCase().includes('emergency'))
+  const emergencyGoal = metrics.goals.find(g => { const n = g.name?.toLowerCase() || ''; return n.includes('emergencia') || n.includes('emergency') || n.includes('emergên') })
   if (!emergencyGoal)
     alerts.push({ type: 'info', text: t('adv.alert.noEmergency') })
   else if (emergencyGoal.saved / emergencyGoal.target < 0.5)
