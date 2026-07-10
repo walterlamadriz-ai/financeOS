@@ -5,12 +5,14 @@
 
 import { useMemo } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
+import { useT } from '../../i18n/useT.js'
 import { Card, CardHeader, PageHeader, Empty } from '../../components/ui/index.jsx'
 import { fmtMoney } from '../../utils/index.js'
 import { CURRENCY_SYMBOLS } from '../shared/constants.js'
 
 export default function NetWorth() {
   const { goals, debts, incomes, expenses, settings } = useApp()
+  const { t } = useT()
   const sym = CURRENCY_SYMBOLS[settings.currency] || '$'
 
   const savedInGoals = useMemo(() => (goals || []).reduce((s, g) => s + (Number(g.saved) || 0), 0), [goals])
@@ -38,14 +40,13 @@ export default function NetWorth() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <PageHeader title="Patrimonio neto" sub="Lo que ahorraste y generaste, menos lo que debés — según lo que registrás en la app" />
+      <PageHeader title={t('networth.title')} sub={t('networth.sub')} />
 
       {!hasData ? (
         <Card>
-          <Empty text="Todavía no hay datos para calcular tu patrimonio." />
+          <Empty text={t('networth.empty')} />
           <div style={{ fontSize: 12, color: 'var(--th)', fontFamily: 'var(--mono)', lineHeight: 1.7, marginTop: 8 }}>
-            Se arma solo con lo que ya usás: <strong>ahorro en Metas</strong>, <strong>Deudas</strong> registradas
-            y el <strong>flujo neto de Propiedades</strong>. Agregá algo en esas secciones y volvé acá.
+            {t('networth.emptyHint')}
           </div>
         </Card>
       ) : (
@@ -53,41 +54,41 @@ export default function NetWorth() {
           <Card>
             <div style={{ textAlign: 'center', padding: '8px 0 4px' }}>
               <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 6 }}>
-                Patrimonio neto
+                {t('networth.headline')}
               </div>
               <div style={{ fontSize: 34, fontWeight: 700, fontFamily: 'var(--mono)', color: netWorth >= 0 ? 'var(--grn)' : '#e84142' }}>
                 {netWorth >= 0 ? '' : '-'}{fmtMoney(Math.abs(netWorth), sym)}
               </div>
               <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: 4 }}>
-                Activos {fmtMoney(totalActivos, sym)} − Pasivos {fmtMoney(totalPasivos, sym)}
+                {t('networth.formula', { a: fmtMoney(totalActivos, sym), p: fmtMoney(totalPasivos, sym) })}
               </div>
             </div>
           </Card>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: 12 }}>
             <Card>
-              <CardHeader title="💰 Activos" />
-              <Row label="Ahorro en Metas" value={savedInGoals} sym={sym} color="var(--grn)" />
-              <Row label="Propiedades (flujo neto positivo)" value={Math.max(0, propertiesNet)} sym={sym} color="var(--grn)" />
+              <CardHeader title={t('networth.assets')} />
+              <Row label={t('networth.savedInGoals')} value={savedInGoals} sym={sym} color="var(--grn)" />
+              <Row label={t('networth.propsPositive')} value={Math.max(0, propertiesNet)} sym={sym} color="var(--grn)" />
               <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 10, marginTop: 6, borderTop: '.5px solid var(--brd)' }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx)' }}>Total activos</span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx)' }}>{t('networth.totalAssets')}</span>
                 <span style={{ fontSize: 13, fontWeight: 700, fontFamily: 'var(--mono)', color: 'var(--grn)' }}>{fmtMoney(totalActivos, sym)}</span>
               </div>
             </Card>
 
             <Card>
-              <CardHeader title="📉 Pasivos" />
-              <Row label="Deudas pendientes" value={pendingDebt} sym={sym} color="#e84142" />
-              <Row label="Propiedades (flujo neto negativo)" value={Math.max(0, -propertiesNet)} sym={sym} color="#e84142" />
+              <CardHeader title={t('networth.liabilities')} />
+              <Row label={t('networth.pendingDebts')} value={pendingDebt} sym={sym} color="#e84142" />
+              <Row label={t('networth.propsNegative')} value={Math.max(0, -propertiesNet)} sym={sym} color="#e84142" />
               <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 10, marginTop: 6, borderTop: '.5px solid var(--brd)' }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx)' }}>Total pasivos</span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx)' }}>{t('networth.totalLiabilities')}</span>
                 <span style={{ fontSize: 13, fontWeight: 700, fontFamily: 'var(--mono)', color: '#e84142' }}>{fmtMoney(totalPasivos, sym)}</span>
               </div>
             </Card>
           </div>
 
           <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', lineHeight: 1.6, padding: '0 4px' }}>
-            Orientativo — se calcula solo con lo que registrás en FinanceOS (Metas, Deudas, Propiedades). No incluye saldos bancarios, inversiones externas ni otros activos que no hayas cargado en la app.
+            {t('networth.disclaimer')}
           </div>
         </>
       )}

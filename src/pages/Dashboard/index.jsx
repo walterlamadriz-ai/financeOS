@@ -3,6 +3,7 @@
 
 import { useMemo, useEffect, useState } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
+import { useT } from '../../i18n/useT.js'
 import ChartCard from '../../components/charts/ChartCard.jsx'
 import IncomeExpenseBar from '../../components/charts/IncomeExpenseBar.jsx'
 import CategoryDonut from '../../components/charts/CategoryDonut.jsx'
@@ -16,6 +17,7 @@ const pct0 = (n) => ((Number(n) || 0) * 100).toFixed(0) + '%'
 
 export default function Dashboard({ setPage }) {
   const ctx      = useApp() || {}
+  const { t }    = useT()
   // Panorama PERSONAL: excluye movimientos marcados como inversión (r.inv) de todos
   // los cálculos del dashboard (ingresos, gastos, balance, tasa de ahorro, score, señales).
   const incomes  = Array.isArray(ctx.incomes)       ? ctx.incomes.filter(r => !r?.inv)  : []
@@ -100,8 +102,8 @@ export default function Dashboard({ setPage }) {
         color: 'var(--amb)',
         bg: 'rgba(245,166,35,.07)',
         border: 'rgba(245,166,35,.22)',
-        text: `Tus suscripciones suman ${sym}${fmt(subMonthly * 12)} al año.`,
-        sub: 'Revisa si todas siguen siendo útiles.',
+        text: t('dash.insight.subs.text', { v: `${sym}${fmt(subMonthly * 12)}` }),
+        sub: t('dash.insight.subs.sub'),
       })
     }
 
@@ -121,8 +123,8 @@ export default function Dashboard({ setPage }) {
           color: 'var(--accent2, #00b8d9)',
           bg: 'rgba(0,184,217,.07)',
           border: 'rgba(0,184,217,.2)',
-          text: `${topCat[0]} representa el ${catPct}% de tus gastos del mes.`,
-          sub: 'Es tu categoría de mayor gasto.',
+          text: t('dash.insight.topCat.text', { cat: topCat[0], pct: catPct }),
+          sub: t('dash.insight.topCat.sub'),
         })
       }
     }
@@ -142,8 +144,8 @@ export default function Dashboard({ setPage }) {
           color,
           bg: pctN > 90 ? 'rgba(255,77,106,.07)' : pctN > 80 ? 'rgba(245,166,35,.07)' : 'rgba(0,212,170,.07)',
           border: pctN > 90 ? 'rgba(255,77,106,.22)' : pctN > 80 ? 'rgba(245,166,35,.22)' : 'rgba(0,212,170,.2)',
-          text: `Has usado el ${budgetPct}% de tu presupuesto mensual.`,
-          sub: pctN > 90 ? 'Límite inminente — revisá tus gastos.' : pctN > 80 ? 'Alerta temprana — moderá los gastos restantes.' : 'Sigue así.',
+          text: t('dash.insight.budget.text', { pct: budgetPct }),
+          sub: pctN > 90 ? t('dash.insight.budget.danger') : pctN > 80 ? t('dash.insight.budget.warn') : t('dash.insight.budget.ok'),
         })
       }
     }
@@ -162,14 +164,14 @@ export default function Dashboard({ setPage }) {
           color: 'var(--accent)',
           bg: 'rgba(0,212,170,.07)',
           border: 'rgba(0,212,170,.2)',
-          text: `"${top.name}" está al ${goalPct}% de tu objetivo.`,
-          sub: `${sym}${fmt(Number(top.target) - Number(top.saved))} restantes para completarla.`,
+          text: t('dash.insight.goal.text', { name: top.name, pct: goalPct }),
+          sub: t('dash.insight.goal.sub', { v: `${sym}${fmt(Number(top.target) - Number(top.saved))}` }),
         })
       }
     }
 
     return cards.slice(0, 4)
-  }, [subMonthly, monthExpenses, budgets, goals, sym])
+  }, [subMonthly, monthExpenses, budgets, goals, sym, settings.language])
 
   // ── Coach signals para Dashboard ──────────────────────────────────────────
   const topSignals = useMemo(() => {
@@ -228,7 +230,7 @@ export default function Dashboard({ setPage }) {
     const diff = curr - prev
     const trendColor = diff > 0 ? 'var(--accent)' : diff < 0 ? 'var(--red)' : 'var(--th)'
     const trendBg    = diff > 0 ? 'var(--accent-bg)' : diff < 0 ? 'var(--red-bg)' : 'var(--sur3)'
-    const trendTxt   = diff > 0 ? `↑ +${Math.abs(diff)} pts vs anterior` : diff < 0 ? `↓ ${Math.abs(diff)} pts vs anterior` : '= sin cambio'
+    const trendTxt   = diff > 0 ? t('dash.trend.up', { n: Math.abs(diff) }) : diff < 0 ? t('dash.trend.down', { n: Math.abs(diff) }) : t('dash.trend.flat')
     return (
       <div style={{ display:'flex', alignItems:'center', gap:8 }}>
         {/* SVG solo en desktop — en mobile basta la tendencia textual */}
@@ -302,21 +304,21 @@ export default function Dashboard({ setPage }) {
           boxShadow:'0 24px 64px rgba(0,0,0,.25)',
         }}>
           <div style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--th)', textTransform:'uppercase', letterSpacing:'1px', marginBottom:8 }}>
-            Cierre de mes
+            {t('dash.close.title')}
           </div>
           <div style={{ fontSize:20, fontWeight:700, color:'var(--tx)', marginBottom:4 }}>
             {activeMonth}
           </div>
           <div style={{ fontSize:13, color: ok ? 'var(--accent)' : 'var(--red)', fontWeight:600, marginBottom:20 }}>
-            {ok ? `✓ Mes cerrado con balance positivo` : `✗ Mes cerrado con balance negativo`}
+            {ok ? t('dash.close.positive') : t('dash.close.negative')}
           </div>
 
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:20 }}>
             {[
-              { label:'Ingresos',    val:`${sym}${fmt(kpis.totalInc)}`,  color:'var(--accent)' },
-              { label:'Gastos',      val:`${sym}${fmt(kpis.totalExp)}`,  color:'var(--red)' },
-              { label:'Balance',     val:`${sym}${fmt(Math.abs(balance))}`, color: ok ? 'var(--accent)' : 'var(--red)', prefix: ok ? '+' : '−' },
-              { label:'Ahorro',      val:pct(kpis.savingRate),            color: kpis.savingRate >= 0.2 ? 'var(--accent)' : 'var(--amb)' },
+              { label:t('dash.kpi.income'),    val:`${sym}${fmt(kpis.totalInc)}`,  color:'var(--accent)' },
+              { label:t('dash.kpi.expenses'),      val:`${sym}${fmt(kpis.totalExp)}`,  color:'var(--red)' },
+              { label:t('dash.kpi.balance'),     val:`${sym}${fmt(Math.abs(balance))}`, color: ok ? 'var(--accent)' : 'var(--red)', prefix: ok ? '+' : '−' },
+              { label:t('dash.close.savings'),      val:pct(kpis.savingRate),            color: kpis.savingRate >= 0.2 ? 'var(--accent)' : 'var(--amb)' },
             ].map(k => (
               <div key={k.label} style={{ background:'var(--bg2)', borderRadius:10, padding:'10px 12px' }}>
                 <div style={{ fontSize:11, fontFamily:'var(--mono)', color:'var(--th)', textTransform:'uppercase', letterSpacing:'.5px', marginBottom:3 }}>{k.label}</div>
@@ -329,7 +331,7 @@ export default function Dashboard({ setPage }) {
             <div style={{ background:'var(--bg2)', borderRadius:10, padding:'10px 12px', marginBottom:20, display:'flex', alignItems:'center', gap:12 }}>
               <div style={{ fontSize:28, fontWeight:700, fontFamily:'var(--mono)', color:healthScore.color }}>{healthScore.score}</div>
               <div>
-                <div style={{ fontSize:11, fontFamily:'var(--mono)', color:'var(--th)', textTransform:'uppercase', letterSpacing:'.5px' }}>Salud financiera</div>
+                <div style={{ fontSize:11, fontFamily:'var(--mono)', color:'var(--th)', textTransform:'uppercase', letterSpacing:'.5px' }}>{t('dash.health.title')}</div>
                 <div style={{ fontSize:13, fontWeight:600, color:healthScore.color }}>{healthScore.label}</div>
               </div>
             </div>
@@ -340,13 +342,13 @@ export default function Dashboard({ setPage }) {
               onClick={goNextMonth}
               style={{ background:'var(--accent)', color:'#fff', border:'none', borderRadius:9, padding:'11px 18px', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'var(--mono)' }}
             >
-              Ir al mes siguiente →
+              {t('dash.close.next')}
             </button>
             <button
               onClick={dismissClose}
               style={{ background:'none', color:'var(--th)', border:'.5px solid var(--brd)', borderRadius:9, padding:'9px 18px', fontSize:12, cursor:'pointer', fontFamily:'var(--mono)' }}
             >
-              Quedarme en {activeMonth}
+              {t('dash.close.stay', { m: activeMonth })}
             </button>
           </div>
         </div>
@@ -392,13 +394,13 @@ export default function Dashboard({ setPage }) {
 
   // Mapea una señal del diagnóstico a una acción concreta
   function signalAction(s) {
-    const t = `${s.title || ''} ${s.msg || ''}`.toLowerCase()
-    if (t.includes('ahorro'))     return { label:'Crear presupuesto', page:'budgets', tone:'amb' }
-    if (t.includes('suscrip'))    return { label:'Ver suscripciones', page:'subscriptions', tone:'amb' }
-    if (t.includes('deuda'))      return { label:'Ver deudas',        page:'debts',   tone:'red' }
-    if (t.includes('presupuesto'))return { label:'Ajustar presupuesto',page:'budgets', tone:'amb' }
-    if (t.includes('meta'))       return { label:'Ver metas',         page:'goals',   tone:'accent' }
-    return { label:'Ver diagnóstico', page:'coach', tone:'accent' }
+    const txt = `${s.title || ''} ${s.msg || ''}`.toLowerCase()
+    if (txt.includes('ahorro'))     return { label:t('dash.action.createBudget'), page:'budgets', tone:'amb' }
+    if (txt.includes('suscrip'))    return { label:t('dash.action.viewSubs'), page:'subscriptions', tone:'amb' }
+    if (txt.includes('deuda'))      return { label:t('dash.action.viewDebts'),        page:'debts',   tone:'red' }
+    if (txt.includes('presupuesto'))return { label:t('dash.action.adjustBudget'),page:'budgets', tone:'amb' }
+    if (txt.includes('meta'))       return { label:t('dash.action.viewGoals'),         page:'goals',   tone:'accent' }
+    return { label:t('dash.action.viewCoach'), page:'coach', tone:'accent' }
   }
 
   // Flujo de inversión/propiedades (💼) del mes activo — para el "flujo total real"
@@ -412,12 +414,12 @@ export default function Dashboard({ setPage }) {
   const flujoTotal = kpis.balance + propFlow.net
 
   const KPIS = [
-    { label:'Ingresos',       value:`${sym}${fmt(kpis.totalInc)}`,  color:'var(--accent)', sub:`${kpis.incCount} registros`,                                                          delta: kpis.delta.inc,  invertDelta: false, raw: kpis.totalInc },
-    { label:'Gastos',         value:`${sym}${fmt(kpis.totalExp)}`,  color:'var(--red)',    sub:`${kpis.expCount} registros`,                                                          delta: kpis.delta.exp,  invertDelta: true,  raw: kpis.totalExp },
-    { label:'Balance neto',   value:`${sym}${fmt(kpis.balance)}`,   color:kpis.balance >= 0 ? 'var(--accent)' : 'var(--red)', sub:(kpis.totalDebt + kpis.totalSubs > 0) ? `Tras deudas/subs: ${sym}${fmt(kpis.freeFlow)}` : (kpis.balance >= 0 ? 'Ingresos − gastos' : 'Gastos > ingresos'),      delta: kpis.delta.bal,  invertDelta: false, raw: kpis.balance },
-    ...(propFlow.has ? [{ label:'Flujo total', value:`${sym}${fmt(flujoTotal)}`, color: flujoTotal >= 0 ? 'var(--accent)' : 'var(--red)', sub:`Personal + propiedades (💼 ${propFlow.net >= 0 ? '+' : '−'}${sym}${fmt(Math.abs(propFlow.net))})`, delta: null, invertDelta: false, raw: flujoTotal }] : []),
-    { label:'Tasa de ahorro', value:pct(kpis.savingRate),           color:kpis.savingRate >= 0.2 ? 'var(--accent)' : kpis.savingRate >= 0 ? 'var(--amb)' : 'var(--red)', sub:'del ingreso', delta: kpis.delta.save, invertDelta: false, raw: null },
-    { label:'Suscripciones',  value:`${sym}${fmt(subMonthly)}/mes`, color:'var(--amb)',    sub:`${sym}${fmt(subMonthly * 12)}/año estimado`,                                          delta: null,            invertDelta: false, raw: subMonthly },
+    { label:t('dash.kpi.income'),       value:`${sym}${fmt(kpis.totalInc)}`,  color:'var(--accent)', sub:t('dash.kpi.records', { n: kpis.incCount }),                                                          delta: kpis.delta.inc,  invertDelta: false, raw: kpis.totalInc },
+    { label:t('dash.kpi.expenses'),         value:`${sym}${fmt(kpis.totalExp)}`,  color:'var(--red)',    sub:t('dash.kpi.records', { n: kpis.expCount }),                                                          delta: kpis.delta.exp,  invertDelta: true,  raw: kpis.totalExp },
+    { label:t('dash.kpi.balance'),   value:`${sym}${fmt(kpis.balance)}`,   color:kpis.balance >= 0 ? 'var(--accent)' : 'var(--red)', sub:(kpis.totalDebt + kpis.totalSubs > 0) ? t('dash.kpi.afterDebts', { v: `${sym}${fmt(kpis.freeFlow)}` }) : (kpis.balance >= 0 ? t('dash.kpi.incMinusExp') : t('dash.kpi.expOverInc')),      delta: kpis.delta.bal,  invertDelta: false, raw: kpis.balance },
+    ...(propFlow.has ? [{ label:t('dash.kpi.totalFlow'), value:`${sym}${fmt(flujoTotal)}`, color: flujoTotal >= 0 ? 'var(--accent)' : 'var(--red)', sub:t('dash.kpi.personalPlusProps', { v: `${propFlow.net >= 0 ? '+' : '−'}${sym}${fmt(Math.abs(propFlow.net))}` }), delta: null, invertDelta: false, raw: flujoTotal }] : []),
+    { label:t('dash.kpi.savingRate'), value:pct(kpis.savingRate),           color:kpis.savingRate >= 0.2 ? 'var(--accent)' : kpis.savingRate >= 0 ? 'var(--amb)' : 'var(--red)', sub:t('dash.kpi.ofIncome'), delta: kpis.delta.save, invertDelta: false, raw: null },
+    { label:t('dash.kpi.subs'),  value:t('dash.kpi.perMonth', { v: `${sym}${fmt(subMonthly)}` }), color:'var(--amb)',    sub:t('dash.kpi.perYear', { v: `${sym}${fmt(subMonthly * 12)}` }),                                          delta: null,            invertDelta: false, raw: subMonthly },
   ]
 
   return (
@@ -429,20 +431,20 @@ export default function Dashboard({ setPage }) {
         const noData = kpis.incCount === 0 && kpis.expCount === 0
         const ok = kpis.balance >= 0
         const heroLine = noData
-          ? 'Tus finanzas, privadas y sin banco. Empieza agregando un movimiento.'
+          ? t('dash.hero.noData')
           : ok
-            ? `Este mes vas en positivo: te quedan ${sym}${fmt(kpis.balance)} disponibles.`
-            : `Este mes estás en rojo por ${sym}${fmt(Math.abs(kpis.balance))}. Revisa tus gastos.`
+            ? t('dash.hero.positive', { amt: `${sym}${fmt(kpis.balance)}` })
+            : t('dash.hero.negative', { amt: `${sym}${fmt(Math.abs(kpis.balance))}` })
         return (
           <div style={{ marginBottom:20, display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:12, flexWrap:'wrap' }}>
             <div>
               <div style={{ fontFamily:'var(--mono)', fontSize:11, letterSpacing:'1.2px', textTransform:'uppercase', color:'var(--grn2)', marginBottom:6 }}>Dashboard · {activeMonth}</div>
-              <h1 style={{ fontSize:22, fontWeight:700, color:'var(--tx)', letterSpacing:'-.5px', marginBottom:4 }}>Tu mes en una mirada</h1>
+              <h1 style={{ fontSize:22, fontWeight:700, color:'var(--tx)', letterSpacing:'-.5px', marginBottom:4 }}>{t('dash.title')}</h1>
               <p style={{ fontSize:13, color: noData ? 'var(--th)' : ok ? 'var(--grn)' : 'var(--red)', fontWeight: noData ? 400 : 500, lineHeight:1.5 }}>{heroLine}</p>
             </div>
-            <button onClick={toggleCompact} title={compact ? 'Mostrar gráficos y proyección' : 'Ocultar gráficos y proyección'}
+            <button onClick={toggleCompact} title={compact ? t('dash.view.show') : t('dash.view.hide')}
               style={{ background:'none', border:'.5px solid var(--brd2)', borderRadius:7, padding:'6px 12px', fontSize:11, fontFamily:'var(--mono)', color:'var(--tm)', cursor:'pointer', whiteSpace:'nowrap', flexShrink:0 }}>
-              {compact ? '▸ Vista detallada' : '▾ Vista compacta'}
+              {compact ? t('dash.view.detailed') : t('dash.view.compact')}
             </button>
           </div>
         )
@@ -453,13 +455,13 @@ export default function Dashboard({ setPage }) {
       {/* Empieza aquí */}
       {setPage && kpis.incCount === 0 && kpis.expCount === 0 && (
         <div style={{ background:'rgba(0,212,170,.06)', border:'.5px solid rgba(0,212,170,.25)', borderRadius:'var(--r)', padding:'18px 20px', marginBottom:20 }}>
-          <div style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--accent)', textTransform:'uppercase', letterSpacing:'1px', marginBottom:6 }}>Empieza aquí</div>
-          <p style={{ fontSize:13, color:'var(--th)', fontFamily:'var(--mono)', marginBottom:14 }}>Si es tu primera vez, sigue estos pasos para ordenar tu información.</p>
+          <div style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--accent)', textTransform:'uppercase', letterSpacing:'1px', marginBottom:6 }}>{t('dash.start.title')}</div>
+          <p style={{ fontSize:13, color:'var(--th)', fontFamily:'var(--mono)', marginBottom:14 }}>{t('dash.start.sub')}</p>
           <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
             {[
-              { n:'1', txt:'Agrega tu primer ingreso.',   btn:'Agregar ingreso',    page:'income',   color:'var(--accent)' },
-              { n:'2', txt:'Registra un egreso.',         btn:'Agregar egreso',     page:'movements', color:'var(--red)' },
-              { n:'3', txt:'Crea un presupuesto.',        btn:'Crear presupuesto',  page:'budgets',  color:'var(--amb)' },
+              { n:'1', txt:t('dash.start.s1'),   btn:t('dash.start.s1btn'),    page:'income',   color:'var(--accent)' },
+              { n:'2', txt:t('dash.start.s2'),         btn:t('dash.start.s2btn'),     page:'movements', color:'var(--red)' },
+              { n:'3', txt:t('dash.start.s3'),        btn:t('dash.start.s3btn'),  page:'budgets',  color:'var(--amb)' },
             ].map((s,i) => (
               <div key={i} style={{ display:'flex', alignItems:'center', gap:12 }}>
                 <div style={{ width:24, height:24, borderRadius:'50%', background:'var(--accent)', color:'#fff', fontSize:11, fontWeight:700, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>{s.n}</div>
@@ -473,14 +475,14 @@ export default function Dashboard({ setPage }) {
       {/* Acciones rápidas */}
       {setPage && (
         <div style={{ marginBottom:20 }}>
-          <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)', textTransform:'uppercase', letterSpacing:'.8px', marginBottom:10 }}>Acciones rápidas</div>
+          <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)', textTransform:'uppercase', letterSpacing:'.8px', marginBottom:10 }}>{t('dash.quick.title')}</div>
           <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
             {[
-              { label:'+ Ingreso',     page:'income',     color:'var(--accent)' },
-              { label:'+ Egreso',      page:'movements',  color:'var(--red)' },
-              { label:'↑ Importar CSV',page:'import',     color:'#00b8d9' },
-              { label:'▤ Presupuesto', page:'budgets',    color:'var(--amb)' },
-              { label:'◎ Meta',        page:'goals',      color:'var(--accent)' },
+              { label:t('dash.quick.income'),     page:'income',     color:'var(--accent)' },
+              { label:t('dash.quick.expense'),      page:'movements',  color:'var(--red)' },
+              { label:t('dash.quick.import'),page:'import',     color:'#00b8d9' },
+              { label:t('dash.quick.budget'), page:'budgets',    color:'var(--amb)' },
+              { label:t('dash.quick.goal'),        page:'goals',      color:'var(--accent)' },
             ].map((a,i) => (
               <button key={i} onClick={() => setPage(a.page)} style={{
                 background:'none', border:`.5px solid ${a.color}`, borderRadius:8,
@@ -524,9 +526,9 @@ export default function Dashboard({ setPage }) {
         return (
           <div style={{ background: over ? 'rgba(0,212,170,.06)' : 'rgba(255,77,106,.06)', border: `.5px solid ${over ? 'rgba(0,212,170,.25)' : 'rgba(255,77,106,.25)'}`, borderRadius: 'var(--r)', padding: '12px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
             <div style={{ flex: 1, minWidth: 160 }}>
-              <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.8px', marginBottom: 4 }}>Ingreso esperado vs recibido</div>
+              <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.8px', marginBottom: 4 }}>{t('dash.expected.title')}</div>
               <div style={{ fontSize: 13, color: 'var(--tx)' }}>
-                Esperado: <strong>{sym}{fmt(expected)}</strong> · Recibido: <strong style={{ color: over ? 'var(--accent)' : 'var(--red)' }}>{sym}{fmt(kpis.totalInc)}</strong>
+                {t('dash.expected.expected')} <strong>{sym}{fmt(expected)}</strong> · {t('dash.expected.received')} <strong style={{ color: over ? 'var(--accent)' : 'var(--red)' }}>{sym}{fmt(kpis.totalInc)}</strong>
               </div>
             </div>
             <div style={{ fontFamily: 'var(--mono)', fontSize: 14, fontWeight: 700, color: over ? 'var(--accent)' : 'var(--red)' }}>
@@ -560,7 +562,7 @@ export default function Dashboard({ setPage }) {
               <div style={{ fontSize:11, fontFamily:'var(--mono)', color:'var(--th)', textTransform:'uppercase', letterSpacing:'.5px', marginTop:2 }}>/ 100</div>
             </div>
             <div>
-              <div style={{ fontSize:11, fontFamily:'var(--mono)', color:'var(--th)', textTransform:'uppercase', letterSpacing:'.8px', marginBottom:2 }}>Salud financiera</div>
+              <div style={{ fontSize:11, fontFamily:'var(--mono)', color:'var(--th)', textTransform:'uppercase', letterSpacing:'.8px', marginBottom:2 }}>{t('dash.health.title')}</div>
               <div style={{ fontSize:14, fontWeight:700, color:healthScore.color, marginBottom:4 }}>{healthScore.label}</div>
               <ScoreSparkline history={scoreHistory} currentColor={healthScore.color} />
             </div>
@@ -580,10 +582,10 @@ export default function Dashboard({ setPage }) {
       {topSignals.length > 0 && (
         <div style={{ background:'var(--sur)', border:`.5px solid var(--brd)`, borderRadius:'var(--r)', padding:'14px 16px', marginBottom:16 }}>
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
-            <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)', textTransform:'uppercase', letterSpacing:'.8px' }}>⚕ Diagnóstico — señales activas</div>
+            <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)', textTransform:'uppercase', letterSpacing:'.8px' }}>{t('dash.signals.title')}</div>
             {setPage && (
               <span style={{ fontSize:11, fontFamily:'var(--mono)', color:'var(--accent)', cursor:'pointer' }} onClick={() => setPage('coach')}>
-                Ver diagnóstico completo →
+                {t('dash.signals.viewAll')}
               </span>
             )}
           </div>
@@ -591,7 +593,7 @@ export default function Dashboard({ setPage }) {
             <div key={i} style={{ borderLeft:`3px solid ${SEV_COLOR[s.severity]}`, paddingLeft:10, marginBottom: i < topSignals.length - 1 ? 10 : 0 }}>
               <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:2 }}>
                 <span style={{ fontSize:12, color:SEV_COLOR[s.severity] }}>{SEV_ICON[s.severity]}</span>
-                <span style={{ fontSize:11, fontWeight:600, color:SEV_COLOR[s.severity], fontFamily:'var(--mono)', textTransform:'uppercase', letterSpacing:'.4px' }}>{s.severity === 'warning' ? 'Revisar' : s.severity === 'attention' ? 'Atención' : 'Info'}</span>
+                <span style={{ fontSize:11, fontWeight:600, color:SEV_COLOR[s.severity], fontFamily:'var(--mono)', textTransform:'uppercase', letterSpacing:'.4px' }}>{s.severity === 'warning' ? t('dash.sev.warning') : s.severity === 'attention' ? t('dash.sev.attention') : t('dash.sev.info')}</span>
               </div>
               <div style={{ fontSize:13, fontWeight:600, color:'var(--tx)', marginBottom:2 }}>{s.title}</div>
               <div style={{ fontSize:12, color:'var(--tm)', lineHeight:1.5 }}>{s.msg}</div>
@@ -616,14 +618,14 @@ export default function Dashboard({ setPage }) {
         return (
           <div style={{ background:'var(--sur)', border:`.5px solid ${over ? 'rgba(255,77,106,.3)' : 'var(--brd)'}`, borderRadius:'var(--r)', padding:'14px 16px', marginBottom:16 }}>
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10, flexWrap:'wrap', gap:6 }}>
-              <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)', textTransform:'uppercase', letterSpacing:'.8px' }}>Proyección fin de mes</div>
-              <div style={{ fontSize:10, fontFamily:'var(--mono)', color:'var(--th)' }}>Día {today}/{daysInMonth} · {daysLeft} días restantes</div>
+              <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)', textTransform:'uppercase', letterSpacing:'.8px' }}>{t('dash.proj.title')}</div>
+              <div style={{ fontSize:10, fontFamily:'var(--mono)', color:'var(--th)' }}>{t('dash.proj.day', { d: today, n: daysInMonth, left: daysLeft })}</div>
             </div>
             <div style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:10, marginBottom:10 }}>
               {[
-                { label:'Gasto proyectado',   value:`${sym}${fmt(projExp)}`,            color:'var(--red)',                                  rawVal: projExp },
-                { label:'Balance proyectado', value:`${sym}${fmt(Math.abs(projBal))}`,  color: over ? 'var(--red)' : 'var(--accent)', prefix: over ? '−' : '+', rawVal: projBal },
-                { label:'Ritmo diario',       value:`${sym}${fmt(dailyExp)}/día`,       color:'var(--th)',                                   rawVal: null },
+                { label:t('dash.proj.exp'),   value:`${sym}${fmt(projExp)}`,            color:'var(--red)',                                  rawVal: projExp },
+                { label:t('dash.proj.bal'), value:`${sym}${fmt(Math.abs(projBal))}`,  color: over ? 'var(--red)' : 'var(--accent)', prefix: over ? '−' : '+', rawVal: projBal },
+                { label:t('dash.proj.daily'),       value:t('dash.proj.perDay', { v: `${sym}${fmt(dailyExp)}` }),       color:'var(--th)',                                   rawVal: null },
               ].map(k => (
                 <div key={k.label}>
                   <div style={{ fontSize:11, fontFamily:'var(--mono)', color:'var(--th)', textTransform:'uppercase', letterSpacing:'.5px', marginBottom:3 }}>{k.label}</div>
@@ -638,10 +640,10 @@ export default function Dashboard({ setPage }) {
               <div style={{ height:'100%', width:`${pctMonth}%`, background: over ? 'var(--red)' : 'var(--accent)', borderRadius:2, transition:'.3s' }} />
             </div>
             <div style={{ display:'flex', justifyContent:'space-between', fontSize:11, fontFamily:'var(--mono)', color:'var(--th)' }}>
-              <span>{pctMonth}% del mes transcurrido</span>
-              {setPage && <span style={{ color:'var(--accent)', cursor:'pointer' }} onClick={() => setPage('cashflow')}>Ver proyección completa →</span>}
+              <span>{t('dash.proj.elapsed', { pct: pctMonth })}</span>
+              {setPage && <span style={{ color:'var(--accent)', cursor:'pointer' }} onClick={() => setPage('cashflow')}>{t('dash.proj.viewFull')}</span>}
             </div>
-            {over && <InlineCTA label="Revisar mis gastos" page="movements" tone="red" />}
+            {over && <InlineCTA label={t('dash.proj.reviewExpenses')} page="movements" tone="red" />}
           </div>
         )
       })()}
@@ -651,16 +653,16 @@ export default function Dashboard({ setPage }) {
         <>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))', gap:16, marginBottom:16 }}>
             <div className="fos-hide-mobile">
-              <ChartCard title="Flujo de dinero del mes" subtitle="distribución orientativa" minHeight={220}>
+              <ChartCard title={t('dash.chart.flow.title')} subtitle={t('dash.chart.flow.sub')} minHeight={220}>
                 <MoneyFlow incomes={incomes} expenses={monthExpenses} subscriptions={subs} debts={debts} sym={sym}/>
               </ChartCard>
             </div>
-            <ChartCard title="Gastos por categoría" subtitle={activeMonth} minHeight={160}>
+            <ChartCard title={t('dash.chart.cat.title')} subtitle={activeMonth} minHeight={160}>
               <CategoryDonut records={monthExpenses} sym={sym} maxCategories={6}
                 onCategoryClick={setPage ? (cat) => { try { sessionStorage.setItem('fos_drill_category', cat) } catch {} ; setPage('movements') } : undefined}/>
             </ChartCard>
           </div>
-          <ChartCard title="Ingresos vs Gastos" subtitle="últimos 6 meses" minHeight={180}>
+          <ChartCard title={t('dash.chart.bar.title')} subtitle={t('dash.chart.bar.sub')} minHeight={180}>
             <IncomeExpenseBar incomes={incomes} expenses={expenses} sym={sym} months={6}/>
           </ChartCard>
         </>
@@ -671,9 +673,9 @@ export default function Dashboard({ setPage }) {
       {/* Link a Diagnóstico */}
       {setPage && (
         <div style={{ padding:'10px 14px', background:'var(--sur)', border:'.5px solid var(--brd)', borderRadius:'var(--r)', display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
-          <span style={{ fontSize:12, color:'var(--th)', fontFamily:'var(--mono)' }}>⚕ Análisis orientativo completo de tu situación financiera.</span>
+          <span style={{ fontSize:12, color:'var(--th)', fontFamily:'var(--mono)' }}>{t('dash.coachLink.text')}</span>
           <button onClick={() => setPage('coach')} style={{ background:'none', border:'.5px solid var(--brd2)', borderRadius:6, padding:'4px 12px', fontSize:11, color:'var(--accent)', cursor:'pointer', fontFamily:'var(--mono)' }}>
-            Ver Diagnóstico →
+            {t('dash.coachLink.btn')}
           </button>
         </div>
       )}
@@ -682,13 +684,13 @@ export default function Dashboard({ setPage }) {
       {/* Backup recomendado */}
       <div style={{ background:'var(--sur)', border:'.5px solid var(--brd)', borderRadius:'var(--r)', padding:'12px 16px', marginBottom:16, display:'flex', alignItems:'center', justifyContent:'space-between', gap:12, flexWrap:'wrap' }}>
         <div>
-          <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)', textTransform:'uppercase', letterSpacing:'.8px', marginBottom:3 }}>Backup recomendado</div>
-          <div style={{ fontSize:12, color:'var(--th)', fontFamily:'var(--mono)' }}>FinanceOS guarda tus datos localmente. Crea backups periódicos para evitar pérdida de información.</div>
+          <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)', textTransform:'uppercase', letterSpacing:'.8px', marginBottom:3 }}>{t('dash.backup.title')}</div>
+          <div style={{ fontSize:12, color:'var(--th)', fontFamily:'var(--mono)' }}>{t('dash.backup.text')}</div>
         </div>
-        {setPage && <button onClick={() => setPage?.('settings')} style={{ background:'none', border:'.5px solid var(--brd2)', borderRadius:7, padding:'5px 12px', fontSize:11, color:'var(--tx)', cursor:'pointer', fontFamily:'var(--mono)', whiteSpace:'nowrap', flexShrink:0 }}>Ir a backups →</button>}
+        {setPage && <button onClick={() => setPage?.('settings')} style={{ background:'none', border:'.5px solid var(--brd2)', borderRadius:7, padding:'5px 12px', fontSize:11, color:'var(--tx)', cursor:'pointer', fontFamily:'var(--mono)', whiteSpace:'nowrap', flexShrink:0 }}>{t('dash.backup.btn')}</button>}
       </div>
       <div style={{ fontSize:10, color:'var(--th)', fontFamily:'var(--mono)', lineHeight:1.6 }}>
-        Los gráficos reflejan los datos registrados en FinanceOS. No constituyen asesoría financiera, tributaria, legal ni de inversión.
+        {t('dash.disclaimer')}
       </div>
     </div>
   )

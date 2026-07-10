@@ -5,12 +5,14 @@
 
 import { useMemo } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
+import { useT } from '../../i18n/useT.js'
 import { Card, PageHeader, Empty } from '../../components/ui/index.jsx'
 import { fmtMoney } from '../../utils/index.js'
 import { CURRENCY_SYMBOLS } from '../shared/constants.js'
 
 export default function Projects() {
   const { incomes, expenses, settings } = useApp()
+  const { t } = useT()
   const sym = CURRENCY_SYMBOLS[settings.currency] || '$'
 
   const groups = useMemo(() => {
@@ -35,15 +37,13 @@ export default function Projects() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <PageHeader title="Propiedades / proyectos" sub="Flujo neto por unidad (ingresos − egresos) · asigná una propiedad al registrar movimientos" />
+      <PageHeader title={t('projects.title')} sub={t('projects.sub')} />
 
       {groups.length === 0 ? (
         <Card>
-          <Empty text="Todavía no asignaste ninguna propiedad o proyecto." />
+          <Empty text={t('projects.empty')} />
           <div style={{ fontSize: 12, color: 'var(--th)', fontFamily: 'var(--mono)', lineHeight: 1.7, marginTop: 8 }}>
-            Al registrar un <strong>ingreso</strong> o <strong>egreso</strong>, completá el campo
-            <em> "Propiedad / proyecto"</em> (ej. <em>Depto Bogotá</em>). Acá vas a ver el flujo neto de cada uno:
-            renta cobrada, hipoteca y gastos, y el resultado del mes.
+            {t('projects.emptyHint')}
           </div>
         </Card>
       ) : (
@@ -51,7 +51,7 @@ export default function Projects() {
           <Card>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 8 }}>
               <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '.5px' }}>
-                Flujo neto total ({groups.length} {groups.length === 1 ? 'unidad' : 'unidades'})
+                {groups.length === 1 ? t('projects.totalNet.one', { n: groups.length }) : t('projects.totalNet.many', { n: groups.length })}
               </div>
               <div style={{ fontSize: 22, fontWeight: 700, fontFamily: 'var(--mono)', color: totalNeto >= 0 ? 'var(--grn)' : '#e84142' }}>
                 {totalNeto >= 0 ? '+' : ''}{fmtMoney(totalNeto, sym)}
@@ -64,14 +64,14 @@ export default function Projects() {
               <Card key={g.name}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
                   <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--tx)' }}>{g.name}</div>
-                  <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)' }}>{g.count} mov.</div>
+                  <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)' }}>{t('projects.movCount', { n: g.count })}</div>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 12 }}>
-                  <Row label="Ingresos (renta)" value={`+${fmtMoney(g.ingresos, sym)}`} color="var(--grn)" />
-                  <Row label="Egresos (hipoteca, gastos)" value={`-${fmtMoney(g.egresos, sym)}`} color="#e84142" />
+                  <Row label={t('projects.incomeRow')} value={`+${fmtMoney(g.ingresos, sym)}`} color="var(--grn)" />
+                  <Row label={t('projects.expenseRow')} value={`-${fmtMoney(g.egresos, sym)}`} color="#e84142" />
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', paddingTop: 10, borderTop: '.5px solid var(--brd)' }}>
-                  <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '.5px' }}>Flujo neto</div>
+                  <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '.5px' }}>{t('projects.netFlow')}</div>
                   <div style={{ fontSize: 18, fontWeight: 700, fontFamily: 'var(--mono)', color: g.neto >= 0 ? 'var(--grn)' : '#e84142' }}>
                     {g.neto >= 0 ? '+' : ''}{fmtMoney(g.neto, sym)}
                   </div>
@@ -81,7 +81,7 @@ export default function Projects() {
           </div>
 
           <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', lineHeight: 1.6, padding: '0 4px' }}>
-            Suma histórica de todos los movimientos asignados a cada propiedad/proyecto. Los movimientos marcados como inversión 💼 no afectan tu presupuesto personal, pero sí aparecen acá.
+            {t('projects.disclaimer')}
           </div>
         </>
       )}
