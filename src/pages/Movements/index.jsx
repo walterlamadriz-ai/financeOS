@@ -3,6 +3,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
+import { useT } from '../../i18n/useT.js'
 import MoneyFlow from '../../components/charts/MoneyFlow.jsx'
 import ChartCard from '../../components/charts/ChartCard.jsx'
 import HorizontalBars from '../../components/charts/HorizontalBars.jsx'
@@ -56,11 +57,12 @@ const SUBCATS = {
 const SUB_CATS = ['Streaming','Música','Software','Gimnasio','Seguro',
   'Educación','Cloud','Delivery','Suscripción','Productividad','Otros']
 const METHODS  = ['Débito','Crédito','Efectivo','Transferencia','Otro']
+// label = key de traducción (el value guardado no cambia)
 const FREQS    = [
-  { value:'monthly',   label:'Mensual' },
-  { value:'annual',    label:'Anual' },
-  { value:'quarterly', label:'Trimestral' },
-  { value:'weekly',    label:'Semanal' },
+  { value:'monthly',   label:'mov.freq.monthly' },
+  { value:'annual',    label:'mov.freq.annual' },
+  { value:'quarterly', label:'mov.freq.quarterly' },
+  { value:'weekly',    label:'mov.freq.weekly' },
 ]
 const CAT_COLORS = {
   'Alimentación':'#f5a623','Vivienda':'#ff4d6a','Transporte':'#00b8d9',
@@ -74,6 +76,7 @@ const CAT_COLORS = {
 
 // ── Formulario Gasto ──────────────────────────────────────────────────────────
 function FormGasto({ onSave, onCancel, sym, projects = [] }) {
+  const { t } = useT()
   const [f, setF] = useState({
     description:'', amount:'', date:todayStr(),
     category:'Alimentación', subcategory:'', method:'Débito', type:'Necesidad', notes:'', project:''
@@ -100,15 +103,13 @@ function FormGasto({ onSave, onCancel, sym, projects = [] }) {
   function detectFromPaste() {
     const r = parseTransactionText(pasteText)
     if (!r || (r.amount == null && !r.merchant)) {
-      setPasteMsg({ ok:false, text:'No se pudo detectar el monto ni el comercio. Completa el formulario manualmente.' })
+      setPasteMsg({ ok:false, text:t('mov.form.pasteFail') })
       return
     }
     if (r.amount != null) set('amount', String(r.amount))
     if (r.merchant) set('description', r.merchant)
     if (r.date) set('date', r.date)
-    setPasteMsg({ ok:true, text: r.confidence === 'high'
-      ? '✓ Detectado — revisa los datos antes de guardar.'
-      : '⚠ Detección parcial — revisa y completa lo que falte.' })
+    setPasteMsg({ ok:true, text: r.confidence === 'high' ? t('mov.form.pasteOk') : t('mov.form.pastePartial') })
     setShowPaste(false)
   }
 
@@ -116,7 +117,7 @@ function FormGasto({ onSave, onCancel, sym, projects = [] }) {
     <div style={{ background:'var(--sur)', border:'.5px solid var(--brd)',
       borderRadius:'var(--r)', padding:'16px', marginBottom:12 }}>
       <div style={{ fontSize:13, fontWeight:600, color:'var(--tx)', marginBottom:12 }}>
-        💳 Nuevo gasto único
+        {t('mov.form.expTitle')}
       </div>
 
       {/* Pegar SMS/notificación del banco */}
@@ -125,28 +126,28 @@ function FormGasto({ onSave, onCancel, sym, projects = [] }) {
           <button type="button" onClick={() => { setShowPaste(true); setPasteMsg(null) }}
             style={{ background:'var(--sur2)', border:'.5px dashed var(--brd2)', borderRadius:6,
               padding:'7px 12px', fontSize:12, color:'var(--tm)', cursor:'pointer', width:'100%', textAlign:'left' }}>
-            📋 Pegar mensaje del banco (SMS o notificación) →
+            {t('mov.form.pasteBtn')}
           </button>
         ) : (
           <div style={{ background:'var(--sur2)', border:'.5px solid var(--brd2)', borderRadius:8, padding:10 }}>
-            <label style={lbl}>Pega aquí el texto del SMS o notificación</label>
+            <label style={lbl}>{t('mov.form.pasteLabel')}</label>
             <textarea value={pasteText} onChange={e => setPasteText(e.target.value)} rows={3}
-              placeholder='Ej: "Compra por $15.990 en FARMACIAS AHUMADA..."'
+              placeholder={t('mov.form.pastePh')}
               style={{ ...inp, fontFamily:'var(--sans)', resize:'vertical' }} />
             <div style={{ display:'flex', gap:8, marginTop:8 }}>
               <button type="button" onClick={detectFromPaste} disabled={!pasteText.trim()}
                 style={{ background:'var(--grn)', color:'#fff', border:'none', borderRadius:6,
                   padding:'6px 14px', fontSize:12, fontWeight:600, cursor: pasteText.trim() ? 'pointer' : 'default', opacity: pasteText.trim() ? 1 : .5 }}>
-                Detectar →
+                {t('mov.form.detect')}
               </button>
               <button type="button" onClick={() => { setShowPaste(false); setPasteText('') }}
                 style={{ background:'none', border:'.5px solid var(--brd)', borderRadius:6,
                   padding:'6px 14px', fontSize:12, color:'var(--th)', cursor:'pointer' }}>
-                Cancelar
+                {t('common.cancel')}
               </button>
             </div>
             <div style={{ fontSize:9, color:'var(--th)', fontFamily:'var(--mono)', marginTop:6, lineHeight:1.5 }}>
-              100% local — el texto se procesa en tu dispositivo, no se envía a ningún servidor. Orientativo: siempre revisa los datos antes de guardar.
+              {t('mov.form.pasteLocal')}
             </div>
           </div>
         )}
@@ -158,16 +159,16 @@ function FormGasto({ onSave, onCancel, sym, projects = [] }) {
       </div>
 
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))', gap:10, marginBottom:10 }}>
-        <div><label style={lbl}>Descripción</label>
-          <input style={inp} value={f.description} placeholder="Ej: Supermercado"
+        <div><label style={lbl}>{t('mov.form.desc')}</label>
+          <input style={inp} value={f.description} placeholder={t('mov.form.descPh')}
             onChange={e => set('description', e.target.value)}/></div>
-        <div><label style={lbl}>Monto ({sym})</label>
+        <div><label style={lbl}>{t('mov.form.amount', { sym })}</label>
           <input style={inp} type="number" value={f.amount} placeholder="0"
             onChange={e => set('amount', e.target.value)}/></div>
-        <div><label style={lbl}>Fecha</label>
+        <div><label style={lbl}>{t('mov.form.date')}</label>
           <input style={inp} type="date" value={f.date}
             onChange={e => set('date', e.target.value)}/></div>
-        <div><label style={lbl}>Categoría</label>
+        <div><label style={lbl}>{t('mov.form.category')}</label>
           <select style={inp} value={f.category} onChange={handleCatChange}>
             {EXP_CATS.map(c => <option key={c}>{c}</option>)}
           </select>
@@ -175,7 +176,7 @@ function FormGasto({ onSave, onCancel, sym, projects = [] }) {
         {subcatOptions.length > 0 && (
           <div style={{ gridColumn:'1 / -1' }}>
             <label style={lbl}>
-              Subcategoría <span style={{ color:'var(--accent)', fontSize:9 }}>(opcional)</span>
+              {t('mov.form.subcat')} <span style={{ color:'var(--accent)', fontSize:9 }}>{t('mov.form.optional')}</span>
             </label>
             <div style={{ display:'flex', flexWrap:'wrap', gap:5 }}>
               {subcatOptions.map(sc => (
@@ -195,27 +196,27 @@ function FormGasto({ onSave, onCancel, sym, projects = [] }) {
             </div>
           </div>
         )}
-        <div><label style={lbl}>Método</label>
+        <div><label style={lbl}>{t('mov.form.method')}</label>
           <select style={inp} value={f.method} onChange={e => set('method', e.target.value)}>
             {METHODS.map(m => <option key={m}>{m}</option>)}</select></div>
-        <div><label style={lbl}>Tipo</label>
+        <div><label style={lbl}>{t('mov.form.type')}</label>
           <select style={inp} value={f.type} onChange={e => set('type', e.target.value)}>
             <option>Necesidad</option><option>Deseo</option></select></div>
       </div>
       <label style={{ display:'flex', alignItems:'flex-start', gap:8, fontSize:12, color:'var(--tm)', cursor:'pointer', marginBottom:12, lineHeight:1.4 }}>
         <input type="checkbox" checked={!!f.inv} onChange={e => set('inv', e.target.checked)} style={{ width:16, height:16, flexShrink:0, marginTop:1 }} />
-        <span style={{ minWidth:0 }}>💼 Es de inversión (ej. hipoteca de una propiedad en arriendo) — no cuenta en mi presupuesto personal</span>
+        <span style={{ minWidth:0 }}>{t('mov.form.invCheck')}</span>
       </label>
       <div style={{ marginBottom:12 }}>
-        <label style={lbl}>Propiedad / proyecto (opcional)</label>
-        <input style={inp} list="fnos-projects-exp" value={f.project} placeholder="ej. Depto Bogotá"
+        <label style={lbl}>{t('mov.form.project')}</label>
+        <input style={inp} list="fnos-projects-exp" value={f.project} placeholder={t('mov.form.projectPh')}
           onChange={e => set('project', e.target.value)}/>
         <datalist id="fnos-projects-exp">{projects.map(p => <option key={p} value={p} />)}</datalist>
       </div>
       <div style={{ display:'flex', gap:8, justifyContent:'flex-end' }}>
         <button onClick={onCancel} style={{ background:'none', border:'.5px solid var(--brd)',
           borderRadius:6, padding:'6px 14px', fontSize:12, color:'var(--th)', cursor:'pointer' }}>
-          Cancelar
+          {t('common.cancel')}
         </button>
         <button onClick={() => {
           if (!f.description.trim() || !f.amount) return
@@ -223,7 +224,7 @@ function FormGasto({ onSave, onCancel, sym, projects = [] }) {
             createdAt:new Date().toISOString() })
         }} style={{ background:'var(--grn)', color:'#fff', border:'none',
           borderRadius:6, padding:'6px 16px', fontSize:12, fontWeight:600, cursor:'pointer' }}>
-          Guardar gasto
+          {t('mov.form.saveExp')}
         </button>
       </div>
     </div>
@@ -232,6 +233,7 @@ function FormGasto({ onSave, onCancel, sym, projects = [] }) {
 
 // ── Formulario Suscripción ────────────────────────────────────────────────────
 function FormSub({ onSave, onCancel }) {
+  const { t } = useT()
   const [f, setF] = useState({
     name:'', amount:'', frequency:'monthly', category:'Streaming',
     status:'active', notes:'', nextPaymentDate:''
@@ -247,30 +249,30 @@ function FormSub({ onSave, onCancel }) {
     <div style={{ background:'var(--sur)', border:'.5px solid var(--brd)',
       borderRadius:'var(--r)', padding:'16px', marginBottom:12 }}>
       <div style={{ fontSize:13, fontWeight:600, color:'var(--tx)', marginBottom:12 }}>
-        🔄 Nuevo pago recurrente
+        {t('mov.form.subTitle')}
       </div>
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))', gap:10, marginBottom:10 }}>
-        <div><label style={lbl}>Nombre</label>
-          <input style={inp} value={f.name} placeholder="Ej: Netflix"
+        <div><label style={lbl}>{t('mov.form.name')}</label>
+          <input style={inp} value={f.name} placeholder={t('mov.form.namePh')}
             onChange={e => set('name', e.target.value)}/></div>
-        <div><label style={lbl}>Monto</label>
+        <div><label style={lbl}>{t('mov.form.amountSimple')}</label>
           <input style={inp} type="number" value={f.amount} placeholder="0"
             onChange={e => set('amount', e.target.value)}/></div>
-        <div><label style={lbl}>Frecuencia</label>
+        <div><label style={lbl}>{t('mov.form.freq')}</label>
           <select style={inp} value={f.frequency} onChange={e => set('frequency', e.target.value)}>
-            {FREQS.map(fr => <option key={fr.value} value={fr.value}>{fr.label}</option>)}
+            {FREQS.map(fr => <option key={fr.value} value={fr.value}>{t(fr.label)}</option>)}
           </select></div>
-        <div><label style={lbl}>Categoría</label>
+        <div><label style={lbl}>{t('mov.form.category')}</label>
           <select style={inp} value={f.category} onChange={e => set('category', e.target.value)}>
             {SUB_CATS.map(c => <option key={c}>{c}</option>)}</select></div>
-        <div><label style={lbl}>Próximo pago</label>
+        <div><label style={lbl}>{t('mov.form.nextPay')}</label>
           <input style={inp} type="date" value={f.nextPaymentDate}
             onChange={e => set('nextPaymentDate', e.target.value)}/></div>
       </div>
       <div style={{ display:'flex', gap:8, justifyContent:'flex-end' }}>
         <button onClick={onCancel} style={{ background:'none', border:'.5px solid var(--brd)',
           borderRadius:6, padding:'6px 14px', fontSize:12, color:'var(--th)', cursor:'pointer' }}>
-          Cancelar
+          {t('common.cancel')}
         </button>
         <button onClick={() => {
           if (!f.name.trim() || !f.amount) return
@@ -278,7 +280,7 @@ function FormSub({ onSave, onCancel }) {
             createdAt:new Date().toISOString() })
         }} style={{ background:'var(--grn)', color:'#fff', border:'none',
           borderRadius:6, padding:'6px 16px', fontSize:12, fontWeight:600, cursor:'pointer' }}>
-          Guardar recurrente
+          {t('mov.form.saveSub')}
         </button>
       </div>
     </div>
@@ -288,6 +290,7 @@ function FormSub({ onSave, onCancel }) {
 // ── Componente principal ──────────────────────────────────────────────────────
 export default function Movements({ setPage }) {
   const ctx           = useApp() || {}
+  const { t }         = useT()
   const incomes       = Array.isArray(ctx.incomes)       ? ctx.incomes       : []
   const expenses      = Array.isArray(ctx.expenses)      ? ctx.expenses      : []
   const subscriptions = Array.isArray(ctx.subscriptions) ? ctx.subscriptions : []
@@ -443,15 +446,15 @@ export default function Movements({ setPage }) {
     const catGroups = {}
     activeSubs.forEach(s => { catGroups[s.category] = [...(catGroups[s.category]||[]), s] })
     Object.entries(catGroups).forEach(([cat, items]) => {
-      if (items.length >= 2) al.push({ type:'dup', msg:`Tienes ${items.length} suscripciones en "${cat}". Revisa si todas son necesarias.` })
+      if (items.length >= 2) al.push({ type:'dup', msg:t('mov.alert.dup', { n: items.length, cat }) })
     })
     if (totalInc > 0 && totalSubs/totalInc > 0.15)
-      al.push({ type:'income', msg:`Tus recurrentes representan el ${(totalSubs/totalInc*100).toFixed(1)}% de tus ingresos.` })
+      al.push({ type:'income', msg:t('mov.alert.income', { pct: (totalSubs/totalInc*100).toFixed(1) }) })
     const todayD = new Date(), in7 = new Date(); in7.setDate(todayD.getDate()+7)
     activeSubs.filter(s=>s.nextPaymentDate).forEach(s => {
       const d = new Date(s.nextPaymentDate)
       if (d >= todayD && d <= in7)
-        al.push({ type:'upcoming', msg:`"${s.name}" tiene un pago próximo el ${d.toLocaleDateString('es-CL')}.` })
+        al.push({ type:'upcoming', msg:t('mov.alert.upcoming', { name: s.name, date: d.toLocaleDateString('es-CL') }) })
     })
     return al
   }, [activeSubs, totalSubs, totalInc])
@@ -476,12 +479,12 @@ export default function Movements({ setPage }) {
       {/* Header */}
       <div style={{ marginBottom:20 }}>
         <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--grn)',
-          textTransform:'uppercase', letterSpacing:'1.2px', marginBottom:4 }}>Movimientos</div>
+          textTransform:'uppercase', letterSpacing:'1.2px', marginBottom:4 }}>{t('mov.kicker')}</div>
         <h1 style={{ fontSize:20, fontWeight:700, color:'var(--tx)', marginBottom:2 }}>
-          Egresos del mes
+          {t('mov.title')}
         </h1>
         <p style={{ fontSize:12, color:'var(--th)', fontFamily:'var(--mono)' }}>
-          // {activeMonth} · gastos únicos + pagos recurrentes
+          {t('mov.sub', { month: activeMonth })}
         </p>
       </div>
 
@@ -489,11 +492,11 @@ export default function Movements({ setPage }) {
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(130px,1fr))',
         gap:10, marginBottom:20 }}>
         {[
-          { label:'Ingresos',      value:fmtM(totalInc, sym),      color:'var(--accent,#00d4aa)', sub: invInc > 0 ? `💼 ${fmtM(invInc, sym)} inversión` : null },
-          { label:'Gastos únicos', value:fmtM(totalExp, sym),      color:'var(--red)', sub: invExp > 0 ? `💼 ${fmtM(invExp, sym)} inversión` : null },
-          { label:'Recurrentes',   value:fmtM(totalSubs, sym),     color:'var(--amb,#f5a623)' },
-          { label:'Total egresos', value:fmtM(totalEgresos, sym),  color:'var(--red)' },
-          { label:'Disponible',    value:fmtM(balance, sym),       color: balance >= 0 ? 'var(--accent,#00d4aa)' : 'var(--red)', sub: (invInc > 0 || invExp > 0) ? 'personal · excl. 💼' : 'tras deudas y subs' },
+          { label:t('mov.kpi.income'),      value:fmtM(totalInc, sym),      color:'var(--accent,#00d4aa)', sub: invInc > 0 ? t('mov.kpi.invTag', { v: fmtM(invInc, sym) }) : null },
+          { label:t('mov.kpi.oneOff'), value:fmtM(totalExp, sym),      color:'var(--red)', sub: invExp > 0 ? t('mov.kpi.invTag', { v: fmtM(invExp, sym) }) : null },
+          { label:t('mov.kpi.recurring'),   value:fmtM(totalSubs, sym),     color:'var(--amb,#f5a623)' },
+          { label:t('mov.kpi.totalOut'), value:fmtM(totalEgresos, sym),  color:'var(--red)' },
+          { label:t('mov.kpi.available'),    value:fmtM(balance, sym),       color: balance >= 0 ? 'var(--accent,#00d4aa)' : 'var(--red)', sub: (invInc > 0 || invExp > 0) ? t('mov.kpi.personalExcl') : t('mov.kpi.afterDebts') },
         ].map((k,i) => (
           <div key={i} style={kpiBox}>
             <div style={{ fontFamily:'var(--mono)', fontSize:9, color:'var(--th)',
@@ -520,13 +523,13 @@ export default function Movements({ setPage }) {
             <div style={{ fontSize:12, fontWeight:600, fontFamily:'var(--mono)',
               color: totalSubs > totalInc * 0.15 ? 'var(--red)' : 'var(--amb,#f5a623)',
               marginBottom:3 }}>
-              Impacto anual de tus servicios recurrentes
+              {t('mov.banner.title')}
             </div>
             <div style={{ fontSize:13, color:'var(--tx)', fontFamily:'var(--mono)' }}>
-              Pagás <strong style={{ color:'var(--amb,#f5a623)' }}>{fmtM(totalSubs, sym)}/mes</strong>
+              <strong style={{ color:'var(--amb,#f5a623)' }}>{t('mov.banner.perMonth', { v: fmtM(totalSubs, sym) })}</strong>
               {' → '}
-              <strong style={{ color:'var(--red)' }}>{fmtM(totalAnnual, sym)} al año</strong>
-              {' en '}{activeSubs.length} servicio{activeSubs.length !== 1 ? 's' : ''} recurrentes
+              <strong style={{ color:'var(--red)' }}>{t('mov.banner.perYear', { v: fmtM(totalAnnual, sym) })}</strong>
+              {t('mov.banner.inServices', { n: activeSubs.length })}
             </div>
           </div>
         </div>
@@ -538,7 +541,7 @@ export default function Movements({ setPage }) {
           <button onClick={() => setShowAdd(true)} style={{
             background:'var(--grn)', color:'#fff', border:'none', borderRadius:8,
             padding:'8px 20px', fontSize:13, fontWeight:600, cursor:'pointer' }}>
-            + Agregar salida
+            {t('mov.addBtn')}
           </button>
         )}
 
@@ -546,31 +549,31 @@ export default function Movements({ setPage }) {
           <div style={{ background:'var(--sur)', border:'.5px solid var(--brd)',
             borderRadius:'var(--r)', padding:'16px', marginBottom:4 }}>
             <div style={{ fontSize:13, color:'var(--tx)', fontWeight:600, marginBottom:12 }}>
-              ¿Qué tipo de salida querés registrar?
+              {t('mov.addWhich')}
             </div>
             <div style={{ display:'flex', gap:10, flexWrap:'wrap' }}>
               <button onClick={() => { setShowAdd(false); setShowGasto(true) }}
                 style={{ background:'var(--sur)', border:'.5px solid var(--red)', borderRadius:8,
                   padding:'10px 18px', fontSize:12, fontWeight:600, color:'var(--red)',
                   cursor:'pointer', flex:1, minWidth:140, textAlign:'left' }}>
-                💳 Gasto único
+                {t('mov.addExpense')}
                 <div style={{ fontSize:10, fontWeight:400, color:'var(--th)', marginTop:3 }}>
-                  Supermercado, bencina, arriendo
+                  {t('mov.addExpenseDesc')}
                 </div>
               </button>
               <button onClick={() => { setShowAdd(false); setShowSub(true) }}
                 style={{ background:'var(--sur)', border:'.5px solid var(--amb,#f5a623)', borderRadius:8,
                   padding:'10px 18px', fontSize:12, fontWeight:600, color:'var(--amb,#f5a623)',
                   cursor:'pointer', flex:1, minWidth:140, textAlign:'left' }}>
-                🔄 Pago recurrente
+                {t('mov.addSub')}
                 <div style={{ fontSize:10, fontWeight:400, color:'var(--th)', marginTop:3 }}>
-                  Netflix, gimnasio, seguro, Claude
+                  {t('mov.addSubDesc')}
                 </div>
               </button>
               <button onClick={() => setShowAdd(false)}
                 style={{ background:'none', border:'.5px solid var(--brd)', borderRadius:8,
                   padding:'10px 14px', fontSize:12, color:'var(--th)', cursor:'pointer' }}>
-                Cancelar
+                {t('common.cancel')}
               </button>
             </div>
           </div>
@@ -583,10 +586,10 @@ export default function Movements({ setPage }) {
       {/* Gráficos unificados */}
       {(monthExp.length > 0 || activeSubs.length > 0) && (
         <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(260px, 1fr))', gap:16, marginBottom:16 }}>
-          <ChartCard title="Top egresos del mes" minHeight={180}>
+          <ChartCard title={t('mov.chart.top')} minHeight={180}>
             <HorizontalBars records={topBarRecords} sym={sym} maxItems={8}/>
           </ChartCard>
-          <ChartCard title="Distribución por categoría" minHeight={180}>
+          <ChartCard title={t('mov.chart.byCat')} minHeight={180}>
             <CategoryDonut records={chartRecords} sym={sym}/>
           </ChartCard>
         </div>
@@ -616,17 +619,17 @@ export default function Movements({ setPage }) {
             display:'flex', alignItems:'center', justifyContent:'space-between' }}>
             <div style={{ fontSize:11, fontWeight:600, color:'var(--red)',
               fontFamily:'var(--mono)', textTransform:'uppercase', letterSpacing:'.5px' }}>
-              💳 Gastos únicos ({listExp.length})
+              {t('mov.list.expenses', { n: listExp.length })}
             </div>
             <div style={{ fontSize:11, fontWeight:700, color:'var(--red)',
               fontFamily:'var(--mono)' }}>{fmtM(totalExp, sym)}</div>
           </div>
           {drillCat && (
             <div style={{ padding:'8px 14px', borderBottom:'.5px solid var(--brd)', display:'flex', alignItems:'center', gap:8, background:'var(--accent-bg)' }}>
-              <span style={{ fontSize:11, fontFamily:'var(--mono)', color:'var(--tx)' }}>Filtrando categoría: <strong>{drillCat}</strong></span>
-              <button onClick={() => setDrillCat(null)} aria-label="Quitar filtro"
+              <span style={{ fontSize:11, fontFamily:'var(--mono)', color:'var(--tx)' }}>{t('mov.list.filtering')} <strong>{drillCat}</strong></span>
+              <button onClick={() => setDrillCat(null)} aria-label={t('mov.list.removeFilter')}
                 style={{ marginLeft:'auto', background:'none', border:'.5px solid var(--brd2)', borderRadius:6, padding:'4px 10px', fontSize:11, fontFamily:'var(--mono)', color:'var(--tm)', cursor:'pointer' }}>
-                ✕ Quitar filtro
+                {t('mov.list.clearFilter')}
               </button>
             </div>
           )}
@@ -634,15 +637,15 @@ export default function Movements({ setPage }) {
             {listExp.length === 0 ? (
               <div style={{ padding:'20px', textAlign:'center', fontSize:12,
                 color:'var(--th)', fontFamily:'var(--mono)' }}>
-                {drillCat ? `Sin gastos en "${drillCat}" este mes` : 'Sin gastos este mes'}
+                {drillCat ? t('mov.list.emptyCat', { cat: drillCat }) : t('mov.list.empty')}
               </div>
             ) : listExp.map((e,i) => editingId === e.id ? (
               <div key={e.id} style={{padding:'10px 14px',borderBottom:i<listExp.length-1?'.5px solid var(--brd)':'none',background:'rgba(232,65,66,.03)'}}>
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(130px,1fr))',gap:6,marginBottom:6}}>
-                  <input type="text" value={editForm.description||''} placeholder="Descripción"
+                  <input type="text" value={editForm.description||''} placeholder={t('mov.edit.descPh')}
                     onChange={ev=>setEditForm(f=>({...f,description:ev.target.value}))}
                     style={{gridColumn:'1/-1',padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
-                  <input type="number" min="0" value={editForm.amount||''} placeholder="Monto"
+                  <input type="number" min="0" value={editForm.amount||''} placeholder={t('mov.edit.amountPh')}
                     onChange={ev=>setEditForm(f=>({...f,amount:ev.target.value}))}
                     style={{padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
                   <input type="date" value={editForm.date||''}
@@ -656,13 +659,13 @@ export default function Movements({ setPage }) {
                   <select value={editForm.subcategory??e.subcategory??''}
                     onChange={ev=>setEditForm(f=>({...f,subcategory:ev.target.value}))}
                     style={{padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}>
-                    <option value="">— Subcategoría —</option>
+                    <option value="">{t('mov.edit.subcatNone')}</option>
                     {(SUBCATS[editForm.category||e.category]||[]).map(sc=><option key={sc}>{sc}</option>)}
                   </select>
                 </div>
                 <div style={{display:'flex',gap:6}}>
-                  <button onClick={()=>saveEdit(e)} style={{fontSize:10,padding:'3px 10px',borderRadius:4,border:'none',background:'var(--grn)',color:'#fff',cursor:'pointer',fontFamily:'var(--mono)',fontWeight:600}}>✓ Guardar</button>
-                  <button onClick={()=>{setEditingId(null);setEditForm({})}} style={{fontSize:10,padding:'3px 10px',borderRadius:4,border:'.5px solid var(--brd)',background:'none',color:'var(--th)',cursor:'pointer',fontFamily:'var(--mono)'}}>Cancelar</button>
+                  <button onClick={()=>saveEdit(e)} style={{fontSize:10,padding:'3px 10px',borderRadius:4,border:'none',background:'var(--grn)',color:'#fff',cursor:'pointer',fontFamily:'var(--mono)',fontWeight:600}}>{t('mov.edit.save')}</button>
+                  <button onClick={()=>{setEditingId(null);setEditForm({})}} style={{fontSize:10,padding:'3px 10px',borderRadius:4,border:'.5px solid var(--brd)',background:'none',color:'var(--th)',cursor:'pointer',fontFamily:'var(--mono)'}}>{t('common.cancel')}</button>
                 </div>
               </div>
             ) : (
@@ -689,18 +692,18 @@ export default function Movements({ setPage }) {
                 </div>
                 {updateExpense && (
                   <button onClick={()=>{setEditingId(e.id);setEditForm({description:e.description||'',amount:e.amount,date:e.date,category:e.category,subcategory:e.subcategory||''})}}
-                    style={{background:'none',border:'none',color:'var(--th)',fontSize:11,cursor:'pointer',padding:'2px 4px'}} title="Editar">✏️</button>
+                    style={{background:'none',border:'none',color:'var(--th)',fontSize:11,cursor:'pointer',padding:'2px 4px'}} title={t('mov.edit.editTitle')}>✏️</button>
                 )}
                 {delExpense && (
                   <button onClick={()=>delExpense(e.id)}
-                    style={{background:'none',border:'none',color:'var(--th)',fontSize:10,cursor:'pointer',padding:'2px 4px'}} title="Eliminar">✕</button>
+                    style={{background:'none',border:'none',color:'var(--th)',fontSize:10,cursor:'pointer',padding:'2px 4px'}} title={t('mov.edit.delTitle')}>✕</button>
                 )}
               </div>
             ))}
             {listExp.length > 10 && (
               <div style={{ padding:'8px 14px', fontSize:11, color:'var(--th)',
                 fontFamily:'var(--mono)', textAlign:'center', borderTop:'.5px solid var(--brd)' }}>
-                +{listExp.length - 10} gastos más este mes
+                {t('mov.list.more', { n: listExp.length - 10 })}
               </div>
             )}
           </div>
@@ -713,41 +716,42 @@ export default function Movements({ setPage }) {
             display:'flex', alignItems:'center', justifyContent:'space-between' }}>
             <div style={{ fontSize:11, fontWeight:600, color:'var(--amb,#f5a623)',
               fontFamily:'var(--mono)', textTransform:'uppercase', letterSpacing:'.5px' }}>
-              🔄 Recurrentes ({activeSubs.length})
+              {t('mov.list.subs', { n: activeSubs.length })}
             </div>
             <div style={{ fontSize:11, fontWeight:700, color:'var(--amb,#f5a623)',
-              fontFamily:'var(--mono)' }}>{fmtM(totalSubs, sym)}/mes</div>
+              fontFamily:'var(--mono)' }}>{t('mov.list.perMonth', { v: fmtM(totalSubs, sym) })}</div>
           </div>
           <div style={{ maxHeight:460, overflowY:'auto' }}>
             {activeSubs.length === 0 ? (
               <div style={{ padding:'20px', textAlign:'center', fontSize:12,
                 color:'var(--th)', fontFamily:'var(--mono)' }}>
-                Sin recurrentes activos
+                {t('mov.list.subsEmpty')}
               </div>
             ) : [...activeSubs]
               .sort((a,b) => toMonthly(Number(b.amount)||0,b.frequency) - toMonthly(Number(a.amount)||0,a.frequency))
               .map((sub,i,arr) => {
                 const monthly = toMonthly(Number(sub.amount)||0, sub.frequency)
-                const freq = FREQS.find(f => f.value === sub.frequency)?.label || sub.frequency
+                const freqKey = FREQS.find(f => f.value === sub.frequency)?.label
+                const freq = freqKey ? t(freqKey) : sub.frequency
                 if (editingSubId === sub.id) {
                   return (
                     <div key={sub.id} style={{padding:'10px 14px',borderBottom:i<arr.length-1?'.5px solid var(--brd)':'none',background:'rgba(245,166,35,.05)'}}>
                       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(130px,1fr))',gap:6,marginBottom:6}}>
-                        <input type="text" value={editSubForm.name||''} placeholder="Nombre"
+                        <input type="text" value={editSubForm.name||''} placeholder={t('mov.edit.namePh')}
                           onChange={ev=>setEditSubForm(f=>({...f,name:ev.target.value}))}
                           style={{gridColumn:'1/-1',padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
-                        <input type="number" min="0" value={editSubForm.amount||''} placeholder="Monto"
+                        <input type="number" min="0" value={editSubForm.amount||''} placeholder={t('mov.edit.amountPh')}
                           onChange={ev=>setEditSubForm(f=>({...f,amount:ev.target.value}))}
                           style={{padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
                         <select value={editSubForm.frequency||sub.frequency}
                           onChange={ev=>setEditSubForm(f=>({...f,frequency:ev.target.value}))}
                           style={{padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}>
-                          {FREQS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
+                          {FREQS.map(f => <option key={f.value} value={f.value}>{t(f.label)}</option>)}
                         </select>
                       </div>
                       <div style={{display:'flex',gap:6}}>
-                        <button onClick={()=>saveSubEdit(sub)} style={{fontSize:10,padding:'3px 10px',borderRadius:4,border:'none',background:'var(--grn)',color:'#fff',cursor:'pointer',fontFamily:'var(--mono)',fontWeight:600}}>✓ Guardar</button>
-                        <button onClick={()=>{setEditingSubId(null);setEditSubForm({})}} style={{fontSize:10,padding:'3px 10px',borderRadius:4,border:'.5px solid var(--brd)',background:'none',color:'var(--th)',cursor:'pointer',fontFamily:'var(--mono)'}}>Cancelar</button>
+                        <button onClick={()=>saveSubEdit(sub)} style={{fontSize:10,padding:'3px 10px',borderRadius:4,border:'none',background:'var(--grn)',color:'#fff',cursor:'pointer',fontFamily:'var(--mono)',fontWeight:600}}>{t('mov.edit.save')}</button>
+                        <button onClick={()=>{setEditingSubId(null);setEditSubForm({})}} style={{fontSize:10,padding:'3px 10px',borderRadius:4,border:'.5px solid var(--brd)',background:'none',color:'var(--th)',cursor:'pointer',fontFamily:'var(--mono)'}}>{t('common.cancel')}</button>
                       </div>
                     </div>
                   )
@@ -769,15 +773,15 @@ export default function Movements({ setPage }) {
                     </div>
                     <div style={{ fontSize:12, fontWeight:600, color:'var(--amb,#f5a623)',
                       fontFamily:'var(--mono)', flexShrink:0 }}>
-                      {fmtM(monthly, sym)}/mes
+                      {t('mov.list.perMonth', { v: fmtM(monthly, sym) })}
                     </div>
                     {updateSubscription && (
                       <button onClick={()=>{setEditingSubId(sub.id);setEditSubForm({name:sub.name||'',amount:sub.amount,frequency:sub.frequency,category:sub.category})}}
-                        style={{background:'none',border:'none',color:'var(--th)',fontSize:11,cursor:'pointer',padding:'2px 4px'}} title="Editar">✏️</button>
+                        style={{background:'none',border:'none',color:'var(--th)',fontSize:11,cursor:'pointer',padding:'2px 4px'}} title={t('mov.edit.editTitle')}>✏️</button>
                     )}
                     {deleteSubscription && (
-                      <button onClick={()=>{if(confirm('¿Eliminar '+sub.name+'?')) deleteSubscription(sub.id)}}
-                        style={{background:'none',border:'none',color:'var(--th)',fontSize:10,cursor:'pointer',padding:'2px 4px'}} title="Eliminar">✕</button>
+                      <button onClick={()=>{if(confirm(t('mov.confirmDelete', { name: sub.name }))) deleteSubscription(sub.id)}}
+                        style={{background:'none',border:'none',color:'var(--th)',fontSize:10,cursor:'pointer',padding:'2px 4px'}} title={t('mov.edit.delTitle')}>✕</button>
                     )}
                   </div>
                 )
@@ -790,7 +794,7 @@ export default function Movements({ setPage }) {
 
       {/* Disclaimer */}
       <div style={{ fontSize:10, color:'var(--th)', fontFamily:'var(--mono)', marginTop:4 }}>
-        Las visualizaciones muestran el costo mensual equivalente de cada salida. No constituyen asesoría financiera.
+        {t('mov.disclaimer')}
       </div>
     </div>
   )
