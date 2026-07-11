@@ -8,7 +8,7 @@ import { CURRENCY_SYMBOLS, monthLabel } from '../shared/constants.js'
 import MonthSelector from '../shared/MonthSelector.jsx'
 import { parseTransactionText } from '../../utils/smsParser.js'
 
-export default function Income() {
+export default function Income({ setPage }) {
   const { incomes, expenses, addIncome, delIncome, updateIncome, settings } = useApp()
   const { t } = useT()
   // Nombres de propiedades/proyectos ya usados (para autocompletar)
@@ -80,6 +80,12 @@ export default function Income() {
           <CardHeader title={t('income.new')} />
           {err && <Alert type="danger">⚠ {err}</Alert>}
 
+          {setPage && (
+            <button type="button" onClick={() => setPage('import')}
+              style={{ background:'none', border:'none', padding:0, marginBottom:10, fontSize:11, fontFamily:'var(--mono)', color:'var(--accent, #00b8d9)', cursor:'pointer', textAlign:'left', display:'block' }}>
+              {t('common.importShortcut')}
+            </button>
+          )}
           <div style={{ marginBottom:12 }}>
             {!showPaste ? (
               <button type="button" onClick={() => { setShowPaste(true); setPasteMsg(null) }}

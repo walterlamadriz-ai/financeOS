@@ -68,7 +68,7 @@ function Inner() {
   function renderPage(page) {
     switch (page) {
       case 'dashboard':     return <Dashboard setPage={setPage}/>
-      case 'income':        return <Income />
+      case 'income':        return <Income setPage={setPage}/>
       case 'budgets':       return <Budgets />
       case 'debts':         return <Debts />
       case 'goals':         return <Goals setPage={setPage}/>

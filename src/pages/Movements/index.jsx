@@ -76,7 +76,7 @@ const CAT_COLORS = {
 }
 
 // ── Formulario Gasto ──────────────────────────────────────────────────────────
-function FormGasto({ onSave, onCancel, sym, projects = [] }) {
+function FormGasto({ onSave, onCancel, sym, projects = [], onImport }) {
   const { t } = useT()
   const [f, setF] = useState({
     description:'', amount:'', date:todayStr(),
@@ -121,6 +121,12 @@ function FormGasto({ onSave, onCancel, sym, projects = [] }) {
         {t('mov.form.expTitle')}
       </div>
 
+      {onImport && (
+        <button type="button" onClick={onImport}
+          style={{ background:'none', border:'none', padding:0, marginBottom:10, fontSize:11, fontFamily:'var(--mono)', color:'var(--accent, #00b8d9)', cursor:'pointer', textAlign:'left', display:'block' }}>
+          {t('common.importShortcut')}
+        </button>
+      )}
       {/* Pegar SMS/notificación del banco */}
       <div style={{ marginBottom:12 }}>
         {!showPaste ? (
@@ -582,7 +588,7 @@ export default function Movements({ setPage }) {
           </div>
         )}
 
-        {showGasto && <FormGasto sym={sym} projects={projectOptions} onSave={handleSaveGasto} onCancel={() => setShowGasto(false)}/>}
+        {showGasto && <FormGasto sym={sym} projects={projectOptions} onSave={handleSaveGasto} onCancel={() => setShowGasto(false)} onImport={setPage ? () => setPage('import') : undefined}/>}
         {showSub   && <FormSub              onSave={handleSaveSub}   onCancel={() => setShowSub(false)}/>}
       </div>
 
