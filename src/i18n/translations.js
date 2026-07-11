@@ -9,6 +9,8 @@
 
 export const translations = {
   es: {
+    'debts.linkProject': "🏢 Vincular a propiedad",
+    'debts.linkProjectHint': "Si esta deuda es de una propiedad en arriendo, vinculala: su cuota dejará de restarse de tu disponible personal (ya vive en el flujo de la propiedad).",
     'debts.uf.check': "🇨🇱 Deuda en UF (crédito hipotecario) — ingreso los montos en UF",
     'debts.uf.balance': "Saldo: UF {uf} ≈ {clp}",
     'debts.uf.rate': "UF hoy: {v}",
@@ -1083,6 +1085,8 @@ export const translations = {
     'settings.install.btn': 'Instalar →',
   },
   en: {
+    'debts.linkProject': "🏢 Link to property",
+    'debts.linkProjectHint': "If this debt belongs to a rental property, link it: its installment will stop being subtracted from your personal available (it already lives in the property's flow).",
     'debts.uf.check': "🇨🇱 Debt in UF (mortgage) — I enter amounts in UF",
     'debts.uf.balance': "Balance: UF {uf} ≈ {clp}",
     'debts.uf.rate': "UF today: {v}",
@@ -2157,6 +2161,8 @@ export const translations = {
     'settings.install.btn': 'Install →',
   },
   pt: {
+    'debts.linkProject': "🏢 Vincular a propriedade",
+    'debts.linkProjectHint': "Se esta dívida é de uma propriedade alugada, vincule-a: sua parcela deixará de ser subtraída do seu disponível pessoal (ela já vive no fluxo da propriedade).",
     'debts.uf.check': "🇨🇱 Dívida em UF (crédito hipotecário) — insiro os valores em UF",
     'debts.uf.balance': "Saldo: UF {uf} ≈ {clp}",
     'debts.uf.rate': "UF hoje: {v}",

@@ -159,6 +159,8 @@ export default function Debts() {
   const [err, setErr]               = useState('')
   const [confirmPay, setConfirmPay] = useState(null)
   const [payMsg, setPayMsg]         = useState(null)
+  const [linkingId, setLinkingId]   = useState(null)
+  const [linkValue, setLinkValue]   = useState('')
   const sym = CURRENCY_SYMBOLS[settings.currency] || '$'
   const isChile = (settings.country || 'CL') === 'CL'
 
@@ -340,6 +342,25 @@ export default function Debts() {
             )}
             {payMsg?.id === d.id && (
               <div style={{fontSize:11,color:'var(--grn)',fontFamily:'var(--mono)',marginBottom:6,padding:'4px 8px',background:'rgba(10,92,62,.06)',borderRadius:4}}>{payMsg.text}</div>
+            )}
+            {!(d.project||'').trim() && knownProjects.length > 0 && (
+              linkingId === d.id ? (
+                <div style={{marginBottom:8,padding:'8px 10px',background:'var(--sur2)',border:'.5px solid var(--brd2)',borderRadius:6}}>
+                  <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:6,lineHeight:1.5}}>{t('debts.linkProjectHint')}</div>
+                  <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+                    <input type="text" list="fnos-debt-projects" value={linkValue} placeholder={t('debts.projectPlaceholder')}
+                      onChange={e=>setLinkValue(e.target.value)}
+                      style={{flex:1,minWidth:160,padding:'5px 9px',fontSize:12,borderRadius:6,border:'.5px solid var(--brd2)',background:'var(--bg)',color:'var(--tx)'}}/>
+                    <Btn variant="primary" size="xs" onClick={async()=>{ if(linkValue.trim()){ await updateDebt({...d, project:linkValue.trim()}); setLinkingId(null); setLinkValue('') } }}>✓</Btn>
+                    <Btn variant="ghost" size="xs" onClick={()=>{setLinkingId(null);setLinkValue('')}}>✕</Btn>
+                  </div>
+                </div>
+              ) : (
+                <button onClick={()=>{setLinkingId(d.id);setLinkValue('')}}
+                  style={{marginBottom:8,background:'none',border:'.5px dashed var(--brd2)',borderRadius:6,padding:'4px 10px',fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',cursor:'pointer'}}>
+                  {t('debts.linkProject')}
+                </button>
+              )
             )}
             <div style={{fontSize:11,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:8}}>
               {Number(d.ufBalance) > 0
