@@ -32,6 +32,14 @@ export default defineConfig({
         ]
       },
       workbox: {
+        // FIX pantalla negra (2026-07-11): el SW nuevo toma control INMEDIATO al
+        // instalarse (skipWaiting) y reclama las pestañas abiertas (clientsClaim).
+        // Sin esto, el SW viejo seguía sirviendo chunks precacheados de una versión
+        // anterior hasta que el usuario cerraba la app por completo — en iOS esos
+        // chunks se desalojan del caché y la navegación quedaba en negro.
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
         // Inyecta los listeners de push/notificationclick al SW autogenerado,
         // sin tocar la lógica de caché/offline (ver public/push-sw.js).
         importScripts: ['push-sw.js'],
