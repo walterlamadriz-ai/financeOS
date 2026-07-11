@@ -3,7 +3,7 @@
 // Fuente tasa: BCV. La tasa es EDITABLE por el usuario (la volatilidad se delega
 // al usuario en vez de depender de una API). Default + fecha visibles.
 
-const TASA_DEFAULT = 612.43       // Bs/USD · BCV jun-2026 (referencial, editable)
+const TASA_DEFAULT = 709.69       // Bs/USD · BCV 10-jul-2026 (referencial, editable)
 
 export default {
   pais: 'VE',
@@ -11,7 +11,7 @@ export default {
   monedaBase: 'USD',
   symUSD: '$',
   symBs: 'Bs',
-  vigencia: 'jun-2026',
+  vigencia: 'jul-2026',
   fuente: 'BCV',
   tasaDefault: TASA_DEFAULT,
   titulo: 'Panel multimoneda (BsS ↔ USD)',

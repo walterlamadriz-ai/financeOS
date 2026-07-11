@@ -7,19 +7,19 @@ import { tasaMarginal, impuestoProgresivo } from '../../utils/marginal.js'
 const UMA_ANUAL = 42794.64        // INEGI, vigente feb-2026
 const TOPE_UMA  = 5 * UMA_ANUAL   // tope = menor entre 10% ingreso y 5 UMA
 
-// Tarifa ISR anual personas físicas (Art. 152). Tabla 2025 (actualizar si cambia).
-// TODO verificar tabla 2026 si el SAT publica nueva (Anexo 8 RMF).
+// Tarifa ISR anual personas físicas (Art. 152). Tabla 2026 — Anexo 8 RMF 2026,
+// publicada en DOF 28-dic-2025 (ajuste inflacionario 13,21%; tasas sin cambios).
 const BR = [
-  { hasta: 8952.49,    rate: 0.0192 },
-  { hasta: 75984.55,   rate: 0.0640 },
-  { hasta: 133536.07,  rate: 0.1088 },
-  { hasta: 155229.80,  rate: 0.1600 },
-  { hasta: 185852.57,  rate: 0.1792 },
-  { hasta: 374837.88,  rate: 0.2136 },
-  { hasta: 590795.99,  rate: 0.2352 },
-  { hasta: 1127926.84, rate: 0.3000 },
-  { hasta: 1503902.46, rate: 0.3200 },
-  { hasta: 4511707.37, rate: 0.3400 },
+  { hasta: 10135.11,   rate: 0.0192 },
+  { hasta: 86022.11,   rate: 0.0640 },
+  { hasta: 151176.19,  rate: 0.1088 },
+  { hasta: 175735.66,  rate: 0.1600 },
+  { hasta: 210403.69,  rate: 0.1792 },
+  { hasta: 424353.97,  rate: 0.2136 },
+  { hasta: 668840.14,  rate: 0.2352 },
+  { hasta: 1276925.98, rate: 0.3000 },
+  { hasta: 1702567.97, rate: 0.3200 },
+  { hasta: 5107703.92, rate: 0.3400 },
   { hasta: Infinity,   rate: 0.3500 },
 ]
 

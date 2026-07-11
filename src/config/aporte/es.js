@@ -1,6 +1,7 @@
 // src/config/aporte/es.js
 // España — Aportación a plan de pensiones con reducción de la base imponible (IRPF).
-// Fuente: AEAT. Vigencia 2025. Tramos = escala general aproximada (estatal + autonómica).
+// Fuente: AEAT. Vigencia 2026 (escala general sin cambios desde la reforma 2021;
+// verificado 2026-07-11: tope 1.500€ y tramos estatales se mantienen).
 
 import { tasaMarginal, impuestoProgresivo } from '../../utils/marginal.js'
 
@@ -22,7 +23,7 @@ export default {
   nombre: 'España',
   moneda: 'EUR',
   sym: '€',
-  vigencia: 2025,
+  vigencia: 2026,
   fuente: 'AEAT',
   titulo: 'Ahorro fiscal por aportación a plan de pensiones',
   subtitulo: 'Estima cuánto IRPF ahorras reduciendo tu base imponible con tu plan de pensiones',

@@ -5,9 +5,10 @@
 const CANASTA_BASICA = 821.80     // USD · canasta básica familiar enero 2026 (SRI)
 const TASA_REBAJA    = 0.18       // rebaja = 18% × min(gastos, N canastas)
 
-// N canastas según cargas familiares: 7 sin cargas, sube hasta 20 con cargas.
-// TODO verificar valores intermedios exactos en la tabla oficial del SRI.
-const CANASTAS_POR_CARGAS = { 0: 7, 1: 9, 2: 11, 3: 13, 4: 15, 5: 20 }
+// N canastas según cargas familiares — TABLA OFICIAL SRI 2026 (verificada 2026-07-11):
+// 0→7 · 1→9 · 2→11 · 3→14 · 4→17 · 5+→20. Enfermedades catastróficas/raras: 100
+// canastas (rebaja máx $14.792,40) — caso especial no modelado aún en el selector.
+const CANASTAS_POR_CARGAS = { 0: 7, 1: 9, 2: 11, 3: 14, 4: 17, 5: 20 }
 
 const CATEGORIAS = [
   { key: 'salud',        label: 'Salud',                     appCats: ['Salud'] },
