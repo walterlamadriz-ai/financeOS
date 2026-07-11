@@ -9,6 +9,7 @@
 
 export const translations = {
   es: {
+    'nav.pprPortugal': "PPR Portugal",
     'goals.emergencyAdjust': "💡 Recomendación actual: 3 meses de tus gastos = {v}",
     'goals.emergencyAdjustBtn': "Ajustar objetivo →",
     'dash.proj.basis': "Base: gastado {cur} + ritmo diario, mezclado con tu promedio de {n} mes(es): {avg}/mes",
@@ -1077,6 +1078,7 @@ export const translations = {
     'settings.install.btn': 'Instalar →',
   },
   en: {
+    'nav.pprPortugal': "PPR Portugal",
     'goals.emergencyAdjust': "💡 Current recommendation: 3 months of your expenses = {v}",
     'goals.emergencyAdjustBtn': "Adjust target →",
     'dash.proj.basis': "Basis: spent {cur} + daily pace, blended with your {n}-month average: {avg}/mo",
@@ -2145,6 +2147,7 @@ export const translations = {
     'settings.install.btn': 'Install →',
   },
   pt: {
+    'nav.pprPortugal': "PPR Portugal",
     'goals.emergencyAdjust': "💡 Recomendação atual: 3 meses dos seus gastos = {v}",
     'goals.emergencyAdjustBtn': "Ajustar objetivo →",
     'dash.proj.basis': "Base: gasto {cur} + ritmo diário, mesclado com sua média de {n} mês(es): {avg}/mês",

@@ -20,6 +20,7 @@ const NAV = [
     { id: 'goals',   ic: '◎', lb: 'nav.goals' },
     { id: 'projects', ic: '🏢', lb: 'nav.properties' },
     { id: 'apv',     ic: '🇨🇱', lb: 'nav.apvChile', countries: ['CL'] },
+    { id: 'ppr',     ic: '🇵🇹', lb: 'nav.pprPortugal', countries: ['PT'] },
     { id: 'deducciones', ic: '🧾', lb: 'nav.deductions', countries: ['EC', 'PE'] },
     { id: 'ahorrofiscal', ic: '🏦', lb: 'nav.taxSavings', countries: ['MX', 'CO', 'US', 'ES'] },
     { id: 'inflacion',   ic: '📈', lb: 'nav.inflation', countries: ['AR'] },
