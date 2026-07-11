@@ -9,6 +9,11 @@
 
 export const translations = {
   es: {
+    'debts.uf.check': "🇨🇱 Deuda en UF (crédito hipotecario) — ingreso los montos en UF",
+    'debts.uf.balance': "Saldo: UF {uf} ≈ {clp}",
+    'debts.uf.rate': "UF hoy: {v}",
+    'debts.uf.paid': "Pagado: UF {uf}",
+    'debts.uf.installment': " · Cuota: UF {uf} ≈ {clp}/mes",
     'nav.pprPortugal': "PPR Portugal",
     'goals.emergencyAdjust': "💡 Recomendación actual: 3 meses de tus gastos = {v}",
     'goals.emergencyAdjustBtn': "Ajustar objetivo →",
@@ -1078,6 +1083,11 @@ export const translations = {
     'settings.install.btn': 'Instalar →',
   },
   en: {
+    'debts.uf.check': "🇨🇱 Debt in UF (mortgage) — I enter amounts in UF",
+    'debts.uf.balance': "Balance: UF {uf} ≈ {clp}",
+    'debts.uf.rate': "UF today: {v}",
+    'debts.uf.paid': "Paid: UF {uf}",
+    'debts.uf.installment': " · Installment: UF {uf} ≈ {clp}/mo",
     'nav.pprPortugal': "PPR Portugal",
     'goals.emergencyAdjust': "💡 Current recommendation: 3 months of your expenses = {v}",
     'goals.emergencyAdjustBtn': "Adjust target →",
@@ -2147,6 +2157,11 @@ export const translations = {
     'settings.install.btn': 'Install →',
   },
   pt: {
+    'debts.uf.check': "🇨🇱 Dívida em UF (crédito hipotecário) — insiro os valores em UF",
+    'debts.uf.balance': "Saldo: UF {uf} ≈ {clp}",
+    'debts.uf.rate': "UF hoje: {v}",
+    'debts.uf.paid': "Pago: UF {uf}",
+    'debts.uf.installment': " · Parcela: UF {uf} ≈ {clp}/mês",
     'nav.pprPortugal': "PPR Portugal",
     'goals.emergencyAdjust': "💡 Recomendação atual: 3 meses dos seus gastos = {v}",
     'goals.emergencyAdjustBtn': "Ajustar objetivo →",

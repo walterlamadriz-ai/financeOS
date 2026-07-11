@@ -1,11 +1,12 @@
 // src/pages/Debts/index.jsx — v1.5
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
 import { useT } from '../../i18n/useT.js'
 import { KPI, Card, CardHeader, FormGroup, FormRow, Btn, Alert, Badge, ProgressBar, PageHeader } from '../../components/ui/index.jsx'
 import { fmtMoney, fmtPct } from '../../utils/index.js'
 import { CURRENCY_SYMBOLS } from '../shared/constants.js'
 import DebtProgressList from '../../components/charts/DebtProgressList.jsx'
+import { loadIndicadores } from '../../utils/indicadores.js'
 import ProGate from '../../components/ui/ProGate.jsx'
 
 // ── Calculadora Avalanche / Snowball ─────────────────────────────────────────
@@ -154,11 +155,36 @@ export default function Debts() {
   const { debts, addDebt, delDebt, updateDebt, addExpense, incomes, expenses, settings } = useApp()
   const { t } = useT()
   const [show, setShow]             = useState(false)
-  const [f, setF]                   = useState({ creditor:'', initial:'', balance:'', minPayment:'', dueDate:'', rate:'', totalInstallments:'', paidInstallments:'', project:'' })
+  const [f, setF]                   = useState({ creditor:'', initial:'', balance:'', minPayment:'', dueDate:'', rate:'', totalInstallments:'', paidInstallments:'', project:'', ufDebt:false })
   const [err, setErr]               = useState('')
   const [confirmPay, setConfirmPay] = useState(null)
   const [payMsg, setPayMsg]         = useState(null)
   const sym = CURRENCY_SYMBOLS[settings.currency] || '$'
+  const isChile = (settings.country || 'CL') === 'CL'
+
+  // ── Deudas en UF (Chile): la fuente de verdad es el monto en UF; el CLP se
+  // revalúa automáticamente con la UF del día para que TODOS los cálculos de la
+  // app (patrimonio, disponible, asesor) sigan funcionando en pesos sin cambios.
+  const [ufValue, setUfValue] = useState(0)
+  useEffect(() => {
+    if (!isChile) return
+    loadIndicadores().then(ind => { if (ind?.uf > 0) setUfValue(ind.uf) }).catch(() => {})
+  }, [isChile])
+
+  // Revaluación silenciosa: si el CLP guardado difiere >0.5% de ufBalance × UF de hoy, actualizar
+  useEffect(() => {
+    if (!ufValue || !updateDebt) return
+    debts.filter(d => Number(d.ufBalance) > 0).forEach(d => {
+      const clp = Math.round(d.ufBalance * ufValue)
+      if (Math.abs((d.balance || 0) - clp) / clp > 0.005) {
+        updateDebt({ ...d,
+          balance: clp,
+          initial: d.ufInitial > 0 ? Math.round(d.ufInitial * ufValue) : d.initial,
+          minPayment: d.ufMinPayment > 0 ? Math.round(d.ufMinPayment * ufValue) : d.minPayment,
+        })
+      }
+    })
+  }, [ufValue, debts.length])
 
   const totalBalance = useMemo(() => debts.reduce((s,d) => s+d.balance, 0), [debts])
   const totalMin     = useMemo(() => debts.reduce((s,d) => s+d.minPayment, 0), [debts])
@@ -174,7 +200,10 @@ export default function Debts() {
     if (monto <= 0) return
     const newBalance = Math.max(0, d.balance - monto)
     const todayStr = new Date().toISOString().slice(0,10)
-    await updateDebt({...d, balance:newBalance, paidInstallments:(Number(d.paidInstallments)||0)+1})
+    const ufFields = (Number(d.ufBalance) > 0 && ufValue > 0)
+      ? { ufBalance: Math.max(0, d.ufBalance - monto / ufValue) }
+      : {}
+    await updateDebt({...d, ...ufFields, balance:newBalance, paidInstallments:(Number(d.paidInstallments)||0)+1})
     await addExpense({
       date: todayStr,
       description: t('debts.payment.desc', { creditor: d.creditor }),
@@ -192,8 +221,17 @@ export default function Debts() {
     const init = Number(f.initial) || Number(f.balance)
     if (Number(f.balance) > init) { setErr(t('debts.err.balance')); return }
     setErr('')
-    await addDebt({...f, initial:init, balance:Number(f.balance), minPayment:Number(f.minPayment)||0, rate:Number(f.rate)||0, totalInstallments:Number(f.totalInstallments)||0, paidInstallments:Number(f.paidInstallments)||0})
-    setF({creditor:'',initial:'',balance:'',minPayment:'',dueDate:'',rate:'',totalInstallments:'',paidInstallments:'',project:''})
+    if (f.ufDebt && ufValue > 0) {
+      // Montos ingresados en UF → guardar UF como fuente de verdad + CLP del día
+      await addDebt({...f,
+        ufInitial: init, ufBalance: Number(f.balance), ufMinPayment: Number(f.minPayment)||0,
+        initial: Math.round(init * ufValue), balance: Math.round(Number(f.balance) * ufValue),
+        minPayment: Math.round((Number(f.minPayment)||0) * ufValue),
+        rate:Number(f.rate)||0, totalInstallments:Number(f.totalInstallments)||0, paidInstallments:Number(f.paidInstallments)||0})
+    } else {
+      await addDebt({...f, initial:init, balance:Number(f.balance), minPayment:Number(f.minPayment)||0, rate:Number(f.rate)||0, totalInstallments:Number(f.totalInstallments)||0, paidInstallments:Number(f.paidInstallments)||0})
+    }
+    setF({creditor:'',initial:'',balance:'',minPayment:'',dueDate:'',rate:'',totalInstallments:'',paidInstallments:'',project:'',ufDebt:false})
     setShow(false)
   }
 
@@ -212,9 +250,15 @@ export default function Debts() {
         <Card>
           <CardHeader title={t('debts.new')} />
           {err && <Alert type="danger">⚠ {err}</Alert>}
+          {isChile && ufValue > 0 && (
+            <label style={{ display:'flex', alignItems:'flex-start', gap:8, fontSize:12, color:'var(--tm)', cursor:'pointer', margin:'0 0 10px', lineHeight:1.4 }}>
+              <input type="checkbox" checked={!!f.ufDebt} onChange={e => setF(p=>({...p, ufDebt:e.target.checked}))} style={{ width:16, height:16, flexShrink:0, marginTop:1 }} />
+              <span style={{ minWidth:0 }}>{t('debts.uf.check')} <span style={{ fontSize:10, color:'var(--th)', fontFamily:'var(--mono)' }}>({t('debts.uf.rate', { v: '$'+Math.round(ufValue).toLocaleString('es-CL') })})</span></span>
+            </label>
+          )}
           <FormRow>
             <FormGroup label={t('debts.form.creditor')}><input type="text" value={f.creditor} placeholder={t('debts.form.creditorPh')} onChange={e => setF(p=>({...p,creditor:e.target.value}))} /></FormGroup>
-            <FormGroup label={t('debts.form.balance', { currency: settings.currency||'CLP' })}><input type="number" min="0" value={f.balance} placeholder="0" onChange={e => setF(p=>({...p,balance:e.target.value}))} /></FormGroup>
+            <FormGroup label={t('debts.form.balance', { currency: f.ufDebt ? 'UF' : (settings.currency||'CLP') })}><input type="number" min="0" value={f.balance} placeholder="0" onChange={e => setF(p=>({...p,balance:e.target.value}))} /></FormGroup>
           </FormRow>
           <FormRow>
             <FormGroup label={t('debts.form.initial')}><input type="number" min="0" value={f.initial} placeholder={t('debts.form.initialPh')} onChange={e => setF(p=>({...p,initial:e.target.value}))} /></FormGroup>
@@ -271,6 +315,7 @@ export default function Debts() {
               <div style={{fontSize:13,fontWeight:600,color:'var(--tx)'}}>{d.creditor}</div>
               <div style={{display:'flex',gap:6,alignItems:'center',flexWrap:'wrap',justifyContent:'flex-end'}}>
                 {d.rate > 0 && <Badge color="red">{d.rate}% TAE</Badge>}
+                {Number(d.ufBalance) > 0 && <Badge color="amber">UF</Badge>}
                 {(d.project||'').trim() && <Badge color="green">🏢 {d.project}</Badge>}
                 {d.balance > 0 && d.minPayment > 0 && confirmPay !== d.id && (
                   <button onClick={() => setConfirmPay(d.id)}
@@ -297,7 +342,10 @@ export default function Debts() {
               <div style={{fontSize:11,color:'var(--grn)',fontFamily:'var(--mono)',marginBottom:6,padding:'4px 8px',background:'rgba(10,92,62,.06)',borderRadius:4}}>{payMsg.text}</div>
             )}
             <div style={{fontSize:11,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:8}}>
-              {t('debts.card.balance', { v: fmtMoney(d.balance,sym) })}{d.minPayment ? t('debts.card.installment', { v: fmtMoney(d.minPayment,sym) }) : ''}{d.dueDate ? t('debts.card.due', { d: d.dueDate.slice(5).replace('-','/') }) : ''}
+              {Number(d.ufBalance) > 0
+                ? <>{t('debts.uf.balance', { uf: d.ufBalance.toLocaleString('es-CL', { maximumFractionDigits: 2 }), clp: fmtMoney(d.balance,sym) })}{d.ufMinPayment > 0 ? t('debts.uf.installment', { uf: d.ufMinPayment.toLocaleString('es-CL', { maximumFractionDigits: 2 }), clp: fmtMoney(d.minPayment,sym) }) : ''}{d.dueDate ? t('debts.card.due', { d: d.dueDate.slice(5).replace('-','/') }) : ''}</>
+                : <>{t('debts.card.balance', { v: fmtMoney(d.balance,sym) })}{d.minPayment ? t('debts.card.installment', { v: fmtMoney(d.minPayment,sym) }) : ''}{d.dueDate ? t('debts.card.due', { d: d.dueDate.slice(5).replace('-','/') }) : ''}</>
+              }
             </div>
             <div style={{marginBottom:8}}>
               <div style={{display:'flex',justifyContent:'space-between',fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',marginBottom:3}}>
@@ -305,7 +353,7 @@ export default function Debts() {
               </div>
               <ProgressBar value={paid} max={d.initial} color="green" height={5}/>
               <div style={{display:'flex',justifyContent:'space-between',marginTop:3,fontSize:10,fontFamily:'var(--mono)',color:'var(--th)'}}>
-                <span>{t('debts.card.paidLb', { v: fmtMoney(paid,sym) })}</span><span>{t('debts.card.initialLb', { v: fmtMoney(d.initial,sym) })}</span>
+                <span>{t('debts.card.paidLb', { v: fmtMoney(paid,sym) })}{Number(d.ufInitial) > 0 && Number(d.ufBalance) >= 0 ? ' · ' + t('debts.uf.paid', { uf: (d.ufInitial - d.ufBalance).toLocaleString('es-CL', { maximumFractionDigits: 2 }) }) : ''}</span><span>{t('debts.card.initialLb', { v: fmtMoney(d.initial,sym) })}</span>
               </div>
             </div>
             {totalInst > 0 && (
