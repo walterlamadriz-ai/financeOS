@@ -36,13 +36,33 @@ export function projectEndOfMonth({ incomes, expenses, activeMonth }) {
   const avgExpMonths = expMonths.filter(m => m < nowMonth).length
 
   const dailyExp = today > 0 ? curExp / today : 0
-  const paceExp  = curExp + dailyExp * daysLeft
-  const blended  = avgExp > 0 ? Math.round(pctElapsed * paceExp + (1 - pctElapsed) * avgExp) : Math.round(paceExp)
-  // Piso lógico: la proyección nunca puede ser menor que lo YA gastado
-  // (si este mes vas por encima de tu histórico, la mezcla no debe "descontar" gasto real).
-  const projExp  = Math.max(blended, Math.round(curExp))
+
+  // Día típico (MEDIANA de los totales diarios del mes en curso, incluyendo días
+  // en cero): robusto frente a cuentas grandes pagadas a inicio de mes (arriendo,
+  // colegio, hipotecas). El promedio diario extrapolaba esas cuentas como si se
+  // repitieran; la mediana representa un día normal (supermercado, transporte).
+  const byDay = {}
+  ;(expenses || []).forEach(r => {
+    if (!r?.date?.startsWith(activeMonth)) return
+    const d = Number(r.date.slice(8, 10))
+    if (d >= 1 && d <= today) byDay[d] = (byDay[d] || 0) + (Number(r.amount) || 0)
+  })
+  const dailyTotals = []
+  for (let d = 1; d <= today; d++) dailyTotals.push(byDay[d] || 0)
+  dailyTotals.sort((a, b) => a - b)
+  const mid = Math.floor(dailyTotals.length / 2)
+  const medianDaily = dailyTotals.length === 0 ? 0
+    : dailyTotals.length % 2 ? dailyTotals[mid]
+    : (dailyTotals[mid - 1] + dailyTotals[mid]) / 2
+
+  // Proyección de gasto = el MAYOR de:
+  //  (a) lo ya gastado + día típico × días restantes  (mes con cuentas ya pagadas)
+  //  (b) promedio histórico mensual                   (cuentas grandes aún pendientes)
+  //  (c) lo ya gastado                                 (piso lógico)
+  const paceTypical = curExp + medianDaily * daysLeft
+  const projExp = Math.round(Math.max(curExp, avgExp, paceTypical))
   const projInc  = Math.max(curInc, avgInc || curInc)
   const projBal  = projInc - projExp
 
-  return { today, daysInMonth, daysLeft, pctElapsed, dailyExp, curInc, curExp, avgInc, avgExp, avgExpMonths, projInc, projExp, projBal }
+  return { today, daysInMonth, daysLeft, pctElapsed, dailyExp, medianDaily, curInc, curExp, avgInc, avgExp, avgExpMonths, projInc, projExp, projBal }
 }
