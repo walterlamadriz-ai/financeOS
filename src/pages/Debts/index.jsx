@@ -161,6 +161,13 @@ export default function Debts() {
   const [payMsg, setPayMsg]         = useState(null)
   const [linkingId, setLinkingId]   = useState(null)
   const [linkValue, setLinkValue]   = useState('')
+
+  // Vista previa CLP en vivo para montos ingresados en UF
+  const ufPreview = (v) => {
+    const n = Number(v)
+    if (!f.ufDebt || !ufValue || !n) return null
+    return <div style={{fontSize:10,color:'var(--grn)',fontFamily:'var(--mono)',marginTop:3}}>≈ ${Math.round(n*ufValue).toLocaleString('es-CL')} CLP</div>
+  }
   const sym = CURRENCY_SYMBOLS[settings.currency] || '$'
   const isChile = (settings.country || 'CL') === 'CL'
 
@@ -260,11 +267,11 @@ export default function Debts() {
           )}
           <FormRow>
             <FormGroup label={t('debts.form.creditor')}><input type="text" value={f.creditor} placeholder={t('debts.form.creditorPh')} onChange={e => setF(p=>({...p,creditor:e.target.value}))} /></FormGroup>
-            <FormGroup label={t('debts.form.balance', { currency: f.ufDebt ? 'UF' : (settings.currency||'CLP') })}><input type="number" min="0" value={f.balance} placeholder="0" onChange={e => setF(p=>({...p,balance:e.target.value}))} /></FormGroup>
+            <FormGroup label={t('debts.form.balance', { currency: f.ufDebt ? 'UF' : (settings.currency||'CLP') })}><input type="number" min="0" step="0.01" value={f.balance} placeholder={f.ufDebt ? 'ej. 2500.50' : '0'} onChange={e => setF(p=>({...p,balance:e.target.value}))} />{ufPreview(f.balance)}</FormGroup>
           </FormRow>
           <FormRow>
-            <FormGroup label={t('debts.form.initial')}><input type="number" min="0" value={f.initial} placeholder={t('debts.form.initialPh')} onChange={e => setF(p=>({...p,initial:e.target.value}))} /></FormGroup>
-            <FormGroup label={t('debts.form.minPay')}><input type="number" min="0" value={f.minPayment} placeholder="0" onChange={e => setF(p=>({...p,minPayment:e.target.value}))} /></FormGroup>
+            <FormGroup label={f.ufDebt ? t('debts.form.initial') + ' (UF)' : t('debts.form.initial')}><input type="number" min="0" step="0.01" value={f.initial} placeholder={f.ufDebt ? 'ej. 3000' : t('debts.form.initialPh')} onChange={e => setF(p=>({...p,initial:e.target.value}))} />{ufPreview(f.initial)}</FormGroup>
+            <FormGroup label={f.ufDebt ? t('debts.form.minPay') + ' (UF)' : t('debts.form.minPay')}><input type="number" min="0" step="0.01" value={f.minPayment} placeholder={f.ufDebt ? 'ej. 7.55' : '0'} onChange={e => setF(p=>({...p,minPayment:e.target.value}))} />{ufPreview(f.minPayment)}</FormGroup>
           </FormRow>
           <div style={{marginTop:8,marginBottom:8}}>
             <button type="button" onClick={() => setF(p=>({...p,_showExtra:!p._showExtra}))}
