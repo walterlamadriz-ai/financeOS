@@ -1,6 +1,6 @@
 // src/config/inflacion/ar.js
 // Argentina — Ajuste por inflación (poder adquisitivo). Fuente: INDEC (IPC nacional).
-// Serie de variación mensual %. Datos hasta dic-2025 (verificados).
+// Serie de variación mensual %. Datos hasta may-2026 (verificados INDEC 2026-07-11).
 // MANTENIMIENTO: agregar 1 dato por mes a SERIE a medida que INDEC publica (los
 // datos pasados no cambian → solo se hace append).
 
@@ -12,6 +12,8 @@ const SERIE = [
   ['2025-01', 2.2],  ['2025-02', 2.4],  ['2025-03', 3.7],  ['2025-04', 2.8],
   ['2025-05', 1.5],  ['2025-06', 1.6],  ['2025-07', 1.9],  ['2025-08', 1.9],
   ['2025-09', 2.1],  ['2025-10', 2.3],  ['2025-11', 2.4],  ['2025-12', 2.8],
+  ['2026-01', 2.9],  ['2026-02', 2.9],  ['2026-03', 3.4],  ['2026-04', 2.6],
+  ['2026-05', 2.1],  // jun-2026 se publica ~13-jul (INDEC)
 ]
 
 // Índices acumulados con base 100 antes del primer mes de la serie.
@@ -47,7 +49,7 @@ export default {
   nombre: 'Argentina',
   moneda: 'ARS',
   sym: '$',
-  vigencia: 'dic-2025',
+  vigencia: 'may-2026',
   fuente: 'INDEC',
   titulo: 'Ajuste por inflación',
   subtitulo: 'Cuánto vale hoy el dinero de antes — y si tu sueldo le ganó a la inflación',
