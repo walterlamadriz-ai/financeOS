@@ -47,3 +47,13 @@ export async function decryptData(blobB64, licenseKey) {
   const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, cipher)
   return JSON.parse(dec.decode(plain))
 }
+
+// Hash sha256 (hex) de la clave de licencia normalizada — IDÉNTICO al key_hash
+// que calcula el servidor: encode(digest(upper(trim(key)),'sha256'),'hex').
+// Se envía al servidor en vez de la clave cruda: el servidor autentica por hash
+// y NUNCA recibe la clave (que es también la base de la llave de cifrado local).
+export async function licenseKeyHash(licenseKey) {
+  const norm = String(licenseKey || '').trim().toUpperCase()
+  const digest = await crypto.subtle.digest('SHA-256', enc.encode(norm))
+  return [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, '0')).join('')
+}

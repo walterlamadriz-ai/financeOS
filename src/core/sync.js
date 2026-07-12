@@ -8,7 +8,7 @@
 
 import { exportAllData, importAllData } from './db/index.js'
 import { getLicenseKey } from '../utils/licenseValidator.js'
-import { encryptData, decryptData } from '../utils/syncCrypto.js'
+import { encryptData, decryptData, licenseKeyHash } from '../utils/syncCrypto.js'
 
 const SUPABASE_URL  = import.meta.env.VITE_SUPABASE_URL
 const SUPABASE_ANON = import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -56,8 +56,9 @@ export async function pushNow() {
   const key = getLicenseKey()
   const payload = await exportAllData()
   const blob = await encryptData(payload, key)
+  const keyHash = await licenseKeyHash(key)
   const updatedAt = syncMeta().lastLocalChange || Date.now()
-  const r = await rpc('sync_push', { p_key: key, p_blob: blob, p_updated_at: updatedAt })
+  const r = await rpc('sync_push', { p_key: keyHash, p_blob: blob, p_updated_at: updatedAt })
   if (r && r.ok) { writeMeta({ lastPushedAt: updatedAt }); return { ok: true, updatedAt } }
   throw new Error(r?.error || 'push_failed')
 }
@@ -66,7 +67,8 @@ export async function pushNow() {
 export async function pullNow() {
   if (!syncAvailable()) return null
   const key = getLicenseKey()
-  const r = await rpc('sync_pull', { p_key: key })
+  const keyHash = await licenseKeyHash(key)
+  const r = await rpc('sync_pull', { p_key: keyHash })
   if (!r || !r.ok || r.empty || !r.blob) return null
   try {
     const payload = await decryptData(r.blob, key)

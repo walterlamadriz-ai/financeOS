@@ -1,5 +1,6 @@
 // src/utils/licenseValidator.js
 // VALIDADOR v2.0 — Supabase. ACTIVO en producción (lo usan App.jsx, LicenseGate, Settings).
+import { licenseKeyHash } from './syncCrypto.js'
 // Valida la clave contra la RPC `validate_license` de Supabase y cachea en localStorage
 // (fnos_license_v2). VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY están en Vercel.
 //
@@ -36,7 +37,7 @@ async function verifyOnline(key) {
         Authorization: `Bearer ${SUPABASE_ANON}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ p_key: key }),
+      body: JSON.stringify({ p_key: await licenseKeyHash(key) }),
     })
     if (!res.ok) return { offline: true, httpError: res.status } // RPC 404 / red → tratar como offline
     const data = await res.json()

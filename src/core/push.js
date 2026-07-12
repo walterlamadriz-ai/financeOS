@@ -3,6 +3,7 @@
 // Ligadas a la licencia, igual patrón que el sync. Apagado por defecto (opt-in).
 
 import { getLicenseKey } from '../utils/licenseValidator.js'
+import { licenseKeyHash } from '../utils/syncCrypto.js'
 
 const SUPABASE_URL  = import.meta.env.VITE_SUPABASE_URL
 const SUPABASE_ANON = import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -54,7 +55,7 @@ export async function enablePush() {
   }
   const json = sub.toJSON()
   const r = await rpc('save_push_subscription', {
-    p_key: key, p_endpoint: json.endpoint, p_p256dh: json.keys.p256dh, p_auth: json.keys.auth,
+    p_key: await licenseKeyHash(key), p_endpoint: json.endpoint, p_p256dh: json.keys.p256dh, p_auth: json.keys.auth,
   })
   if (!(r && r.ok)) return { ok: false, error: r?.error || 'save_failed' }
 
