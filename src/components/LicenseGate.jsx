@@ -21,8 +21,8 @@ const PLANS = [
 
 // Stripe Payment Links (Live) — Personal US$19 / Pro US$29
 const CHECKOUT_LINKS = {
-  personal: 'https://buy.stripe.com/6oU5kFdxo2a95Xz7Z73wQ00',
-  pro:      'https://buy.stripe.com/3cIdRb9h82a90Dfenv3wQ01',
+  personal: 'https://buy.stripe.com/dRmeVf64WdSR85HgvD3wQ02',
+  pro:      'https://buy.stripe.com/fZu5kFctk5ml1Hj3IR3wQ03',
 }
 
 async function startCheckout(product) {
