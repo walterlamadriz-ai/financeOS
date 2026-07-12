@@ -4,9 +4,21 @@ export const uid = () => Math.random().toString(36).slice(2, 10)
 
 export const today = () => new Date().toISOString().slice(0, 10)
 
+// Locale de formato de miles, seteado una vez desde AppContext según la moneda
+// del usuario (default es-CL = separador punto, comportamiento histórico).
+// Evita que un cliente en USA/México/Portugal vea el separador chileno.
+let _moneyLocale = 'es-CL'
+const CURRENCY_LOCALE = {
+  CLP: 'es-CL', COP: 'es-CO', ARS: 'es-AR', PEN: 'es-PE', VES: 'es-VE',
+  MXN: 'es-MX', USD: 'en-US', EUR: 'pt-PT', BRL: 'pt-BR',
+}
+export function setMoneyLocale(currency) {
+  _moneyLocale = CURRENCY_LOCALE[currency] || 'es-CL'
+}
+
 export const fmtMoney = (n, symbol = '$') => {
   const abs = Math.abs(Math.round(n || 0))
-  return symbol + abs.toLocaleString('es-CL')
+  return symbol + abs.toLocaleString(_moneyLocale)
 }
 
 export const fmtPct = (n) => (Math.round((n || 0) * 1000) / 10).toFixed(1) + '%'

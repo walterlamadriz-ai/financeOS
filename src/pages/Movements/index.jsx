@@ -1,4 +1,4 @@
-// src/pages/Movements/index.jsx — v1.2
+// src/pages/Movements/index.jsx — v1.5
 // Hub "Egresos del mes" — vista unificada Gastos + Recurrentes
 
 import { useState, useMemo, useEffect } from 'react'

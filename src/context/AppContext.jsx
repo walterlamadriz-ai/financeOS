@@ -13,7 +13,7 @@ import {
   getSettings, saveSettings, exportAllData, importAllData,
   isUsingFallback, DEFAULT_SETTINGS,
 } from '../core/db/index.js'
-import { uid, SEED_INCOMES, SEED_EXPENSES, SEED_BUDGETS, SEED_DEBTS, SEED_GOALS } from '../utils/index.js'
+import { uid, SEED_INCOMES, SEED_EXPENSES, SEED_BUDGETS, SEED_DEBTS, SEED_GOALS, setMoneyLocale } from '../utils/index.js'
 import { markLocalChange, pullAndApplyIfNewer, isSyncEnabled, setSyncEnabled, initialSync, pushNow } from '../core/sync.js'
 
 export const AppContext = createContext(null)
@@ -108,6 +108,11 @@ export function AppProvider({ children }) {
     if (!hydratedRef.current) return  // no dispara durante la hidratación inicial
     markLocalChange()
   }, [state.incomes, state.expenses, state.budgets, state.debts, state.goals, state.subscriptions])
+  // ── Formato de miles según la moneda del usuario (US/MX/PT ≠ CL) ──────────────
+  useEffect(() => {
+    setMoneyLocale(state.settings?.currency || 'CLP')
+  }, [state.settings?.currency])
+
 
   // ── Actions — FIX: DB primero, luego dispatch ─────────────────────────────────
 

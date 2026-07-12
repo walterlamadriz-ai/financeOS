@@ -1,6 +1,6 @@
 // src/components/Onboarding.jsx
 // Onboarding inicial — FinanceOS Fase 8 (reescrito completo)
-// 6 pasos: Bienvenida → Uso → Perfil → Configuración → Plantilla → Resumen
+// 9 pasos (0-8): Bienvenida → Uso → Perfil → País → Config → Ingreso → Objetivo → Plantilla → Resumen
 
 import { useState, useMemo } from 'react'
 import { useApp } from '../context/AppContext.jsx'
