@@ -100,7 +100,7 @@ export async function setLicenseEmail(email) {
         Authorization: `Bearer ${SUPABASE_ANON}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ p_key: key, p_email: clean }),
+      body: JSON.stringify({ p_key: await licenseKeyHash(key), p_email: clean }),
     })
     if (!res.ok) return false
     const data = await res.json()
