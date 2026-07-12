@@ -3,10 +3,11 @@
 // Resultado es orientativo — no constituye asesoría financiera.
 
 import { translations } from '../i18n/translations.js'
+import { effectiveBudgetLimits } from './budgets.js'
 
 function esFallback(key) { return translations.es?.[key] ?? key }
 
-export function calcFinancialScore({ savingRate, budgets, expenses, debts, goals, subs, incomes, activeMonth }, t) {
+export function calcFinancialScore({ savingRate, budgets, expenses, debts, goals, subs, incomes, activeMonth, settings }, t) {
   const tr = t || esFallback
   let score = 0
   const breakdown = []
@@ -24,7 +25,8 @@ export function calcFinancialScore({ savingRate, budgets, expenses, debts, goals
   const expByCat = {}
   monthExp.forEach(e => { expByCat[e.category] = (expByCat[e.category] || 0) + (Number(e.amount) || 0) })
   const budgetArr = Array.isArray(budgets) ? budgets : []
-  const exceeded = budgetArr.filter(b => (expByCat[b.category] || 0) > (Number(b.limit) || 0)).length
+  const effLimits = effectiveBudgetLimits({ budgets: budgetArr, expenses, activeMonth, settings })
+  const exceeded = budgetArr.filter(b => (expByCat[b.category] || 0) > (effLimits[b.category] || 0)).length
   const budgetPts = Math.max(0, 20 - exceeded * 5)
   score += budgetPts
   breakdown.push({ label: tr('score.budgets'), pts: budgetPts, max: 20 })

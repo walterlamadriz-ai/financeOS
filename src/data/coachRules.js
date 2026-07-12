@@ -1,5 +1,6 @@
 // src/data/coachRules.js
 import { translations } from '../i18n/translations.js'
+import { effectiveBudgetLimits } from '../utils/budgets.js'
 // Motor de reglas del FinanceOS Coach
 // Configurable sin tocar componentes React
 // Cada regla: id, categoría, condición, severidad, mensaje, acción sugerida
@@ -324,9 +325,12 @@ export function calcCoachMetrics({ incomes, expenses, budgets, debts, goals, sub
   expenses.filter(r => r.date?.startsWith(activeMonth)).forEach(e => {
     expByCat[e.category] = (expByCat[e.category] || 0) + e.amount
   })
-  const budgetsExceeded  = budgets.filter(b => (expByCat[b.category] || 0) >= b.limit * COACH_CONFIG.thresholds.budgetExceededPct).length
+  // Límite EFECTIVO (con rollover si está activo) — coincide con la página Presupuestos.
+  const effLimits = effectiveBudgetLimits({ budgets, expenses, activeMonth, settings })
+  const budgetsExceeded  = budgets.filter(b => (expByCat[b.category] || 0) >= (effLimits[b.category] || 0) * COACH_CONFIG.thresholds.budgetExceededPct).length
   const budgetsNearLimit = budgets.filter(b => {
-    const used = (expByCat[b.category] || 0) / b.limit
+    const lim = effLimits[b.category] || 0
+    const used = lim > 0 ? (expByCat[b.category] || 0) / lim : 0
     return used >= COACH_CONFIG.thresholds.budgetOverUsePct && used < COACH_CONFIG.thresholds.budgetExceededPct
   }).length
 

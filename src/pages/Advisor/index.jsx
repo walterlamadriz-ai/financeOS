@@ -15,6 +15,7 @@ import { downloadReportePDF } from './ReportePDF.jsx'
 import TemplateSelector from '../../components/templates/TemplateSelector.jsx'
 import config from '../../config.js'
 import { calcNetWorth } from '../../utils/netWorth.js'
+import { countBudgetsExceeded } from '../../utils/budgets.js'
 
 const CURRENCY_SYMBOLS = { CLP: '$', USD: 'US$', EUR: '€', VES: 'Bs.', MXN: '$', ARS: '$' }
 
@@ -336,7 +337,7 @@ export default function Advisor() {
     return m
   }, [monthExpenses])
 
-  const overBudgetCount = budgets.filter(b => (expByCat[b.category] || 0) > b.limit).length
+  const overBudgetCount = countBudgetsExceeded({ budgets, expenses: _expAll, activeMonth, settings })
 
   // Metas
   const goalsProgress = goals.map(g => ({ ...g, pct: g.target > 0 ? g.saved / g.target : 0 }))

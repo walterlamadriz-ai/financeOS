@@ -58,7 +58,7 @@ export default function Dashboard({ setPage }) {
       const balance  = totalInc - totalExp                        // Balance neto = ingresos − gastos
       const freeFlow = totalInc - totalExp - totalDebt - totalSubs // Disponible tras deudas y suscripciones
       return { totalInc, totalExp, totalDebt, totalSubs, balance, freeFlow,
-               savingRate: totalInc > 0 ? Math.max(0, balance) / totalInc : 0,
+               savingRate: totalInc > 0 ? balance / totalInc : 0,  // sin floor: coincide con Coach/Advisor
                incCount: inc.length, expCount: exp.length }
     }
 
@@ -192,7 +192,7 @@ export default function Dashboard({ setPage }) {
     return calcFinancialScore({
       savingRate: kpis.savingRate,
       budgets, expenses, debts, goals, subs, incomes,
-      activeMonth,
+      activeMonth, settings,
     }, t)
   }, [kpis.savingRate, kpis.incCount, kpis.expCount, budgets, expenses, debts, goals, subs, incomes, activeMonth, settings.language])
 

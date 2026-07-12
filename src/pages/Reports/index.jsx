@@ -77,7 +77,7 @@ export default function Reports({ setPage }) {
   const totalDebt    = useMemo(() => pendingDebtMonthly(allDebts, mExpenses), [allDebts, mExpenses])
   const balance      = totalIncome - totalExpense                          // Balance neto = ingresos − gastos
   const freeFlow     = totalIncome - totalExpense - totalDebt - totalSubs   // Disponible tras deudas y suscripciones
-  const savingRate   = totalIncome > 0 ? Math.max(0, balance)/totalIncome : 0
+  const savingRate   = totalIncome > 0 ? balance/totalIncome : 0  // sin floor: coincide con Coach/Advisor
   const necesidad    = useMemo(() => mExpenses.filter(r=>r.type==='Necesidad').reduce((s,r) => s+r.amount, 0), [mExpenses])
   const deseos       = useMemo(() => mExpenses.filter(r=>r.type==='Deseo').reduce((s,r) => s+r.amount, 0), [mExpenses])
   const expByCat     = useMemo(() => { const m={}; mExpenses.forEach(e=>{m[e.category]=(m[e.category]||0)+e.amount}); return m }, [mExpenses])

@@ -319,7 +319,17 @@ export default function Debts() {
         const paidInst  = Number(d.paidInstallments)||0
         const pendInst  = totalInst > 0 ? Math.max(0,totalInst-paidInst) : 0
         const instProg  = totalInst > 0 ? paidInst/totalInst : 0
-        const monthsLeft = d.minPayment > 0 && d.balance > 0 ? Math.ceil(d.balance/d.minPayment) : pendInst > 0 ? pendInst : 0
+        // Meses restantes considerando el interés (coincide con el simulador).
+        // Si el pago mínimo no cubre el interés, la deuda no se amortiza → null.
+        const monthsLeft = (() => {
+          if (d.minPayment > 0 && d.balance > 0) {
+            const r = (Number(d.rate) || 0) / 100 / 12
+            if (r <= 0) return Math.ceil(d.balance / d.minPayment)
+            if (d.minPayment <= d.balance * r) return null  // no converge
+            return Math.ceil(-Math.log(1 - (r * d.balance) / d.minPayment) / Math.log(1 + r))
+          }
+          return pendInst > 0 ? pendInst : 0
+        })()
         const finDate   = monthsLeft > 0 ? new Date(Date.now()+monthsLeft*30*24*60*60*1000).toLocaleDateString('es-CL',{month:'short',year:'numeric'}) : null
         return (
           <Card key={d.id}>
