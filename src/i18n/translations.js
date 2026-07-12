@@ -9,6 +9,7 @@
 
 export const translations = {
   es: {
+    'common.confirmDelete': "¿Eliminar este registro? No se puede deshacer.",
     'common.importShortcut': "⇪ ¿Muchos movimientos? Importa tu cartola del banco →",
     'debts.linkProject': "🏢 Vincular a propiedad",
     'debts.linkProjectHint': "Si esta deuda es de una propiedad en arriendo, vinculala: su cuota dejará de restarse de tu disponible personal (ya vive en el flujo de la propiedad).",
@@ -1086,6 +1087,7 @@ export const translations = {
     'settings.install.btn': 'Instalar →',
   },
   en: {
+    'common.confirmDelete': "Delete this record? This can't be undone.",
     'common.importShortcut': "⇪ Lots of transactions? Import your bank statement →",
     'debts.linkProject': "🏢 Link to property",
     'debts.linkProjectHint': "If this debt belongs to a rental property, link it: its installment will stop being subtracted from your personal available (it already lives in the property's flow).",
@@ -2163,6 +2165,7 @@ export const translations = {
     'settings.install.btn': 'Install →',
   },
   pt: {
+    'common.confirmDelete': "Excluir este registro? Não pode ser desfeito.",
     'common.importShortcut': "⇪ Muitos movimentos? Importe seu extrato bancário →",
     'debts.linkProject': "🏢 Vincular a propriedade",
     'debts.linkProjectHint': "Se esta dívida é de uma propriedade alugada, vincule-a: sua parcela deixará de ser subtraída do seu disponível pessoal (ela já vive no fluxo da propriedade).",

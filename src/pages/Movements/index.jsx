@@ -170,7 +170,7 @@ function FormGasto({ onSave, onCancel, sym, projects = [], onImport }) {
           <input style={inp} value={f.description} placeholder={t('mov.form.descPh')}
             onChange={e => set('description', e.target.value)}/></div>
         <div><label style={lbl}>{t('mov.form.amount', { sym })}</label>
-          <input style={inp} type="number" value={f.amount} placeholder="0"
+          <input style={inp} type="number" min="0" value={f.amount} placeholder="0"
             onChange={e => set('amount', e.target.value)}/></div>
         <div><label style={lbl}>{t('mov.form.date')}</label>
           <input style={inp} type="date" value={f.date}
@@ -704,7 +704,7 @@ export default function Movements({ setPage }) {
                     style={{background:'none',border:'none',color:'var(--th)',fontSize:11,cursor:'pointer',padding:'2px 4px'}} title={t('mov.edit.editTitle')}>✏️</button>
                 )}
                 {delExpense && (
-                  <button onClick={()=>delExpense(e.id)}
+                  <button onClick={()=>{ if(confirm(t('common.confirmDelete'))) delExpense(e.id) }}
                     style={{background:'none',border:'none',color:'var(--th)',fontSize:10,cursor:'pointer',padding:'2px 4px'}} title={t('mov.edit.delTitle')}>✕</button>
                 )}
               </div>

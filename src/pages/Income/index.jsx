@@ -183,7 +183,7 @@ export default function Income({ setPage }) {
                     <TxRow dot={CAT_COLORS[r.category]||'#888'} name={`${r.inv?'💼 ':''}${r.source}`}
                       meta={`${r.category} · ${r.date.slice(5).replace('-','/')}${r.recurrence!=='Único'?' · '+r.recurrence:''}${r.inv?' · '+t('income.row.investment'):''}`}
                       amount={fmtMoney(r.amount,sym)} isIncome
-                      onDelete={()=>delIncome(r.id)}
+                      onDelete={()=>{ if(confirm(t('common.confirmDelete'))) delIncome(r.id) }}
                       onEdit={()=>{setEditingId(r.id);setEditForm({source:r.source,amount:r.amount,date:r.date,category:r.category,recurrence:r.recurrence,notes:r.notes||''})}} />
                   </div>
                 ))}

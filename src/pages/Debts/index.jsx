@@ -39,8 +39,11 @@ function calcPayoffPlan(debts, extraPayment, method) {
       const pay = Math.min(d.minPayment, d.balance)
       return { ...d, balance: Math.max(0, d.balance - pay) }
     })
-    // Aplicar pago extra a la primera deuda activa (según orden del método)
-    let extra = extraPayment
+    // Bola de nieve real: el pago mínimo de las deudas YA saldadas se libera y
+    // se suma al pago extra que ataca la siguiente deuda activa (sin esto, el
+    // tiempo de pago se sobreestimaba ~2×).
+    const freedMinimums = pool.filter(d => d.balance <= 0).reduce((s, d) => s + (Number(d.minPayment) || 0), 0)
+    let extra = extraPayment + freedMinimums
     for (let i = 0; i < pool.length && extra > 0; i++) {
       if (pool[i].balance > 0) {
         const pay = Math.min(extra, pool[i].balance)
@@ -333,7 +336,7 @@ export default function Debts() {
                   </button>
                 )}
                 {d.balance <= 0 && <span style={{fontSize:10,padding:'2px 8px',borderRadius:4,background:'rgba(10,92,62,.1)',color:'var(--grn)',fontFamily:'var(--mono)'}}>{t('debts.card.settled')}</span>}
-                <button onClick={() => delDebt(d.id)} aria-label={t('debts.card.delete')} style={{background:'none',border:'none',color:'var(--th)',fontSize:13,cursor:'pointer',minWidth:44,minHeight:44,display:'inline-flex',alignItems:'center',justifyContent:'center'}}>✕</button>
+                <button onClick={() => { if(confirm(t('common.confirmDelete'))) delDebt(d.id) }} aria-label={t('debts.card.delete')} style={{background:'none',border:'none',color:'var(--th)',fontSize:13,cursor:'pointer',minWidth:44,minHeight:44,display:'inline-flex',alignItems:'center',justifyContent:'center'}}>✕</button>
               </div>
             </div>
             {confirmPay === d.id && (

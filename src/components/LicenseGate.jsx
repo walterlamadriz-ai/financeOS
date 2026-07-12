@@ -131,7 +131,7 @@ export default function LicenseGate({ onActivate }) {
             spellCheck={false}
           />
           <div style={{ fontSize: 10, color: '#999', fontFamily: 'var(--mono)', marginBottom: 10, lineHeight: 1.5 }}>
-            Solo para avisarte antes de que venza tu prueba o si necesitás soporte. Nunca vemos tus datos financieros.
+            Solo para avisarte de novedades importantes o si necesitas soporte. Nunca vemos tus datos financieros.
           </div>
 
           {error && (

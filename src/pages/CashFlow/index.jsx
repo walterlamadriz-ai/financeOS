@@ -117,8 +117,8 @@ export default function CashFlow({ setPage }) {
     let balance = curBal
 
     for (let i = 0; i < 6; i++) {
-      const d = new Date()
-      d.setMonth(d.getMonth() + i)
+      const base = new Date()
+      const d = new Date(base.getFullYear(), base.getMonth() + i, 1)
       const label = months[d.getMonth()] + ' ' + d.getFullYear().toString().slice(2)
       if (i === 0) {
         result.push({ mes: label, Balance: balance, Ingresos: monthlyEstimate.avgInc, Gastos: monthlyEstimate.avgExp, actual: true })

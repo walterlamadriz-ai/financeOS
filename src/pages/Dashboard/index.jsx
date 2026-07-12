@@ -86,11 +86,14 @@ export default function Dashboard({ setPage }) {
     [expenses, activeMonth]
   )
 
-  const subMonthly = useMemo(() => subs.reduce((s, sub) => {
-    if (!sub) return s
+  // Gasto mensual equivalente de suscripciones ACTIVAS (weekly×4.33, quarterly/3,
+  // annual/12). Debe coincidir con la página Suscripciones, Coach y Reports.
+  const subMonthly = useMemo(() => subs.filter(s => s?.status === 'active').reduce((s, sub) => {
     const amt  = Number(sub.amount) || 0
     const freq = sub.frequency || 'monthly'
     if (freq === 'annual' || freq === 'anual') return s + amt / 12
+    if (freq === 'quarterly') return s + amt / 3
+    if (freq === 'weekly') return s + amt * 4.33
     return s + amt
   }, 0), [subs])
 
