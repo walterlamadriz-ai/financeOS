@@ -5,21 +5,21 @@ import { validateLicense, setLicenseEmail } from '../utils/licenseValidator.js'
 const PLANS = [
   {
     name: 'Personal',
-    price: 'US$14.99',
+    price: 'US$19',
     desc: 'Pago único · uso personal',
     product: 'personal',
     highlight: false,
   },
   {
     name: 'Pro',
-    price: 'US$19.99',
+    price: 'US$29',
     desc: 'PDF · Asesor · APV · pago único',
     product: 'pro',
     highlight: true,
   },
 ]
 
-// Stripe Payment Links (Live) — Personal US$14.99 / Pro US$19.99
+// Stripe Payment Links (Live) — Personal US$19 / Pro US$29
 const CHECKOUT_LINKS = {
   personal: 'https://buy.stripe.com/6oU5kFdxo2a95Xz7Z73wQ00',
   pro:      'https://buy.stripe.com/3cIdRb9h82a90Dfenv3wQ01',

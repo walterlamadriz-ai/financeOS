@@ -59,8 +59,8 @@ function generateKey(): string {
 }
 
 function planFromAmount(amountTotal: number | null): "personal" | "pro" {
-  // centavos. Personal US$14.99 (1499) / Pro US$19.99 (1999) → umbral 1750.
-  return (amountTotal ?? 0) >= 1750 ? "pro" : "personal";
+  // centavos. Personal US$19 (1900) / Pro US$29 (2900) → umbral 2400.
+  return (amountTotal ?? 0) >= 2400 ? "pro" : "personal";
 }
 
 async function issueLicense(key: string, plan: string, email: string | null, session: string) {
@@ -125,7 +125,7 @@ Deno.serve(async (req) => {
     const session = event.data?.object ?? {};
     // Solo checkouts realmente pagados y con un monto válido (evita $0 / pruebas).
     const amount = session.amount_total ?? 0;
-    if (session.payment_status !== "paid" || amount < 1499) {
+    if (session.payment_status !== "paid" || amount < 1900) {
       console.warn(`Checkout ignorado: payment_status=${session.payment_status} amount=${amount} session=${session.id}`);
       return new Response(JSON.stringify({ received: true, ignored: "unpaid_or_zero" }), {
         headers: { "Content-Type": "application/json" },

@@ -1,7 +1,7 @@
 // src/pages/legal/License.jsx
 // Términos de Licencia por Plan — FinanceOS (es/en/pt)
-// ACTUALIZADO 2026-07: reescrito al modelo vigente (Personal US$14.99 /
-// Pro US$19.99, pago único, app web, sin redistribución). El texto anterior
+// ACTUALIZADO 2026-07: modelo vigente (Personal US$19 / Pro US$29, pago único,
+// app web, sin redistribución). El texto anterior
 // describía los planes white-label antiguos ($29/$79/$299), retirados.
 // Enterprise / white-label: bajo contacto directo.
 
@@ -12,7 +12,7 @@ import s from './legal.module.css'
 const PLANS = {
   es: [
     {
-      name: 'Personal — US$14.99 (pago único)',
+      name: 'Personal — US$19 (pago único)',
       allowed: [
         'Uso personal ilimitado, sin mensualidades',
         'Todas las funciones base: ingresos, gastos, presupuestos, deudas, metas, reportes',
@@ -26,7 +26,7 @@ const PLANS = {
       ],
     },
     {
-      name: 'Pro — US$19.99 (pago único)',
+      name: 'Pro — US$29 (pago único)',
       featured: true,
       allowed: [
         'Todo lo del plan Personal',
@@ -44,7 +44,7 @@ const PLANS = {
   ],
   en: [
     {
-      name: 'Personal — US$14.99 (one-time payment)',
+      name: 'Personal — US$19 (one-time payment)',
       allowed: [
         'Unlimited personal use, no monthly fees',
         'All core features: income, expenses, budgets, debts, goals, reports',
@@ -58,7 +58,7 @@ const PLANS = {
       ],
     },
     {
-      name: 'Pro — US$19.99 (one-time payment)',
+      name: 'Pro — US$29 (one-time payment)',
       featured: true,
       allowed: [
         'Everything in the Personal plan',
@@ -76,7 +76,7 @@ const PLANS = {
   ],
   pt: [
     {
-      name: 'Personal — US$14.99 (pagamento único)',
+      name: 'Personal — US$19 (pagamento único)',
       allowed: [
         'Uso pessoal ilimitado, sem mensalidades',
         'Todas as funções base: receitas, despesas, orçamentos, dívidas, metas, relatórios',
@@ -90,7 +90,7 @@ const PLANS = {
       ],
     },
     {
-      name: 'Pro — US$19.99 (pagamento único)',
+      name: 'Pro — US$29 (pagamento único)',
       featured: true,
       allowed: [
         'Tudo do plano Personal',
