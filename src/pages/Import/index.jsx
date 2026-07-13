@@ -172,15 +172,32 @@ export default function ImportMovements() {
       const batchId = uid()
       const now = new Date().toISOString()
       const { incomes, expenses } = buildTransactions(rows, batchId, now)
+      // Guardado resiliente: si UNA fila falla, las demás SÍ se guardan (antes un
+      // solo error abortaba TODA la importación y no cargaba nada). Sanitiza cada
+      // registro a tipos serializables por IndexedDB.
+      const clean = (r) => ({
+        id: uid(),
+        date: String(r.date || ''),
+        description: String(r.description || ''),
+        concept: String(r.concept || r.description || ''),
+        amount: Number(r.amount) || 0,
+        category: String(r.category || 'Importado'),
+        account: String(r.account || ''),
+        notes: '', source: 'csv', importBatchId: batchId, importedAt: now,
+        originalDescription: String(r.originalDescription || r.description || ''),
+      })
+      let ok = 0, fail = 0
+      for (const r of [...incomes.map(x => ['incomes', x]), ...expenses.map(x => ['expenses', x])]) {
+        try { await dbAdd(r[0], clean(r[1])); ok++ } catch { fail++ }
+      }
+      const total = incomes.length + expenses.length
       const batch = createImportBatch(file.name, rows)
-      batch.id = batchId; batch.importedAt = now
-      await Promise.all([
-        ...incomes.map(r => dbAdd('incomes', { ...r, id: uid() })),
-        ...expenses.map(r => dbAdd('expenses', { ...r, id: uid() })),
-        dbAdd('importBatches', batch),
-      ])
+      batch.id = batchId; batch.importedAt = now; batch.importedRows = ok
+      try { await dbAdd('importBatches', batch) } catch {}
       try { localStorage.setItem('fos_recent_import', JSON.stringify(batch)) } catch {}
       setHistory(prev => [batch, ...prev])
+      if (fail > 0 && ok === 0) { setWarning(t('imp.err.partial', { ok, total, fail })); return }
+      if (fail > 0) setWarning(t('imp.err.partial', { ok, total, fail }))
       setResult(batch)
       setStep(3)
     } catch (err) {
