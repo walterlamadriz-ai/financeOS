@@ -163,14 +163,14 @@ function AdvisorKPI({ label, value, sub, color = 'var(--tx)' }) {
   // Fuente adaptativa: números largos (patrimonios/deudas en millones) se achican
   // para no desbordar la caja en móvil (375px). Además overflowWrap por seguridad.
   const len = String(value).length
-  const valSize = len > 15 ? 13 : len > 12 ? 15 : len > 10 ? 17 : 20
+  const valSize = len > 13 ? 12 : len > 11 ? 14 : len > 9 ? 16 : 20
   return (
     <div style={{
       background: 'var(--sur2)', border: '0.5px solid var(--brd)',
       borderRadius: 8, padding: '12px 14px', minWidth: 0, overflow: 'hidden',
     }}>
       <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 4 }}>{label}</div>
-      <div style={{ fontSize: valSize, fontWeight: 700, color, fontFamily: 'var(--mono)', letterSpacing: '-0.5px', lineHeight: 1.2, overflowWrap: 'anywhere' }}>{value}</div>
+      <div style={{ fontSize: valSize, fontWeight: 700, color, fontFamily: 'var(--mono)', letterSpacing: '-0.5px', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{value}</div>
       {sub && <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: 3, overflowWrap: 'anywhere' }}>{sub}</div>}
     </div>
   )
@@ -586,7 +586,7 @@ export default function Advisor() {
             ].map((item,i) => (
               <div key={i} style={{background:'#f8f9fa',borderRadius:6,padding:'8px 10px',minWidth:0,overflow:'hidden'}}>
                 <div style={{fontSize:8,color:'#888',marginBottom:2,textTransform:'uppercase',letterSpacing:.5}}>{item.l}</div>
-                <div style={{fontSize: String(item.v).length>11?11:13,fontWeight:700,color:item.c,fontFamily:'monospace',overflowWrap:'anywhere'}}>{item.v}</div>
+                <div style={{fontSize: String(item.v).length>11?11:13,fontWeight:700,color:item.c,fontFamily:'monospace',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{item.v}</div>
               </div>
             ))}
           </div>

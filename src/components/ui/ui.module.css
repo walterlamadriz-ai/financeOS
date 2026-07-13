@@ -7,8 +7,8 @@
   font-weight: 500; transition: all 0.15s; border: 0.5px solid var(--brd2);
   padding: 7px 14px;
 }
-.btn_primary { background: var(--grn); color: #fff; border-color: var(--grn); }
-.btn_primary:hover { opacity: 0.88; }
+.btn_primary { background: var(--grn); color: #fff; border-color: var(--grn); box-shadow: var(--sh-1); }
+.btn_primary:hover { opacity: 0.92; box-shadow: var(--sh-2); }
 .btn_ghost { background: transparent; color: var(--tm); }
 .btn_ghost:hover { background: var(--sur2); }
 .btn_danger { background: transparent; color: var(--red); border-color: var(--red); }
@@ -19,7 +19,8 @@
 /* CARD */
 .card {
   background: var(--sur); border: 0.5px solid var(--brd);
-  border-radius: var(--rl); padding: 14px;
+  border-radius: var(--rl); padding: 16px;
+  box-shadow: var(--sh-1);
 }
 .cardHd {
   display: flex; align-items: center; justify-content: space-between;
@@ -30,11 +31,12 @@
 
 /* KPI */
 .kpi {
-  background: var(--sur2); border-radius: var(--r);
-  padding: 12px; border: 0.5px solid var(--brd);
+  background: var(--sur); border-radius: var(--rl);
+  padding: 14px 16px; border: 0.5px solid var(--brd);
+  box-shadow: var(--sh-1);
 }
-.kpiLbl { font-size: 10px; color: var(--tm); font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
-.kpiVal { font-size: 20px; font-weight: 600; font-family: var(--mono); letter-spacing: -1px; color: var(--tx); }
+.kpiLbl { font-size: 10px; color: var(--tm); font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.kpiVal { font-size: 22px; font-weight: 700; font-family: var(--display); letter-spacing: -0.01em; font-feature-settings: 'tnum' 1; color: var(--tx); }
 .kpi_green { color: var(--grn); }
 .kpi_red   { color: var(--red); }
 .kpi_amber { color: var(--amb); }
@@ -97,7 +99,7 @@
 .barFill { height: 100%; border-radius: 3px; transition: width 0.4s; }
 
 /* PAGE HEADER */
-.pageHeader { margin-bottom: 14px; }
-.pageHeader h1 { font-size: 16px; font-weight: 600; letter-spacing: -0.3px; color: var(--tx); }
-.pageHeader p  { font-size: 11px; color: var(--th); font-family: var(--mono); margin-top: 2px; }
+.pageHeader { margin-bottom: 18px; }
+.pageHeader h1 { font-size: 24px; font-weight: 700; font-family: var(--display); letter-spacing: -0.02em; color: var(--tx); }
+.pageHeader p  { font-size: 11px; color: var(--th); font-family: var(--mono); margin-top: 4px; }
 .sectionTitle  { font-size: 11px; font-weight: 500; color: var(--tm); text-transform: uppercase; letter-spacing: 0.8px; font-family: var(--mono); margin-bottom: 10px; }

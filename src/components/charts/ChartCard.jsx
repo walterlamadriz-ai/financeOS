@@ -1,10 +1,10 @@
 // src/components/charts/ChartCard.jsx
 export default function ChartCard({ title, subtitle, children, minHeight = 220 }) {
   return (
-    <div style={{ background:'var(--sur)', border:'.5px solid var(--brd)', borderRadius:'var(--r)', padding:'18px 20px', marginBottom:16 }}>
+    <div style={{ background:'var(--sur)', border:'.5px solid var(--brd)', borderRadius:'var(--rl)', padding:'18px 20px', marginBottom:16, boxShadow:'var(--sh-1)' }}>
       {title && (
         <div style={{ marginBottom:14 }}>
-          <div style={{ fontSize:13, fontWeight:600, color:'var(--tx)', display:'flex', alignItems:'center', gap:8 }}>
+          <div className="display" style={{ fontSize:15, fontWeight:600, color:'var(--tx)', display:'flex', alignItems:'center', gap:8 }}>
             <span style={{ width:6, height:6, borderRadius:'50%', background:'var(--accent)', display:'inline-block', flexShrink:0 }}/>
             {title}
           </div>
