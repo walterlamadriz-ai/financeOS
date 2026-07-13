@@ -1,5 +1,5 @@
 /* src/styles/globals.css */
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -28,15 +28,35 @@
   --accent-bg: rgba(10,157,126,0.08);
   --accent2:   #1a7a99;   /* cyan de acento secundario */
   --sans:      'Instrument Sans', sans-serif;
+  --display:   'Space Grotesk', 'Instrument Sans', sans-serif; /* jerarquía con carácter */
   --mono:      'JetBrains Mono', monospace;
   --r:         8px;
   --rl:        12px;
   --rs:        4px;
+  --rxl:       16px;   /* tarjetas destacadas / modales */
   /* Escala tipográfica */
   --fs-xs:     10px;
   --fs-sm:     12px;
   --fs-md:     14px;
   --fs-lg:     18px;
+  --fs-xl:     22px;
+  --fs-2xl:    28px;
+  --fs-3xl:    36px;   /* números hero / display */
+  /* Espaciado (ritmo de 4px) */
+  --sp-1:      4px;
+  --sp-2:      8px;
+  --sp-3:      12px;
+  --sp-4:      16px;
+  --sp-5:      20px;
+  --sp-6:      24px;
+  --sp-8:      32px;
+  /* Elevación — profundidad sutil, la clave contra el "se ve plano" */
+  --sh-1:      0 1px 2px rgba(20,20,15,.04), 0 1px 3px rgba(20,20,15,.03);
+  --sh-2:      0 2px 4px rgba(20,20,15,.05), 0 4px 12px rgba(20,20,15,.05);
+  --sh-3:      0 8px 24px rgba(20,20,15,.08), 0 2px 8px rgba(20,20,15,.05);
+  /* Movimiento */
+  --ease:      cubic-bezier(.22,.61,.36,1);
+  --dur:       .18s;
 }
 
 [data-theme="dark"] {
@@ -62,6 +82,10 @@
   --accent:    #2de8c0;   /* brillante para pasar AA sobre --sur oscuro */
   --accent-bg: rgba(45,232,192,0.12);
   --accent2:   #4ec8e6;
+  /* Elevación en dark: sombra más honda + hairline de luz superior */
+  --sh-1:      0 1px 2px rgba(0,0,0,.4);
+  --sh-2:      0 4px 14px rgba(0,0,0,.45);
+  --sh-3:      0 12px 32px rgba(0,0,0,.55);
 }
 
 html, body, #root {
@@ -100,6 +124,32 @@ select option { background: var(--sur); }
 
 /* Buttons */
 button { cursor: pointer; font-family: var(--sans); }
+
+/* ── Fundaciones de diseño (Ronda 0) ─────────────────────────────────────────
+   Utilidades opt-in: se aplican por clase, no cambian nada existente. */
+
+/* Tarjeta con elevación — reemplaza gradualmente al patrón "solo borde". */
+.card {
+  background: var(--sur);
+  border: 0.5px solid var(--brd);
+  border-radius: var(--rl);
+  box-shadow: var(--sh-1);
+}
+.card-2 { box-shadow: var(--sh-2); }
+.card-hover { transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease); }
+.card-hover:hover { box-shadow: var(--sh-2); transform: translateY(-1px); }
+
+/* Tipografía display — jerarquía con carácter (títulos, no cuerpo). */
+.display { font-family: var(--display); letter-spacing: -0.02em; }
+
+/* Números grandes: Space Grotesk tiene cifras tabulares con más presencia que
+   el mono para los montos hero, sin el aire "terminal". */
+.num { font-family: var(--display); font-feature-settings: 'tnum' 1; letter-spacing: -0.01em; }
+
+/* Entrada suave — para escalonar la aparición de tarjetas (Ronda 3 la explota). */
+@keyframes fos-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.rise { animation: fos-rise var(--dur) var(--ease) both; }
+@media (prefers-reduced-motion: reduce) { .rise { animation: none; } .card-hover { transition: none; } }
 
 /* Utilidad: ocultar en móvil (≤700px) */
 @media (max-width: 700px) {

@@ -254,8 +254,11 @@ export default function Dashboard({ setPage }) {
   }
 
   // ── Vista compacta (progressive disclosure) ───────────────────────────────
+  // Vista esencial por defecto (calma): la primera pantalla muestra lo esencial y
+  // el resto (acciones, proyección, gráficos, ingreso esperado) vive en "detallado".
+  // Respeta la preferencia previa del usuario si ya la fijó.
   const [compact, setCompact] = useState(() => {
-    try { return localStorage.getItem('fos_dash_compact') === '1' } catch { return false }
+    try { return localStorage.getItem('fos_dash_compact') !== '0' } catch { return true }
   })
   function toggleCompact() {
     setCompact(c => {
@@ -445,7 +448,7 @@ export default function Dashboard({ setPage }) {
           <div style={{ marginBottom:20, display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:12, flexWrap:'wrap' }}>
             <div>
               <div style={{ fontFamily:'var(--mono)', fontSize:11, letterSpacing:'1.2px', textTransform:'uppercase', color:'var(--grn2)', marginBottom:6 }}>Dashboard · {activeMonth}</div>
-              <h1 style={{ fontSize:22, fontWeight:700, color:'var(--tx)', letterSpacing:'-.5px', marginBottom:4 }}>{t('dash.title')}</h1>
+              <h1 className="display" style={{ fontSize:26, fontWeight:700, color:'var(--tx)', marginBottom:4 }}>{t('dash.title')}</h1>
               <p style={{ fontSize:13, color: noData ? 'var(--th)' : ok ? 'var(--grn)' : 'var(--red)', fontWeight: noData ? 400 : 500, lineHeight:1.5 }}>{heroLine}</p>
             </div>
             <button onClick={toggleCompact} title={compact ? t('dash.view.show') : t('dash.view.hide')}
@@ -478,8 +481,8 @@ export default function Dashboard({ setPage }) {
           </div>
         </div>
       )}
-      {/* Acciones rápidas */}
-      {setPage && (
+      {/* Acciones rápidas — solo en vista detallada (reduce ruido inicial) */}
+      {setPage && !compact && (
         <div style={{ marginBottom:20 }}>
           <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)', textTransform:'uppercase', letterSpacing:'.8px', marginBottom:10 }}>{t('dash.quick.title')}</div>
           <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
@@ -505,10 +508,10 @@ export default function Dashboard({ setPage }) {
       {/* KPI Cards */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))', gap:12, marginBottom:16 }}>
         {KPIS.map((k, i) => (
-          <div key={i} style={{ background:'var(--sur)', border:'.5px solid var(--brd)', borderRadius:'var(--r)', padding:'14px 16px', position:'relative', overflow:'hidden' }}>
+          <div key={i} className="card card-hover rise" style={{ padding:'14px 16px', position:'relative', overflow:'hidden', animationDelay:`${i*40}ms` }}>
             <div style={{ position:'absolute', top:-16, right:-16, width:56, height:56, borderRadius:'50%', background:`${k.color}`, opacity:.08 }}/>
             <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)', textTransform:'uppercase', letterSpacing:'.8px', marginBottom:6 }}>{k.label}</div>
-            <div style={{ fontFamily:'var(--mono)', fontSize:18, fontWeight:700, color:k.color, marginBottom:3, display:'flex', alignItems:'center', flexWrap:'wrap', gap:2 }}>
+            <div className="num" style={{ fontSize:22, fontWeight:700, color:k.color, marginBottom:3, display:'flex', alignItems:'center', flexWrap:'wrap', gap:4 }}>
               {k.value}
               <DeltaBadge d={k.delta} invert={k.invertDelta} />
             </div>
@@ -522,8 +525,8 @@ export default function Dashboard({ setPage }) {
         ))}
       </div>
 
-      {/* Ingreso esperado vs recibido */}
-      {(() => {
+      {/* Ingreso esperado vs recibido — vista detallada */}
+      {!compact && (() => {
         const expected = Number(settings.estimatedMonthlyIncome) || 0
         if (expected <= 0 || kpis.totalInc <= 0) return null
         const diff = kpis.totalInc - expected
@@ -561,10 +564,10 @@ export default function Dashboard({ setPage }) {
 
       {/* Puntaje de salud financiera */}
       {healthScore && (
-        <div style={{ background:'var(--sur)', border:`.5px solid var(--brd)`, borderRadius:'var(--r)', padding:'14px 16px', marginBottom:16, display:'flex', alignItems:'center', gap:16, flexWrap:'wrap' }}>
+        <div className="card rise" style={{ padding:'16px 18px', marginBottom:16, display:'flex', alignItems:'center', gap:16, flexWrap:'wrap' }}>
           <div style={{ display:'flex', alignItems:'center', gap:14, flex:1, minWidth:180 }}>
             <div style={{ textAlign:'center', flexShrink:0 }}>
-              <div style={{ fontSize:28, fontWeight:700, fontFamily:'var(--mono)', color:healthScore.color, lineHeight:1 }}>{healthScore.score}</div>
+              <div className="num" style={{ fontSize:34, fontWeight:700, color:healthScore.color, lineHeight:1 }}>{healthScore.score}</div>
               <div style={{ fontSize:11, fontFamily:'var(--mono)', color:'var(--th)', textTransform:'uppercase', letterSpacing:'.5px', marginTop:2 }}>/ 100</div>
             </div>
             <div>
@@ -586,7 +589,7 @@ export default function Dashboard({ setPage }) {
 
       {/* Señales del Diagnóstico */}
       {topSignals.length > 0 && (
-        <div style={{ background:'var(--sur)', border:`.5px solid var(--brd)`, borderRadius:'var(--r)', padding:'14px 16px', marginBottom:16 }}>
+        <div className="card rise" style={{ padding:'16px 18px', marginBottom:16 }}>
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
             <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)', textTransform:'uppercase', letterSpacing:'.8px' }}>{t('dash.signals.title')}</div>
             {setPage && (
@@ -654,30 +657,33 @@ export default function Dashboard({ setPage }) {
         )
       })()}
 
-      {/* Gráficos */}
-      {!compact && (
-        <>
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))', gap:16, marginBottom:16 }}>
+      {/* Gráficos — el donut de categorías vive también en la vista esencial
+          (da vida visual sin recargar); flujo y barras solo en detallada. */}
+      {monthExpenses.length > 0 && (
+        <div style={{ display:'grid', gridTemplateColumns: compact ? '1fr' : 'repeat(auto-fit, minmax(280px, 1fr))', gap:16, marginBottom:16 }}>
+          {!compact && (
             <div className="fos-hide-mobile">
               <ChartCard title={t('dash.chart.flow.title')} subtitle={t('dash.chart.flow.sub')} minHeight={220}>
                 <MoneyFlow incomes={incomes} expenses={monthExpenses} subscriptions={subs} debts={debts} sym={sym}/>
               </ChartCard>
             </div>
-            <ChartCard title={t('dash.chart.cat.title')} subtitle={activeMonth} minHeight={160}>
-              <CategoryDonut records={monthExpenses} sym={sym} maxCategories={6}
-                onCategoryClick={setPage ? (cat) => { try { sessionStorage.setItem('fos_drill_category', cat) } catch {} ; setPage('movements') } : undefined}/>
-            </ChartCard>
-          </div>
-          <ChartCard title={t('dash.chart.bar.title')} subtitle={t('dash.chart.bar.sub')} minHeight={180}>
-            <IncomeExpenseBar incomes={incomes} expenses={expenses} sym={sym} months={6}/>
+          )}
+          <ChartCard title={t('dash.chart.cat.title')} subtitle={activeMonth} minHeight={160}>
+            <CategoryDonut records={monthExpenses} sym={sym} maxCategories={6}
+              onCategoryClick={setPage ? (cat) => { try { sessionStorage.setItem('fos_drill_category', cat) } catch {} ; setPage('movements') } : undefined}/>
           </ChartCard>
-        </>
+        </div>
+      )}
+      {!compact && (
+        <ChartCard title={t('dash.chart.bar.title')} subtitle={t('dash.chart.bar.sub')} minHeight={180}>
+          <IncomeExpenseBar incomes={incomes} expenses={expenses} sym={sym} months={6}/>
+        </ChartCard>
       )}
 
 
 
-      {/* Link a Diagnóstico */}
-      {setPage && (
+      {/* Link a Diagnóstico — vista detallada */}
+      {setPage && !compact && (
         <div style={{ padding:'10px 14px', background:'var(--sur)', border:'.5px solid var(--brd)', borderRadius:'var(--r)', display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
           <span style={{ fontSize:12, color:'var(--th)', fontFamily:'var(--mono)' }}>{t('dash.coachLink.text')}</span>
           <button onClick={() => setPage('coach')} style={{ background:'none', border:'.5px solid var(--brd2)', borderRadius:6, padding:'4px 12px', fontSize:11, color:'var(--accent)', cursor:'pointer', fontFamily:'var(--mono)' }}>
