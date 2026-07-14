@@ -99,7 +99,7 @@ const box = {
   borderRadius: 16, padding: '26px 22px', maxWidth: 430, width: '100%',
   boxShadow: '0 24px 60px rgba(0,0,0,.08)', margin: 'auto',
 }
-const h1s = { fontSize: 18, fontWeight: 700, color: 'var(--tx)', marginBottom: 5, letterSpacing: '-0.3px' }
+const h1s = { fontSize: 22, fontWeight: 700, color: 'var(--tx)', marginBottom: 5, fontFamily: 'var(--display)', letterSpacing: '-0.02em' }
 const subs = { fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', lineHeight: 1.5, marginBottom: 18 }
 const btnP = (disabled = false) => ({
   width: '100%', padding: '10px', borderRadius: 8, border: 'none',

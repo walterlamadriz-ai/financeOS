@@ -98,14 +98,14 @@ export default function LicenseGate({ onActivate }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }}>
           <div style={{ width: 34, height: 34, background: 'var(--grn,#1a6b4a)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 14 }}>F</div>
           <div>
-            <div style={{ fontFamily: 'var(--head)', fontSize: 17, fontWeight: 600, color: 'var(--ink)', letterSpacing: '-.3px' }}>FinanceOS</div>
+            <div style={{ fontFamily: 'var(--display)', fontSize: 17, fontWeight: 600, color: 'var(--ink)', letterSpacing: '-.3px' }}>FinanceOS</div>
             <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--ink3,#888)', marginTop: 1 }}>v1.5 · MAXNOVA & LUCI Global LLC</div>
           </div>
         </div>
 
         {/* Activate */}
         <div style={{ marginBottom: 24 }}>
-          <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ink)', marginBottom: 6, fontFamily: 'var(--head)' }}>Ingresa tu clave de acceso</div>
+          <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ink)', marginBottom: 6, fontFamily: 'var(--display)' }}>Ingresa tu clave de acceso</div>
           <div style={{ fontSize: 12, color: 'var(--ink2,#666)', lineHeight: 1.6, marginBottom: 14, fontFamily: 'var(--body)' }}>
             La encontrarás en el email de confirmación de tu compra, con formato{' '}
             <span style={{ fontFamily: 'var(--mono)', background: '#f4f4f0', padding: '1px 6px', borderRadius: 4 }}>FNOS-XXXX-XXXX-XXXX</span>
@@ -190,8 +190,8 @@ export default function LicenseGate({ onActivate }) {
               onMouseOver={e => { if (!buying) e.currentTarget.style.transform = 'translateY(-1px)' }}
               onMouseOut={e => { e.currentTarget.style.transform = 'none' }}
             >
-              <div style={{ fontFamily: 'var(--head)', fontSize: 13, fontWeight: 600, color: p.highlight ? 'var(--grn,#1a6b4a)' : 'var(--ink)', marginBottom: 3 }}>{p.name}</div>
-              <div style={{ fontFamily: 'var(--head)', fontSize: 20, fontWeight: 700, color: 'var(--ink)', marginBottom: 3 }}>{p.price}</div>
+              <div style={{ fontFamily: 'var(--display)', fontSize: 13, fontWeight: 600, color: p.highlight ? 'var(--grn,#1a6b4a)' : 'var(--ink)', marginBottom: 3 }}>{p.name}</div>
+              <div style={{ fontFamily: 'var(--display)', fontSize: 20, fontWeight: 700, color: 'var(--ink)', marginBottom: 3 }}>{p.price}</div>
               <div style={{ fontFamily: 'var(--mono)', fontSize: 9, color: '#888' }}>{p.desc}</div>
               {buying === p.product && (
                 <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--grn)', marginTop: 6 }}>Redirigiendo…</div>
