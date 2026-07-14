@@ -39,7 +39,7 @@ export default function NetWorth() {
               <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 6 }}>
                 {t('networth.headline')}
               </div>
-              <div style={{ fontSize: 34, fontWeight: 700, fontFamily: 'var(--mono)', color: netWorth >= 0 ? 'var(--grn)' : '#e84142' }}>
+              <div className="num" style={{ fontSize: 36, fontWeight: 700, color: netWorth >= 0 ? 'var(--grn)' : '#e84142' }}>
                 {netWorth >= 0 ? '' : '-'}{fmtMoney(Math.abs(netWorth), sym)}
               </div>
               <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: 4 }}>

@@ -376,7 +376,7 @@ export default function Advisor() {
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
-            <h1 style={{ fontSize: 16, fontWeight: 600, letterSpacing: '-0.3px' }}>{t('adv.title')}</h1>
+            <h1 className="display" style={{ fontSize: 24, fontWeight: 700 }}>{t('adv.title')}</h1>
             <div style={{
               fontSize: 9, fontFamily: 'var(--mono)', fontWeight: 600,
               background: 'var(--grn-bg)', color: 'var(--grn)',
@@ -428,7 +428,7 @@ export default function Advisor() {
                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                 flexShrink: 0,
               }}>
-                <div style={{ fontSize: 20, fontWeight: 700, color: scoreColor, fontFamily: 'var(--mono)', lineHeight: 1 }}>{score}</div>
+                <div className="num" style={{ fontSize: 24, fontWeight: 700, color: scoreColor, lineHeight: 1 }}>{score}</div>
                 <div style={{ fontSize: 8, color: 'var(--th)', fontFamily: 'var(--mono)' }}>/ 100</div>
               </div>
               <div style={{ flex: 1 }}>

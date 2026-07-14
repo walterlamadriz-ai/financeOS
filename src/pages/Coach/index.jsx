@@ -132,7 +132,7 @@ export default function Coach() {
         <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--grn)', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: 6 }}>
           {t('coach.kicker')}
         </div>
-        <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--tx)', letterSpacing: '-.5px', marginBottom: 4 }}>
+        <h1 className="display" style={{ fontSize: 24, fontWeight: 700, color: 'var(--tx)', marginBottom: 4 }}>
           {t('coach.title')}
         </h1>
         <p style={{ fontSize: 12, color: 'var(--th)', fontFamily: 'var(--mono)', marginBottom: 4 }}>

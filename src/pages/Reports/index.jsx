@@ -283,7 +283,7 @@ export default function Reports({ setPage }) {
         <div style={{padding:'12px 16px',background:'var(--sur)',border:'.5px solid var(--brd)',borderRadius:'var(--r)',display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,flexWrap:'wrap'}}>
           <div style={{flex:1,minWidth:200}}>
             <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',textTransform:'uppercase',letterSpacing:'.8px',marginBottom:3}}>{t('reports.networth.title')}</div>
-            <div style={{fontSize:20,fontWeight:700,fontFamily:'var(--mono)',color: nw.netWorth >= 0 ? 'var(--grn)' : 'var(--red)'}}>
+            <div className="num" style={{fontSize:22,fontWeight:700,color: nw.netWorth >= 0 ? 'var(--grn)' : 'var(--red)'}}>
               {nw.netWorth >= 0 ? '' : '-'}{fmtMoney(Math.abs(nw.netWorth), sym)}
             </div>
             <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',marginTop:2}}>{t('reports.networth.formula', { a: fmtMoney(nw.totalActivos, sym), p: fmtMoney(nw.totalPasivos, sym) })}</div>
