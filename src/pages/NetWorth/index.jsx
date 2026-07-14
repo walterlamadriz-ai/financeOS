@@ -10,6 +10,7 @@ import { Card, CardHeader, PageHeader, Empty } from '../../components/ui/index.j
 import { fmtMoney } from '../../utils/index.js'
 import { CURRENCY_SYMBOLS } from '../shared/constants.js'
 import { calcNetWorth } from '../../utils/netWorth.js'
+import CountUp from '../../components/CountUp.jsx'
 
 export default function NetWorth() {
   const { goals, debts, incomes, expenses, settings } = useApp()
@@ -40,7 +41,7 @@ export default function NetWorth() {
                 {t('networth.headline')}
               </div>
               <div className="num" style={{ fontSize: 36, fontWeight: 700, color: netWorth >= 0 ? 'var(--grn)' : '#e84142' }}>
-                {netWorth >= 0 ? '' : '-'}{fmtMoney(Math.abs(netWorth), sym)}
+                {netWorth >= 0 ? '' : '-'}<CountUp value={Math.abs(netWorth)} format={(v) => fmtMoney(v, sym)} duration={750} />
               </div>
               <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: 4 }}>
                 {t('networth.formula', { a: fmtMoney(totalActivos, sym), p: fmtMoney(totalPasivos, sym) })}

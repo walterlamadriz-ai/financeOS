@@ -12,6 +12,7 @@ import { evaluateCoach, calcCoachMetrics } from '../../data/coachRules.js'
 import { calcFinancialScore } from '../../utils/financialScore.js'
 import { pendingDebtMonthly } from '../../utils/personal.js'
 import { projectEndOfMonth } from '../../utils/projection.js'
+import CountUp from '../../components/CountUp.jsx'
 
 const fmt  = (n) => (Number(n) || 0).toLocaleString('es-CL', { maximumFractionDigits: 0 })
 const pct  = (n) => ((Number(n) || 0) * 100).toFixed(1) + '%'
@@ -423,10 +424,10 @@ export default function Dashboard({ setPage }) {
   const flujoTotal = kpis.balance + propFlow.net
 
   const KPIS = [
-    { label:t('dash.kpi.income'),       value:`${sym}${fmt(kpis.totalInc)}`,  color:'var(--accent)', sub:t('dash.kpi.records', { n: kpis.incCount }),                                                          delta: kpis.delta.inc,  invertDelta: false, raw: kpis.totalInc },
-    { label:t('dash.kpi.expenses'),         value:`${sym}${fmt(kpis.totalExp)}`,  color:'var(--red)',    sub:t('dash.kpi.records', { n: kpis.expCount }),                                                          delta: kpis.delta.exp,  invertDelta: true,  raw: kpis.totalExp },
-    { label:t('dash.kpi.balance'),   value:`${sym}${fmt(kpis.balance)}`,   color:kpis.balance >= 0 ? 'var(--accent)' : 'var(--red)', sub:(kpis.totalDebt + kpis.totalSubs > 0) ? t('dash.kpi.afterDebts', { v: `${sym}${fmt(kpis.freeFlow)}` }) : (kpis.balance >= 0 ? t('dash.kpi.incMinusExp') : t('dash.kpi.expOverInc')),      delta: kpis.delta.bal,  invertDelta: false, raw: kpis.balance },
-    ...(propFlow.has ? [{ label:t('dash.kpi.totalFlow'), value:`${sym}${fmt(flujoTotal)}`, color: flujoTotal >= 0 ? 'var(--accent)' : 'var(--red)', sub:t('dash.kpi.personalPlusProps', { v: `${propFlow.net >= 0 ? '+' : '−'}${sym}${fmt(Math.abs(propFlow.net))}` }), delta: null, invertDelta: false, raw: flujoTotal }] : []),
+    { label:t('dash.kpi.income'),       value:`${sym}${fmt(kpis.totalInc)}`,  color:'var(--accent)', sub:t('dash.kpi.records', { n: kpis.incCount }),                                                          delta: kpis.delta.inc,  invertDelta: false, raw: kpis.totalInc, count: true },
+    { label:t('dash.kpi.expenses'),         value:`${sym}${fmt(kpis.totalExp)}`,  color:'var(--red)',    sub:t('dash.kpi.records', { n: kpis.expCount }),                                                          delta: kpis.delta.exp,  invertDelta: true,  raw: kpis.totalExp, count: true },
+    { label:t('dash.kpi.balance'),   value:`${sym}${fmt(kpis.balance)}`,   color:kpis.balance >= 0 ? 'var(--accent)' : 'var(--red)', sub:(kpis.totalDebt + kpis.totalSubs > 0) ? t('dash.kpi.afterDebts', { v: `${sym}${fmt(kpis.freeFlow)}` }) : (kpis.balance >= 0 ? t('dash.kpi.incMinusExp') : t('dash.kpi.expOverInc')),      delta: kpis.delta.bal,  invertDelta: false, raw: kpis.balance, count: true },
+    ...(propFlow.has ? [{ label:t('dash.kpi.totalFlow'), value:`${sym}${fmt(flujoTotal)}`, color: flujoTotal >= 0 ? 'var(--accent)' : 'var(--red)', sub:t('dash.kpi.personalPlusProps', { v: `${propFlow.net >= 0 ? '+' : '−'}${sym}${fmt(Math.abs(propFlow.net))}` }), delta: null, invertDelta: false, raw: flujoTotal, count: true }] : []),
     { label:t('dash.kpi.savingRate'), value:pct(kpis.savingRate),           color:kpis.savingRate >= 0.2 ? 'var(--accent)' : kpis.savingRate >= 0 ? 'var(--amb)' : 'var(--red)', sub:t('dash.kpi.ofIncome'), delta: kpis.delta.save, invertDelta: false, raw: null },
     { label:t('dash.kpi.subs'),  value:t('dash.kpi.perMonth', { v: `${sym}${fmt(subMonthly)}` }), color:'var(--amb)',    sub:t('dash.kpi.perYear', { v: `${sym}${fmt(subMonthly * 12)}` }),                                          delta: null,            invertDelta: false, raw: subMonthly },
   ]
@@ -512,7 +513,7 @@ export default function Dashboard({ setPage }) {
             <div style={{ position:'absolute', top:-16, right:-16, width:56, height:56, borderRadius:'50%', background:`${k.color}`, opacity:.08 }}/>
             <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)', textTransform:'uppercase', letterSpacing:'.8px', marginBottom:6 }}>{k.label}</div>
             <div className="num" style={{ fontSize:22, fontWeight:700, color:k.color, marginBottom:3, display:'flex', alignItems:'center', flexWrap:'wrap', gap:4 }}>
-              {k.value}
+              {k.count ? <CountUp value={k.raw} format={(v) => `${sym}${fmt(v)}`} /> : k.value}
               <DeltaBadge d={k.delta} invert={k.invertDelta} />
             </div>
             <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)' }}>{k.sub}</div>
@@ -567,7 +568,9 @@ export default function Dashboard({ setPage }) {
         <div className="card rise" style={{ padding:'16px 18px', marginBottom:16, display:'flex', alignItems:'center', gap:16, flexWrap:'wrap' }}>
           <div style={{ display:'flex', alignItems:'center', gap:14, flex:1, minWidth:180 }}>
             <div style={{ textAlign:'center', flexShrink:0 }}>
-              <div className="num" style={{ fontSize:34, fontWeight:700, color:healthScore.color, lineHeight:1 }}>{healthScore.score}</div>
+              <div className="num" style={{ fontSize:34, fontWeight:700, color:healthScore.color, lineHeight:1 }}>
+                <CountUp value={healthScore.score} format={(v) => Math.round(v)} duration={800} />
+              </div>
               <div style={{ fontSize:11, fontFamily:'var(--mono)', color:'var(--th)', textTransform:'uppercase', letterSpacing:'.5px', marginTop:2 }}>/ 100</div>
             </div>
             <div>
