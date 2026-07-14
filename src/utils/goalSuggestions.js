@@ -34,7 +34,13 @@ export const GOAL_TEMPLATES = [
     name: 'gs.vacations.name',
     description: 'gs.vacations.desc',
     priority: 2,
-    targetFn: ({ ingresoNeto }) => Math.round(ingresoNeto * 1.5),
+    // Vacaciones anuales ≈ un mes de tu ritmo de vida (gasto mensual). Antes era
+    // 1.5× ingreso, que inflaba el monto y daba horizontes de ~30 meses para una
+    // meta que es anual. Fallback a ingreso si aún no hay gastos registrados.
+    targetFn: ({ ingresoNeto, gastoMensual }) => {
+      const base = gastoMensual > 0 ? gastoMensual : ingresoNeto
+      return Math.round(base * 1)
+    },
     contributionPct: 0.05,
     color: '#2563eb',
     goalPriority: 'Media',
@@ -73,7 +79,13 @@ export const GOAL_TEMPLATES = [
     name: 'gs.opportunity.name',
     description: 'gs.opportunity.desc',
     priority: 5,
-    targetFn: ({ ingresoNeto }) => Math.round(ingresoNeto * 2),
+    // Colchón de oportunidades = un mes de tu ritmo de vida (gasto mensual).
+    // Antes era 2× ingreso, lo que lo hacía casi tan grande como el fondo de
+    // emergencia pese a ser la meta de MENOR prioridad. Fallback a ingreso.
+    targetFn: ({ ingresoNeto, gastoMensual }) => {
+      const base = gastoMensual > 0 ? gastoMensual : ingresoNeto
+      return Math.round(base * 1)
+    },
     contributionPct: 0.03,
     color: '#0891b2',
     goalPriority: 'Baja',
