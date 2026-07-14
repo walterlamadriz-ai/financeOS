@@ -58,6 +58,7 @@
 .crumb    { font-size: 11px; color: var(--th); font-family: var(--mono); }
 .topRight { font-size: 10px; color: var(--th); font-family: var(--mono); }
 .content  { flex: 1; overflow-y: auto; padding: 14px 18px 24px; }
+.contentInner { max-width: 1080px; margin: 0 auto; }
 
 /* GRID HELPERS */
 :global(.grid2) { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }

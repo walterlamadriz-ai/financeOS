@@ -36,7 +36,7 @@ export default function Multimoneda() {
 
   return (
     <ProGate feature="El panel multimoneda">
-      <div className="stack" style={{ maxWidth: 760, margin: '0 auto' }}>
+      <div className="stack">
         <PageHeader title={config.titulo} sub={config.subtitulo} />
 
         <Alert type="info">

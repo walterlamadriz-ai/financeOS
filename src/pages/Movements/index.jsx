@@ -483,7 +483,7 @@ export default function Movements({ setPage }) {
     borderRadius:'var(--r)', padding:'12px 14px', minWidth:0 }
 
   return (
-    <div style={{ maxWidth:960, margin:'0 auto' }}>
+    <div>
 
       {/* Header */}
       <div style={{ marginBottom:20 }}>

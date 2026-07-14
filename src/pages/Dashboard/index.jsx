@@ -432,7 +432,7 @@ export default function Dashboard({ setPage }) {
   ]
 
   return (
-    <div style={{ maxWidth:960, margin:'0 auto' }}>
+    <div>
       <MonthlyCloseModal />
 
       {/* Header — hero contextual */}

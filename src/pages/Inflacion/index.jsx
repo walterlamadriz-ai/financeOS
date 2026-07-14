@@ -46,7 +46,7 @@ export default function Inflacion() {
 
   return (
     <ProGate feature="El ajuste por inflación">
-      <div className="stack" style={{ maxWidth: 760, margin: '0 auto' }}>
+      <div className="stack">
         <PageHeader title={config.titulo} sub={config.subtitulo} />
 
         <Alert type="info">

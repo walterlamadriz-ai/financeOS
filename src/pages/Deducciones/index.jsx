@@ -59,7 +59,7 @@ export default function Deducciones() {
 
   return (
     <ProGate feature="El optimizador de deducciones">
-      <div className="stack" style={{ maxWidth: 760, margin: '0 auto' }}>
+      <div className="stack">
         <PageHeader title={config.titulo} sub={config.subtitulo} />
 
         <Alert type="info">

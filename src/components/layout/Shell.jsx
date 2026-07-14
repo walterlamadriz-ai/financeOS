@@ -214,7 +214,9 @@ export default function Shell({ page, setPage, children }) {
         </div>
 
         <div className={s.content}>
-          {children}
+          <div className={s.contentInner}>
+            {children}
+          </div>
         </div>
 
         {/* FAB speed-dial — Ingreso / Egreso, solo móvil */}

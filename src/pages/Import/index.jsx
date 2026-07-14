@@ -14,7 +14,7 @@ import {
 } from './fileParser.js'
 
 const s = {
-  page: { maxWidth: 860, margin: '0 auto' },
+  page: {},
   header: { marginBottom: 24 },
   eyebrow: { fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '1.2px', textTransform: 'uppercase', color: 'var(--grn2)', marginBottom: 6 },
   h1: { fontSize: 22, fontWeight: 700, color: 'var(--tx)', letterSpacing: '-.5px', marginBottom: 4 },
