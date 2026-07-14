@@ -480,7 +480,7 @@ export default function Movements({ setPage }) {
 
   // ── Render ───────────────────────────────────────────────────────────────────
   const kpiBox = { background:'var(--sur)', border:'.5px solid var(--brd)',
-    borderRadius:'var(--r)', padding:'12px 14px', minWidth:0 }
+    borderRadius:'var(--rl)', padding:'14px 16px', minWidth:0, boxShadow:'var(--sh-1)' }
 
   return (
     <div>
@@ -489,7 +489,7 @@ export default function Movements({ setPage }) {
       <div style={{ marginBottom:20 }}>
         <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--grn)',
           textTransform:'uppercase', letterSpacing:'1.2px', marginBottom:4 }}>{t('mov.kicker')}</div>
-        <h1 style={{ fontSize:20, fontWeight:700, color:'var(--tx)', marginBottom:2 }}>
+        <h1 className="display" style={{ fontSize:24, fontWeight:700, color:'var(--tx)', marginBottom:2 }}>
           {t('mov.title')}
         </h1>
         <p style={{ fontSize:12, color:'var(--th)', fontFamily:'var(--mono)' }}>
@@ -510,7 +510,7 @@ export default function Movements({ setPage }) {
           <div key={i} style={kpiBox}>
             <div style={{ fontFamily:'var(--mono)', fontSize:9, color:'var(--th)',
               textTransform:'uppercase', letterSpacing:'.8px', marginBottom:5 }}>{k.label}</div>
-            <div style={{ fontFamily:'var(--mono)', fontSize:16, fontWeight:700, color:k.color }}>
+            <div style={{ fontFamily:'var(--display)', fontSize:19, fontWeight:700, letterSpacing:'-0.01em', fontFeatureSettings:"'tnum' 1", color:k.color, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
               {k.value}
             </div>
             {k.sub && <div style={{ fontFamily:'var(--mono)', fontSize:9, color:'var(--th)', marginTop:3 }}>{k.sub}</div>}

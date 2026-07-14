@@ -241,7 +241,7 @@ export default function Subscriptions() {
     <div>
       {/* HEADER */}
       <div style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 600, letterSpacing: '-.3px', color: 'var(--tx)', marginBottom: 3 }}>
+        <h2 className="display" style={{ fontSize: 24, fontWeight: 700, color: 'var(--tx)', marginBottom: 3 }}>
           {t('subs.title')}
         </h2>
         <p style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)' }}>
@@ -258,9 +258,9 @@ export default function Subscriptions() {
           { label: t('subs.kpi.mostExpensive'),   value: mostExpensive ? mostExpensive.name : '—', color: 'var(--amb)' },
           { label: t('subs.kpi.nextPay'),  value: nextSub ? new Date(nextSub.nextPaymentDate).toLocaleDateString('es-CL') : '—', color: 'var(--tx)' },
         ].map(k => (
-          <div key={k.label} style={{ background: 'var(--sur)', border: '.5px solid var(--brd)', borderRadius: 'var(--r)', padding: '12px 14px' }}>
+          <div key={k.label} style={{ background: 'var(--sur)', border: '.5px solid var(--brd)', borderRadius: 'var(--rl)', padding: '14px 16px', boxShadow: 'var(--sh-1)' }}>
             <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 4 }}>{k.label}</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: k.color, fontFamily: 'var(--mono)', letterSpacing: '-.5px' }}>{k.value}</div>
+            <div style={{ fontSize: 19, fontWeight: 700, color: k.color, fontFamily: 'var(--display)', letterSpacing: '-.01em', fontFeatureSettings: "'tnum' 1", whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{k.value}</div>
           </div>
         ))}
       </div>

@@ -96,7 +96,7 @@ export default function BudgetProgressList({ budgets, expByCat, sym = '$' }) {
                 <div style={{ fontSize: 12, color: 'var(--th)', fontFamily: 'var(--mono)' }}>{fmtV(r.limit, sym)}</div>
               </div>
             </div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: r.status.color, fontFamily: 'var(--mono)' }}>
+            <div style={{ fontSize: 20, fontWeight: 700, color: r.status.color, fontFamily: 'var(--display)', letterSpacing: '-0.01em', fontFeatureSettings: "'tnum' 1" }}>
               {r.pct}%
             </div>
           </div>

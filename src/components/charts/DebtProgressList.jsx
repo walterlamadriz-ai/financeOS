@@ -56,9 +56,9 @@ export default function DebtProgressList({ debts, sym = '$' }) {
           { label:'Total pagado',   value:fmtV(totalPaid,     sym), color:'var(--accent)' },
           { label:'Avance total',   value:`${(totalProg*100).toFixed(0)}%`, color: totalProg >= 0.75 ? 'var(--accent)' : totalProg >= 0.4 ? 'var(--amb)' : 'var(--th)' },
         ].map((k,i) => (
-          <div key={i} style={{ background:'var(--sur)', border:'.5px solid var(--brd)', borderRadius:'var(--r)', padding:'12px 14px' }}>
+          <div key={i} style={{ background:'var(--sur)', border:'.5px solid var(--brd)', borderRadius:'var(--rl)', padding:'12px 14px', boxShadow:'var(--sh-1)' }}>
             <div style={{ fontFamily:'var(--mono)', fontSize:9, color:'var(--th)', textTransform:'uppercase', letterSpacing:'.8px', marginBottom:5 }}>{k.label}</div>
-            <div style={{ fontFamily:'var(--mono)', fontSize:16, fontWeight:700, color:k.color }}>{k.value}</div>
+            <div style={{ fontFamily:'var(--display)', fontSize:19, fontWeight:700, letterSpacing:'-0.01em', fontFeatureSettings:"'tnum' 1", color:k.color }}>{k.value}</div>
           </div>
         ))}
       </div>
