@@ -4,7 +4,7 @@
 import { ChartEmpty } from './ChartCard.jsx'
 
 const STATUS = [
-  { key: 'over',  label: 'Sobrepasado',      color: 'var(--red)',    bg: 'rgba(255,77,106,.1)',   border: 'rgba(255,77,106,.25)',  icon: '⚠' },
+  { key: 'over',  label: 'Sobrepasado',      color: 'var(--red)',    bg: 'color-mix(in srgb, var(--neg) 12%, transparent)',   border: 'color-mix(in srgb, var(--neg) 26%, transparent)',  icon: '⚠' },
   { key: 'warn',  label: 'Cerca del límite',  color: 'var(--amb)',    bg: 'rgba(245,166,35,.08)',  border: 'rgba(245,166,35,.25)',  icon: '◑' },
   { key: 'ok',    label: 'Bajo control',      color: 'var(--accent)', bg: 'transparent',           border: 'var(--brd)',            icon: '✓' },
 ]

@@ -3,7 +3,8 @@ import { useMemo } from 'react'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import { ChartEmpty } from './ChartCard.jsx'
 
-const COLORS = ['#00d4aa','#00b8d9','#f5a623','#ff4d6a','#a78bfa','#34d399','#fb923c','#60a5fa']
+// Paleta categórica por identidad, theme-aware (definida en globals.css).
+const COLORS = ['var(--cat-1)','var(--cat-2)','var(--cat-3)','var(--cat-4)','var(--cat-5)','var(--cat-6)','var(--cat-7)','var(--cat-8)']
 
 function CustomTooltip({ active, payload, sym }) {
   if (!active || !payload?.length) return null

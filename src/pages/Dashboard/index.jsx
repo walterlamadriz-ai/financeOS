@@ -107,8 +107,8 @@ export default function Dashboard({ setPage }) {
       cards.push({
         icon: '↻',
         color: 'var(--amb)',
-        bg: 'rgba(245,166,35,.07)',
-        border: 'rgba(245,166,35,.22)',
+        bg: 'color-mix(in srgb, var(--warn) 9%, transparent)',
+        border: 'color-mix(in srgb, var(--warn) 24%, transparent)',
         text: t('dash.insight.subs.text', { v: `${sym}${fmt(subMonthly * 12)}` }),
         sub: t('dash.insight.subs.sub'),
       })
@@ -127,9 +127,9 @@ export default function Dashboard({ setPage }) {
         const catPct = ((topCat[1] / totalExp) * 100).toFixed(0)
         cards.push({
           icon: '◑',
-          color: 'var(--accent2, #00b8d9)',
-          bg: 'rgba(0,184,217,.07)',
-          border: 'rgba(0,184,217,.2)',
+          color: 'var(--accent2)',
+          bg: 'color-mix(in srgb, var(--accent2) 9%, transparent)',
+          border: 'color-mix(in srgb, var(--accent2) 22%, transparent)',
           text: t('dash.insight.topCat.text', { cat: topCat[0], pct: catPct }),
           sub: t('dash.insight.topCat.sub'),
         })
@@ -149,8 +149,8 @@ export default function Dashboard({ setPage }) {
         cards.push({
           icon: pctN > 90 ? '⚠' : pctN > 80 ? '◑' : '⊞',
           color,
-          bg: pctN > 90 ? 'rgba(255,77,106,.07)' : pctN > 80 ? 'rgba(245,166,35,.07)' : 'rgba(0,212,170,.07)',
-          border: pctN > 90 ? 'rgba(255,77,106,.22)' : pctN > 80 ? 'rgba(245,166,35,.22)' : 'rgba(0,212,170,.2)',
+          bg: pctN > 90 ? 'color-mix(in srgb, var(--neg) 8%, transparent)' : pctN > 80 ? 'color-mix(in srgb, var(--warn) 9%, transparent)' : 'color-mix(in srgb, var(--pos) 8%, transparent)',
+          border: pctN > 90 ? 'color-mix(in srgb, var(--neg) 24%, transparent)' : pctN > 80 ? 'color-mix(in srgb, var(--warn) 24%, transparent)' : 'color-mix(in srgb, var(--pos) 22%, transparent)',
           text: t('dash.insight.budget.text', { pct: budgetPct }),
           sub: pctN > 90 ? t('dash.insight.budget.danger') : pctN > 80 ? t('dash.insight.budget.warn') : t('dash.insight.budget.ok'),
         })
@@ -169,8 +169,8 @@ export default function Dashboard({ setPage }) {
         cards.push({
           icon: '→',
           color: 'var(--accent)',
-          bg: 'rgba(0,212,170,.07)',
-          border: 'rgba(0,212,170,.2)',
+          bg: 'color-mix(in srgb, var(--pos) 8%, transparent)',
+          border: 'color-mix(in srgb, var(--pos) 22%, transparent)',
           text: t('dash.insight.goal.text', { name: top.name, pct: goalPct }),
           sub: t('dash.insight.goal.sub', { v: `${sym}${fmt(Number(top.target) - Number(top.saved))}` }),
         })
@@ -377,7 +377,7 @@ export default function Dashboard({ setPage }) {
     const good = invert ? !up : up
     return (
       <span style={{ fontSize:11, fontFamily:'var(--mono)', color: good ? 'var(--accent)' : 'var(--red)',
-                     background: good ? 'rgba(0,212,170,.1)' : 'rgba(255,77,106,.1)',
+                     background: good ? 'color-mix(in srgb, var(--pos) 12%, transparent)' : 'color-mix(in srgb, var(--neg) 12%, transparent)',
                      borderRadius:4, padding:'1px 5px', marginLeft:5 }}>
         {up ? '↑' : '↓'}{Math.abs(n)}%
       </span>
@@ -464,7 +464,7 @@ export default function Dashboard({ setPage }) {
 
       {/* Empieza aquí */}
       {setPage && kpis.incCount === 0 && kpis.expCount === 0 && (
-        <div style={{ background:'rgba(0,212,170,.06)', border:'.5px solid rgba(0,212,170,.25)', borderRadius:'var(--r)', padding:'18px 20px', marginBottom:20 }}>
+        <div style={{ background:'color-mix(in srgb, var(--pos) 8%, transparent)', border:'.5px solid color-mix(in srgb, var(--pos) 28%, transparent)', borderRadius:'var(--r)', padding:'18px 20px', marginBottom:20 }}>
           <div style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--accent)', textTransform:'uppercase', letterSpacing:'1px', marginBottom:6 }}>{t('dash.start.title')}</div>
           <p style={{ fontSize:13, color:'var(--th)', fontFamily:'var(--mono)', marginBottom:14 }}>{t('dash.start.sub')}</p>
           <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
@@ -490,7 +490,7 @@ export default function Dashboard({ setPage }) {
             {[
               { label:t('dash.quick.income'),     page:'income',     color:'var(--accent)' },
               { label:t('dash.quick.expense'),      page:'movements',  color:'var(--red)' },
-              { label:t('dash.quick.import'),page:'import',     color:'#00b8d9' },
+              { label:t('dash.quick.import'),page:'import',     color:'var(--accent2)' },
               { label:t('dash.quick.budget'), page:'budgets',    color:'var(--amb)' },
               { label:t('dash.quick.goal'),        page:'goals',      color:'var(--accent)' },
             ].map((a,i) => (
@@ -534,7 +534,7 @@ export default function Dashboard({ setPage }) {
         const pctDiff = ((diff / expected) * 100).toFixed(1)
         const over = diff >= 0
         return (
-          <div style={{ background: over ? 'rgba(0,212,170,.06)' : 'rgba(255,77,106,.06)', border: `.5px solid ${over ? 'rgba(0,212,170,.25)' : 'rgba(255,77,106,.25)'}`, borderRadius: 'var(--r)', padding: '12px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+          <div style={{ background: over ? 'color-mix(in srgb, var(--pos) 8%, transparent)' : 'color-mix(in srgb, var(--neg) 8%, transparent)', border: `.5px solid ${over ? 'color-mix(in srgb, var(--pos) 28%, transparent)' : 'color-mix(in srgb, var(--neg) 28%, transparent)'}`, borderRadius: 'var(--r)', padding: '12px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
             <div style={{ flex: 1, minWidth: 160 }}>
               <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.8px', marginBottom: 4 }}>{t('dash.expected.title')}</div>
               <div style={{ fontSize: 13, color: 'var(--tx)' }}>
@@ -623,7 +623,7 @@ export default function Dashboard({ setPage }) {
         const pctMonth = (today / daysInMonth * 100).toFixed(0)
         const over     = projBal < 0
         return (
-          <div style={{ background:'var(--sur)', border:`.5px solid ${over ? 'rgba(255,77,106,.3)' : 'var(--brd)'}`, borderRadius:'var(--r)', padding:'14px 16px', marginBottom:16 }}>
+          <div style={{ background:'var(--sur)', border:`.5px solid ${over ? 'color-mix(in srgb, var(--neg) 32%, transparent)' : 'var(--brd)'}`, borderRadius:'var(--r)', padding:'14px 16px', marginBottom:16 }}>
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10, flexWrap:'wrap', gap:6 }}>
               <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)', textTransform:'uppercase', letterSpacing:'.8px' }}>{t('dash.proj.title')}</div>
               <div style={{ fontSize:10, fontFamily:'var(--mono)', color:'var(--th)' }}>{t('dash.proj.day', { d: today, n: daysInMonth, left: daysLeft })}</div>

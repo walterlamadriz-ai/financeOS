@@ -12,9 +12,9 @@ function fmtV(v, sym) {
 }
 
 const STATUS = [
-  { key:'done',  label:'Completada',          color:'var(--accent)', bg:'rgba(0,212,170,.08)',  border:'rgba(0,212,170,.2)',  icon:'✓' },
+  { key:'done',  label:'Completada',          color:'var(--accent)', bg:'color-mix(in srgb, var(--pos) 9%, transparent)',  border:'color-mix(in srgb, var(--pos) 22%, transparent)',  icon:'✓' },
   { key:'close', label:'Cerca de completarse', color:'var(--amb)',    bg:'rgba(245,166,35,.08)', border:'rgba(245,166,35,.2)', icon:'◑' },
-  { key:'prog',  label:'En progreso',          color:'#00b8d9',       bg:'transparent',          border:'var(--brd)',          icon:'→' },
+  { key:'prog',  label:'En progreso',          color:'var(--accent2)',       bg:'transparent',          border:'var(--brd)',          icon:'→' },
 ]
 
 function getStatus(prog) {

@@ -12,9 +12,9 @@ function fmtV(v, sym) {
 }
 
 const STATUS = [
-  { key:'done',  label:'Pagada',           color:'var(--accent)', bg:'rgba(0,212,170,.08)',  border:'rgba(0,212,170,.2)',  icon:'✓' },
+  { key:'done',  label:'Pagada',           color:'var(--accent)', bg:'color-mix(in srgb, var(--pos) 9%, transparent)',  border:'color-mix(in srgb, var(--pos) 22%, transparent)',  icon:'✓' },
   { key:'close', label:'Cerca de terminar',color:'var(--amb)',     bg:'rgba(245,166,35,.08)', border:'rgba(245,166,35,.2)', icon:'◑' },
-  { key:'prog',  label:'En progreso',      color:'#00b8d9',        bg:'transparent',          border:'var(--brd)',          icon:'→' },
+  { key:'prog',  label:'En progreso',      color:'var(--accent2)',        bg:'transparent',          border:'var(--brd)',          icon:'→' },
 ]
 
 function getStatus(prog) {
@@ -83,7 +83,7 @@ export default function DebtProgressList({ debts, sym = '$' }) {
               <div style={{ display:'flex', alignItems:'center', gap:7 }}>
                 <span style={{ fontSize:13 }}>{d.status.icon}</span>
                 <span style={{ fontSize:13, fontWeight:600, color:'var(--tx)' }}>{d.creditor}</span>
-                {d.rate > 0 && <span style={{ fontSize:9, fontFamily:'var(--mono)', color:'var(--red)', background:'rgba(255,77,106,.1)', padding:'1px 6px', borderRadius:20 }}>{d.rate}% TAE</span>}
+                {d.rate > 0 && <span style={{ fontSize:9, fontFamily:'var(--mono)', color:'var(--red)', background:'color-mix(in srgb, var(--neg) 12%, transparent)', padding:'1px 6px', borderRadius:20 }}>{d.rate}% TAE</span>}
               </div>
               <span style={{ fontSize:10, fontFamily:'var(--mono)', fontWeight:600, color:d.status.color, background:`${d.status.color}18`, padding:'2px 8px', borderRadius:20 }}>
                 {d.status.label}

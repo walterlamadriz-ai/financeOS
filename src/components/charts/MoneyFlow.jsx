@@ -13,11 +13,11 @@ function fmtV(v, sym) {
 }
 
 const COLORS = {
-  income:  { fill: '#00d4aa', stroke: '#00b896', text: '#004d3e' },
-  gastos:  { fill: '#ff4d6a', stroke: '#e03558', text: '#4a0010' },
+  income:  { fill: 'var(--pos)', stroke: '#00b896', text: '#004d3e' },
+  gastos:  { fill: 'var(--neg)', stroke: '#e03558', text: '#4a0010' },
   subs:    { fill: '#f5a623', stroke: '#d48a0a', text: '#3d2200' },
-  deudas:  { fill: '#00b8d9', stroke: '#0099b8', text: '#002d3d' },
-  libre:   { fill: '#00d4aa', stroke: '#00b896', text: '#004d3e' },
+  deudas:  { fill: 'var(--accent2)', stroke: '#0099b8', text: '#002d3d' },
+  libre:   { fill: 'var(--pos)', stroke: '#00b896', text: '#004d3e' },
 }
 
 function SankeyPath({ x1, y1, h1, x2, y2, h2, color, opacity = 0.22 }) {

@@ -27,7 +27,9 @@ export default function HorizontalBars({ records, sym = '$', maxItems = 6, value
   const total = data.reduce((s, d) => s + d.value, 0)
   const fmtV = v => v >= 1000000 ? `${sym}${(v/1000000).toFixed(1)}M` : v >= 1000 ? `${sym}${(v/1000).toFixed(0)}K` : `${sym}${v}`
 
-  const COLORS = ['var(--red)','#f5a623','#a78bfa','#00b8d9','var(--accent)','#fb923c']
+  // Color por identidad de categoría (theme-aware). Antes: la #1 salía roja
+  // por su POSICIÓN, no por su significado — alarma falsa en "Arriendo", etc.
+  const COLORS = ['var(--cat-1)','var(--cat-2)','var(--cat-3)','var(--cat-4)','var(--cat-5)','var(--cat-6)','var(--cat-7)','var(--cat-8)']
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
