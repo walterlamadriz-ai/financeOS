@@ -13,6 +13,7 @@ import { calcFinancialScore } from '../../utils/financialScore.js'
 import { pendingDebtMonthly } from '../../utils/personal.js'
 import { projectEndOfMonth } from '../../utils/projection.js'
 import CountUp from '../../components/CountUp.jsx'
+import LivingRing from '../../components/LivingRing.jsx'
 
 const fmt  = (n) => (Number(n) || 0).toLocaleString('es-CL', { maximumFractionDigits: 0 })
 const pct  = (n) => ((Number(n) || 0) * 100).toFixed(1) + '%'
@@ -423,6 +424,28 @@ export default function Dashboard({ setPage }) {
   }, [ctx.incomes, ctx.expenses, activeMonth])
   const flujoTotal = kpis.balance + propFlow.net
 
+  // ── El Anillo Vivo (Pulso) — detrás de flag (?ring=1 o localStorage fos_ring).
+  //    Default OFF: no cambia nada para nadie. Usa motores ya existentes.
+  const showRing = (() => {
+    try { return localStorage.getItem('fos_ring') === '1' || new URLSearchParams(location.search).has('ring') }
+    catch { return false }
+  })()
+  const pulse = useMemo(() => {
+    const { today, daysInMonth, daysLeft } = projectEndOfMonth({ incomes, expenses, activeMonth })
+    // Referencia = ingreso del mes (mejor proxy de "¿voy bien para esta altura?"
+    // → ritmo de gasto vs ritmo del tiempo). Fallback a gasto si no hay ingreso.
+    const reference = kpis.totalInc > 0 ? kpis.totalInc : (kpis.totalExp || 1)
+    const spent = kpis.totalExp
+    const elapsedRatio = daysInMonth > 0 ? today / daysInMonth : 0
+    const spentRatio = reference > 0 ? spent / reference : 0
+    const pace = spentRatio - elapsedRatio
+    const color = pace <= 0.02 ? 'var(--pos)' : pace <= 0.10 ? 'var(--warn)' : 'var(--neg)'
+    const safePerDay = daysLeft > 0 ? Math.max(0, (reference - spent) / daysLeft) : 0
+    return { spentRatio, elapsedRatio, color, daysLeft,
+             centerValue: `${sym}${fmt(safePerDay)}`,
+             refIsIncome: kpis.totalInc > 0 }
+  }, [incomes, expenses, kpis.totalExp, kpis.totalInc, activeMonth, sym])
+
   const KPIS = [
     { label:t('dash.kpi.income'),       value:`${sym}${fmt(kpis.totalInc)}`,  color:'var(--accent)', sub:t('dash.kpi.records', { n: kpis.incCount }),                                                          delta: kpis.delta.inc,  invertDelta: false, raw: kpis.totalInc, count: true },
     { label:t('dash.kpi.expenses'),         value:`${sym}${fmt(kpis.totalExp)}`,  color:'var(--red)',    sub:t('dash.kpi.records', { n: kpis.expCount }),                                                          delta: kpis.delta.exp,  invertDelta: true,  raw: kpis.totalExp, count: true },
@@ -460,7 +483,26 @@ export default function Dashboard({ setPage }) {
         )
       })()}
 
-
+      {/* El Anillo Vivo (Pulso) — solo con flag; no afecta al trial por defecto */}
+      {showRing && (kpis.incCount > 0 || kpis.expCount > 0) && (
+        <div className="card rise" style={{ padding:'20px 16px', marginBottom:16, display:'flex', flexDirection:'column', alignItems:'center', gap:10 }}>
+          <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)', textTransform:'uppercase', letterSpacing:'1px' }}>
+            {pulse.refIsIncome ? 'Tu ritmo del mes' : 'Ritmo de gasto'} · {activeMonth}
+          </div>
+          <LivingRing
+            spentRatio={pulse.spentRatio}
+            elapsedRatio={pulse.elapsedRatio}
+            color={pulse.color}
+            centerValue={pulse.centerValue}
+            centerLabel="SEGURO/DÍA"
+            footLabel={`quedan ${pulse.daysLeft} días`}
+            size={220}
+          />
+          <div style={{ fontSize:12, color:'var(--tm)', textAlign:'center', maxWidth:340, lineHeight:1.5 }}>
+            El punto que late es hoy · la marca fina es dónde deberías ir · si el arco no la alcanza, vas bien.
+          </div>
+        </div>
+      )}
 
       {/* Empieza aquí */}
       {setPage && kpis.incCount === 0 && kpis.expCount === 0 && (
