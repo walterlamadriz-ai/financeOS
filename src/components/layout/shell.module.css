@@ -4,6 +4,7 @@
   display: grid;
   grid-template-columns: 188px 1fr;
   height: 100vh;
+  height: 100dvh;   /* iOS: evita el salto de la barra de Safari */
   overflow: hidden;
 }
 
@@ -53,7 +54,7 @@
 .main { display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
 .topbar {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 18px 0; flex-shrink: 0;
+  padding: max(10px, env(safe-area-inset-top)) 18px 0; flex-shrink: 0;
 }
 .crumb    { font-size: 11px; color: var(--th); font-family: var(--mono); }
 .topRight { font-size: 10px; color: var(--th); font-family: var(--mono); }
@@ -161,6 +162,8 @@
   left: 0;
   width: 260px;
   height: 100vh;
+  height: 100dvh;
+  padding-top: env(safe-area-inset-top);
   background: var(--sur);
   border-right: 0.5px solid var(--brd);
   z-index: 201;
@@ -245,7 +248,7 @@
   .menuBtn { display: flex; align-items: center; justify-content: center; min-height: 44px; }
   .backBtn { display: inline-flex; align-items: center; }
   .overlay { display: block; }
-  .content { padding-bottom: 88px; }  /* deja aire para el FAB (52px) */
+  .content { padding-bottom: calc(88px + env(safe-area-inset-bottom)); }  /* aire para el FAB + home-indicator iOS */
   :global(.grid2), :global(.grid3), :global(.grid4) { grid-template-columns: 1fr; }
 }
 
@@ -253,7 +256,7 @@
 .fab {
   display: none;
   position: fixed;
-  bottom: 20px;
+  bottom: calc(20px + env(safe-area-inset-bottom));
   right: 20px;
   width: 52px;
   height: 52px;
