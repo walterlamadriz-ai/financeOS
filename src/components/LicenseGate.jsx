@@ -71,22 +71,22 @@ export default function LicenseGate({ onActivate }) {
 
   const s = {
     wrap: {
-      minHeight: '100vh',
+      minHeight: '100dvh',
       background: 'var(--bg)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       padding: '24px',
-      fontFamily: 'var(--body)',
+      fontFamily: 'var(--sans)',
     },
     box: {
-      background: 'var(--card,#fff)',
-      border: '0.5px solid var(--brd2,#e2e2dc)',
+      background: 'var(--sur)',
+      border: '1px solid var(--brd2)',
       borderRadius: 18,
       padding: '40px 36px',
       maxWidth: 440,
       width: '100%',
-      boxShadow: '0 4px 24px rgba(0,0,0,.07)',
+      boxShadow: 'var(--sh-2)',
     },
   }
 
@@ -96,22 +96,22 @@ export default function LicenseGate({ onActivate }) {
 
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }}>
-          <div style={{ width: 34, height: 34, background: 'var(--grn,#1a6b4a)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 14 }}>F</div>
+          <div style={{ width: 34, height: 34, background: 'var(--grn)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 14 }}>F</div>
           <div>
-            <div style={{ fontFamily: 'var(--display)', fontSize: 17, fontWeight: 600, color: 'var(--ink)', letterSpacing: '-.3px' }}>FinanceOS</div>
-            <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--ink3,#888)', marginTop: 1 }}>v1.5 · MAXNOVA & LUCI Global LLC</div>
+            <div style={{ fontFamily: 'var(--display)', fontSize: 17, fontWeight: 600, color: 'var(--tx)', letterSpacing: '-.3px' }}>FinanceOS</div>
+            <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--th)', marginTop: 1 }}>v1.5 · MAXNOVA & LUCI Global LLC</div>
           </div>
         </div>
 
         {/* Activate */}
         <div style={{ marginBottom: 24 }}>
-          <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ink)', marginBottom: 6, fontFamily: 'var(--display)' }}>Ingresa tu clave de acceso</div>
-          <div style={{ fontSize: 12, color: 'var(--ink2,#666)', lineHeight: 1.6, marginBottom: 14, fontFamily: 'var(--body)' }}>
+          <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--tx)', marginBottom: 6, fontFamily: 'var(--display)' }}>Ingresa tu clave de acceso</div>
+          <div style={{ fontSize: 12, color: 'var(--tm)', lineHeight: 1.6, marginBottom: 14, fontFamily: 'var(--sans)' }}>
             La encontrarás en el email de confirmación de tu compra, con formato{' '}
-            <span style={{ fontFamily: 'var(--mono)', background: '#f4f4f0', padding: '1px 6px', borderRadius: 4 }}>FNOS-XXXX-XXXX-XXXX</span>
+            <span style={{ fontFamily: 'var(--mono)', background: 'var(--sur3)', padding: '1px 6px', borderRadius: 4 }}>FNOS-XXXX-XXXX-XXXX</span>
           </div>
           <input
-            style={{ width: '100%', padding: '11px 14px', border: '1px solid var(--brd,#e0e0d8)', borderRadius: 8, fontSize: 14, fontFamily: 'var(--mono)', background: 'var(--bg)', color: 'var(--ink)', letterSpacing: 1, marginBottom: 10, boxSizing: 'border-box', outline: 'none' }}
+            style={{ width: '100%', padding: '12px 14px', border: '1px solid var(--brd)', borderRadius: 8, fontSize: 16, fontFamily: 'var(--mono)', background: 'var(--bg)', color: 'var(--tx)', letterSpacing: 1, marginBottom: 10, boxSizing: 'border-box', outline: 'none' }}
             type="text"
             placeholder="FNOS-XXXX-XXXX-XXXX"
             value={key}
@@ -122,26 +122,27 @@ export default function LicenseGate({ onActivate }) {
           />
 
           <input
-            style={{ width: '100%', padding: '10px 14px', border: '1px solid var(--brd,#e0e0d8)', borderRadius: 8, fontSize: 13, fontFamily: 'var(--body)', background: 'var(--bg)', color: 'var(--ink)', marginBottom: 4, boxSizing: 'border-box', outline: 'none' }}
+            style={{ width: '100%', padding: '12px 14px', border: '1px solid var(--brd)', borderRadius: 8, fontSize: 16, fontFamily: 'var(--sans)', background: 'var(--bg)', color: 'var(--tx)', marginBottom: 4, boxSizing: 'border-box', outline: 'none' }}
             type="email"
+            inputMode="email"
             placeholder="Tu email (opcional — avisos y soporte)"
             value={email}
             onChange={e => setEmail(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleActivate()}
             spellCheck={false}
           />
-          <div style={{ fontSize: 10, color: '#999', fontFamily: 'var(--mono)', marginBottom: 10, lineHeight: 1.5 }}>
+          <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', marginBottom: 10, lineHeight: 1.5 }}>
             Solo para avisarte de novedades importantes o si necesitas soporte. Nunca vemos tus datos financieros.
           </div>
 
           {error && (
-            <div style={{ fontSize: 11, color: '#c0392b', marginBottom: 10, fontFamily: 'var(--mono)', padding: '8px 12px', background: 'rgba(192,57,43,.07)', borderRadius: 7, lineHeight: 1.5 }}>
+            <div style={{ fontSize: 11, color: 'var(--red)', marginBottom: 10, fontFamily: 'var(--mono)', padding: '8px 12px', background: 'var(--red-bg)', borderRadius: 7, lineHeight: 1.5 }}>
               ⚠ {error}
             </div>
           )}
 
           <button
-            style={{ width: '100%', padding: 12, background: 'var(--grn,#1a6b4a)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 500, cursor: loading || !key.trim() ? 'not-allowed' : 'pointer', opacity: loading || !key.trim() ? 0.55 : 1, fontFamily: 'var(--body)', transition: 'opacity .15s' }}
+            style={{ width: '100%', padding: 12, background: 'var(--grn)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 500, cursor: loading || !key.trim() ? 'not-allowed' : 'pointer', opacity: loading || !key.trim() ? 0.55 : 1, fontFamily: 'var(--sans)', transition: 'opacity .15s' }}
             onClick={handleActivate}
             disabled={loading || !key.trim()}
           >
@@ -149,8 +150,8 @@ export default function LicenseGate({ onActivate }) {
           </button>
 
           {showHelp && (
-            <div style={{ marginTop: 12, padding: '12px 14px', background: '#f7f8f4', borderRadius: 8, fontSize: 11, color: '#555', fontFamily: 'var(--mono)', lineHeight: 1.65 }}>
-              <strong style={{ color: 'var(--ink)' }}>¿Dónde está mi clave?</strong><br />
+            <div style={{ marginTop: 12, padding: '12px 14px', background: 'var(--sur2)', borderRadius: 8, fontSize: 11, color: 'var(--tm)', fontFamily: 'var(--mono)', lineHeight: 1.65 }}>
+              <strong style={{ color: 'var(--tx)' }}>¿Dónde está mi clave?</strong><br />
               1. Abre el email de confirmación de tu compra<br />
               2. Busca el campo "License Key" — formato FNOS-XXXX-XXXX-XXXX<br />
               3. Cópiala completa y pégala arriba<br /><br />
@@ -164,9 +165,9 @@ export default function LicenseGate({ onActivate }) {
 
         {/* Divider */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '24px 0' }}>
-          <div style={{ flex: 1, height: '0.5px', background: 'var(--brd,#e0e0d8)' }} />
-          <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: '#aaa', flexShrink: 0 }}>¿Aún no tienes licencia?</span>
-          <div style={{ flex: 1, height: '0.5px', background: 'var(--brd,#e0e0d8)' }} />
+          <div style={{ flex: 1, height: '1px', background: 'var(--brd)' }} />
+          <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--th)', flexShrink: 0 }}>¿Aún no tienes licencia?</span>
+          <div style={{ flex: 1, height: '1px', background: 'var(--brd)' }} />
         </div>
 
         {/* Purchase plans */}
@@ -181,8 +182,8 @@ export default function LicenseGate({ onActivate }) {
                 padding: '14px 12px',
                 borderRadius: 10,
                 textAlign: 'center',
-                border: p.highlight ? '1.5px solid var(--grn,#1a6b4a)' : '1px solid var(--brd,#e0e0d8)',
-                background: p.highlight ? 'rgba(26,107,74,.05)' : 'var(--bg)',
+                border: p.highlight ? '2px solid var(--grn)' : '1px solid var(--brd)',
+                background: p.highlight ? 'var(--grn-tint)' : 'var(--bg)',
                 cursor: buying !== null ? 'not-allowed' : 'pointer',
                 opacity: buying && buying !== p.product ? 0.5 : 1,
                 transition: 'transform .12s, opacity .15s',
@@ -190,9 +191,9 @@ export default function LicenseGate({ onActivate }) {
               onMouseOver={e => { if (!buying) e.currentTarget.style.transform = 'translateY(-1px)' }}
               onMouseOut={e => { e.currentTarget.style.transform = 'none' }}
             >
-              <div style={{ fontFamily: 'var(--display)', fontSize: 13, fontWeight: 600, color: p.highlight ? 'var(--grn,#1a6b4a)' : 'var(--ink)', marginBottom: 3 }}>{p.name}</div>
-              <div style={{ fontFamily: 'var(--display)', fontSize: 20, fontWeight: 700, color: 'var(--ink)', marginBottom: 3 }}>{p.price}</div>
-              <div style={{ fontFamily: 'var(--mono)', fontSize: 9, color: '#888' }}>{p.desc}</div>
+              <div style={{ fontFamily: 'var(--display)', fontSize: 13, fontWeight: 600, color: p.highlight ? 'var(--grn)' : 'var(--tx)', marginBottom: 3 }}>{p.name}</div>
+              <div style={{ fontFamily: 'var(--display)', fontSize: 20, fontWeight: 700, color: 'var(--tx)', marginBottom: 3 }}>{p.price}</div>
+              <div style={{ fontFamily: 'var(--mono)', fontSize: 9, color: 'var(--th)' }}>{p.desc}</div>
               {buying === p.product && (
                 <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--grn)', marginTop: 6 }}>Redirigiendo…</div>
               )}
@@ -201,8 +202,8 @@ export default function LicenseGate({ onActivate }) {
         </div>
 
         {/* Demo link */}
-        <div style={{ textAlign: 'center', fontSize: 11, color: '#aaa', fontFamily: 'var(--mono)' }}>
-          <a href="https://demo.financeospro.com/app/?demo=true" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--grn,#1a6b4a)', textDecoration: 'none' }}>
+        <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)' }}>
+          <a href="https://demo.financeospro.com/app/?demo=true" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--grn)', textDecoration: 'none' }}>
             Explorar el demo gratis →
           </a>
         </div>
