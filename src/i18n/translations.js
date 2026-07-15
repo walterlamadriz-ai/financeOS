@@ -11,6 +11,8 @@ export const translations = {
   es: {
     'imp.err.partial': "Se importaron {ok} de {total} movimientos. {fail} no se pudieron guardar (formato o datos no válidos).",
     'common.confirmDelete': "¿Eliminar este registro? No se puede deshacer.",
+    'common.deleted': "Eliminado",
+    'common.undo': "Deshacer",
     'common.importShortcut': "⇪ ¿Muchos movimientos? Importa tu cartola del banco →",
     'debts.linkProject': "🏢 Vincular a propiedad",
     'debts.linkProjectHint': "Si esta deuda es de una propiedad en arriendo, vinculala: su cuota dejará de restarse de tu disponible personal (ya vive en el flujo de la propiedad).",
@@ -1090,6 +1092,8 @@ export const translations = {
   en: {
     'imp.err.partial': "{ok} of {total} transactions imported. {fail} could not be saved (invalid format or data).",
     'common.confirmDelete': "Delete this record? This can't be undone.",
+    'common.deleted': "Deleted",
+    'common.undo': "Undo",
     'common.importShortcut': "⇪ Lots of transactions? Import your bank statement →",
     'debts.linkProject': "🏢 Link to property",
     'debts.linkProjectHint': "If this debt belongs to a rental property, link it: its installment will stop being subtracted from your personal available (it already lives in the property's flow).",
@@ -2169,6 +2173,8 @@ export const translations = {
   pt: {
     'imp.err.partial': "Foram importados {ok} de {total} movimentos. {fail} não puderam ser salvos (formato ou dados inválidos).",
     'common.confirmDelete': "Excluir este registro? Não pode ser desfeito.",
+    'common.deleted': "Excluído",
+    'common.undo': "Desfazer",
     'common.importShortcut': "⇪ Muitos movimentos? Importe seu extrato bancário →",
     'debts.linkProject': "🏢 Vincular a propriedade",
     'debts.linkProjectHint': "Se esta dívida é de uma propriedade alugada, vincule-a: sua parcela deixará de ser subtraída do seu disponível pessoal (ela já vive no fluxo da propriedade).",

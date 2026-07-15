@@ -2,30 +2,58 @@
 import { useApp } from '../../context/AppContext.jsx'
 
 export default function Toast() {
-  const { toast } = useApp()
+  const { toast, dismissToast } = useApp()
   if (!toast) return null
 
   const isError = toast.type === 'error'
+  const action = toast.action
+
   return (
-    <div style={{
-      position: 'fixed',
-      bottom: 20,
-      left: '50%',
-      transform: 'translateX(-50%)',
-      zIndex: 9999,
-      padding: '10px 18px',
-      borderRadius: 8,
-      fontSize: 12,
-      fontFamily: 'var(--mono)',
-      fontWeight: 500,
-      background: isError ? 'var(--red)' : 'var(--grn)',
-      color: '#fff',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
-      maxWidth: 400,
-      textAlign: 'center',
-      animation: 'fadeInUp 0.2s ease',
-    }}>
-      {isError ? '⚠ ' : '✓ '}{toast.msg}
+    <div
+      role="status"
+      aria-live="polite"
+      style={{
+        position: 'fixed',
+        bottom: 'calc(20px + env(safe-area-inset-bottom))',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 9999,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        padding: action ? '10px 12px 10px 16px' : '11px 18px',
+        borderRadius: 10,
+        fontSize: 13,
+        fontFamily: 'var(--sans)',
+        fontWeight: 500,
+        background: isError ? 'var(--neg)' : 'var(--brand, var(--grn))',
+        color: '#fff',
+        boxShadow: 'var(--sh-3, 0 8px 24px rgba(0,0,0,.25))',
+        maxWidth: 'min(92vw, 420px)',
+        animation: 'fadeInUp 0.2s ease',
+      }}
+    >
+      <span>{isError ? '⚠ ' : '✓ '}{toast.msg}</span>
+      {action && (
+        <button
+          type="button"
+          onClick={() => { action.onAction?.(); dismissToast?.() }}
+          style={{
+            flexShrink: 0,
+            background: 'rgba(255,255,255,.18)',
+            color: '#fff',
+            border: 'none',
+            borderRadius: 7,
+            padding: '6px 12px',
+            fontSize: 12.5,
+            fontWeight: 700,
+            fontFamily: 'var(--sans)',
+            cursor: 'pointer',
+          }}
+        >
+          {action.label}
+        </button>
+      )}
       <style>{`@keyframes fadeInUp { from { opacity:0; transform:translateX(-50%) translateY(8px) } to { opacity:1; transform:translateX(-50%) translateY(0) } }`}</style>
     </div>
   )

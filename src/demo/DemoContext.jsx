@@ -48,10 +48,20 @@ export function DemoProvider({ children }) {
     toast: null,
   })
 
-  const showToast = useCallback((msg, type = 'ok') => {
-    dispatch({ type: 'SET_TOAST', toast: { msg, type } })
-    setTimeout(() => dispatch({ type: 'SET_TOAST', toast: null }), 3500)
+  const showToast = useCallback((msg, type = 'ok', action = null) => {
+    dispatch({ type: 'SET_TOAST', toast: { msg, type, action } })
+    setTimeout(() => dispatch({ type: 'SET_TOAST', toast: null }), action ? 6000 : 3500)
   }, [])
+  const dismissToast = useCallback(() => dispatch({ type: 'SET_TOAST', toast: null }), [])
+
+  // Borrado con deshacer en demo (en memoria: re-dispatch del ADD con el mismo item)
+  const deleteWithUndo = useCallback((store, item, deletedMsg = 'Eliminado', undoLabel = 'Deshacer') => {
+    const DEL = { incomes:'DEL_INCOME', expenses:'DEL_EXPENSE', budgets:'DEL_BUDGET', debts:'DEL_DEBT', goals:'DEL_GOAL', subscriptions:'DEL_SUB' }[store]
+    const ADD = { incomes:'ADD_INCOME', expenses:'ADD_EXPENSE', budgets:'ADD_BUDGET', debts:'ADD_DEBT', goals:'ADD_GOAL', subscriptions:'ADD_SUB' }[store]
+    if (!DEL || !item?.id) return
+    dispatch({ type: DEL, id: item.id })
+    showToast(deletedMsg, 'ok', { label: undoLabel, onAction: () => dispatch({ type: ADD, item }) })
+  }, [showToast])
 
   // Todas las operaciones son en memoria — sin await, sin IndexedDB
   const addIncome    = useCallback((item) => { dispatch({ type: 'ADD_INCOME',  item: { ...item, id: uid() } }); showToast('Ingreso agregado en demo.', 'ok') }, [showToast])
@@ -157,7 +167,7 @@ export function DemoProvider({ children }) {
     // Sync no disponible en demo (no-ops)
     enableSync: async () => { showToast('El sync no está disponible en el demo.', 'ok'); return { ok:false } },
     disableSync: () => {},
-    showToast,  setScenario,
+    showToast, dismissToast, deleteWithUndo, setScenario,
   }
 
   return <DemoContext.Provider value={value}>{children}</DemoContext.Provider>

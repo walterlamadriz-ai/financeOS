@@ -309,6 +309,7 @@ export default function Movements({ setPage }) {
   const addSubscription    = ctx.addSubscription
   const deleteSubscription = ctx.deleteSubscription
   const updateSubscription = ctx.updateSubscription
+  const deleteWithUndo     = ctx.deleteWithUndo
 
   const sym         = SYM[settings.currency] || '$'
   const activeMonth = settings.activeMonth || new Date().toISOString().slice(0,7)
@@ -704,7 +705,7 @@ export default function Movements({ setPage }) {
                     style={{background:'none',border:'none',color:'var(--th)',fontSize:11,cursor:'pointer',padding:'2px 4px'}} title={t('mov.edit.editTitle')}>✏️</button>
                 )}
                 {delExpense && (
-                  <button onClick={()=>{ if(confirm(t('common.confirmDelete'))) delExpense(e.id) }}
+                  <button onClick={()=>deleteWithUndo('expenses', e, t('common.deleted'), t('common.undo'))}
                     style={{background:'none',border:'none',color:'var(--th)',fontSize:10,cursor:'pointer',padding:'2px 4px'}} title={t('mov.edit.delTitle')}>✕</button>
                 )}
               </div>
@@ -789,7 +790,7 @@ export default function Movements({ setPage }) {
                         style={{background:'none',border:'none',color:'var(--th)',fontSize:11,cursor:'pointer',padding:'2px 4px'}} title={t('mov.edit.editTitle')}>✏️</button>
                     )}
                     {deleteSubscription && (
-                      <button onClick={()=>{if(confirm(t('mov.confirmDelete', { name: sub.name }))) deleteSubscription(sub.id)}}
+                      <button onClick={()=>deleteWithUndo('subscriptions', sub, t('common.deleted'), t('common.undo'))}
                         style={{background:'none',border:'none',color:'var(--th)',fontSize:10,cursor:'pointer',padding:'2px 4px'}} title={t('mov.edit.delTitle')}>✕</button>
                     )}
                   </div>

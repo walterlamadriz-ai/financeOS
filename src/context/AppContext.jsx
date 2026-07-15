@@ -62,9 +62,17 @@ export function AppProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   // ── Toast helper ─────────────────────────────────────────────────────────────
-  const showToast = useCallback((msg, type = 'ok') => {
-    dispatch({ type: 'SET_TOAST', toast: { msg, type } })
-    setTimeout(() => dispatch({ type: 'SET_TOAST', toast: null }), 3500)
+  // action opcional: { label, onAction } → renderiza un botón (p.ej. "Deshacer").
+  // Con acción, el toast dura más (6s) para dar tiempo a reaccionar.
+  const toastTimer = useRef(null)
+  const showToast = useCallback((msg, type = 'ok', action = null) => {
+    if (toastTimer.current) clearTimeout(toastTimer.current)
+    dispatch({ type: 'SET_TOAST', toast: { msg, type, action } })
+    toastTimer.current = setTimeout(() => dispatch({ type: 'SET_TOAST', toast: null }), action ? 6000 : 3500)
+  }, [])
+  const dismissToast = useCallback(() => {
+    if (toastTimer.current) clearTimeout(toastTimer.current)
+    dispatch({ type: 'SET_TOAST', toast: null })
   }, [])
 
   // ── Re-hidratar desde la DB (reutilizado por hydrate inicial y por el sync) ────
@@ -76,6 +84,24 @@ export function AppProvider({ children }) {
     dispatch({ type: 'HYDRATE', payload: { incomes, expenses, budgets, debts, goals, subscriptions, settings } })
     document.documentElement.setAttribute('data-theme', settings.theme || 'light')
   }, [])
+
+  // ── Borrado con deshacer ──────────────────────────────────────────────────────
+  // Reemplaza el confirm() nativo: borra de inmediato y ofrece "Deshacer" ~6s.
+  // Restaura re-insertando el MISMO item (conserva su id) y rehidratando desde DB.
+  // Genérico y sin tocar el esquema: store ∈ incomes|expenses|budgets|debts|goals|subscriptions.
+  const deleteWithUndo = useCallback(async (store, item, deletedMsg = 'Eliminado', undoLabel = 'Deshacer') => {
+    if (!item?.id) return
+    try {
+      await dbDelete(store, item.id)
+      await rehydrate()
+      showToast(deletedMsg, 'ok', {
+        label: undoLabel,
+        onAction: async () => { try { await dbAdd(store, item); await rehydrate() } catch (e) { showToast('No se pudo deshacer.', 'error') } },
+      })
+    } catch (e) {
+      showToast('Error al eliminar. Intenta de nuevo.', 'error')
+    }
+  }, [rehydrate, showToast])
 
   // ── Hydrate from DB on mount ──────────────────────────────────────────────────
   const hydratedRef = useRef(false)
@@ -449,7 +475,7 @@ export function AppProvider({ children }) {
     clearAll,   loadDemo,
     exportData, exportCSV,  importData,
     enableSync, disableSync,
-    showToast,
+    showToast, dismissToast, deleteWithUndo,
   }
 
 

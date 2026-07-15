@@ -155,7 +155,7 @@ function DebtPayoffSimulator({ debts, sym }) {
 }
 
 export default function Debts() {
-  const { debts, addDebt, delDebt, updateDebt, addExpense, incomes, expenses, settings } = useApp()
+  const { debts, addDebt, delDebt, updateDebt, addExpense, incomes, expenses, settings, deleteWithUndo } = useApp()
   const { t } = useT()
   const [show, setShow]             = useState(false)
   const [f, setF]                   = useState({ creditor:'', initial:'', balance:'', minPayment:'', dueDate:'', rate:'', totalInstallments:'', paidInstallments:'', project:'', ufDebt:false })
@@ -346,7 +346,7 @@ export default function Debts() {
                   </button>
                 )}
                 {d.balance <= 0 && <span style={{fontSize:10,padding:'2px 8px',borderRadius:4,background:'rgba(10,92,62,.1)',color:'var(--grn)',fontFamily:'var(--mono)'}}>{t('debts.card.settled')}</span>}
-                <button onClick={() => { if(confirm(t('common.confirmDelete'))) delDebt(d.id) }} aria-label={t('debts.card.delete')} style={{background:'none',border:'none',color:'var(--th)',fontSize:13,cursor:'pointer',minWidth:44,minHeight:44,display:'inline-flex',alignItems:'center',justifyContent:'center'}}>✕</button>
+                <button onClick={() => deleteWithUndo('debts', d, t('common.deleted'), t('common.undo'))} aria-label={t('debts.card.delete')} style={{background:'none',border:'none',color:'var(--th)',fontSize:13,cursor:'pointer',minWidth:44,minHeight:44,display:'inline-flex',alignItems:'center',justifyContent:'center'}}>✕</button>
               </div>
             </div>
             {confirmPay === d.id && (

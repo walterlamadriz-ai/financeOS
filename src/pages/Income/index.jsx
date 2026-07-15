@@ -9,7 +9,7 @@ import MonthSelector from '../shared/MonthSelector.jsx'
 import { parseTransactionText } from '../../utils/smsParser.js'
 
 export default function Income({ setPage }) {
-  const { incomes, expenses, addIncome, delIncome, updateIncome, settings } = useApp()
+  const { incomes, expenses, addIncome, delIncome, updateIncome, settings, deleteWithUndo } = useApp()
   const { t } = useT()
   // Nombres de propiedades/proyectos ya usados (para autocompletar)
   const projectOptions = useMemo(() => [...new Set([...(incomes||[]), ...(expenses||[])].map(r => r?.project).filter(Boolean))], [incomes, expenses])
@@ -183,7 +183,7 @@ export default function Income({ setPage }) {
                     <TxRow dot={CAT_COLORS[r.category]||'#888'} name={`${r.inv?'💼 ':''}${r.source}`}
                       meta={`${r.category} · ${r.date.slice(5).replace('-','/')}${r.recurrence!=='Único'?' · '+r.recurrence:''}${r.inv?' · '+t('income.row.investment'):''}`}
                       amount={fmtMoney(r.amount,sym)} isIncome
-                      onDelete={()=>{ if(confirm(t('common.confirmDelete'))) delIncome(r.id) }}
+                      onDelete={()=>deleteWithUndo('incomes', r, t('common.deleted'), t('common.undo'))}
                       onEdit={()=>{setEditingId(r.id);setEditForm({source:r.source,amount:r.amount,date:r.date,category:r.category,recurrence:r.recurrence,notes:r.notes||''})}} />
                   </div>
                 ))}

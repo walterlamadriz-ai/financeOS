@@ -115,7 +115,7 @@ const EMPTY_FORM = {
 // ── COMPONENTE PRINCIPAL ────────────────────────────────────────────────────────
 export default function Subscriptions() {
   const { t } = useT()
-  const { settings, incomes, subscriptions: ctxSubs, addSubscription, updateSubscription, deleteSubscription } = useApp()
+  const { settings, incomes, subscriptions: ctxSubs, addSubscription, updateSubscription, deleteSubscription, deleteWithUndo, showToast } = useApp()
   const currency = settings.currency || 'CLP'
   const fmt = n => (n || 0).toLocaleString('es-CL', { maximumFractionDigits: 0 })
   const isDemo = !!settings.isDemo
@@ -204,13 +204,17 @@ export default function Subscriptions() {
   }
 
   async function remove(id) {
-    if (!confirm(t('subs.confirmDelete'))) return
-    if (isDemo) {
-      setDbSubs(prev => prev.filter(s => s.id !== id))
-    } else {
-      await deleteSubscription(id)
-      setDbSubs(prev => prev.filter(s => s.id !== id))
-    }
+    const sub = dbSubs.find(s => s.id === id)
+    if (!sub) return
+    setDbSubs(prev => prev.filter(s => s.id !== id))
+    if (!isDemo) { try { await deleteSubscription(id) } catch {} }
+    showToast(t('common.deleted'), 'ok', {
+      label: t('common.undo'),
+      onAction: async () => {
+        setDbSubs(prev => prev.some(s => s.id === sub.id) ? prev : [...prev, sub])
+        if (!isDemo) { try { await dbAdd('subscriptions', sub) } catch {} }
+      },
+    })
   }
 
   async function toggleStatus(sub) {

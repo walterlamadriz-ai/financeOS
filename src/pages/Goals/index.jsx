@@ -9,7 +9,7 @@ import { generateGoalSuggestions, totalMonthlyContribution } from '../../utils/g
 import { projectEndOfMonth } from '../../utils/projection.js'
 
 export default function Goals({ setPage }) {
-  const { goals, addGoal, delGoal, updateGoal, incomes: _incAll, expenses: _expAll, settings } = useApp()
+  const { goals, addGoal, delGoal, updateGoal, incomes: _incAll, expenses: _expAll, settings, deleteWithUndo } = useApp()
   const { t } = useT()
   const incomes = (_incAll || []).filter(r => !r?.inv)   // "disponible para ahorrar" personal: excluye inversión
   const expenses = (_expAll || []).filter(r => !r?.inv)
@@ -250,7 +250,7 @@ export default function Goals({ setPage }) {
                       <span style={{fontSize:13,fontWeight:700,color:clr,fontFamily:'var(--mono)'}}>{(p*100).toFixed(0)}%</span>
                       <button onClick={()=>{setEditingId(g.id);setEditForm({name:g.name,target:g.target,targetDate:g.targetDate||'',priority:g.priority||'Media'})}}
                         style={{background:'none',border:'none',color:'var(--th)',fontSize:12,cursor:'pointer',padding:'2px 5px'}} title={t('goals.card.editTitle')}>✏️</button>
-                      <button onClick={()=>{ if(confirm(t('common.confirmDelete'))) delGoal(g.id) }} style={{background:'none',border:'none',color:'var(--th)',fontSize:11,cursor:'pointer',padding:'2px 5px'}}>✕</button>
+                      <button onClick={()=>deleteWithUndo('goals', g, t('common.deleted'), t('common.undo'))} aria-label={t('common.confirmDelete')} style={{background:'none',border:'none',color:'var(--th)',fontSize:11,cursor:'pointer',padding:'2px 5px',minWidth:44,minHeight:44}}>✕</button>
                     </div>
                   </div>
                   <div style={{height:8,background:'var(--brd)',borderRadius:4,overflow:'hidden',marginBottom:8}}>
