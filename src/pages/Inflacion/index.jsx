@@ -57,7 +57,7 @@ export default function Inflacion() {
           <CardHeader title="¿Cuánto vale hoy el dinero de antes?" />
           <FormRow>
             <FormGroup label="Monto (ARS)">
-              <input type="number" min="0" value={monto} placeholder="0" onChange={e => setMonto(e.target.value)} />
+              <input type="number" inputMode="decimal" min="0" value={monto} placeholder="0" onChange={e => setMonto(e.target.value)} />
             </FormGroup>
           </FormRow>
           <FormRow>

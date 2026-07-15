@@ -73,7 +73,7 @@ export default function Deducciones() {
           {config.needsIngreso && (
             <FormRow>
               <FormGroup label={config.ingresoLabel || 'Ingreso anual'}>
-                <input type="number" min="0" value={ingreso} placeholder="0"
+                <input type="number" inputMode="decimal" min="0" value={ingreso} placeholder="0"
                   onChange={e => setIngreso(e.target.value)} />
               </FormGroup>
               {config.extraInput && (
@@ -102,7 +102,7 @@ export default function Deducciones() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10 }}>
             {config.categorias.map(c => (
               <FormGroup key={c.key} label={c.label}>
-                <input type="number" min="0" value={gastos[c.key] ?? 0}
+                <input type="number" inputMode="decimal" min="0" value={gastos[c.key] ?? 0}
                   onChange={e => setGasto(c.key, e.target.value)} />
               </FormGroup>
             ))}

@@ -123,8 +123,8 @@ export default function APVPage() {
           <div style={{padding:'14px',background:'var(--sur2)',borderRadius:8,border:'0.5px solid var(--brd)'}}>
             <div style={{fontSize:11,fontWeight:600,color:'var(--tx)',marginBottom:10,fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:'.5px'}}>① Tu situación actual</div>
             <FormRow>
-              <FormGroup label="Sueldo bruto mensual ($)"><input type="number" min="0" value={apvF.grossMonthly} placeholder="ej. 2000000" onChange={e => { setGrossTouched(true); setApvF(p => ({...p, grossMonthly: e.target.value})) }} /></FormGroup>
-              <FormGroup label="Bono anual estimado ($)"><input type="number" min="0" value={apvF.annualBonus} placeholder="0 (opcional)" onChange={e => setApvF(p => ({...p, annualBonus: e.target.value}))} /></FormGroup>
+              <FormGroup label="Sueldo bruto mensual ($)"><input type="number" inputMode="decimal" min="0" value={apvF.grossMonthly} placeholder="ej. 2000000" onChange={e => { setGrossTouched(true); setApvF(p => ({...p, grossMonthly: e.target.value})) }} /></FormGroup>
+              <FormGroup label="Bono anual estimado ($)"><input type="number" inputMode="decimal" min="0" value={apvF.annualBonus} placeholder="0 (opcional)" onChange={e => setApvF(p => ({...p, annualBonus: e.target.value}))} /></FormGroup>
             </FormRow>
             {!isDemo && sueldoBrutoCalculado > 0 && (
               <div style={{marginTop:6,fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',lineHeight:1.5}}>
@@ -167,15 +167,15 @@ export default function APVPage() {
           <div style={{padding:'14px',background:'var(--sur2)',borderRadius:8,border:'0.5px solid var(--brd)'}}>
             <div style={{fontSize:11,fontWeight:600,color:'var(--tx)',marginBottom:10,fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:'.5px'}}>② Simular aporte APV</div>
             <FormRow>
-              <FormGroup label="Aporte mensual APV ($)"><input type="number" min="0" value={apvF.monthlyContribution} placeholder="ej. 150000" onChange={e => setApvF(p => ({...p, monthlyContribution: e.target.value}))} /></FormGroup>
-              <FormGroup label="Saldo APV actual ($)"><input type="number" min="0" value={apvF.currentBalance} placeholder="0 (opcional)" onChange={e => setApvF(p => ({...p, currentBalance: e.target.value}))} /></FormGroup>
+              <FormGroup label="Aporte mensual APV ($)"><input type="number" inputMode="decimal" min="0" value={apvF.monthlyContribution} placeholder="ej. 150000" onChange={e => setApvF(p => ({...p, monthlyContribution: e.target.value}))} /></FormGroup>
+              <FormGroup label="Saldo APV actual ($)"><input type="number" inputMode="decimal" min="0" value={apvF.currentBalance} placeholder="0 (opcional)" onChange={e => setApvF(p => ({...p, currentBalance: e.target.value}))} /></FormGroup>
             </FormRow>
             <FormRow>
-              <FormGroup label="Edad actual"><input type="number" min="18" max="80" value={apvF.currentAge} placeholder="ej. 32" onChange={e => setApvF(p => ({...p, currentAge: e.target.value}))} /></FormGroup>
-              <FormGroup label="Edad objetivo jubilación"><input type="number" min="50" max="90" value={apvF.targetAge} placeholder="65" onChange={e => setApvF(p => ({...p, targetAge: e.target.value}))} /></FormGroup>
+              <FormGroup label="Edad actual"><input type="number" inputMode="decimal" min="18" max="80" value={apvF.currentAge} placeholder="ej. 32" onChange={e => setApvF(p => ({...p, currentAge: e.target.value}))} /></FormGroup>
+              <FormGroup label="Edad objetivo jubilación"><input type="number" inputMode="decimal" min="50" max="90" value={apvF.targetAge} placeholder="65" onChange={e => setApvF(p => ({...p, targetAge: e.target.value}))} /></FormGroup>
             </FormRow>
             <FormRow>
-              <FormGroup label="Rentabilidad anual esperada (%)"><input type="number" min="0" max="20" step="0.5" value={apvF.expectedReturn} placeholder="5" onChange={e => setApvF(p => ({...p, expectedReturn: e.target.value}))} /></FormGroup>
+              <FormGroup label="Rentabilidad anual esperada (%)"><input type="number" inputMode="decimal" min="0" max="20" step="0.5" value={apvF.expectedReturn} placeholder="5" onChange={e => setApvF(p => ({...p, expectedReturn: e.target.value}))} /></FormGroup>
               <FormGroup label="Régimen APV (informativo)">
                 <select value={apvF.regime} onChange={e => setApvF(p => ({...p, regime: e.target.value}))}>
                   <option value="unsure">No estoy seguro</option>

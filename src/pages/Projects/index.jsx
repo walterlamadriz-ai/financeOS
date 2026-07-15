@@ -108,7 +108,7 @@ export default function Projects() {
                     <div style={{ marginTop: 10, paddingTop: 10, borderTop: '.5px solid var(--brd)' }}>
                       <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', marginBottom: 5 }}>{t('projects.valueHint')}</div>
                       <div style={{ display: 'flex', gap: 6 }}>
-                        <input type="number" min="0" value={draft} autoFocus placeholder="0"
+                        <input type="number" inputMode="decimal" min="0" value={draft} autoFocus placeholder="0"
                           onChange={e => setDraft(e.target.value)}
                           style={{ flex: 1, minWidth: 0, padding: '6px 9px', borderRadius: 6, border: '.5px solid var(--brd2)', background: 'var(--sur2)', color: 'var(--tx)', fontFamily: 'var(--mono)', fontSize: 12 }} />
                         <button onClick={() => saveValue(g.name)} style={{ padding: '6px 12px', borderRadius: 6, border: 'none', background: 'var(--grn)', color: '#fff', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>{t('projects.saveBtn')}</button>

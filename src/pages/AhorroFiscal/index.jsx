@@ -53,10 +53,10 @@ export default function AhorroFiscal() {
           <CardHeader title="Tus datos del año" right={<span style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)' }}>{year}</span>} />
           <FormRow>
             <FormGroup label={config.ingresoLabel}>
-              <input type="number" min="0" value={ingreso} placeholder="0" onChange={e => setIngreso(e.target.value)} />
+              <input type="number" inputMode="decimal" min="0" value={ingreso} placeholder="0" onChange={e => setIngreso(e.target.value)} />
             </FormGroup>
             <FormGroup label={config.aporteLabel}>
-              <input type="number" min="0" value={aporte} placeholder="0" onChange={e => setAporte(e.target.value)} />
+              <input type="number" inputMode="decimal" min="0" value={aporte} placeholder="0" onChange={e => setAporte(e.target.value)} />
             </FormGroup>
           </FormRow>
           <div style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)', marginTop: 6 }}>

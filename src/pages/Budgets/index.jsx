@@ -120,7 +120,7 @@ export default function Budgets() {
             {err && <Alert type="danger">⚠ {err}</Alert>}
             <FormRow>
               <FormGroup label={t('budgets.form.category')}><select value={f.category} onChange={e => setF(p => ({...p,category:e.target.value}))}>{CATS_EXPENSE.map(c => <option key={c}>{c}</option>)}</select></FormGroup>
-              <FormGroup label={t('budgets.form.limit', { currency: settings.currency||'CLP' })}><input type="number" min="0" value={f.limit} placeholder="0" onChange={e => setF(p => ({...p,limit:e.target.value}))} /></FormGroup>
+              <FormGroup label={t('budgets.form.limit', { currency: settings.currency||'CLP' })}><input type="number" inputMode="decimal" min="0" value={f.limit} placeholder="0" onChange={e => setF(p => ({...p,limit:e.target.value}))} /></FormGroup>
             </FormRow>
             <Btn variant="primary" onClick={submit}>{t('budgets.form.submit')}</Btn>
           </Card>

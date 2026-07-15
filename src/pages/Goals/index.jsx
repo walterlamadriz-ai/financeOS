@@ -120,8 +120,8 @@ export default function Goals({ setPage }) {
           {err && <Alert type="danger">⚠ {err}</Alert>}
           <FormGroup label={t('goals.form.name')}><input type="text" value={f.name} placeholder={t('goals.form.namePh')} onChange={e=>setF(p=>({...p,name:e.target.value}))} /></FormGroup>
           <FormRow>
-            <FormGroup label={t('goals.form.target', { currency: settings.currency||'CLP' })}><input type="number" min="0" value={f.target} placeholder="0" onChange={e=>setF(p=>({...p,target:e.target.value}))} /></FormGroup>
-            <FormGroup label={t('goals.form.saved')}><input type="number" min="0" value={f.saved} placeholder="0" onChange={e=>setF(p=>({...p,saved:e.target.value}))} /></FormGroup>
+            <FormGroup label={t('goals.form.target', { currency: settings.currency||'CLP' })}><input type="number" inputMode="decimal" min="0" value={f.target} placeholder="0" onChange={e=>setF(p=>({...p,target:e.target.value}))} /></FormGroup>
+            <FormGroup label={t('goals.form.saved')}><input type="number" inputMode="decimal" min="0" value={f.saved} placeholder="0" onChange={e=>setF(p=>({...p,saved:e.target.value}))} /></FormGroup>
           </FormRow>
           <FormRow>
             <FormGroup label={t('goals.form.date')}><input type="date" value={f.targetDate} onChange={e=>setF(p=>({...p,targetDate:e.target.value}))} /></FormGroup>
@@ -214,7 +214,7 @@ export default function Goals({ setPage }) {
                     </div>
                     <div>
                       <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:4}}>{t('goals.edit.target')}</div>
-                      <input type="number" min="0" value={editForm.target||''} onChange={e=>setEditForm(f=>({...f,target:e.target.value}))}
+                      <input type="number" inputMode="decimal" min="0" value={editForm.target||''} onChange={e=>setEditForm(f=>({...f,target:e.target.value}))}
                         style={{width:'100%',padding:'6px 10px',fontSize:13,borderRadius:6,border:'0.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
                     </div>
                     <div>
@@ -281,7 +281,7 @@ export default function Goals({ setPage }) {
                     {!done && (
                       savingId === g.id
                         ? <div style={{display:'flex',gap:6,alignItems:'center'}}>
-                            <input type="number" min="0" value={addAmt} placeholder={t('goals.card.amountPh')} autoFocus
+                            <input type="number" inputMode="decimal" min="0" value={addAmt} placeholder={t('goals.card.amountPh')} autoFocus
                               style={{width:90,padding:'4px 7px',fontSize:11,borderRadius:6,border:'0.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)'}}
                               onChange={e=>setAddAmt(e.target.value)}
                               onKeyDown={e=>e.key==='Enter'&&confirmAddSaving(g)} />

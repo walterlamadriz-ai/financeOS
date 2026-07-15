@@ -129,7 +129,7 @@ export function Income() {
             <input type="text" value={f.source} placeholder="ej. Salario, Freelance cliente A" onChange={e => setF(p => ({ ...p, source: e.target.value }))} />
           </FormGroup>
           <FormRow>
-            <FormGroup label={`Monto (${settings.currency || 'CLP'})`}><input type="number" min="0" value={f.amount} placeholder="0" onChange={e => setF(p => ({ ...p, amount: e.target.value }))} /></FormGroup>
+            <FormGroup label={`Monto (${settings.currency || 'CLP'})`}><input type="number" inputMode="decimal" min="0" value={f.amount} placeholder="0" onChange={e => setF(p => ({ ...p, amount: e.target.value }))} /></FormGroup>
             <FormGroup label="Fecha"><input type="date" value={f.date} onChange={e => setF(p => ({ ...p, date: e.target.value }))} /></FormGroup>
           </FormRow>
           <FormRow>
@@ -251,7 +251,7 @@ export function Expenses() {
           {err && <Alert type="danger">⚠ {err}</Alert>}
           <FormGroup label="Descripción"><input type="text" value={f.description} placeholder="ej. Supermercado Lider" onChange={e => setF(p => ({ ...p, description: e.target.value }))} /></FormGroup>
           <FormRow>
-            <FormGroup label={`Monto (${settings.currency || 'CLP'})`}><input type="number" min="0" value={f.amount} placeholder="0" onChange={e => setF(p => ({ ...p, amount: e.target.value }))} /></FormGroup>
+            <FormGroup label={`Monto (${settings.currency || 'CLP'})`}><input type="number" inputMode="decimal" min="0" value={f.amount} placeholder="0" onChange={e => setF(p => ({ ...p, amount: e.target.value }))} /></FormGroup>
             <FormGroup label="Fecha"><input type="date" value={f.date} onChange={e => setF(p => ({ ...p, date: e.target.value }))} /></FormGroup>
           </FormRow>
           <FormRow>
@@ -411,7 +411,7 @@ export function Budgets() {
           {err && <Alert type="danger">⚠ {err}</Alert>}
           <FormRow>
             <FormGroup label="Categoría"><select value={f.category} onChange={e => setF(p => ({ ...p, category: e.target.value }))}>{CATS_EXPENSE.map(c => <option key={c}>{c}</option>)}</select></FormGroup>
-            <FormGroup label={`Límite mensual (${settings.currency || 'CLP'})`}><input type="number" min="0" value={f.limit} placeholder="0" onChange={e => setF(p => ({ ...p, limit: e.target.value }))} /></FormGroup>
+            <FormGroup label={`Límite mensual (${settings.currency || 'CLP'})`}><input type="number" inputMode="decimal" min="0" value={f.limit} placeholder="0" onChange={e => setF(p => ({ ...p, limit: e.target.value }))} /></FormGroup>
           </FormRow>
           <Btn variant="primary" onClick={submit}>+ Agregar presupuesto</Btn>
         </Card>
@@ -667,11 +667,11 @@ export function Debts() {
           {err && <Alert type="danger">⚠ {err}</Alert>}
           <FormRow>
             <FormGroup label="Acreedor"><input type="text" value={f.creditor} placeholder="ej. Banco, Persona" onChange={e => setF(p => ({ ...p, creditor: e.target.value }))} /></FormGroup>
-            <FormGroup label={`Saldo actual (${settings.currency || 'CLP'})`}><input type="number" min="0" value={f.balance} placeholder="0" onChange={e => setF(p => ({ ...p, balance: e.target.value }))} /></FormGroup>
+            <FormGroup label={`Saldo actual (${settings.currency || 'CLP'})`}><input type="number" inputMode="decimal" min="0" value={f.balance} placeholder="0" onChange={e => setF(p => ({ ...p, balance: e.target.value }))} /></FormGroup>
           </FormRow>
           <FormRow>
-            <FormGroup label="Monto inicial"><input type="number" min="0" value={f.initial} placeholder="Si no sabes, igual al saldo" onChange={e => setF(p => ({ ...p, initial: e.target.value }))} /></FormGroup>
-            <FormGroup label="Pago mínimo"><input type="number" min="0" value={f.minPayment} placeholder="0" onChange={e => setF(p => ({ ...p, minPayment: e.target.value }))} /></FormGroup>
+            <FormGroup label="Monto inicial"><input type="number" inputMode="decimal" min="0" value={f.initial} placeholder="Si no sabes, igual al saldo" onChange={e => setF(p => ({ ...p, initial: e.target.value }))} /></FormGroup>
+            <FormGroup label="Pago mínimo"><input type="number" inputMode="decimal" min="0" value={f.minPayment} placeholder="0" onChange={e => setF(p => ({ ...p, minPayment: e.target.value }))} /></FormGroup>
           </FormRow>
           <div style={{ marginTop: 8, marginBottom: 8 }}>
             <button
@@ -686,11 +686,11 @@ export function Debts() {
             <>
               <FormRow>
                 <FormGroup label="Fecha vencimiento"><input type="date" value={f.dueDate} onChange={e => setF(p => ({ ...p, dueDate: e.target.value }))} /></FormGroup>
-                <FormGroup label="Tasa anual % (TAE)"><input type="number" min="0" max="200" value={f.rate} placeholder="0" onChange={e => setF(p => ({ ...p, rate: e.target.value }))} /></FormGroup>
+                <FormGroup label="Tasa anual % (TAE)"><input type="number" inputMode="decimal" min="0" max="200" value={f.rate} placeholder="0" onChange={e => setF(p => ({ ...p, rate: e.target.value }))} /></FormGroup>
               </FormRow>
               <FormRow>
-                <FormGroup label="Cuotas totales"><input type="number" min="0" value={f.totalInstallments} placeholder="ej. 36" onChange={e => setF(p => ({ ...p, totalInstallments: e.target.value }))} /></FormGroup>
-                <FormGroup label="Cuotas pagadas"><input type="number" min="0" value={f.paidInstallments} placeholder="ej. 12" onChange={e => setF(p => ({ ...p, paidInstallments: e.target.value }))} /></FormGroup>
+                <FormGroup label="Cuotas totales"><input type="number" inputMode="decimal" min="0" value={f.totalInstallments} placeholder="ej. 36" onChange={e => setF(p => ({ ...p, totalInstallments: e.target.value }))} /></FormGroup>
+                <FormGroup label="Cuotas pagadas"><input type="number" inputMode="decimal" min="0" value={f.paidInstallments} placeholder="ej. 12" onChange={e => setF(p => ({ ...p, paidInstallments: e.target.value }))} /></FormGroup>
               </FormRow>
             </>
           )}
@@ -954,8 +954,8 @@ export function Goals({ setPage }) {
           {err && <Alert type="danger">⚠ {err}</Alert>}
           <FormGroup label="Nombre de la meta"><input type="text" value={f.name} placeholder="ej. Fondo de emergencia, Viaje" onChange={e => setF(p => ({ ...p, name: e.target.value }))} /></FormGroup>
           <FormRow>
-            <FormGroup label={`Monto objetivo (${settings.currency || 'CLP'})`}><input type="number" min="0" value={f.target} placeholder="0" onChange={e => setF(p => ({ ...p, target: e.target.value }))} /></FormGroup>
-            <FormGroup label="Ahorrado hasta hoy"><input type="number" min="0" value={f.saved} placeholder="0" onChange={e => setF(p => ({ ...p, saved: e.target.value }))} /></FormGroup>
+            <FormGroup label={`Monto objetivo (${settings.currency || 'CLP'})`}><input type="number" inputMode="decimal" min="0" value={f.target} placeholder="0" onChange={e => setF(p => ({ ...p, target: e.target.value }))} /></FormGroup>
+            <FormGroup label="Ahorrado hasta hoy"><input type="number" inputMode="decimal" min="0" value={f.saved} placeholder="0" onChange={e => setF(p => ({ ...p, saved: e.target.value }))} /></FormGroup>
           </FormRow>
           <FormRow>
             <FormGroup label="Fecha objetivo"><input type="date" value={f.targetDate} onChange={e => setF(p => ({ ...p, targetDate: e.target.value }))} /></FormGroup>
@@ -1048,7 +1048,7 @@ export function Goals({ setPage }) {
                   </div>
                   <div>
                     <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:4}}>Monto objetivo</div>
-                    <input type="number" min="0" value={editForm.target||''} onChange={e=>setEditForm(f=>({...f,target:e.target.value}))}
+                    <input type="number" inputMode="decimal" min="0" value={editForm.target||''} onChange={e=>setEditForm(f=>({...f,target:e.target.value}))}
                       style={{width:'100%',padding:'6px 10px',fontSize:13,borderRadius:6,border:'0.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
                   </div>
                   <div>
@@ -1102,7 +1102,7 @@ export function Goals({ setPage }) {
               {!done && (
                 savingId === g.id
                   ? <div style={{display:'flex',gap:6,alignItems:'center'}}>
-                      <input type="number" min="0" value={addAmt} placeholder="Monto" autoFocus
+                      <input type="number" inputMode="decimal" min="0" value={addAmt} placeholder="Monto" autoFocus
                         style={{width:90,padding:'4px 7px',fontSize:11,borderRadius:6,border:'0.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)'}}
                         onChange={e => setAddAmt(e.target.value)}
                         onKeyDown={e => e.key === 'Enter' && confirmAddSaving(g)} />

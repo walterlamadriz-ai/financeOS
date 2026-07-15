@@ -131,7 +131,7 @@ export default function Settings() {
             </div>
             <div style={{display:'flex', alignItems:'center', gap:8, width:'100%'}}>
               <input
-                type="number" min="0" step="any"
+                type="number" inputMode="decimal" min="0" step="any"
                 value={settings.usdRate || DEFAULT_USD_RATES[settings.currency] || ''}
                 placeholder={String(DEFAULT_USD_RATES[settings.currency] || '')}
                 onChange={e => updateSettings({...settings, usdRate: parseFloat(e.target.value) || 0})}

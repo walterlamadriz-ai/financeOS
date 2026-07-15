@@ -118,7 +118,7 @@ export default function Income({ setPage }) {
             <input type="text" value={f.source} placeholder={t('income.form.sourcePh')} onChange={e => setF(p => ({ ...p, source: e.target.value }))} />
           </FormGroup>
           <FormRow>
-            <FormGroup label={t('income.form.amount', { currency: settings.currency || 'CLP' })}><input type="number" min="0" value={f.amount} placeholder="0" onChange={e => setF(p => ({ ...p, amount: e.target.value }))} /></FormGroup>
+            <FormGroup label={t('income.form.amount', { currency: settings.currency || 'CLP' })}><input type="number" inputMode="decimal" min="0" value={f.amount} placeholder="0" onChange={e => setF(p => ({ ...p, amount: e.target.value }))} /></FormGroup>
             <FormGroup label={t('income.form.date')}><input type="date" value={f.date} onChange={e => setF(p => ({ ...p, date: e.target.value }))} /></FormGroup>
           </FormRow>
           <FormRow>
@@ -157,7 +157,7 @@ export default function Income({ setPage }) {
                       </div>
                       <div>
                         <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:3}}>{t('income.edit.amount')}</div>
-                        <input type="number" min="0" value={editForm.amount||''} onChange={e=>setEditForm(f=>({...f,amount:e.target.value}))}
+                        <input type="number" inputMode="decimal" min="0" value={editForm.amount||''} onChange={e=>setEditForm(f=>({...f,amount:e.target.value}))}
                           style={{width:'100%',padding:'5px 8px',fontSize:12,borderRadius:5,border:'0.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
                       </div>
                       <div>

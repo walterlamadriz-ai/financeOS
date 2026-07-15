@@ -357,7 +357,7 @@ export default function Onboarding({ onComplete }) {
           {t('onboarding.income.label', { currency: answers.currency || 'tu moneda' })}
         </div>
         <input
-          type="number"
+          type="number" inputMode="decimal"
           min="0"
           value={answers.estimatedMonthlyIncome}
           placeholder={t('onboarding.income.placeholder')}

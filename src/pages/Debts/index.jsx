@@ -102,7 +102,7 @@ function DebtPayoffSimulator({ debts, sym }) {
           {t('debts.sim.extraLabel', { sym })}
         </label>
         <input
-          type="number" min="0" value={extra}
+          type="number" inputMode="decimal" min="0" value={extra}
           onChange={e => setExtra(e.target.value)}
           placeholder={t('debts.sim.extraPh')}
           style={{width:'100%',maxWidth:240,padding:'7px 10px',borderRadius:7,border:'.5px solid var(--brd)',background:'var(--sur)',color:'var(--tx)',fontFamily:'var(--mono)',fontSize:13}}
@@ -270,11 +270,11 @@ export default function Debts() {
           )}
           <FormRow>
             <FormGroup label={t('debts.form.creditor')}><input type="text" value={f.creditor} placeholder={t('debts.form.creditorPh')} onChange={e => setF(p=>({...p,creditor:e.target.value}))} /></FormGroup>
-            <FormGroup label={t('debts.form.balance', { currency: f.ufDebt ? 'UF' : (settings.currency||'CLP') })}><input type="number" min="0" step="0.01" value={f.balance} placeholder={f.ufDebt ? 'ej. 2500.50' : '0'} onChange={e => setF(p=>({...p,balance:e.target.value}))} />{ufPreview(f.balance)}</FormGroup>
+            <FormGroup label={t('debts.form.balance', { currency: f.ufDebt ? 'UF' : (settings.currency||'CLP') })}><input type="number" inputMode="decimal" min="0" step="0.01" value={f.balance} placeholder={f.ufDebt ? 'ej. 2500.50' : '0'} onChange={e => setF(p=>({...p,balance:e.target.value}))} />{ufPreview(f.balance)}</FormGroup>
           </FormRow>
           <FormRow>
-            <FormGroup label={f.ufDebt ? t('debts.form.initial') + ' (UF)' : t('debts.form.initial')}><input type="number" min="0" step="0.01" value={f.initial} placeholder={f.ufDebt ? 'ej. 3000' : t('debts.form.initialPh')} onChange={e => setF(p=>({...p,initial:e.target.value}))} />{ufPreview(f.initial)}</FormGroup>
-            <FormGroup label={f.ufDebt ? t('debts.form.minPay') + ' (UF)' : t('debts.form.minPay')}><input type="number" min="0" step="0.01" value={f.minPayment} placeholder={f.ufDebt ? 'ej. 7.55' : '0'} onChange={e => setF(p=>({...p,minPayment:e.target.value}))} />{ufPreview(f.minPayment)}</FormGroup>
+            <FormGroup label={f.ufDebt ? t('debts.form.initial') + ' (UF)' : t('debts.form.initial')}><input type="number" inputMode="decimal" min="0" step="0.01" value={f.initial} placeholder={f.ufDebt ? 'ej. 3000' : t('debts.form.initialPh')} onChange={e => setF(p=>({...p,initial:e.target.value}))} />{ufPreview(f.initial)}</FormGroup>
+            <FormGroup label={f.ufDebt ? t('debts.form.minPay') + ' (UF)' : t('debts.form.minPay')}><input type="number" inputMode="decimal" min="0" step="0.01" value={f.minPayment} placeholder={f.ufDebt ? 'ej. 7.55' : '0'} onChange={e => setF(p=>({...p,minPayment:e.target.value}))} />{ufPreview(f.minPayment)}</FormGroup>
           </FormRow>
           <div style={{marginTop:8,marginBottom:8}}>
             <button type="button" onClick={() => setF(p=>({...p,_showExtra:!p._showExtra}))}
@@ -286,11 +286,11 @@ export default function Debts() {
             <>
               <FormRow>
                 <FormGroup label={t('debts.form.dueDate')}><input type="date" value={f.dueDate} onChange={e => setF(p=>({...p,dueDate:e.target.value}))} /></FormGroup>
-                <FormGroup label={t('debts.form.rate')}><input type="number" min="0" max="200" value={f.rate} placeholder="0" onChange={e => setF(p=>({...p,rate:e.target.value}))} /></FormGroup>
+                <FormGroup label={t('debts.form.rate')}><input type="number" inputMode="decimal" min="0" max="200" value={f.rate} placeholder="0" onChange={e => setF(p=>({...p,rate:e.target.value}))} /></FormGroup>
               </FormRow>
               <FormRow>
-                <FormGroup label={t('debts.form.totalInst')}><input type="number" min="0" value={f.totalInstallments} placeholder={t('debts.form.totalInstPh')} onChange={e => setF(p=>({...p,totalInstallments:e.target.value}))} /></FormGroup>
-                <FormGroup label={t('debts.form.paidInst')}><input type="number" min="0" value={f.paidInstallments} placeholder={t('debts.form.paidInstPh')} onChange={e => setF(p=>({...p,paidInstallments:e.target.value}))} /></FormGroup>
+                <FormGroup label={t('debts.form.totalInst')}><input type="number" inputMode="decimal" min="0" value={f.totalInstallments} placeholder={t('debts.form.totalInstPh')} onChange={e => setF(p=>({...p,totalInstallments:e.target.value}))} /></FormGroup>
+                <FormGroup label={t('debts.form.paidInst')}><input type="number" inputMode="decimal" min="0" value={f.paidInstallments} placeholder={t('debts.form.paidInstPh')} onChange={e => setF(p=>({...p,paidInstallments:e.target.value}))} /></FormGroup>
               </FormRow>
               <FormRow>
                 <FormGroup label={t('debts.projectLabel')}>

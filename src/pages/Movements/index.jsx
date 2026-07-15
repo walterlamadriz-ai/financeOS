@@ -170,7 +170,7 @@ function FormGasto({ onSave, onCancel, sym, projects = [], onImport }) {
           <input style={inp} value={f.description} placeholder={t('mov.form.descPh')}
             onChange={e => set('description', e.target.value)}/></div>
         <div><label style={lbl}>{t('mov.form.amount', { sym })}</label>
-          <input style={inp} type="number" min="0" value={f.amount} placeholder="0"
+          <input style={inp} type="number" inputMode="decimal" min="0" value={f.amount} placeholder="0"
             onChange={e => set('amount', e.target.value)}/></div>
         <div><label style={lbl}>{t('mov.form.date')}</label>
           <input style={inp} type="date" value={f.date}
@@ -263,7 +263,7 @@ function FormSub({ onSave, onCancel }) {
           <input style={inp} value={f.name} placeholder={t('mov.form.namePh')}
             onChange={e => set('name', e.target.value)}/></div>
         <div><label style={lbl}>{t('mov.form.amountSimple')}</label>
-          <input style={inp} type="number" value={f.amount} placeholder="0"
+          <input style={inp} type="number" inputMode="decimal" value={f.amount} placeholder="0"
             onChange={e => set('amount', e.target.value)}/></div>
         <div><label style={lbl}>{t('mov.form.freq')}</label>
           <select style={inp} value={f.frequency} onChange={e => set('frequency', e.target.value)}>
@@ -654,7 +654,7 @@ export default function Movements({ setPage }) {
                   <input type="text" value={editForm.description||''} placeholder={t('mov.edit.descPh')}
                     onChange={ev=>setEditForm(f=>({...f,description:ev.target.value}))}
                     style={{gridColumn:'1/-1',padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
-                  <input type="number" min="0" value={editForm.amount||''} placeholder={t('mov.edit.amountPh')}
+                  <input type="number" inputMode="decimal" min="0" value={editForm.amount||''} placeholder={t('mov.edit.amountPh')}
                     onChange={ev=>setEditForm(f=>({...f,amount:ev.target.value}))}
                     style={{padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
                   <input type="date" value={editForm.date||''}
@@ -749,7 +749,7 @@ export default function Movements({ setPage }) {
                         <input type="text" value={editSubForm.name||''} placeholder={t('mov.edit.namePh')}
                           onChange={ev=>setEditSubForm(f=>({...f,name:ev.target.value}))}
                           style={{gridColumn:'1/-1',padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
-                        <input type="number" min="0" value={editSubForm.amount||''} placeholder={t('mov.edit.amountPh')}
+                        <input type="number" inputMode="decimal" min="0" value={editSubForm.amount||''} placeholder={t('mov.edit.amountPh')}
                           onChange={ev=>setEditSubForm(f=>({...f,amount:ev.target.value}))}
                           style={{padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
                         <select value={editSubForm.frequency||sub.frequency}

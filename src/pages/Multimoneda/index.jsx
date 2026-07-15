@@ -47,15 +47,15 @@ export default function Multimoneda() {
           <CardHeader title="Tus saldos" />
           <FormRow>
             <FormGroup label="Saldo en bolívares (Bs)">
-              <input type="number" min="0" value={bs} placeholder="0" onChange={e => setBs(e.target.value)} />
+              <input type="number" inputMode="decimal" min="0" value={bs} placeholder="0" onChange={e => setBs(e.target.value)} />
             </FormGroup>
             <FormGroup label="Saldo en dólares (USD)">
-              <input type="number" min="0" value={usd} placeholder="0" onChange={e => setUsd(e.target.value)} />
+              <input type="number" inputMode="decimal" min="0" value={usd} placeholder="0" onChange={e => setUsd(e.target.value)} />
             </FormGroup>
           </FormRow>
           <FormRow>
             <FormGroup label="Tasa Bs/USD (editable)">
-              <input type="number" min="0" step="0.01" value={tasa} onChange={e => setTasa(e.target.value)} />
+              <input type="number" inputMode="decimal" min="0" step="0.01" value={tasa} onChange={e => setTasa(e.target.value)} />
             </FormGroup>
           </FormRow>
         </Card>

@@ -84,27 +84,27 @@ export default function PPRPage() {
         <CardHeader title="Os seus dados" />
         <FormRow>
           <FormGroup label="Idade (a 1 de janeiro)">
-            <input type="number" min="18" max="80" value={f.age} placeholder="ex. 32"
+            <input type="number" inputMode="decimal" min="18" max="80" value={f.age} placeholder="ex. 32"
               onChange={e => set('age', e.target.value)} />
           </FormGroup>
           <FormGroup label="Aporte anual ao PPR (€)">
-            <input type="number" min="0" value={f.annualContrib} placeholder="ex. 1200"
+            <input type="number" inputMode="decimal" min="0" value={f.annualContrib} placeholder="ex. 1200"
               onChange={e => set('annualContrib', e.target.value)} />
           </FormGroup>
         </FormRow>
         <FormRow>
           <FormGroup label="Saldo atual no PPR (€)">
-            <input type="number" min="0" value={f.currentBalance} placeholder="0"
+            <input type="number" inputMode="decimal" min="0" value={f.currentBalance} placeholder="0"
               onChange={e => set('currentBalance', e.target.value)} />
           </FormGroup>
           <FormGroup label="Idade de reforma">
-            <input type="number" min="55" max="75" value={f.retireAge}
+            <input type="number" inputMode="decimal" min="55" max="75" value={f.retireAge}
               onChange={e => set('retireAge', e.target.value)} />
           </FormGroup>
         </FormRow>
         <FormRow>
           <FormGroup label="Retorno anual esperado (%)">
-            <input type="number" min="0" max="15" step="0.5" value={f.expectedReturn}
+            <input type="number" inputMode="decimal" min="0" max="15" step="0.5" value={f.expectedReturn}
               onChange={e => set('expectedReturn', e.target.value)} />
           </FormGroup>
         </FormRow>
