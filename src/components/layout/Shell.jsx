@@ -5,6 +5,7 @@ import { useApp } from '../../context/AppContext.jsx'
 import { useT } from '../../i18n/useT.js'
 import s from './shell.module.css'
 import { BackupStatusBadge } from '../backup/BackupManager.jsx'
+import QuickAdd from '../QuickAdd.jsx'
 
 // lb = key de traducción (ver src/i18n/translations.js), no texto directo
 const NAV = [
@@ -60,6 +61,7 @@ export default function Shell({ page, setPage, children }) {
 
   // ── FAB speed-dial (Ingreso / Egreso) ────────────────────────────────────────
   const [fabOpen, setFabOpen] = useState(false)
+  const [quickAdd, setQuickAdd] = useState(null) // null | 'expense' | 'income'
 
   // Cerrar drawer al hacer clic fuera
   useEffect(() => {
@@ -221,38 +223,19 @@ export default function Shell({ page, setPage, children }) {
           </div>
         </div>
 
-        {/* FAB speed-dial — Ingreso / Egreso, solo móvil */}
-        {fabOpen && <div className={s.fabBackdrop} onClick={() => setFabOpen(false)} />}
+        {/* FAB — abre captura rápida directa (1 tap), solo móvil */}
         <div className={s.fabWrap}>
-          {fabOpen && (
-            <div className={s.fabActions}>
-              <button
-                className={s.fabAction}
-                onClick={() => { setFabOpen(false); navigate('income') }}
-                aria-label={t('nav.fab.addIncome')}
-              >
-                <span className={s.fabActionIc}>↑</span> {t('nav.fab.income')}
-              </button>
-              <button
-                className={s.fabAction}
-                onClick={() => { setFabOpen(false); navigate('movements') }}
-                aria-label={t('nav.fab.addExpense')}
-              >
-                <span className={s.fabActionIc}>↓</span> {t('nav.fab.expense')}
-              </button>
-            </div>
-          )}
           <button
             className={s.fab}
-            onClick={() => setFabOpen(o => !o)}
-            aria-label={fabOpen ? t('nav.fab.close') : t('nav.fab.open')}
-            aria-expanded={fabOpen}
-            style={fabOpen ? { transform: 'rotate(45deg)' } : undefined}
+            onClick={() => setQuickAdd('expense')}
+            aria-label={t('qa.title')}
           >
             +
           </button>
         </div>
       </div>
+
+      <QuickAdd open={!!quickAdd} defaultType={quickAdd || 'expense'} onClose={() => setQuickAdd(null)} />
     </div>
   )
 }
