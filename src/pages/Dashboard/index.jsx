@@ -225,8 +225,13 @@ export default function Dashboard({ setPage }) {
   function ScoreSparkline({ history, currentColor }) {
     if (history.length < 2) return null
     const vals = history.map(e => e.s)
-    const min = Math.min(...vals) - 5
-    const max = Math.max(...vals) + 5
+    // Escala honesta: ventana MÍNIMA de 20 pts (un ±1 no se dibuja como montaña),
+    // centrada en los datos y acotada al rango real del score [0,100].
+    const dataMin = Math.min(...vals), dataMax = Math.max(...vals)
+    const span = Math.max(dataMax - dataMin, 20)
+    const mid = (dataMin + dataMax) / 2
+    const min = Math.max(0, mid - span / 2)
+    const max = Math.min(100, min + span) || 100
     const W = 80, H = 28
     const pts = vals.map((v, i) => {
       const x = (i / (vals.length - 1)) * W
@@ -236,13 +241,13 @@ export default function Dashboard({ setPage }) {
     const prev = vals[vals.length - 2]
     const curr = vals[vals.length - 1]
     const diff = curr - prev
-    const trendColor = diff > 0 ? 'var(--accent)' : diff < 0 ? 'var(--red)' : 'var(--th)'
-    const trendBg    = diff > 0 ? 'var(--accent-bg)' : diff < 0 ? 'var(--red-bg)' : 'var(--sur3)'
+    const trendColor = diff > 0 ? 'var(--pos)' : diff < 0 ? 'var(--neg)' : 'var(--th)'
+    const trendBg    = diff > 0 ? 'var(--pos-bg)' : diff < 0 ? 'var(--neg-bg)' : 'var(--sur3)'
     const trendTxt   = diff > 0 ? t('dash.trend.up', { n: Math.abs(diff) }) : diff < 0 ? t('dash.trend.down', { n: Math.abs(diff) }) : t('dash.trend.flat')
     return (
       <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-        {/* SVG solo en desktop — en mobile basta la tendencia textual */}
-        <span className="fos-hide-mobile">
+        {/* Ahora también visible en móvil — es la tendencia del score, la métrica clave */}
+        <span>
           <svg width={W} height={H} style={{ overflow:'visible', display:'block' }}>
             <polyline points={pts} fill="none" stroke={currentColor} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" opacity="0.7" />
             <circle cx={pts.split(' ').pop().split(',')[0]} cy={pts.split(' ').pop().split(',')[1]} r="3" fill={currentColor} />
