@@ -9,11 +9,11 @@
   --sur:       #ffffff;
   --sur2:      #f9f8f5;
   --sur3:      #f1f0eb;
-  --brd:       rgba(0,0,0,0.07);
-  --brd2:      rgba(0,0,0,0.13);
+  --brd:       rgba(0,0,0,0.09);
+  --brd2:      rgba(0,0,0,0.16);
   --tx:        #1a1a18;
-  --tm:        #6b6960;
-  --th:        #9a9890;
+  --tm:        #5f5d55;   /* 6.4:1 AA */
+  --th:        #767469;   /* 4.54:1 AA — era #9a9890 (2.60:1, fallaba) */
   --grn:       #1a6b4a;
   --grn-bg:    #e8f5ef;
   --grn-lt:    #d0eddf;
@@ -27,6 +27,15 @@
   --accent:    #0a9d7e;   /* verde-teal de acento — AA sobre fondos claros */
   --accent-bg: rgba(10,157,126,0.08);
   --accent2:   #1a7a99;   /* cyan de acento secundario */
+  /* ── Semántica por rol (el DATO, no la marca). --grn = marca/estructura. ── */
+  --pos:  var(--accent);   --pos-bg:  var(--accent-bg);   /* positivo / ingreso / on-track */
+  --neg:  var(--red);      --neg-bg:  var(--red-bg);      /* gasto / sobregiro */
+  --warn: var(--amb);      --warn-bg: var(--amb-bg);      /* cerca del límite */
+  --info: var(--blu);      --info-bg: var(--blu-bg);      /* neutral / deudas */
+  /* ── Charts: grid visible en ambos temas + paleta categórica por identidad ── */
+  --chart-grid: rgba(0,0,0,0.10);
+  --cat-1:#2563a8; --cat-2:#0a9d7e; --cat-3:#c2721a; --cat-4:#a03e6b;
+  --cat-5:#6b4fbb; --cat-6:#3a8c5a; --cat-7:#b23b3b; --cat-8:#4a8ca8;
   --sans:      'Instrument Sans', sans-serif;
   --display:   'Space Grotesk', 'Instrument Sans', sans-serif; /* jerarquía con carácter */
   --mono:      'JetBrains Mono', monospace;
@@ -64,11 +73,11 @@
   --sur:       #1c1e1a;
   --sur2:      #22241f;
   --sur3:      #282b24;
-  --brd:       rgba(255,255,255,0.07);
-  --brd2:      rgba(255,255,255,0.14);
+  --brd:       rgba(255,255,255,0.09);
+  --brd2:      rgba(255,255,255,0.16);
   --tx:        #e8e6e0;
-  --tm:        #9a9890;
-  --th:        #5a5850;
+  --tm:        #a5a39a;   /* AA sobre --bg oscuro */
+  --th:        #8a887e;   /* ~4.6:1 — era #5a5850 (2.36:1, fallaba) */
   --grn:       #3dbe7a;
   --grn-bg:    #0f2218;
   --grn-lt:    #163d26;
@@ -82,6 +91,10 @@
   --accent:    #2de8c0;   /* brillante para pasar AA sobre --sur oscuro */
   --accent-bg: rgba(45,232,192,0.12);
   --accent2:   #4ec8e6;
+  /* Charts en dark (grid + categóricas más luminosas) */
+  --chart-grid: rgba(255,255,255,0.12);
+  --cat-1:#5b9bd8; --cat-2:#2de8c0; --cat-3:#e0a050; --cat-4:#d47aa0;
+  --cat-5:#a08de0; --cat-6:#5cc47e; --cat-7:#e06a6a; --cat-8:#6cb8d8;
   /* Elevación en dark: sombra más honda + hairline de luz superior */
   --sh-1:      0 1px 2px rgba(0,0,0,.4);
   --sh-2:      0 4px 14px rgba(0,0,0,.45);
