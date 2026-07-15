@@ -10,7 +10,7 @@ import { fmtMoney, fmtPct } from '../../utils/index.js'
 import { projectEndOfMonth } from '../../utils/projection.js'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, ReferenceLine, Legend,
+  Tooltip, ResponsiveContainer, ReferenceLine, ReferenceArea, Legend,
 } from 'recharts'
 
 const CURRENCY_SYMBOLS = { CLP: '$', USD: 'US$', EUR: '€', VES: 'Bs.', MXN: '$', ARS: '$', COP: '$' }
@@ -121,10 +121,12 @@ export default function CashFlow({ setPage }) {
       const d = new Date(base.getFullYear(), base.getMonth() + i, 1)
       const label = months[d.getMonth()] + ' ' + d.getFullYear().toString().slice(2)
       if (i === 0) {
-        result.push({ mes: label, Balance: balance, Ingresos: monthlyEstimate.avgInc, Gastos: monthlyEstimate.avgExp, actual: true })
+        // Mes actual = DATO. Sirve de puente: aparece en ambas series para que
+        // la línea real (sólida) y la estimada (punteada) se conecten.
+        result.push({ mes: label, Balance: balance, BalanceReal: balance, BalanceEst: balance, Ingresos: monthlyEstimate.avgInc, Gastos: monthlyEstimate.avgExp, actual: true })
       } else {
         balance += monthlyNetFlow
-        result.push({ mes: label, Balance: balance, Ingresos: monthlyEstimate.avgInc, Gastos: monthlyEstimate.avgExp })
+        result.push({ mes: label, Balance: balance, BalanceReal: null, BalanceEst: balance, Ingresos: monthlyEstimate.avgInc, Gastos: monthlyEstimate.avgExp })
       }
     }
     return result
@@ -137,7 +139,7 @@ export default function CashFlow({ setPage }) {
   const trend  = monthlyNetFlow > 0 ? 'positivo' : monthlyNetFlow < 0 ? 'negativo' : 'neutro'
 
   const axisStyle = { fill: 'var(--th)', fontSize: 10 }
-  const gridStyle = { stroke: 'rgba(0,0,0,0.05)', strokeDasharray: '3 3' }
+  const gridStyle = { stroke: 'var(--chart-grid)', strokeDasharray: '3 3' }
 
   const hasData = monthsWithData.length > 0
 
@@ -270,11 +272,21 @@ export default function CashFlow({ setPage }) {
                 <YAxis tick={axisStyle} axisLine={false} tickLine={false}
                   tickFormatter={v => v >= 1000000 ? (v/1000000).toFixed(1)+'M' : v >= 1000 ? (v/1000).toFixed(0)+'K' : v} />
                 <Tooltip content={<ChartTooltip sym={sym} />} />
+                {/* Zona estimada: todo lo que va del 2º mes en adelante es proyección */}
+                {projectionData.length > 1 && (
+                  <ReferenceArea x1={projectionData[1].mes} x2={projectionData[projectionData.length-1].mes}
+                    fill="var(--th)" fillOpacity={0.06} strokeOpacity={0}
+                    label={{ value: t('cf.chart.estimate'), position: 'insideTopRight', fontSize: 9, fill: 'var(--th)', fontFamily: 'var(--mono)' }} />
+                )}
                 <ReferenceLine y={0} stroke="var(--red)" strokeDasharray="4 2" strokeWidth={1.5} />
-                <Area type="monotone" dataKey="Balance" name={t('cf.chart.series')}
-                  stroke={monthlyNetFlow >= 0 ? 'var(--grn)' : 'var(--red)'}
-                  strokeWidth={2}
+                {/* Real = sólido con relleno */}
+                <Area type="monotone" dataKey="BalanceReal" name={t('cf.chart.series')} connectNulls={false}
+                  stroke={monthlyNetFlow >= 0 ? 'var(--grn)' : 'var(--red)'} strokeWidth={2.5}
                   fill={monthlyNetFlow >= 0 ? 'url(#balGrad)' : 'url(#balGradNeg)'} />
+                {/* Estimado = punteado, sin relleno (comunica incertidumbre, no inventa bandas) */}
+                <Area type="monotone" dataKey="BalanceEst" name={t('cf.chart.estimate')} connectNulls={false}
+                  stroke={monthlyNetFlow >= 0 ? 'var(--grn)' : 'var(--red)'} strokeWidth={2}
+                  strokeDasharray="5 4" strokeOpacity={0.75} fill="none" />
               </AreaChart>
             </ResponsiveContainer>
           )
