@@ -116,17 +116,19 @@ export default function Shell({ page, setPage, children }) {
           <div key={g.sec}>
             <div className={s.sec}>{t(g.sec)}</div>
             {g.items.filter(it => !it.countries || it.countries.includes(navCountry)).map(it => (
-              <div
+              <button
                 key={it.id}
+                type="button"
                 className={s.ni + (page === it.id ? ' ' + s.active : '')}
                 onClick={() => onNavigate(it.id)}
+                aria-current={page === it.id ? 'page' : undefined}
               >
                 <span className={s.ic}>{it.ic}</span>
                 {t(it.lb)}
                 {it.proOnly && (
-                  <span style={{ marginLeft:'auto', fontSize:8, fontFamily:'var(--mono)', background:'rgba(245,166,35,.18)', color:'var(--amb)', borderRadius:4, padding:'1px 5px', letterSpacing:'.5px', fontWeight:700 }}>PRO</span>
+                  <span style={{ marginLeft:'auto', fontSize:8, fontFamily:'var(--mono)', background:'color-mix(in srgb, var(--warn) 18%, transparent)', color:'var(--amb)', borderRadius:4, padding:'1px 5px', letterSpacing:'.5px', fontWeight:700 }}>PRO</span>
                 )}
-              </div>
+              </button>
             ))}
           </div>
         ))}
@@ -151,9 +153,9 @@ export default function Shell({ page, setPage, children }) {
             {isDark ? '☀ ' + t('settings.theme.light') : '◑ ' + t('settings.theme.dark')}
           </button>
           <div className={s.legalLinks}>
-            <span onClick={() => navigate('privacy')} className={s.legalLink}>{t('nav.legal.privacy')}</span>
-            <span onClick={() => navigate('terms')} className={s.legalLink}>{t('nav.legal.terms')}</span>
-            <span onClick={() => navigate('disclaimer')} className={s.legalLink}>{t('nav.legal.disclaimer')}</span>
+            <button type="button" onClick={() => navigate('privacy')} className={s.legalLink}>{t('nav.legal.privacy')}</button>
+            <button type="button" onClick={() => navigate('terms')} className={s.legalLink}>{t('nav.legal.terms')}</button>
+            <button type="button" onClick={() => navigate('disclaimer')} className={s.legalLink}>{t('nav.legal.disclaimer')}</button>
             <a href='https://www.financeospro.com/docs/' target='_blank' className={s.legalLink} style={{textDecoration:'none'}}>{t('nav.legal.help')}</a>
           </div>
           <div className={s.appVersion}>
