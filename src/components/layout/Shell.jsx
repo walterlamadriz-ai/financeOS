@@ -6,6 +6,15 @@ import { useT } from '../../i18n/useT.js'
 import s from './shell.module.css'
 import { BackupStatusBadge } from '../backup/BackupManager.jsx'
 import QuickAdd from '../QuickAdd.jsx'
+import PrivacySeal from '../PrivacySeal.jsx'
+import CountryBadge from '../CountryBadge.jsx'
+
+// Flag de preview de la firma (Anillo/Sello) — mismo que el Dashboard.
+// OFF por defecto: el trial no ve ningún cambio.
+const SHOW_FIRMA = (() => {
+  try { return localStorage.getItem('fos_ring') === '1' || new URLSearchParams(location.search).has('ring') }
+  catch { return false }
+})()
 
 // lb = key de traducción (ver src/i18n/translations.js), no texto directo
 const NAV = [
@@ -20,8 +29,8 @@ const NAV = [
     { id: 'debts',   ic: '⊖', lb: 'nav.debts' },
     { id: 'goals',   ic: '◎', lb: 'nav.goals' },
     { id: 'projects', ic: '🏢', lb: 'nav.properties' },
-    { id: 'apv',     ic: '🇨🇱', lb: 'nav.apvChile', countries: ['CL'] },
-    { id: 'ppr',     ic: '🇵🇹', lb: 'nav.pprPortugal', countries: ['PT'] },
+    { id: 'apv',     ic: '🇨🇱', cc: 'CL', lb: 'nav.apvChile', countries: ['CL'] },
+    { id: 'ppr',     ic: '🇵🇹', cc: 'PT', lb: 'nav.pprPortugal', countries: ['PT'] },
     { id: 'deducciones', ic: '🧾', lb: 'nav.deductions', countries: ['EC', 'PE'] },
     { id: 'ahorrofiscal', ic: '🏦', lb: 'nav.taxSavings', countries: ['MX', 'CO', 'US', 'ES'] },
     { id: 'inflacion',   ic: '📈', lb: 'nav.inflation', countries: ['AR'] },
@@ -125,7 +134,7 @@ export default function Shell({ page, setPage, children }) {
                 onClick={() => onNavigate(it.id)}
                 aria-current={page === it.id ? 'page' : undefined}
               >
-                <span className={s.ic}>{it.ic}</span>
+                <span className={s.ic}>{SHOW_FIRMA && it.cc ? <CountryBadge code={it.cc} /> : it.ic}</span>
                 {t(it.lb)}
                 {it.proOnly && (
                   <span style={{ marginLeft:'auto', fontSize:8, fontFamily:'var(--mono)', background:'color-mix(in srgb, var(--warn) 18%, transparent)', color:'var(--amb)', borderRadius:4, padding:'1px 5px', letterSpacing:'.5px', fontWeight:700 }}>PRO</span>
@@ -160,6 +169,12 @@ export default function Shell({ page, setPage, children }) {
             <button type="button" onClick={() => navigate('disclaimer')} className={s.legalLink}>{t('nav.legal.disclaimer')}</button>
             <a href='https://www.financeospro.com/docs/' target='_blank' className={s.legalLink} style={{textDecoration:'none'}}>{t('nav.legal.help')}</a>
           </div>
+          {SHOW_FIRMA && (
+            <div style={{ display:'flex', justifyContent:'center', padding:'8px 0 2px' }}
+              title={t('nav.noServerTag')}>
+              <PrivacySeal size={72} />
+            </div>
+          )}
           <div className={s.appVersion}>
             FinanceOS v1.5 · MAXNOVA & LUCI Global LLC<br/>
             <span style={{opacity:.5}}>{t('nav.noServerTag')}</span>
