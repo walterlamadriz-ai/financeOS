@@ -429,12 +429,9 @@ export default function Dashboard({ setPage }) {
   }, [ctx.incomes, ctx.expenses, activeMonth])
   const flujoTotal = kpis.balance + propFlow.net
 
-  // ── El Anillo Vivo (Pulso) — detrás de flag (?ring=1 o localStorage fos_ring).
-  //    Default OFF: no cambia nada para nadie. Usa motores ya existentes.
-  const showRing = (() => {
-    try { return localStorage.getItem('fos_ring') === '1' || new URLSearchParams(location.search).has('ring') }
-    catch { return false }
-  })()
+  // ── El Anillo Vivo (Pulso) — firma del producto, visible por defecto.
+  //    Solo se muestra cuando hay datos del mes. Usa motores ya existentes.
+  const showRing = true
   const pulse = useMemo(() => {
     const { today, daysInMonth, daysLeft } = projectEndOfMonth({ incomes, expenses, activeMonth })
     // Referencia = ingreso del mes (mejor proxy de "¿voy bien para esta altura?"

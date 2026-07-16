@@ -9,12 +9,8 @@ import QuickAdd from '../QuickAdd.jsx'
 import PrivacySeal from '../PrivacySeal.jsx'
 import CountryBadge from '../CountryBadge.jsx'
 
-// Flag de preview de la firma (Anillo/Sello) — mismo que el Dashboard.
-// OFF por defecto: el trial no ve ningún cambio.
-const SHOW_FIRMA = (() => {
-  try { return localStorage.getItem('fos_ring') === '1' || new URLSearchParams(location.search).has('ring') }
-  catch { return false }
-})()
+// Firma del producto (Sello + badges de país) — visible por defecto.
+const SHOW_FIRMA = true
 
 // lb = key de traducción (ver src/i18n/translations.js), no texto directo
 const NAV = [
