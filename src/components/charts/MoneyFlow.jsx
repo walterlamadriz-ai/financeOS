@@ -69,9 +69,11 @@ export default function MoneyFlow({ incomes, expenses, subscriptions, debts, sym
   const { totalInc, items } = data
 
   // ── Layout SVG ──────────────────────────────────────────────────────────────
+  // Nodos derechos corridos a la izquierda para dejar margen al % (evita que el
+  // "Disponible" y su porcentaje se desborden por el borde derecho).
   const W = 520, H = 280, PAD = 20
   const LEFT_X  = 30,  LEFT_W  = 90
-  const RIGHT_X = 400, RIGHT_W = 90
+  const RIGHT_X = 380, RIGHT_W = 90
   const MID_X   = 220, MID_W  = 80
   const NODE_H  = H - PAD * 2
 
@@ -116,7 +118,7 @@ export default function MoneyFlow({ incomes, expenses, subscriptions, debts, sym
         </text>
         <text x={LEFT_X + LEFT_W/2} y={PAD + incH/2 + 10}
           textAnchor="middle" dominantBaseline="middle"
-          style={{ fontFamily:'var(--mono, monospace)', fontSize:11, fill: COLORS.income.text }}>
+          style={{ fontFamily:'var(--mono, monospace)', fontSize: fmtV(totalInc, sym).length > 8 ? 9 : 11, fill: COLORS.income.text }}>
           {fmtV(totalInc, sym)}
         </text>
 
@@ -139,17 +141,17 @@ export default function MoneyFlow({ incomes, expenses, subscriptions, debts, sym
                 fill={node.color.fill} opacity={0.88} />
               <text x={RIGHT_X + RIGHT_W/2} y={node.y + node.h/2 - (node.h > 36 ? 8 : 0)}
                 textAnchor="middle" dominantBaseline="middle"
-                style={{ fontFamily:'var(--mono, monospace)', fontSize:10, fontWeight:700, fill: node.color.text }}>
+                style={{ fontFamily:'var(--mono, monospace)', fontSize: node.label.length > 11 ? 9 : 10, fontWeight:700, fill: node.color.text }}>
                 {node.label}
               </text>
               {node.h > 32 && (
                 <text x={RIGHT_X + RIGHT_W/2} y={node.y + node.h/2 + 9}
                   textAnchor="middle" dominantBaseline="middle"
-                  style={{ fontFamily:'var(--mono, monospace)', fontSize:10, fill: node.color.text }}>
+                  style={{ fontFamily:'var(--mono, monospace)', fontSize: fmtV(node.amount, sym).length > 8 ? 8 : 10, fill: node.color.text }}>
                   {fmtV(node.amount, sym)}
                 </text>
               )}
-              {/* Porcentaje a la derecha */}
+              {/* Porcentaje a la derecha (anclado; con margen al borde del viewBox) */}
               <text x={RIGHT_X + RIGHT_W + 8} y={node.y + node.h/2}
                 dominantBaseline="middle"
                 style={{ fontFamily:'var(--mono, monospace)', fontSize:10, fill:'var(--th, #888)' }}>
