@@ -92,8 +92,9 @@
 .txAmt  { font-size: 12px; font-family: var(--mono); font-weight: 500; flex-shrink: 0; }
 .txInc  { color: var(--grn); }
 .txExp  { color: var(--red); }
-.delBtn { background: transparent; border: none; color: var(--th); font-size: 10px; padding: 2px 5px; border-radius: 4px; transition: all .15s; }
+.delBtn { background: transparent; border: none; color: var(--th); font-size: 10px; padding: 2px 5px; border-radius: 4px; transition: background .15s ease, color .15s ease, transform .16s var(--ease-out, ease-out); }
 .delBtn:hover { background: var(--red-bg); color: var(--red); }
+.delBtn:active { transform: scale(0.9); }
 
 /* BAR ROW */
 .barRow { margin-bottom: 8px; }

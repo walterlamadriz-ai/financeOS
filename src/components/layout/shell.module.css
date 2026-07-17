@@ -32,7 +32,7 @@
 .ni {
   display: flex; align-items: center; gap: 9px;
   padding: 7px 14px; cursor: pointer; font-size: 12px; color: var(--tm);
-  border-left: 2px solid transparent; transition: all 0.15s; user-select: none;
+  border-left: 2px solid transparent; transition: color .15s ease, background .15s ease, border-left-color .15s ease; user-select: none;
   /* reset de <button>: ocupa toda la fila, alineado a la izquierda, sin chrome */
   width: 100%; background: none; border-top: 0; border-right: 0; border-bottom: 0;
   text-align: left; font-family: var(--sans); appearance: none;
@@ -49,9 +49,10 @@
 .themeBtn {
   width: 100%; padding: 6px 0; background: var(--sur2); border: 0.5px solid var(--brd);
   border-radius: var(--r); font-size: 11px; font-family: var(--sans); color: var(--tm);
-  transition: all 0.15s;
+  transition: color .15s ease, border-color .15s ease, transform .16s var(--ease-out, ease-out);
 }
 .themeBtn:hover { color: var(--tx); border-color: var(--brd2); }
+.themeBtn:active { transform: scale(0.98); }
 
 /* MAIN */
 .main { display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
