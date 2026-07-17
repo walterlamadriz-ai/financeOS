@@ -19,16 +19,36 @@ export default function QuickAdd({ open, defaultType = 'expense', onClose }) {
   const [cat, setCat] = useState('')
   const [saving, setSaving] = useState(false)
   const amountRef = useRef(null)
+  const sheetRef = useRef(null)
 
   const sym = SYM[settings?.currency] || '$'
 
-  // Al abrir: resetea y enfoca el monto
+  // Al abrir: resetea, enfoca el monto, y monta accesibilidad de diálogo
+  // (Esc para cerrar · focus-trap · retorno de foco al disparador). — web-design-guidelines
   useEffect(() => {
     if (!open) return
     setType(defaultType); setAmount(''); setDesc(''); setCat(''); setSaving(false)
+    const trigger = document.activeElement           // p.ej. el FAB, para devolverle el foco
     const id = setTimeout(() => amountRef.current?.focus(), 120)
-    return () => clearTimeout(id)
-  }, [open, defaultType])
+
+    const onKey = (e) => {
+      if (e.key === 'Escape') { e.preventDefault(); onClose?.(); return }
+      if (e.key === 'Tab' && sheetRef.current) {
+        const els = [...sheetRef.current.querySelectorAll('button, input, [tabindex]:not([tabindex="-1"])')]
+          .filter(el => !el.disabled && el.offsetParent !== null)
+        if (!els.length) return
+        const first = els[0], last = els[els.length - 1]
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
+      }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => {
+      clearTimeout(id)
+      document.removeEventListener('keydown', onKey)
+      if (trigger && typeof trigger.focus === 'function') trigger.focus()  // retorno de foco
+    }
+  }, [open, defaultType, onClose])
 
   // Categorías más usadas del historial + fallback a las de config
   const chips = useMemo(() => {
@@ -70,6 +90,7 @@ export default function QuickAdd({ open, defaultType = 'expense', onClose }) {
       style={{ position: 'fixed', inset: 0, zIndex: 600, background: 'rgba(0,0,0,.5)', backdropFilter: 'blur(3px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', animation: 'qaFade .18s ease' }}
     >
       <div
+        ref={sheetRef}
         onClick={e => e.stopPropagation()}
         style={{
           width: '100%', maxWidth: 460, background: 'var(--sur)', borderTopLeftRadius: 20, borderTopRightRadius: 20,
