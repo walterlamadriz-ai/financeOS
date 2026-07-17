@@ -65,6 +65,7 @@
   --sh-3:      0 8px 24px rgba(20,20,15,.08), 0 2px 8px rgba(20,20,15,.05);
   /* Movimiento */
   --ease:      cubic-bezier(.22,.61,.36,1);
+  --ease-out:  cubic-bezier(.23,1,.32,1);   /* ease-out fuerte para press/feedback (Emil) */
   --dur:       .18s;
 }
 

@@ -4,9 +4,14 @@
 .btn {
   display: inline-flex; align-items: center; gap: 5px;
   border-radius: var(--r); font-size: 12px; font-family: var(--sans);
-  font-weight: 500; transition: all 0.15s; border: 0.5px solid var(--brd2);
+  font-weight: 500; border: 0.5px solid var(--brd2);
   padding: 7px 14px;
+  /* propiedades explícitas (no `all`) + press feedback con ease-out fuerte (Emil) */
+  transition: background .15s ease, border-color .15s ease, opacity .15s ease,
+              box-shadow .15s ease, transform .16s var(--ease-out, ease-out);
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
 }
+.btn:active { transform: scale(0.97); }
 .btn_primary { background: var(--grn); color: #fff; border-color: var(--grn); box-shadow: var(--sh-1); }
 .btn_primary:hover { opacity: 0.92; box-shadow: var(--sh-2); }
 .btn_ghost { background: transparent; color: var(--tm); }
