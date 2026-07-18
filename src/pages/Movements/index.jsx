@@ -9,7 +9,7 @@ import ChartCard from '../../components/charts/ChartCard.jsx'
 import HorizontalBars from '../../components/charts/HorizontalBars.jsx'
 import CategoryDonut from '../../components/charts/CategoryDonut.jsx'
 import { parseTransactionText } from '../../utils/smsParser.js'
-import { catLabel } from '../../utils/index.js'
+import { catLabel, catEmoji } from '../../utils/index.js'
 import { pendingDebtMonthly } from '../../utils/personal.js'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -445,7 +445,8 @@ export default function Movements({ setPage }) {
 
   const topBarRecords = useMemo(() => {
     const items = [
-      ...monthExp.map(e => ({ category: e.description || e.category, amount: Number(e.amount)||0 })),
+      // La barra muestra la descripción del gasto; el emoji viene de SU categoría.
+      ...monthExp.map(e => ({ category: [catEmoji(e.category), e.description || e.category].filter(Boolean).join(' '), amount: Number(e.amount)||0 })),
       ...activeSubs.map(s => ({ category: `${s.name} 🔄`, amount: toMonthly(Number(s.amount)||0, s.frequency) })),
     ]
     return items.sort((a,b) => b.amount-a.amount).slice(0,8)
