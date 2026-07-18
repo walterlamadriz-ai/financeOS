@@ -101,7 +101,7 @@ const config = {
   // categoría no tiene emoji, simplemente se muestra el nombre sin icono.
   categoryEmojis: {
     Vivienda:        '🏠',
-    Alimentación:    '🍔',
+    Alimentación:    '🛒',
     Transporte:      '🚗',
     Salud:           '⚕️',
     Educación:       '📚',

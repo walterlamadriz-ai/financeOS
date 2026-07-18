@@ -337,7 +337,19 @@ export default function Debts() {
         return (
           <Card key={d.id}>
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:6}}>
-              <div style={{fontSize:13,fontWeight:600,color:'var(--tx)'}}>{debtEmoji(d.debtType)} {d.creditor}</div>
+              <div style={{fontSize:13,fontWeight:600,color:'var(--tx)',display:'flex',alignItems:'center',gap:6,minWidth:0}}>
+                {/* Selector de tipo editable in-situ para deudas existentes */}
+                <select
+                  value={d.debtType || 'Tarjeta'}
+                  onChange={e => updateDebt({ ...d, debtType: e.target.value })}
+                  aria-label={t('debts.form.type')}
+                  title={t('debts.form.type')}
+                  style={{ width:'auto', flexShrink:0, padding:'2px 4px', fontSize:13, fontFamily:'var(--sans)', fontWeight:600,
+                           color:'var(--tx)', background:'var(--sur2)', border:'.5px solid var(--brd2)', borderRadius:6, cursor:'pointer' }}>
+                  {DEBT_TYPES.map(tp => <option key={tp} value={tp}>{debtEmoji(tp)} {t('debts.type.'+tp)}</option>)}
+                </select>
+                <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{d.creditor}</span>
+              </div>
               <div style={{display:'flex',gap:6,alignItems:'center',flexWrap:'wrap',justifyContent:'flex-end'}}>
                 {d.rate > 0 && <Badge color="red">{d.rate}% TAE</Badge>}
                 {Number(d.ufBalance) > 0 && <Badge color="amber">UF</Badge>}

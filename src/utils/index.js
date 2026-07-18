@@ -48,7 +48,7 @@ export const CAT_COLORS = {
 
 // Emoji por categoría — hace el registro más ágil y amigable. Fallback: solo el nombre.
 export const CAT_EMOJIS = {
-  Vivienda: '🏠', Alimentación: '🍔', Transporte: '🚗', Salud: '⚕️', Educación: '📚',
+  Vivienda: '🏠', Alimentación: '🛒', Transporte: '🚗', Salud: '⚕️', Educación: '📚',
   Entretenimiento: '🎬', Servicios: '💡', Ropa: '👕', Tecnología: '💻', Mascota: '🐾',
   Propiedad: '🏢', Inversión: '📈', Otro: '📦',
   Salario: '💼', Freelance: '🧑‍💻', Arriendo: '🔑', Bono: '🎁', Pensión: '🏦', 'Negocio propio': '🏪',
