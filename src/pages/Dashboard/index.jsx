@@ -476,7 +476,7 @@ export default function Dashboard({ setPage }) {
 
       {/* Estado del mes — el verdicto (¿te sobra o falta?) y el ritmo (¿vas a tiempo?)
           cuentan la misma historia desde dos ángulos: van lado a lado y ahorran scroll.
-          .grid2 ya apila en una columna ≤700px. */}
+          .dash-status apila en una columna bajo 900px (el anillo necesita aire). */}
       {(() => {
         const ringOn = showRing && (kpis.incCount > 0 || kpis.expCount > 0)
         const verdict = (
@@ -489,7 +489,7 @@ export default function Dashboard({ setPage }) {
         )
         if (!ringOn) return <div style={{ marginBottom:16 }}>{verdict}</div>
         return (
-          <div className="grid2" style={{ marginBottom:16, alignItems:'stretch' }}>
+          <div className="dash-status" style={{ marginBottom:16 }}>
             {verdict}
             <div className="card rise" style={{ padding:'20px 16px', display:'flex', flexDirection:'column', alignItems:'center', gap:10 }}>
               <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)', textTransform:'uppercase', letterSpacing:'1px' }}>

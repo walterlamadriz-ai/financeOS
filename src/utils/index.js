@@ -58,6 +58,14 @@ export const catEmoji = (c) => CAT_EMOJIS[c] || ''
 // Devuelve "emoji nombre" (o solo el nombre si no hay emoji). Para options, listas y etiquetas.
 export const catLabel = (c) => { const e = CAT_EMOJIS[c]; return e ? `${e} ${c}` : (c || '') }
 
+// Categorías de SUSCRIPCIONES (distintas de las de gasto). Fallback: solo el nombre.
+export const SUB_EMOJIS = {
+  Streaming: '🎥', 'Música': '🎵', Software: '🧰', Gimnasio: '🏋️', Seguro: '🛡️',
+  'Educación': '📚', Cloud: '☁️', Delivery: '🛵', 'Suscripción': '🔄', Productividad: '⚙️', Otros: '📦',
+}
+export const subEmoji = (c) => SUB_EMOJIS[c] || ''
+export const subLabel = (c) => { const e = SUB_EMOJIS[c]; return e ? `${e} ${c}` : (c || '') }
+
 // Prioridad de metas — semáforo visual (🔴 alta, 🟡 media, 🟢 baja).
 export const PRIO_EMOJIS = { Alta: '🔴', Media: '🟡', Baja: '🟢' }
 export const prioEmoji = (p) => PRIO_EMOJIS[p] || ''

@@ -9,7 +9,7 @@ import ChartCard from '../../components/charts/ChartCard.jsx'
 import HorizontalBars from '../../components/charts/HorizontalBars.jsx'
 import CategoryDonut from '../../components/charts/CategoryDonut.jsx'
 import { parseTransactionText } from '../../utils/smsParser.js'
-import { catLabel, catEmoji } from '../../utils/index.js'
+import { catLabel, catEmoji, subLabel } from '../../utils/index.js'
 import { pendingDebtMonthly } from '../../utils/personal.js'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -272,7 +272,7 @@ function FormSub({ onSave, onCancel }) {
           </select></div>
         <div><label style={lbl}>{t('mov.form.category')}</label>
           <select style={inp} value={f.category} onChange={e => set('category', e.target.value)}>
-            {SUB_CATS.map(c => <option key={c}>{c}</option>)}</select></div>
+            {SUB_CATS.map(c => <option key={c} value={c}>{subLabel(c)}</option>)}</select></div>
         <div><label style={lbl}>{t('mov.form.nextPay')}</label>
           <input style={inp} type="date" value={f.nextPaymentDate}
             onChange={e => set('nextPaymentDate', e.target.value)}/></div>

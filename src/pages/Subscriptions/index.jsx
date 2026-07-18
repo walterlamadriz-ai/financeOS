@@ -6,7 +6,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
 import { useT } from '../../i18n/useT.js'
 import { dbGetAll, dbAdd, dbDelete } from '../../core/db/index.js'
-import { uid } from '../../utils/index.js'
+import { uid, subEmoji, subLabel } from '../../utils/index.js'
 import ChartCard from '../../components/charts/ChartCard.jsx'
 import HorizontalBars from '../../components/charts/HorizontalBars.jsx'
 import CategoryDonut from '../../components/charts/CategoryDonut.jsx'
@@ -157,9 +157,10 @@ export default function Subscriptions() {
   const alerts = useMemo(() => generateAlerts(subs, monthlyIncome, t), [subs, monthlyIncome, settings.language])
 
   // Datos para gráficos
+  // El "top" muestra el NOMBRE del servicio; el emoji viene de su categoría.
   const topRecords = useMemo(() =>
     activeSubs.map(s => ({
-      category: s.name,
+      category: [subEmoji(s.category), s.name].filter(Boolean).join(' '),
       amount: toMonthly(s.amount, s.frequency),
     })),
     [activeSubs]
@@ -167,7 +168,7 @@ export default function Subscriptions() {
 
   const catRecords = useMemo(() =>
     activeSubs.map(s => ({
-      category: s.category || 'Sin categoría',
+      category: subLabel(s.category) || 'Sin categoría',
       amount: toMonthly(s.amount, s.frequency),
     })),
     [activeSubs]
@@ -338,7 +339,7 @@ export default function Subscriptions() {
               <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 4 }}>{t('subs.form.category')}</div>
               <select value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))}
                 style={{ width: '100%', background: 'var(--sur2)', border: '.5px solid var(--brd2)', borderRadius: 6, padding: '7px 10px', color: 'var(--tx)', fontSize: 13, fontFamily: 'var(--mono)' }}>
-                {SUB_CATEGORIES.map(c => <option key={c}>{c}</option>)}
+                {SUB_CATEGORIES.map(c => <option key={c} value={c}>{subLabel(c)}</option>)}
               </select>
             </div>
             <div>
@@ -400,7 +401,7 @@ export default function Subscriptions() {
                     <tr key={sub.id} style={{ borderBottom: i < displayed.length - 1 ? '.5px solid var(--brd)' : 'none', opacity: isActive ? 1 : 0.5 }}>
                       <td style={{ padding: '9px 12px', fontSize: 12, fontWeight: 600, color: 'var(--tx)' }}>{sub.name}</td>
                       <td style={{ padding: '9px 12px' }}>
-                        <span style={{ fontSize: 10, fontFamily: 'var(--mono)', background: 'var(--sur2)', padding: '2px 7px', borderRadius: 20, color: 'var(--tm)', border: '.5px solid var(--brd)' }}>{sub.category}</span>
+                        <span style={{ fontSize: 10, fontFamily: 'var(--mono)', background: 'var(--sur2)', padding: '2px 7px', borderRadius: 20, color: 'var(--tm)', border: '.5px solid var(--brd)' }}>{subLabel(sub.category)}</span>
                       </td>
                       <td style={{ padding: '9px 12px', fontSize: 12, fontFamily: 'var(--mono)', color: 'var(--tx)' }}>{(sub.currency || currency)} {fmt(monthly)}</td>
                       <td style={{ padding: '9px 12px', fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)' }}>{(sub.currency || currency)} {fmt(annual)}</td>
