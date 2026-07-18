@@ -3,7 +3,7 @@ import { useState, useMemo } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
 import { useT } from '../../i18n/useT.js'
 import { KPI, Card, CardHeader, FormGroup, FormRow, Btn, Alert, PageHeader } from '../../components/ui/index.jsx'
-import { fmtMoney, fmtPct, CATS_EXPENSE } from '../../utils/index.js'
+import { fmtMoney, fmtPct, CATS_EXPENSE, catLabel } from '../../utils/index.js'
 import { CURRENCY_SYMBOLS, monthLabel } from '../shared/constants.js'
 import MonthSelector from '../shared/MonthSelector.jsx'
 
@@ -119,7 +119,7 @@ export default function Budgets() {
             <CardHeader title={t('budgets.new')} />
             {err && <Alert type="danger">⚠ {err}</Alert>}
             <FormRow>
-              <FormGroup label={t('budgets.form.category')}><select value={f.category} onChange={e => setF(p => ({...p,category:e.target.value}))}>{CATS_EXPENSE.map(c => <option key={c}>{c}</option>)}</select></FormGroup>
+              <FormGroup label={t('budgets.form.category')}><select value={f.category} onChange={e => setF(p => ({...p,category:e.target.value}))}>{CATS_EXPENSE.map(c => <option key={c} value={c}>{catLabel(c)}</option>)}</select></FormGroup>
               <FormGroup label={t('budgets.form.limit', { currency: settings.currency||'CLP' })}><input type="number" inputMode="decimal" min="0" value={f.limit} placeholder="0" onChange={e => setF(p => ({...p,limit:e.target.value}))} /></FormGroup>
             </FormRow>
             <Btn variant="primary" onClick={submit}>{t('budgets.form.submit')}</Btn>
@@ -233,7 +233,7 @@ export default function Budgets() {
                       return (
                         <div key={b.id} style={{background:'var(--bg)',borderRadius:8,padding:'10px',border:`0.5px solid ${over?'#e84142':warn?'rgba(245,166,35,.3)':'var(--brd)'}`,display:'flex',flexDirection:'column',alignItems:'center',gap:6,position:'relative'}}>
                           <button onClick={() => deleteWithUndo('budgets', b, t('common.deleted'), t('common.undo'))} aria-label={t('common.confirmDelete')} style={{position:'absolute',top:4,right:4,background:'none',border:'none',color:'var(--th)',fontSize:10,cursor:'pointer',padding:'1px 4px'}}>✕</button>
-                          <div style={{fontSize:10,fontWeight:600,color:'var(--tx)',fontFamily:'var(--mono)',textAlign:'center',lineHeight:1.2,paddingRight:10}}>{b.category}</div>
+                          <div style={{fontSize:10,fontWeight:600,color:'var(--tx)',fontFamily:'var(--mono)',textAlign:'center',lineHeight:1.2,paddingRight:10}}>{catLabel(b.category)}</div>
                           {carry > 0 && (
                             <div style={{fontSize:8,fontFamily:'var(--mono)',color:'var(--accent)',background:'rgba(0,212,170,.1)',borderRadius:4,padding:'1px 5px'}}>
                               ↻ +{fmtMoney(carry,sym)}

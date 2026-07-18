@@ -46,6 +46,18 @@ export const CAT_COLORS = {
   Bono: '#3dbe7a',
 }
 
+// Emoji por categoría — hace el registro más ágil y amigable. Fallback: solo el nombre.
+export const CAT_EMOJIS = {
+  Vivienda: '🏠', Alimentación: '🍔', Transporte: '🚗', Salud: '⚕️', Educación: '📚',
+  Entretenimiento: '🎬', Servicios: '💡', Ropa: '👕', Tecnología: '💻', Mascota: '🐾',
+  Propiedad: '🏢', Inversión: '📈', Otro: '📦',
+  Salario: '💼', Freelance: '🧑‍💻', Arriendo: '🔑', Bono: '🎁', Pensión: '🏦', 'Negocio propio': '🏪',
+}
+// Devuelve el emoji de la categoría (o '' si no tiene).
+export const catEmoji = (c) => CAT_EMOJIS[c] || ''
+// Devuelve "emoji nombre" (o solo el nombre si no hay emoji). Para options, listas y etiquetas.
+export const catLabel = (c) => { const e = CAT_EMOJIS[c]; return e ? `${e} ${c}` : (c || '') }
+
 export const CATS_INCOME  = ['Salario', 'Freelance', 'Inversión', 'Arriendo', 'Bono', 'Otro']
 export const CATS_EXPENSE = ['Vivienda', 'Alimentación', 'Transporte', 'Salud', 'Educación', 'Entretenimiento', 'Servicios', 'Ropa', 'Otro']
 export const METHODS      = ['Débito', 'Crédito', 'Efectivo', 'Transferencia']

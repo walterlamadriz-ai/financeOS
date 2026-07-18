@@ -9,6 +9,7 @@ import ChartCard from '../../components/charts/ChartCard.jsx'
 import HorizontalBars from '../../components/charts/HorizontalBars.jsx'
 import CategoryDonut from '../../components/charts/CategoryDonut.jsx'
 import { parseTransactionText } from '../../utils/smsParser.js'
+import { catLabel } from '../../utils/index.js'
 import { pendingDebtMonthly } from '../../utils/personal.js'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -177,7 +178,7 @@ function FormGasto({ onSave, onCancel, sym, projects = [], onImport }) {
             onChange={e => set('date', e.target.value)}/></div>
         <div><label style={lbl}>{t('mov.form.category')}</label>
           <select style={inp} value={f.category} onChange={handleCatChange}>
-            {EXP_CATS.map(c => <option key={c}>{c}</option>)}
+            {EXP_CATS.map(c => <option key={c} value={c}>{catLabel(c)}</option>)}
           </select>
         </div>
         {subcatOptions.length > 0 && (
@@ -691,8 +692,8 @@ export default function Movements({ setPage }) {
                   </div>
                   <div style={{ fontSize:10, color:'var(--th)', fontFamily:'var(--mono)' }}>
                     {e.subcategory
-                      ? <><span style={{ color:'var(--accent)', opacity:.75 }}>{e.category}</span>{' › '}{e.subcategory}{' · '}{e.date?.slice(5)}</>
-                      : <>{e.category}{' · '}{e.date?.slice(5)}</>
+                      ? <><span style={{ color:'var(--accent)', opacity:.75 }}>{catLabel(e.category)}</span>{' › '}{e.subcategory}{' · '}{e.date?.slice(5)}</>
+                      : <>{catLabel(e.category)}{' · '}{e.date?.slice(5)}</>
                     }
                   </div>
                 </div>

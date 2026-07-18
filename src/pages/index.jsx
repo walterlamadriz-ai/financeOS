@@ -10,7 +10,7 @@ import BackupManager, { BackupStatusBadge } from '../components/backup/BackupMan
 import TemplateSelector from '../components/templates/TemplateSelector.jsx'
 import { useApp } from '../context/AppContext.jsx'
 import { KPI, Card, CardHeader, TxRow, BarRow, FormGroup, FormRow, Btn, Badge, Alert, Empty, ProgressBar, PageHeader } from '../components/ui/index.jsx'
-import { fmtMoney, fmtPct, CAT_COLORS, CATS_INCOME, CATS_EXPENSE, METHODS, RECURRENCES, today } from '../utils/index.js'
+import { fmtMoney, fmtPct, CAT_COLORS, CATS_INCOME, CATS_EXPENSE, METHODS, RECURRENCES, today, catEmoji, catLabel } from '../utils/index.js'
 
 const CURRENCY_SYMBOLS = { CLP: '$', USD: 'US$', EUR: '€', VES: 'Bs.' }
 const CURRENCY_OPTIONS  = [
@@ -133,7 +133,7 @@ export function Income() {
             <FormGroup label="Fecha"><input type="date" value={f.date} onChange={e => setF(p => ({ ...p, date: e.target.value }))} /></FormGroup>
           </FormRow>
           <FormRow>
-            <FormGroup label="Categoría"><select value={f.category} onChange={e => setF(p => ({ ...p, category: e.target.value }))}>{CATS_INCOME.map(c => <option key={c}>{c}</option>)}</select></FormGroup>
+            <FormGroup label="Categoría"><select value={f.category} onChange={e => setF(p => ({ ...p, category: e.target.value }))}>{CATS_INCOME.map(c => <option key={c} value={c}>{catLabel(c)}</option>)}</select></FormGroup>
             <FormGroup label="Recurrencia"><select value={f.recurrence} onChange={e => setF(p => ({ ...p, recurrence: e.target.value }))}>{RECURRENCES.map(r => <option key={r}>{r}</option>)}</select></FormGroup>
           </FormRow>
           <FormGroup label="Notas"><input type="text" value={f.notes} placeholder="opcional" onChange={e => setF(p => ({ ...p, notes: e.target.value }))} /></FormGroup>
@@ -151,7 +151,7 @@ export function Income() {
             </div> :
             <div style={{ maxHeight: 280, overflowY: 'auto' }}>
               {filtered.map(r => <TxRow key={r.id} dot={CAT_COLORS[r.category] || '#888'} name={r.source}
-                meta={`${r.category} · ${r.date.slice(5).replace('-', '/')}${r.recurrence !== 'Único' ? ' · ' + r.recurrence : ''}`}
+                meta={`${catLabel(r.category)} · ${r.date.slice(5).replace('-', '/')}${r.recurrence !== 'Único' ? ' · ' + r.recurrence : ''}`}
                 amount={fmtMoney(r.amount, sym)} isIncome onDelete={() => delIncome(r.id)} />)}
             </div>
           }
@@ -255,7 +255,7 @@ export function Expenses() {
             <FormGroup label="Fecha"><input type="date" value={f.date} onChange={e => setF(p => ({ ...p, date: e.target.value }))} /></FormGroup>
           </FormRow>
           <FormRow>
-            <FormGroup label="Categoría"><select value={f.category} onChange={e => setF(p => ({ ...p, category: e.target.value }))}>{CATS_EXPENSE.map(c => <option key={c}>{c}</option>)}</select></FormGroup>
+            <FormGroup label="Categoría"><select value={f.category} onChange={e => setF(p => ({ ...p, category: e.target.value }))}>{CATS_EXPENSE.map(c => <option key={c} value={c}>{catLabel(c)}</option>)}</select></FormGroup>
             <FormGroup label="Tipo"><select value={f.type} onChange={e => setF(p => ({ ...p, type: e.target.value }))}>{['Necesidad', 'Deseo'].map(t => <option key={t}>{t}</option>)}</select></FormGroup>
           </FormRow>
           <FormRow>
@@ -277,7 +277,7 @@ export function Expenses() {
             </div> :
             <div style={{ maxHeight: 280, overflowY: 'auto' }}>
               {filtered.map(r => <TxRow key={r.id} dot={CAT_COLORS[r.category] || '#888'} name={r.description}
-                meta={`${r.category} · ${r.date.slice(5).replace('-', '/')}${r.type === 'Deseo' ? ' · Deseo' : ''}`}
+                meta={`${catLabel(r.category)} · ${r.date.slice(5).replace('-', '/')}${r.type === 'Deseo' ? ' · Deseo' : ''}`}
                 amount={fmtMoney(r.amount, sym)} isIncome={false} onDelete={() => delExpense(r.id)} />)}
             </div>
           }
@@ -410,7 +410,7 @@ export function Budgets() {
           <CardHeader title="Nuevo presupuesto" />
           {err && <Alert type="danger">⚠ {err}</Alert>}
           <FormRow>
-            <FormGroup label="Categoría"><select value={f.category} onChange={e => setF(p => ({ ...p, category: e.target.value }))}>{CATS_EXPENSE.map(c => <option key={c}>{c}</option>)}</select></FormGroup>
+            <FormGroup label="Categoría"><select value={f.category} onChange={e => setF(p => ({ ...p, category: e.target.value }))}>{CATS_EXPENSE.map(c => <option key={c} value={c}>{catLabel(c)}</option>)}</select></FormGroup>
             <FormGroup label={`Límite mensual (${settings.currency || 'CLP'})`}><input type="number" inputMode="decimal" min="0" value={f.limit} placeholder="0" onChange={e => setF(p => ({ ...p, limit: e.target.value }))} /></FormGroup>
           </FormRow>
           <Btn variant="primary" onClick={submit}>+ Agregar presupuesto</Btn>
@@ -539,7 +539,7 @@ export function Budgets() {
                   return (
                     <div key={b.id} style={{background:'var(--bg)',borderRadius:8,padding:'10px',border:`0.5px solid ${over?'#e84142':warn?'rgba(245,166,35,.3)':'var(--brd)'}`,display:'flex',flexDirection:'column',alignItems:'center',gap:6,position:'relative'}}>
                       <button onClick={() => delBudget(b.id)} style={{position:'absolute',top:4,right:4,background:'none',border:'none',color:'var(--th)',fontSize:10,cursor:'pointer',padding:'1px 4px',lineHeight:1}}>✕</button>
-                      <div style={{fontSize:10,fontWeight:600,color:'var(--tx)',fontFamily:'var(--mono)',textAlign:'center',lineHeight:1.2,paddingRight:10}}>{b.category}</div>
+                      <div style={{fontSize:10,fontWeight:600,color:'var(--tx)',fontFamily:'var(--mono)',textAlign:'center',lineHeight:1.2,paddingRight:10}}>{catLabel(b.category)}</div>
                       <svg width="90" height="90" viewBox="0 0 90 90">
                         <circle cx={cx2} cy={cy2} r={r2} fill="none" stroke="var(--brd)" strokeWidth="9"/>
                         <circle cx={cx2} cy={cy2} r={r2} fill="none" stroke={clr} strokeWidth="9"
