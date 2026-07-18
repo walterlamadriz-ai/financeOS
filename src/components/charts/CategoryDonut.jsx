@@ -2,6 +2,7 @@
 import { useMemo } from 'react'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import { ChartEmpty } from './ChartCard.jsx'
+import { catLabel } from '../../utils/index.js'
 
 // Paleta categórica por identidad, theme-aware (definida en globals.css).
 const COLORS = ['var(--cat-1)','var(--cat-2)','var(--cat-3)','var(--cat-4)','var(--cat-5)','var(--cat-6)','var(--cat-7)','var(--cat-8)']
@@ -12,7 +13,7 @@ function CustomTooltip({ active, payload, sym }) {
   if (!d) return null
   return (
     <div style={{ background:'var(--sur2)', border:'.5px solid var(--brd2)', borderRadius:8, padding:'8px 12px', fontSize:12, fontFamily:'var(--mono)' }}>
-      <div style={{ color: d.payload?.fill || 'var(--accent)', fontWeight:600, marginBottom:2 }}>{d.name}</div>
+      <div style={{ color: d.payload?.fill || 'var(--accent)', fontWeight:600, marginBottom:2 }}>{catLabel(d.name)}</div>
       <div style={{ color:'var(--tx)' }}>{sym}{(d.value || 0).toLocaleString('es-CL', { maximumFractionDigits:0 })}</div>
       <div style={{ color:'var(--th)' }}>{d.payload?.pct || 0}%</div>
     </div>
@@ -81,7 +82,7 @@ export default function CategoryDonut({ records, sym = '$', maxCategories = 6, o
             style={{ display:'flex', alignItems:'center', gap:8, cursor: clickable(d.name) ? 'pointer' : 'default', padding:'2px 0' }}
           >
             <div style={{ width:8, height:8, borderRadius:'50%', background:COLORS[i % COLORS.length], flexShrink:0 }}/>
-            <div style={{ flex:1, fontSize:13, color:'var(--tx)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{d.name}{clickable(d.name) ? ' ›' : ''}</div>
+            <div style={{ flex:1, fontSize:13, color:'var(--tx)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{catLabel(d.name)}{clickable(d.name) ? ' ›' : ''}</div>
             <div style={{ fontSize:12, color:'var(--th)', fontFamily:'var(--mono)' }}>{d.pct}%</div>
           </div>
         ))}

@@ -334,7 +334,7 @@ export default function Debts() {
         return (
           <Card key={d.id}>
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:6}}>
-              <div style={{fontSize:13,fontWeight:600,color:'var(--tx)'}}>{d.creditor}</div>
+              <div style={{fontSize:13,fontWeight:600,color:'var(--tx)'}}>💳 {d.creditor}</div>
               <div style={{display:'flex',gap:6,alignItems:'center',flexWrap:'wrap',justifyContent:'flex-end'}}>
                 {d.rate > 0 && <Badge color="red">{d.rate}% TAE</Badge>}
                 {Number(d.ufBalance) > 0 && <Badge color="amber">UF</Badge>}
