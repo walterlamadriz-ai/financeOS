@@ -62,6 +62,12 @@ export const catLabel = (c) => { const e = CAT_EMOJIS[c]; return e ? `${e} ${c}`
 export const PRIO_EMOJIS = { Alta: '🔴', Media: '🟡', Baja: '🟢' }
 export const prioEmoji = (p) => PRIO_EMOJIS[p] || ''
 
+// Tipos de deuda con emoji. Los valores se guardan en español (como la prioridad);
+// el emoji es solo presentación. Fallback 💳 para deudas antiguas sin tipo.
+export const DEBT_TYPES  = ['Tarjeta', 'Hipoteca', 'Auto', 'Crédito', 'Préstamo', 'Estudiantil', 'Otro']
+export const DEBT_EMOJIS = { Tarjeta: '💳', Hipoteca: '🏠', Auto: '🚗', Crédito: '📄', Préstamo: '🤝', Estudiantil: '🎓', Otro: '💰' }
+export const debtEmoji = (tp) => DEBT_EMOJIS[tp] || '💳'
+
 export const CATS_INCOME  = ['Salario', 'Freelance', 'Inversión', 'Arriendo', 'Bono', 'Otro']
 export const CATS_EXPENSE = ['Vivienda', 'Alimentación', 'Transporte', 'Salud', 'Educación', 'Entretenimiento', 'Servicios', 'Ropa', 'Otro']
 export const METHODS      = ['Débito', 'Crédito', 'Efectivo', 'Transferencia']

@@ -3,7 +3,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
 import { useT } from '../../i18n/useT.js'
 import { KPI, Card, CardHeader, FormGroup, FormRow, Btn, Alert, Badge, ProgressBar, PageHeader } from '../../components/ui/index.jsx'
-import { fmtMoney, fmtPct } from '../../utils/index.js'
+import { fmtMoney, fmtPct, DEBT_TYPES, debtEmoji } from '../../utils/index.js'
 import { CURRENCY_SYMBOLS } from '../shared/constants.js'
 import DebtProgressList from '../../components/charts/DebtProgressList.jsx'
 import { loadIndicadores } from '../../utils/indicadores.js'
@@ -158,7 +158,7 @@ export default function Debts() {
   const { debts, addDebt, delDebt, updateDebt, addExpense, incomes, expenses, settings, deleteWithUndo } = useApp()
   const { t } = useT()
   const [show, setShow]             = useState(false)
-  const [f, setF]                   = useState({ creditor:'', initial:'', balance:'', minPayment:'', dueDate:'', rate:'', totalInstallments:'', paidInstallments:'', project:'', ufDebt:false })
+  const [f, setF]                   = useState({ creditor:'', debtType:'Tarjeta', initial:'', balance:'', minPayment:'', dueDate:'', rate:'', totalInstallments:'', paidInstallments:'', project:'', ufDebt:false })
   const [err, setErr]               = useState('')
   const [confirmPay, setConfirmPay] = useState(null)
   const [payMsg, setPayMsg]         = useState(null)
@@ -243,7 +243,7 @@ export default function Debts() {
     } else {
       await addDebt({...f, initial:init, balance:Number(f.balance), minPayment:Number(f.minPayment)||0, rate:Number(f.rate)||0, totalInstallments:Number(f.totalInstallments)||0, paidInstallments:Number(f.paidInstallments)||0})
     }
-    setF({creditor:'',initial:'',balance:'',minPayment:'',dueDate:'',rate:'',totalInstallments:'',paidInstallments:'',project:'',ufDebt:false})
+    setF({creditor:'',debtType:'Tarjeta',initial:'',balance:'',minPayment:'',dueDate:'',rate:'',totalInstallments:'',paidInstallments:'',project:'',ufDebt:false})
     setShow(false)
   }
 
@@ -270,10 +270,13 @@ export default function Debts() {
           )}
           <FormRow>
             <FormGroup label={t('debts.form.creditor')}><input type="text" value={f.creditor} placeholder={t('debts.form.creditorPh')} onChange={e => setF(p=>({...p,creditor:e.target.value}))} /></FormGroup>
-            <FormGroup label={t('debts.form.balance', { currency: f.ufDebt ? 'UF' : (settings.currency||'CLP') })}><input type="number" inputMode="decimal" min="0" step="0.01" value={f.balance} placeholder={f.ufDebt ? 'ej. 2500.50' : '0'} onChange={e => setF(p=>({...p,balance:e.target.value}))} />{ufPreview(f.balance)}</FormGroup>
+            <FormGroup label={t('debts.form.type')}><select value={f.debtType} onChange={e => setF(p=>({...p,debtType:e.target.value}))}>{DEBT_TYPES.map(tp => <option key={tp} value={tp}>{debtEmoji(tp)} {t('debts.type.'+tp)}</option>)}</select></FormGroup>
           </FormRow>
           <FormRow>
+            <FormGroup label={t('debts.form.balance', { currency: f.ufDebt ? 'UF' : (settings.currency||'CLP') })}><input type="number" inputMode="decimal" min="0" step="0.01" value={f.balance} placeholder={f.ufDebt ? 'ej. 2500.50' : '0'} onChange={e => setF(p=>({...p,balance:e.target.value}))} />{ufPreview(f.balance)}</FormGroup>
             <FormGroup label={f.ufDebt ? t('debts.form.initial') + ' (UF)' : t('debts.form.initial')}><input type="number" inputMode="decimal" min="0" step="0.01" value={f.initial} placeholder={f.ufDebt ? 'ej. 3000' : t('debts.form.initialPh')} onChange={e => setF(p=>({...p,initial:e.target.value}))} />{ufPreview(f.initial)}</FormGroup>
+          </FormRow>
+          <FormRow>
             <FormGroup label={f.ufDebt ? t('debts.form.minPay') + ' (UF)' : t('debts.form.minPay')}><input type="number" inputMode="decimal" min="0" step="0.01" value={f.minPayment} placeholder={f.ufDebt ? 'ej. 7.55' : '0'} onChange={e => setF(p=>({...p,minPayment:e.target.value}))} />{ufPreview(f.minPayment)}</FormGroup>
           </FormRow>
           <div style={{marginTop:8,marginBottom:8}}>
@@ -334,7 +337,7 @@ export default function Debts() {
         return (
           <Card key={d.id}>
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:6}}>
-              <div style={{fontSize:13,fontWeight:600,color:'var(--tx)'}}>💳 {d.creditor}</div>
+              <div style={{fontSize:13,fontWeight:600,color:'var(--tx)'}}>{debtEmoji(d.debtType)} {d.creditor}</div>
               <div style={{display:'flex',gap:6,alignItems:'center',flexWrap:'wrap',justifyContent:'flex-end'}}>
                 {d.rate > 0 && <Badge color="red">{d.rate}% TAE</Badge>}
                 {Number(d.ufBalance) > 0 && <Badge color="amber">UF</Badge>}
