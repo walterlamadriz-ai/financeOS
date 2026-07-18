@@ -52,6 +52,9 @@ export const CAT_EMOJIS = {
   Entretenimiento: '🎬', Servicios: '💡', Ropa: '👕', Tecnología: '💻', Mascota: '🐾',
   Propiedad: '🏢', Inversión: '📈', Otro: '📦',
   Salario: '💼', Freelance: '🧑‍💻', Arriendo: '🔑', Bono: '🎁', Pensión: '🏦', 'Negocio propio': '🏪',
+  // Alias usados por las sugerencias de presupuesto (nombres distintos a las categorías canónicas).
+  // 🍔 queda para comer fuera; 🛒 (Alimentación) es el mercado del mes.
+  'Ropa y calzado': '👕', Restaurantes: '🍔', Otros: '📦', Ahorro: '💰',
 }
 // Devuelve el emoji de la categoría (o '' si no tiene).
 export const catEmoji = (c) => CAT_EMOJIS[c] || ''

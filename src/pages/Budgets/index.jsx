@@ -109,7 +109,7 @@ export default function Budgets() {
         <KPI label={t('budgets.kpi.over')}  value={overBudget.length} color={overBudget.length > 0 ? 'red' : 'green'} sub={overBudget.length > 0 ? t('budgets.kpi.review') : t('budgets.kpi.allOk')} />
         <KPI label={t('budgets.kpi.coverage')} value={ingresoNeto > 0 ? fmtPct(totalBudget/ingresoNeto) : '—'} color={ingresoNeto > 0 && totalBudget > ingresoNeto ? 'red' : ingresoNeto > 0 && totalBudget/ingresoNeto > 0.8 ? 'amber' : 'green'} sub={ingresoNeto > 0 ? (totalBudget > ingresoNeto ? t('budgets.kpi.exceedsIncome') : totalBudget/ingresoNeto > 0.8 ? t('budgets.kpi.noMargin') : t('budgets.kpi.healthy')) : t('budgets.kpi.noIncome')} />
       </div>
-      {overBudget.length > 0 && <Alert type="danger">{t('budgets.alert.over', { cats: overBudget.map(b => b.category).join(', ') })}</Alert>}
+      {overBudget.length > 0 && <Alert type="danger">{t('budgets.alert.over', { cats: overBudget.map(b => catLabel(b.category)).join(', ') })}</Alert>}
       {ingresoNeto > 0 && totalBudget > ingresoNeto && <Alert type="danger">{t('budgets.alert.deficit', { total: fmtMoney(totalBudget,sym), inc: fmtMoney(ingresoNeto,sym), def: fmtMoney(totalBudget-ingresoNeto,sym) })}</Alert>}
       {ingresoNeto > 0 && totalBudget > 0 && totalBudget <= ingresoNeto && totalBudget/ingresoNeto > 0.8 && <Alert type="warning">{t('budgets.alert.tight', { pct: fmtPct(totalBudget/ingresoNeto) })}</Alert>}
 
@@ -162,7 +162,8 @@ export default function Budgets() {
                     {sugs.map((s,i) => (
                       <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'5px 10px',borderRadius:6,background:s.highlight?'rgba(10,92,62,.08)':i%2===0?'var(--sur2)':'transparent',border:s.highlight?'0.5px solid rgba(10,92,62,.25)':'none'}}>
                         <div>
-                          <span style={{fontSize:11,fontFamily:'var(--mono)',color:s.highlight?'var(--grn)':'var(--tx)',fontWeight:s.highlight?700:400}}>{s.cat}</span>
+                          {/* La fila de ahorro usa etiqueta traducida (no está en el mapa) → emoji fijo */}
+                          <span style={{fontSize:11,fontFamily:'var(--mono)',color:s.highlight?'var(--grn)':'var(--tx)',fontWeight:s.highlight?700:400}}>{s.highlight ? `💰 ${s.cat}` : catLabel(s.cat)}</span>
                           <span style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginLeft:6}}>{s.grupo}</span>
                         </div>
                         <div style={{textAlign:'right'}}>
