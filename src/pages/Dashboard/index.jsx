@@ -462,16 +462,8 @@ export default function Dashboard({ setPage }) {
     <div>
       <MonthlyCloseModal />
 
-      {/* Número héroe — la respuesta clara del mes (¿te sobra o te falta?) va primero */}
-      <MonthVerdict
-        freeFlow={kpis.freeFlow}
-        hasData={kpis.incCount > 0 || kpis.expCount > 0}
-        sym={sym}
-        month={activeMonth}
-      />
-
-      {/* Header — título + toggle de vista (el verdicto de arriba ya da el contexto) */}
-      <div style={{ marginBottom:20, display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:12, flexWrap:'wrap' }}>
+      {/* Header — título + toggle de vista */}
+      <div style={{ marginBottom:16, display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:12, flexWrap:'wrap' }}>
         <div>
           <div style={{ fontFamily:'var(--mono)', fontSize:11, letterSpacing:'1.2px', textTransform:'uppercase', color:'var(--grn2)', marginBottom:6 }}>Dashboard · {activeMonth}</div>
           <h1 className="display" style={{ fontSize:26, fontWeight:700, color:'var(--tx)', marginBottom:4 }}>{t('dash.title')}</h1>
@@ -482,26 +474,43 @@ export default function Dashboard({ setPage }) {
         </button>
       </div>
 
-      {/* El Anillo Vivo (Pulso) — solo con flag; no afecta al trial por defecto */}
-      {showRing && (kpis.incCount > 0 || kpis.expCount > 0) && (
-        <div className="card rise" style={{ padding:'20px 16px', marginBottom:16, display:'flex', flexDirection:'column', alignItems:'center', gap:10 }}>
-          <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)', textTransform:'uppercase', letterSpacing:'1px' }}>
-            {pulse.refIsIncome ? 'Tu ritmo del mes' : 'Ritmo de gasto'} · {activeMonth}
-          </div>
-          <LivingRing
-            spentRatio={pulse.spentRatio}
-            elapsedRatio={pulse.elapsedRatio}
-            color={pulse.color}
-            centerValue={pulse.centerValue}
-            centerLabel="SEGURO/DÍA"
-            footLabel={`quedan ${pulse.daysLeft} días`}
-            size={220}
+      {/* Estado del mes — el verdicto (¿te sobra o falta?) y el ritmo (¿vas a tiempo?)
+          cuentan la misma historia desde dos ángulos: van lado a lado y ahorran scroll.
+          .grid2 ya apila en una columna ≤700px. */}
+      {(() => {
+        const ringOn = showRing && (kpis.incCount > 0 || kpis.expCount > 0)
+        const verdict = (
+          <MonthVerdict
+            freeFlow={kpis.freeFlow}
+            hasData={kpis.incCount > 0 || kpis.expCount > 0}
+            sym={sym}
+            month={activeMonth}
           />
-          <div style={{ fontSize:12, color:'var(--tm)', textAlign:'center', maxWidth:340, lineHeight:1.5 }}>
-            El punto que late es hoy · la marca fina es dónde deberías ir · si el arco no la alcanza, vas bien.
+        )
+        if (!ringOn) return <div style={{ marginBottom:16 }}>{verdict}</div>
+        return (
+          <div className="grid2" style={{ marginBottom:16, alignItems:'stretch' }}>
+            {verdict}
+            <div className="card rise" style={{ padding:'20px 16px', display:'flex', flexDirection:'column', alignItems:'center', gap:10 }}>
+              <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)', textTransform:'uppercase', letterSpacing:'1px' }}>
+                {pulse.refIsIncome ? 'Tu ritmo del mes' : 'Ritmo de gasto'} · {activeMonth}
+              </div>
+              <LivingRing
+                spentRatio={pulse.spentRatio}
+                elapsedRatio={pulse.elapsedRatio}
+                color={pulse.color}
+                centerValue={pulse.centerValue}
+                centerLabel="SEGURO/DÍA"
+                footLabel={`quedan ${pulse.daysLeft} días`}
+                size={200}
+              />
+              <div style={{ fontSize:11.5, color:'var(--tm)', textAlign:'center', maxWidth:340, lineHeight:1.5 }}>
+                El punto que late es hoy · la marca fina es dónde deberías ir · si el arco no la alcanza, vas bien.
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
 
       {/* Empieza aquí */}
       {setPage && kpis.incCount === 0 && kpis.expCount === 0 && (

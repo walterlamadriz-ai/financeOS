@@ -25,8 +25,8 @@ export default function MonthVerdict({ freeFlow, hasData, sym, month }) {
 
   return (
     <div className="card rise" style={{
-      padding: '18px 20px', marginBottom: 16, background: bg,
-      borderLeft: `3px solid ${color}`, display: 'flex', flexDirection: 'column', gap: 4,
+      padding: '18px 20px', height: '100%', background: bg,
+      borderLeft: `3px solid ${color}`, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 4,
     }}>
       <div style={{ fontFamily: 'var(--mono)', fontSize: 10.5, letterSpacing: '1.2px', textTransform: 'uppercase', color: 'var(--th)' }}>
         {t('verdict.eyebrow')} · {month}
