@@ -14,6 +14,8 @@ const EXPENSE_HINTS = /\b(compra|cargo|pago realizado|retiro|env[ií]o|pagaste|c
 // Monto: símbolo de moneda + número con separadores de miles/decimales
 // Soporta: $12.990  $12,990.50  MX$350.00  COP 50.000  US$14.99  1.234,56
 const AMOUNT_RE = /(?:[A-Z]{0,3}\$|\$)\s?([0-9][0-9.,]*[0-9]|[0-9])/
+// Algunos bancos escriben el monto con el CÓDIGO de moneda y sin símbolo: "COP 50.000", "CLP 12.990"
+const AMOUNT_CODE_RE = /\b(?:COP|CLP|MXN|ARS|USD|PEN|BRL|UYU|EUR|VES)\s?([0-9][0-9.,]*[0-9]|[0-9])/i
 
 // Fecha: dd-mm-yyyy, dd/mm/yyyy, dd-mm-yy (con o sin hora al final)
 const DATE_RE = /\b(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})\b/
@@ -22,13 +24,15 @@ const DATE_RE = /\b(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})\b/
 // Excluye "en tu/mi/la/el/su cuenta..." (frases de transferencias, no comercios).
 // Incluye "/" en la clase para no romper el match cuando sigue una fecha dd/mm/yyyy
 // (la fecha se recorta después, en el post-proceso).
-const MERCHANT_RE = /\ben\s+(?!(?:tu|mi|la|el|su|cuenta)\b)([A-Za-zÀ-ÿ0-9&.\-\s/]{2,50}?)(?:,|\scon\s|\ssaldo|\sSdo\b|\saprob|\starjeta|\scta\b|\.|\n|$)/i
+const MERCHANT_RE = /\ben\s+(?!(?:tu|mi|la|el|su|cuenta)\b)([A-Za-zÀ-ÿ0-9&.\-\s/]{2,50}?)(?:,|\scon\s|\ssaldo|\sSdo\b|\saprob|\starjeta|\scta\b|\s(?:el|del)\s|\s\d|\.|\n|$)/i
 
 // Recorta del comercio cualquier fecha/hora que haya quedado pegada al final
 function stripTrailingDateTime(s) {
   return s
     .replace(/\s*\d{1,2}[/-]\d{1,2}[/-]\d{2,4}.*$/, '')
     .replace(/\s*\d{1,2}:\d{2}(:\d{2})?\s*(hrs?|am|pm)?.*$/i, '')
+    // Conectores colgantes que suelen quedar antes de la fecha/hora ("en Jumbo el 15/07")
+    .replace(/\s+(el|del|de|a las|hoy|ayer|por)\s*$/i, '')
     .trim()
 }
 
@@ -84,7 +88,7 @@ export function parseTransactionText(text) {
   const clean = text.trim()
   if (clean.length < 4) return null
 
-  const amountMatch = clean.match(AMOUNT_RE)
+  const amountMatch = clean.match(AMOUNT_RE) || clean.match(AMOUNT_CODE_RE)
   const amount = amountMatch ? parseAmount(amountMatch[1]) : null
   const merchant = parseMerchant(clean)
   const date = parseDate(clean)

@@ -95,6 +95,32 @@ const config = {
     'Negocio propio':'#0f6e56',
   },
 
+  // ── EMOJIS POR CATEGORÍA (opcional) ────────────────────────────────────────
+  // Se muestran junto al nombre en chips de captura rápida para hacer el
+  // registro más ágil y amigable (inspirado en apps de gastos LATAM). Si una
+  // categoría no tiene emoji, simplemente se muestra el nombre sin icono.
+  categoryEmojis: {
+    Vivienda:        '🏠',
+    Alimentación:    '🍔',
+    Transporte:      '🚗',
+    Salud:           '⚕️',
+    Educación:       '📚',
+    Entretenimiento: '🎬',
+    Servicios:       '💡',
+    Ropa:            '👕',
+    Tecnología:      '💻',
+    Mascota:         '🐾',
+    Propiedad:       '🏢',
+    Inversión:       '📈',
+    Otro:            '📦',
+    Salario:         '💼',
+    Freelance:       '🧑‍💻',
+    Arriendo:        '🔑',
+    Bono:            '🎁',
+    Pensión:         '🏦',
+    'Negocio propio':'🏪',
+  },
+
   // ── MÉTODOS DE PAGO ────────────────────────────────────────────────────────
   paymentMethods: [
     'Débito',

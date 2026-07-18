@@ -14,6 +14,7 @@ import { pendingDebtMonthly } from '../../utils/personal.js'
 import { projectEndOfMonth } from '../../utils/projection.js'
 import CountUp from '../../components/CountUp.jsx'
 import LivingRing from '../../components/LivingRing.jsx'
+import MonthVerdict from './MonthVerdict.jsx'
 
 const fmt  = (n) => (Number(n) || 0).toLocaleString('es-CL', { maximumFractionDigits: 0 })
 const pct  = (n) => ((Number(n) || 0) * 100).toFixed(1) + '%'
@@ -461,29 +462,25 @@ export default function Dashboard({ setPage }) {
     <div>
       <MonthlyCloseModal />
 
-      {/* Header — hero contextual */}
-      {(() => {
-        const noData = kpis.incCount === 0 && kpis.expCount === 0
-        const ok = kpis.balance >= 0
-        const heroLine = noData
-          ? t('dash.hero.noData')
-          : ok
-            ? t('dash.hero.positive', { amt: `${sym}${fmt(kpis.balance)}` })
-            : t('dash.hero.negative', { amt: `${sym}${fmt(Math.abs(kpis.balance))}` })
-        return (
-          <div style={{ marginBottom:20, display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:12, flexWrap:'wrap' }}>
-            <div>
-              <div style={{ fontFamily:'var(--mono)', fontSize:11, letterSpacing:'1.2px', textTransform:'uppercase', color:'var(--grn2)', marginBottom:6 }}>Dashboard · {activeMonth}</div>
-              <h1 className="display" style={{ fontSize:26, fontWeight:700, color:'var(--tx)', marginBottom:4 }}>{t('dash.title')}</h1>
-              <p style={{ fontSize:13, color: noData ? 'var(--th)' : ok ? 'var(--grn)' : 'var(--red)', fontWeight: noData ? 400 : 500, lineHeight:1.5 }}>{heroLine}</p>
-            </div>
-            <button onClick={toggleCompact} title={compact ? t('dash.view.show') : t('dash.view.hide')}
-              style={{ background:'none', border:'.5px solid var(--brd2)', borderRadius:7, padding:'6px 12px', fontSize:11, fontFamily:'var(--mono)', color:'var(--tm)', cursor:'pointer', whiteSpace:'nowrap', flexShrink:0 }}>
-              {compact ? t('dash.view.detailed') : t('dash.view.compact')}
-            </button>
-          </div>
-        )
-      })()}
+      {/* Número héroe — la respuesta clara del mes (¿te sobra o te falta?) va primero */}
+      <MonthVerdict
+        freeFlow={kpis.freeFlow}
+        hasData={kpis.incCount > 0 || kpis.expCount > 0}
+        sym={sym}
+        month={activeMonth}
+      />
+
+      {/* Header — título + toggle de vista (el verdicto de arriba ya da el contexto) */}
+      <div style={{ marginBottom:20, display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:12, flexWrap:'wrap' }}>
+        <div>
+          <div style={{ fontFamily:'var(--mono)', fontSize:11, letterSpacing:'1.2px', textTransform:'uppercase', color:'var(--grn2)', marginBottom:6 }}>Dashboard · {activeMonth}</div>
+          <h1 className="display" style={{ fontSize:26, fontWeight:700, color:'var(--tx)', marginBottom:4 }}>{t('dash.title')}</h1>
+        </div>
+        <button onClick={toggleCompact} title={compact ? t('dash.view.show') : t('dash.view.hide')}
+          style={{ background:'none', border:'.5px solid var(--brd2)', borderRadius:7, padding:'6px 12px', fontSize:11, fontFamily:'var(--mono)', color:'var(--tm)', cursor:'pointer', whiteSpace:'nowrap', flexShrink:0 }}>
+          {compact ? t('dash.view.detailed') : t('dash.view.compact')}
+        </button>
+      </div>
 
       {/* El Anillo Vivo (Pulso) — solo con flag; no afecta al trial por defecto */}
       {showRing && (kpis.incCount > 0 || kpis.expCount > 0) && (
