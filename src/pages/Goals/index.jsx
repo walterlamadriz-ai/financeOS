@@ -87,7 +87,7 @@ export default function Goals({ setPage }) {
   return (
     <div className="stack">
       <PageHeader title={t('goals.title')} sub={t('goals.sub')} />
-      <p style={{fontSize:12,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:12,marginTop:-4}}>{t('goals.intro')}</p>
+      <p style={{fontSize:12.5,color:'var(--th)',fontFamily:'var(--sans)',lineHeight:1.5,marginBottom:12,marginTop:-4}}>{t('goals.intro')}</p>
       <div className="kpi-row">
         <KPI label={t('goals.kpi.active')}  value={goals.length} />
         <KPI label={t('goals.kpi.target')} value={fmtMoney(totalTarget,sym)} />
@@ -161,7 +161,7 @@ export default function Goals({ setPage }) {
                           <span style={{fontSize:11,fontFamily:'var(--mono)',color:'var(--th)'}}>{t('goals.suggest.monthly', { v: fmtMoney(s.monthlyContribution,sym) })}</span>
                           {s.monthsToGoal && <span style={{fontSize:11,fontFamily:'var(--mono)',color:'var(--th)'}}>{t('goals.suggest.months', { n: s.monthsToGoal })}</span>}
                         </div>
-                        <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',fontStyle:'italic',lineHeight:1.4}}>{s.hint}</div>
+                        <div style={{fontSize:11.5,color:'var(--th)',fontFamily:'var(--sans)',fontStyle:'italic',lineHeight:1.45}}>{s.hint}</div>
                       </div>
                     </div>
                   </div>

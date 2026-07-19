@@ -107,7 +107,7 @@ function PreviewModal({ template, onClose, onApply }) {
             }}>
               <div>
                 <div style={{ fontSize: 11, fontWeight: 500, color: 'var(--tx)' }}>{b.category}</div>
-                <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)' }}>{b.note}</div>
+                <div style={{ fontSize: 11.5, color: 'var(--th)', fontFamily: 'var(--sans)', lineHeight: 1.45 }}>{b.note}</div>
               </div>
               <div style={{
                 fontSize: 11, fontFamily: 'var(--mono)', fontWeight: 600,
@@ -125,7 +125,7 @@ function PreviewModal({ template, onClose, onApply }) {
               <span style={{ color: template.color, flexShrink: 0, marginTop: 1 }}>◎</span>
               <div>
                 <div style={{ fontSize: 11, fontWeight: 500, color: 'var(--tx)' }}>{g.name}</div>
-                <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)' }}>{g.note}</div>
+                <div style={{ fontSize: 11.5, color: 'var(--th)', fontFamily: 'var(--sans)', lineHeight: 1.45 }}>{g.note}</div>
               </div>
               <span style={{
                 marginLeft: 'auto', fontSize: 9, fontFamily: 'var(--mono)',

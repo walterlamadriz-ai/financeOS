@@ -80,7 +80,8 @@
 .alert_info   { background: var(--blu-bg); color: var(--blu); border: 0.5px solid rgba(26,90,138,.2); }
 
 /* EMPTY */
-.empty { text-align: center; padding: 28px 0; color: var(--th); font-size: 12px; font-family: var(--mono); }
+/* Estados vacíos: son una invitación a actuar, se leen como lenguaje → sans */
+.empty { text-align: center; padding: 28px 0; color: var(--th); font-size: 12.5px; font-family: var(--sans); line-height: 1.55; }
 
 /* TX ROW */
 .txRow { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 0.5px solid var(--brd); }
@@ -107,5 +108,6 @@
 /* PAGE HEADER */
 .pageHeader { margin-bottom: 18px; }
 .pageHeader h1 { font-size: 24px; font-weight: 700; font-family: var(--display); letter-spacing: -0.02em; color: var(--tx); }
-.pageHeader p  { font-size: 11px; color: var(--th); font-family: var(--mono); margin-top: 4px; }
+/* Subtítulo de página: frase descriptiva, no dato → sans (mono a 11px se leía duro) */
+.pageHeader p  { font-size: 12px; color: var(--th); font-family: var(--sans); margin-top: 5px; line-height: 1.5; }
 .sectionTitle  { font-size: 11px; font-weight: 500; color: var(--tm); text-transform: uppercase; letter-spacing: 0.8px; font-family: var(--mono); margin-bottom: 10px; }

@@ -131,7 +131,7 @@ export default function LicenseGate({ onActivate }) {
             onKeyDown={e => e.key === 'Enter' && handleActivate()}
             spellCheck={false}
           />
-          <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', marginBottom: 10, lineHeight: 1.5 }}>
+          <div style={{ fontSize: 12, color: 'var(--th)', fontFamily: 'var(--sans)', marginBottom: 10, lineHeight: 1.5 }}>
             Solo para avisarte de novedades importantes o si necesitas soporte. Nunca vemos tus datos financieros.
           </div>
 
@@ -193,7 +193,7 @@ export default function LicenseGate({ onActivate }) {
             >
               <div style={{ fontFamily: 'var(--display)', fontSize: 13, fontWeight: 600, color: p.highlight ? 'var(--grn)' : 'var(--tx)', marginBottom: 3 }}>{p.name}</div>
               <div style={{ fontFamily: 'var(--display)', fontSize: 20, fontWeight: 700, color: 'var(--tx)', marginBottom: 3 }}>{p.price}</div>
-              <div style={{ fontFamily: 'var(--mono)', fontSize: 9, color: 'var(--th)' }}>{p.desc}</div>
+              <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--th)', lineHeight: 1.45 }}>{p.desc}</div>
               {buying === p.product && (
                 <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--grn)', marginTop: 6 }}>Redirigiendo…</div>
               )}

@@ -140,7 +140,7 @@ function TrafficLight({ signals }) {
           }} />
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx)', marginBottom: 1 }}>{s.label}</div>
-            <div style={{ fontSize: 11, color: 'var(--tm)', fontFamily: 'var(--mono)' }}>{s.note}</div>
+            <div style={{ fontSize: 12, color: 'var(--tm)', fontFamily: 'var(--sans)', lineHeight: 1.5 }}>{s.note}</div>
           </div>
           <div style={{
             fontSize: 10, fontFamily: 'var(--mono)', fontWeight: 600,

@@ -91,7 +91,7 @@ function DebtPayoffSimulator({ debts, sym }) {
             background: method===m.id ? 'rgba(10,92,62,.06)' : 'var(--sur)',
           }}>
             <div style={{fontSize:12,fontWeight:600,color: method===m.id ? 'var(--grn)' : 'var(--tx)',fontFamily:'var(--mono)'}}>{m.label}</div>
-            <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginTop:3}}>{m.desc}</div>
+            <div style={{fontSize:11.5,color:'var(--th)',fontFamily:'var(--sans)',marginTop:3,lineHeight:1.45}}>{m.desc}</div>
           </button>
         ))}
       </div>
@@ -250,7 +250,7 @@ export default function Debts() {
   return (
     <div className="stack">
       <PageHeader title={t('debts.title')} sub={t('debts.sub')} />
-      <p style={{fontSize:12,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:12,marginTop:-4}}>{t('debts.intro')}</p>
+      <p style={{fontSize:12.5,color:'var(--th)',fontFamily:'var(--sans)',lineHeight:1.5,marginBottom:12,marginTop:-4}}>{t('debts.intro')}</p>
       <div className="kpi-row">
         <KPI label={t('debts.kpi.total')}       value={fmtMoney(totalBalance,sym)} color="red" />
         <KPI label={t('debts.kpi.minPay')} value={fmtMoney(totalMin,sym)} />

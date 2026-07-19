@@ -100,7 +100,8 @@ const box = {
   boxShadow: '0 24px 60px rgba(0,0,0,.08)', margin: 'auto',
 }
 const h1s = { fontSize: 22, fontWeight: 700, color: 'var(--tx)', marginBottom: 5, fontFamily: 'var(--display)', letterSpacing: '-0.02em' }
-const subs = { fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', lineHeight: 1.5, marginBottom: 18 }
+// Subtítulo del onboarding: es la voz que guía al usuario, no un dato → sans
+const subs = { fontSize: 12.5, color: 'var(--th)', fontFamily: 'var(--sans)', lineHeight: 1.55, marginBottom: 18 }
 const btnP = (disabled = false) => ({
   width: '100%', padding: '10px', borderRadius: 8, border: 'none',
   background: disabled ? 'var(--brd2)' : 'var(--grn)', color: '#fff',
