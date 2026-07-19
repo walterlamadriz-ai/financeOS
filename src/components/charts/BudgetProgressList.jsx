@@ -2,6 +2,7 @@
 // Barras de progreso enriquecidas para Presupuestos — FinanceOS
 
 import { ChartEmpty } from './ChartCard.jsx'
+import { moneyLocale } from '../../utils/index.js'
 
 const STATUS = [
   { key: 'over',  label: 'Sobrepasado',      color: 'var(--red)',    bg: 'color-mix(in srgb, var(--neg) 12%, transparent)',   border: 'color-mix(in srgb, var(--neg) 26%, transparent)',  icon: '⚠' },
@@ -21,7 +22,7 @@ function fmtV(v, sym) {
   const n = Number(v) || 0
   if (n >= 1000000) return `${sym}${(n/1000000).toFixed(1)}M`
   if (n >= 1000)    return `${sym}${(n/1000).toFixed(0)}K`
-  return `${sym}${Math.round(n).toLocaleString('es-CL')}`
+  return `${sym}${Math.round(n).toLocaleString(moneyLocale())}`
 }
 
 export default function BudgetProgressList({ budgets, expByCat, sym = '$' }) {

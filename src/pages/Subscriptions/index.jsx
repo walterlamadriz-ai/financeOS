@@ -6,7 +6,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
 import { useT } from '../../i18n/useT.js'
 import { dbGetAll, dbAdd, dbDelete } from '../../core/db/index.js'
-import { uid, subEmoji, subLabel } from '../../utils/index.js'
+import { uid, subEmoji, subLabel, moneyLocale } from '../../utils/index.js'
 import ChartCard from '../../components/charts/ChartCard.jsx'
 import HorizontalBars from '../../components/charts/HorizontalBars.jsx'
 import CategoryDonut from '../../components/charts/CategoryDonut.jsx'
@@ -117,7 +117,7 @@ export default function Subscriptions() {
   const { t } = useT()
   const { settings, incomes, subscriptions: ctxSubs, addSubscription, updateSubscription, deleteSubscription, deleteWithUndo, showToast } = useApp()
   const currency = settings.currency || 'CLP'
-  const fmt = n => (n || 0).toLocaleString('es-CL', { maximumFractionDigits: 0 })
+  const fmt = n => (n || 0).toLocaleString(moneyLocale(), { maximumFractionDigits: 0 })
   const isDemo = !!settings.isDemo
 
   const [dbSubs,   setDbSubs]  = useState([])
@@ -420,7 +420,7 @@ export default function Subscriptions() {
                       <td style={{ padding: '9px 12px' }}>
                         <div style={{ display: 'flex', gap: 4 }}>
                           <button onClick={() => openEdit(sub)} style={{ background: 'none', border: 'none', color: 'var(--th)', fontSize: 11, cursor: 'pointer' }}>✎</button>
-                          <button onClick={() => remove(sub.id)} style={{ background: 'none', border: 'none', color: 'var(--th)', fontSize: 11, cursor: 'pointer' }}>✕</button>
+                          <button onClick={() => remove(sub.id)} aria-label={`Eliminar ${sub.name}`} title="Eliminar" style={{ background: 'none', border: 'none', color: 'var(--th)', fontSize: 11, cursor: 'pointer' }}><span aria-hidden="true">✕</span></button>
                         </div>
                       </td>
                     </tr>

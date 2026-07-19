@@ -5,6 +5,7 @@
 
 import { createContext, useContext, useReducer, useCallback } from 'react'
 import { DEMO_STATE, DEMO_INCOMES_EXITOSO } from './demoData.js'
+import { setMoneyLocale } from '../utils/index.js'
 
 export const DemoContext = createContext(null)
 
@@ -86,6 +87,9 @@ export function DemoProvider({ children }) {
   const updateSettings = useCallback((settings) => {
     dispatch({ type: 'SAVE_SETTINGS', settings })
     document.documentElement.setAttribute('data-theme', settings.theme || 'light')
+    // El demo también debe respetar el formato de miles de la moneda elegida
+    // (AppContext lo hace en un efecto; aquí el provider es independiente).
+    setMoneyLocale(settings.currency || 'CLP')
   }, [])
 
   // En demo, "borrar todo" recarga datos demo — no puede dejar vacío

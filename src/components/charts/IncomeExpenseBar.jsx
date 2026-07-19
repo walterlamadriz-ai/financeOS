@@ -2,6 +2,7 @@
 import { useMemo } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { ChartEmpty } from './ChartCard.jsx'
+import { moneyLocale } from '../../utils/index.js'
 
 const MONTHS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
 
@@ -9,7 +10,7 @@ function CustomTooltip({ active, payload, label, sym }) {
   if (!active || !payload?.length) return null
   const inc = payload.find(p => p.dataKey === 'ingresos')?.value || 0
   const exp = payload.find(p => p.dataKey === 'gastos')?.value || 0
-  const f = v => (v || 0).toLocaleString('es-CL', { maximumFractionDigits: 0 })
+  const f = v => (v || 0).toLocaleString(moneyLocale(), { maximumFractionDigits: 0 })
   return (
     <div style={{ background:'var(--sur2)', border:'.5px solid var(--brd2)', borderRadius:8, padding:'10px 14px', fontSize:12, fontFamily:'var(--mono)' }}>
       <div style={{ fontWeight:600, color:'var(--tx)', marginBottom:6 }}>{label}</div>

@@ -130,7 +130,7 @@ export default function APVPage() {
               <div style={{marginTop:6,fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',lineHeight:1.5}}>
                 {!grossTouched
                   ? <>✓ Estimado desde tus ingresos del mes (líquido → bruto, con AFP/salud/cesantía e impuesto único). Podés ajustarlo.</>
-                  : <>Valor sugerido desde tus ingresos: ${sueldoBrutoCalculado.toLocaleString()} · <span style={{color:'var(--grn)',cursor:'pointer',textDecoration:'underline'}} onClick={() => { setGrossTouched(false); setApvF(p => ({...p, grossMonthly: String(sueldoBrutoCalculado)})) }}>usar valor automático</span></>}
+                  : <>Valor sugerido desde tus ingresos: ${sueldoBrutoCalculado.toLocaleString()} · <button type="button" style={{color:'var(--grn)',cursor:'pointer',textDecoration:'underline',background:'none',border:0,padding:0,font:'inherit'}} onClick={() => { setGrossTouched(false); setApvF(p => ({...p, grossMonthly: String(sueldoBrutoCalculado)})) }}>usar valor automático</button></>}
               </div>
             )}
             {apvF.grossMonthly && Number(apvF.grossMonthly) > 0 && (() => {

@@ -85,10 +85,14 @@ export function TxRow({ dot, name, meta, amount, isIncome, onDelete, onEdit }) {
         {isIncome ? '+' : '-'}{amount}
       </div>
       {onEdit && (
-        <button className={styles.delBtn} onClick={onEdit} title="Editar" style={{marginRight:2,fontSize:11}}>✏️</button>
+        <button className={styles.delBtn} onClick={onEdit} title="Editar" aria-label={`Editar ${name || 'movimiento'}`} style={{marginRight:2,fontSize:11}}>
+          <span aria-hidden="true">✏️</span>
+        </button>
       )}
       {onDelete && (
-        <button className={styles.delBtn} onClick={onDelete}>✕</button>
+        <button className={styles.delBtn} onClick={onDelete} title="Eliminar" aria-label={`Eliminar ${name || 'movimiento'}`}>
+          <span aria-hidden="true">✕</span>
+        </button>
       )}
     </div>
   )

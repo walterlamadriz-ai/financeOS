@@ -4,6 +4,7 @@
 import {
   Document, Page, Text, View, StyleSheet, Font,
 } from '@react-pdf/renderer'
+import { moneyLocale } from '../../utils/index.js'
 
 const ACCENT  = '#00d4aa'
 const RED     = '#ff4d6a'
@@ -59,7 +60,7 @@ const s = StyleSheet.create({
 })
 
 function fmt(n, sym = '$') {
-  return `${sym}${(Number(n) || 0).toLocaleString('es-CL', { maximumFractionDigits: 0 })}`
+  return `${sym}${(Number(n) || 0).toLocaleString(moneyLocale(), { maximumFractionDigits: 0 })}`
 }
 function pct(n) { return `${((Number(n) || 0) * 100).toFixed(1)}%` }
 

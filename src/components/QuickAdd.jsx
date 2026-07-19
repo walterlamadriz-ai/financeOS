@@ -124,7 +124,8 @@ export default function QuickAdd({ open, defaultType = 'expense', onClose }) {
     <div
       role="dialog" aria-modal="true" aria-label={t('qa.title')}
       onClick={onClose}
-      style={{ position: 'fixed', inset: 0, zIndex: 600, background: 'rgba(0,0,0,.5)', backdropFilter: 'blur(3px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', animation: 'qaFade .18s ease' }}
+      style={{ position: 'fixed', inset: 0, zIndex: 600, background: 'rgba(0,0,0,.5)', backdropFilter: 'blur(3px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', animation: 'qaFade .18s ease',
+        overscrollBehavior: 'contain' }}   /* el scroll no se contagia a la página de atrás */
     >
       <div
         ref={sheetRef}

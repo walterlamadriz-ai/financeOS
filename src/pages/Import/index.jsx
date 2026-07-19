@@ -6,7 +6,7 @@ import { useState, useCallback, useMemo } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
 import { useT } from '../../i18n/useT.js'
 import { dbGetAll, dbAdd } from '../../core/db/index.js'
-import { uid } from '../../utils/index.js'
+import { uid, moneyLocale } from '../../utils/index.js'
 import { detectBankTemplate, applyTemplate, BANK_TEMPLATES } from './bankTemplates.js'
 import {
   parseFile, detectColumns, validateRows, detectDuplicates,
@@ -71,7 +71,7 @@ const s = {
 
 // keys de traducción
 const STEPS = ['imp.step.upload', 'imp.step.map', 'imp.step.review', 'imp.step.import']
-const fmt = (n) => (n || 0).toLocaleString('es-CL', { maximumFractionDigits: 0 })
+const fmt = (n) => (n || 0).toLocaleString(moneyLocale(), { maximumFractionDigits: 0 })
 
 export default function ImportMovements() {
   const { settings } = useApp()

@@ -8,7 +8,7 @@ import useSubscriptionMetrics from '../../hooks/useSubscriptionMetrics.js'
 import { useApp } from '../../context/AppContext.jsx'
 import { useT } from '../../i18n/useT.js'
 import { Card, CardHeader, Alert } from '../../components/ui/index.jsx'
-import { fmtMoney, fmtPct } from '../../utils/index.js'
+import { fmtMoney, fmtPct, moneyLocale } from '../../utils/index.js'
 import ProGate from '../../components/ui/ProGate.jsx'
 import { FinancialDisclaimer } from '../../components/legal/MicroCopy.jsx'
 import { downloadReportePDF } from './ReportePDF.jsx'
@@ -624,8 +624,8 @@ export default function Advisor() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px,1fr))', gap: 8, marginBottom: 12 }}>
             {[
-              { label: t('adv.subs.monthly'), value: `${sym}${subMonthly.toLocaleString('es-CL', {maximumFractionDigits:0})}` },
-              { label: t('adv.subs.annual'),   value: `${sym}${subAnnual.toLocaleString('es-CL', {maximumFractionDigits:0})}` },
+              { label: t('adv.subs.monthly'), value: `${sym}${subMonthly.toLocaleString(moneyLocale(), {maximumFractionDigits:0})}` },
+              { label: t('adv.subs.annual'),   value: `${sym}${subAnnual.toLocaleString(moneyLocale(), {maximumFractionDigits:0})}` },
               { label: t('adv.subs.active'),       value: `${activeSubs.length}` },
               { label: t('adv.subs.pctIncome'), value: mIncome > 0 ? `${(subPct*100).toFixed(1)}%` : '—' },
             ].map(m => (

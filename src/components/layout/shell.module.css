@@ -210,6 +210,7 @@
 .drawerNav {
   flex: 1;
   overflow-y: auto;
+  overscroll-behavior: contain;  /* el scroll del drawer no arrastra la página */
   padding: 8px 0;
 }
 .drawerFooter {

@@ -10,6 +10,7 @@ import { clearLicense, getLicensePlan, getLicenseKey } from '../../utils/license
 import { isSyncEnabled, syncMeta, syncAvailable } from '../../core/sync.js'
 import { pushSupported, isPushEnabled, enablePush, disablePush } from '../../core/push.js'
 import { useT } from '../../i18n/useT.js'
+import { moneyLocale } from '../../utils/index.js'
 
 export default function Settings() {
   const { settings, updateSettings, clearAll, loadDemo, exportCSV, enableSync, disableSync } = useApp()
@@ -148,7 +149,7 @@ export default function Settings() {
             </div>
             {settings.usdRate > 0 && (
               <div style={{fontSize:10, color:'var(--accent)', fontFamily:'var(--mono)'}}>
-                → US$1 = {Number(settings.usdRate).toLocaleString('es-CL')} {settings.currency} · US$100 = {(settings.usdRate * 100).toLocaleString('es-CL')} {settings.currency}
+                → US$1 = {Number(settings.usdRate).toLocaleString(moneyLocale())} {settings.currency} · US$100 = {(settings.usdRate * 100).toLocaleString(moneyLocale())} {settings.currency}
               </div>
             )}
           </div>

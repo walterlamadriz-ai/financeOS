@@ -3,7 +3,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
 import { useT } from '../../i18n/useT.js'
 import { KPI, Card, CardHeader, FormGroup, FormRow, Btn, Alert, Badge, ProgressBar, PageHeader } from '../../components/ui/index.jsx'
-import { fmtMoney, fmtPct, DEBT_TYPES, debtEmoji } from '../../utils/index.js'
+import { fmtMoney, fmtPct, DEBT_TYPES, debtEmoji, moneyLocale } from '../../utils/index.js'
 import { CURRENCY_SYMBOLS } from '../shared/constants.js'
 import DebtProgressList from '../../components/charts/DebtProgressList.jsx'
 import { loadIndicadores } from '../../utils/indicadores.js'
@@ -123,7 +123,7 @@ function DebtPayoffSimulator({ debts, sym }) {
         </div>
         {(Number(extra)||0) > 0 && monthsSaved > 0 && (
           <div style={{padding:'12px 14px',borderRadius:8,background:'rgba(10,92,62,.06)',border:'1px solid rgba(10,92,62,.2)'}}>
-            <div style={{fontSize:9,color:'var(--grn)',fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:'.8px',marginBottom:4}}>{t('debts.sim.withExtra', { v: sym+Number(extra).toLocaleString('es-CL') })}</div>
+            <div style={{fontSize:9,color:'var(--grn)',fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:'.8px',marginBottom:4}}>{t('debts.sim.withExtra', { v: sym+Number(extra).toLocaleString(moneyLocale()) })}</div>
             <div style={{fontSize:13,fontWeight:700,color:'var(--grn)',fontFamily:'var(--mono)'}}>{t('debts.sim.youSave', { v: fmtMoney(interestSaved,sym) })}</div>
             <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginTop:3}}>{t('debts.sim.inLess', { t: fmtMonths(monthsSaved) })}</div>
           </div>
@@ -169,7 +169,7 @@ export default function Debts() {
   const ufPreview = (v) => {
     const n = Number(v)
     if (!f.ufDebt || !ufValue || !n) return null
-    return <div style={{fontSize:10,color:'var(--grn)',fontFamily:'var(--mono)',marginTop:3}}>≈ ${Math.round(n*ufValue).toLocaleString('es-CL')} CLP</div>
+    return <div style={{fontSize:10,color:'var(--grn)',fontFamily:'var(--mono)',marginTop:3}}>≈ ${Math.round(n*ufValue).toLocaleString(moneyLocale())} CLP</div>
   }
   const sym = CURRENCY_SYMBOLS[settings.currency] || '$'
   const isChile = (settings.country || 'CL') === 'CL'
@@ -224,7 +224,7 @@ export default function Debts() {
       notes: t('debts.payment.note', { n: (Number(d.paidInstallments)||0)+1 }),
     })
     setConfirmPay(null)
-    setPayMsg({id:d.id, text:t('debts.card.paidMsg', { amt: sym+Math.round(monto).toLocaleString('es-CL') })})
+    setPayMsg({id:d.id, text:t('debts.card.paidMsg', { amt: sym+Math.round(monto).toLocaleString(moneyLocale()) })})
     setTimeout(() => setPayMsg(null), 3000)
   }
 
@@ -265,7 +265,7 @@ export default function Debts() {
           {isChile && ufValue > 0 && (
             <label style={{ display:'flex', alignItems:'flex-start', gap:8, fontSize:12, color:'var(--tm)', cursor:'pointer', margin:'0 0 10px', lineHeight:1.4 }}>
               <input type="checkbox" checked={!!f.ufDebt} onChange={e => setF(p=>({...p, ufDebt:e.target.checked}))} style={{ width:16, height:16, flexShrink:0, marginTop:1 }} />
-              <span style={{ minWidth:0 }}>{t('debts.uf.check')} <span style={{ fontSize:10, color:'var(--th)', fontFamily:'var(--mono)' }}>({t('debts.uf.rate', { v: '$'+Math.round(ufValue).toLocaleString('es-CL') })})</span></span>
+              <span style={{ minWidth:0 }}>{t('debts.uf.check')} <span style={{ fontSize:10, color:'var(--th)', fontFamily:'var(--mono)' }}>({t('debts.uf.rate', { v: '$'+Math.round(ufValue).toLocaleString(moneyLocale()) })})</span></span>
             </label>
           )}
           <FormRow>
@@ -367,7 +367,7 @@ export default function Debts() {
             {confirmPay === d.id && (
               <div style={{display:'flex',alignItems:'center',gap:10,padding:'8px 12px',marginBottom:8,background:'rgba(10,92,62,.06)',borderRadius:6,border:'0.5px solid rgba(10,92,62,.2)',flexWrap:'wrap'}}>
                 <span style={{fontSize:12,color:'var(--tx)',fontFamily:'var(--mono)',flex:1}}>
-                  {t('debts.card.confirmPay', { amt: sym+Math.round(Math.min(Number(d.minPayment)||0,d.balance)).toLocaleString('es-CL'), creditor: d.creditor })}
+                  {t('debts.card.confirmPay', { amt: sym+Math.round(Math.min(Number(d.minPayment)||0,d.balance)).toLocaleString(moneyLocale()), creditor: d.creditor })}
                 </span>
                 <div style={{display:'flex',gap:6}}>
                   <Btn variant="primary" size="xs" onClick={() => handleRegisterPayment(d)}>{t('debts.card.confirm')}</Btn>
@@ -399,7 +399,7 @@ export default function Debts() {
             )}
             <div style={{fontSize:11,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:8}}>
               {Number(d.ufBalance) > 0
-                ? <>{t('debts.uf.balance', { uf: d.ufBalance.toLocaleString('es-CL', { maximumFractionDigits: 2 }), clp: fmtMoney(d.balance,sym) })}{d.ufMinPayment > 0 ? t('debts.uf.installment', { uf: d.ufMinPayment.toLocaleString('es-CL', { maximumFractionDigits: 2 }), clp: fmtMoney(d.minPayment,sym) }) : ''}{d.dueDate ? t('debts.card.due', { d: d.dueDate.slice(5).replace('-','/') }) : ''}</>
+                ? <>{t('debts.uf.balance', { uf: d.ufBalance.toLocaleString(moneyLocale(), { maximumFractionDigits: 2 }), clp: fmtMoney(d.balance,sym) })}{d.ufMinPayment > 0 ? t('debts.uf.installment', { uf: d.ufMinPayment.toLocaleString(moneyLocale(), { maximumFractionDigits: 2 }), clp: fmtMoney(d.minPayment,sym) }) : ''}{d.dueDate ? t('debts.card.due', { d: d.dueDate.slice(5).replace('-','/') }) : ''}</>
                 : <>{t('debts.card.balance', { v: fmtMoney(d.balance,sym) })}{d.minPayment ? t('debts.card.installment', { v: fmtMoney(d.minPayment,sym) }) : ''}{d.dueDate ? t('debts.card.due', { d: d.dueDate.slice(5).replace('-','/') }) : ''}</>
               }
             </div>
@@ -409,7 +409,7 @@ export default function Debts() {
               </div>
               <ProgressBar value={paid} max={d.initial} color="green" height={5}/>
               <div style={{display:'flex',justifyContent:'space-between',marginTop:3,fontSize:10,fontFamily:'var(--mono)',color:'var(--th)'}}>
-                <span>{t('debts.card.paidLb', { v: fmtMoney(paid,sym) })}{Number(d.ufInitial) > 0 && Number(d.ufBalance) >= 0 ? ' · ' + t('debts.uf.paid', { uf: (d.ufInitial - d.ufBalance).toLocaleString('es-CL', { maximumFractionDigits: 2 }) }) : ''}</span><span>{t('debts.card.initialLb', { v: fmtMoney(d.initial,sym) })}</span>
+                <span>{t('debts.card.paidLb', { v: fmtMoney(paid,sym) })}{Number(d.ufInitial) > 0 && Number(d.ufBalance) >= 0 ? ' · ' + t('debts.uf.paid', { uf: (d.ufInitial - d.ufBalance).toLocaleString(moneyLocale(), { maximumFractionDigits: 2 }) }) : ''}</span><span>{t('debts.card.initialLb', { v: fmtMoney(d.initial,sym) })}</span>
               </div>
             </div>
             {totalInst > 0 && (

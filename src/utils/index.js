@@ -15,11 +15,19 @@ const CURRENCY_LOCALE = {
 export function setMoneyLocale(currency) {
   _moneyLocale = CURRENCY_LOCALE[currency] || 'es-CL'
 }
+// Locale activo, para los toLocaleString sueltos que no pasan por fmtMoney.
+export const moneyLocale = () => _moneyLocale
 
 export const fmtMoney = (n, symbol = '$') => {
   const abs = Math.abs(Math.round(n || 0))
   return symbol + abs.toLocaleString(_moneyLocale)
 }
+
+// Número SIN símbolo, con el mismo locale que el dinero. Usar SIEMPRE en vez de
+// toLocaleString('es-CL') hardcodeado: si no, un usuario en US/BR/PT ve
+// separadores chilenos aunque su moneda sea otra.
+export const fmtNum = (n, maxFrac = 0) =>
+  (Number(n) || 0).toLocaleString(_moneyLocale, { maximumFractionDigits: maxFrac })
 
 export const fmtPct = (n) => (Math.round((n || 0) * 1000) / 10).toFixed(1) + '%'
 

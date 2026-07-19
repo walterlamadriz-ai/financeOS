@@ -6,7 +6,7 @@ import { useMemo } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
 import { useT } from '../../i18n/useT.js'
 import { KPI, Card, CardHeader, Alert, Empty, ProgressBar, PageHeader } from '../../components/ui/index.jsx'
-import { fmtMoney, fmtPct } from '../../utils/index.js'
+import { fmtMoney, fmtPct, moneyLocale } from '../../utils/index.js'
 import { projectEndOfMonth } from '../../utils/projection.js'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
@@ -23,7 +23,7 @@ const ChartTooltip = ({ active, payload, label, sym }) => {
       {payload.map((p, i) => (
         <div key={i} style={{ color: p.color, display: 'flex', gap: 12, justifyContent: 'space-between' }}>
           <span>{p.name}</span>
-          <span style={{ fontWeight: 600 }}>{sym}{Math.abs(Math.round(p.value)).toLocaleString('es-CL')}</span>
+          <span style={{ fontWeight: 600 }}>{sym}{Math.abs(Math.round(p.value)).toLocaleString(moneyLocale())}</span>
         </div>
       ))}
     </div>
@@ -183,10 +183,10 @@ export default function CashFlow({ setPage }) {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10, marginBottom: 16 }}>
               {[
                 { label: t('cf.eom.day'), value: t('cf.eom.dayValue', { d: today, n: daysInMonth }), sub: t('cf.eom.daysLeft', { n: daysLeft }), color: 'var(--tx)' },
-                { label: t('cf.eom.dailyExp'), value: `${sym}${Math.round(dailyExp).toLocaleString('es-CL')}`, sub: t('cf.eom.avgToDate'), color: 'var(--red)' },
-                { label: t('cf.eom.projInc'), value: `${sym}${Math.round(projInc).toLocaleString('es-CL')}`, sub: t('cf.eom.atPace'), color: 'var(--accent)' },
-                { label: t('cf.eom.projExp'), value: `${sym}${Math.round(projExp).toLocaleString('es-CL')}`, sub: t('cf.eom.atPace'), color: 'var(--red)' },
-                { label: t('cf.eom.projBal'), value: `${sym}${Math.round(projBal).toLocaleString('es-CL')}`, sub: projBal >= 0 ? t('cf.eom.positive') : t('cf.eom.deficit'), color: projBal >= 0 ? 'var(--accent)' : 'var(--red)' },
+                { label: t('cf.eom.dailyExp'), value: `${sym}${Math.round(dailyExp).toLocaleString(moneyLocale())}`, sub: t('cf.eom.avgToDate'), color: 'var(--red)' },
+                { label: t('cf.eom.projInc'), value: `${sym}${Math.round(projInc).toLocaleString(moneyLocale())}`, sub: t('cf.eom.atPace'), color: 'var(--accent)' },
+                { label: t('cf.eom.projExp'), value: `${sym}${Math.round(projExp).toLocaleString(moneyLocale())}`, sub: t('cf.eom.atPace'), color: 'var(--red)' },
+                { label: t('cf.eom.projBal'), value: `${sym}${Math.round(projBal).toLocaleString(moneyLocale())}`, sub: projBal >= 0 ? t('cf.eom.positive') : t('cf.eom.deficit'), color: projBal >= 0 ? 'var(--accent)' : 'var(--red)' },
               ].map(k => (
                 <div key={k.label} style={{ background: 'var(--sur2)', borderRadius: 8, padding: '10px 12px', border: '.5px solid var(--brd)' }}>
                   <div style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 4 }}>{k.label}</div>
@@ -217,7 +217,7 @@ export default function CashFlow({ setPage }) {
                     <div style={{ height: '100%', width: `${budgetBarPct}%`, background: paceColor, borderRadius: 3, transition: '.3s' }} />
                   </div>
                   <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: 4 }}>
-                    {t('cf.eom.budgetLine', { total: sym+totalBudget.toLocaleString('es-CL'), spent: sym+Math.round(curExp).toLocaleString('es-CL') })}
+                    {t('cf.eom.budgetLine', { total: sym+totalBudget.toLocaleString(moneyLocale()), spent: sym+Math.round(curExp).toLocaleString(moneyLocale()) })}
                   </div>
                 </div>
               )}
@@ -226,7 +226,7 @@ export default function CashFlow({ setPage }) {
             {/* Alerta de ritmo */}
             {pace !== null && pace > 0.08 && (
               <div style={{ marginTop: 12, padding: '8px 12px', background: 'rgba(255,77,106,.07)', border: '.5px solid rgba(255,77,106,.25)', borderRadius: 8, fontSize: 11, color: 'var(--red)', fontFamily: 'var(--mono)' }}>
-                {t('cf.alert.over', { pct: (pace * 100).toFixed(0), proj: sym+Math.round(projExp).toLocaleString('es-CL'), overBudget: totalBudget > 0 ? t('cf.alert.overBudgetPart', { v: sym+Math.round(projExp - totalBudget).toLocaleString('es-CL') }) : '' })}
+                {t('cf.alert.over', { pct: (pace * 100).toFixed(0), proj: sym+Math.round(projExp).toLocaleString(moneyLocale()), overBudget: totalBudget > 0 ? t('cf.alert.overBudgetPart', { v: sym+Math.round(projExp - totalBudget).toLocaleString(moneyLocale()) }) : '' })}
               </div>
             )}
             {pace !== null && pace <= 0 && curExp > 0 && (

@@ -15,8 +15,9 @@ import { projectEndOfMonth } from '../../utils/projection.js'
 import CountUp from '../../components/CountUp.jsx'
 import LivingRing from '../../components/LivingRing.jsx'
 import MonthVerdict from './MonthVerdict.jsx'
+import { moneyLocale } from '../../utils/index.js'
 
-const fmt  = (n) => (Number(n) || 0).toLocaleString('es-CL', { maximumFractionDigits: 0 })
+const fmt  = (n) => (Number(n) || 0).toLocaleString(moneyLocale(), { maximumFractionDigits: 0 })
 const pct  = (n) => ((Number(n) || 0) * 100).toFixed(1) + '%'
 const pct0 = (n) => ((Number(n) || 0) * 100).toFixed(0) + '%'
 
@@ -37,7 +38,7 @@ export default function Dashboard({ setPage }) {
   const activeMonth = settings.activeMonth || new Date().toISOString().slice(0, 7)
   const dualOn      = !!settings.showDualCurrency && settings.currency !== 'USD' && Number(settings.usdRate) > 0
   const usdRate     = Number(settings.usdRate) || 1
-  const toUSD       = (n) => `≈ US$${((Number(n) || 0) / usdRate).toLocaleString('es-CL', { maximumFractionDigits: 0 })}`
+  const toUSD       = (n) => `≈ US$${((Number(n) || 0) / usdRate).toLocaleString(moneyLocale(), { maximumFractionDigits: 0 })}`
 
   const kpis = useMemo(() => {
     const [y, mo] = activeMonth.split('-').map(Number)
@@ -646,9 +647,10 @@ export default function Dashboard({ setPage }) {
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
             <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)', textTransform:'uppercase', letterSpacing:'.8px' }}>{t('dash.signals.title')}</div>
             {setPage && (
-              <span style={{ fontSize:11, fontFamily:'var(--mono)', color:'var(--accent)', cursor:'pointer' }} onClick={() => setPage('coach')}>
+              <button type="button" onClick={() => setPage('coach')}
+                style={{ fontSize:11, fontFamily:'var(--mono)', color:'var(--accent)', cursor:'pointer', background:'none', border:0, padding:0 }}>
                 {t('dash.signals.viewAll')}
-              </span>
+              </button>
             )}
           </div>
           {topSignals.map((s, i) => (
@@ -703,7 +705,7 @@ export default function Dashboard({ setPage }) {
             )}
             <div style={{ display:'flex', justifyContent:'space-between', fontSize:11, fontFamily:'var(--mono)', color:'var(--th)' }}>
               <span>{t('dash.proj.elapsed', { pct: pctMonth })}</span>
-              {setPage && <span style={{ color:'var(--accent)', cursor:'pointer' }} onClick={() => setPage('cashflow')}>{t('dash.proj.viewFull')}</span>}
+              {setPage && <button type="button" onClick={() => setPage('cashflow')} style={{ color:'var(--accent)', cursor:'pointer', background:'none', border:0, padding:0, font:'inherit' }}>{t('dash.proj.viewFull')}</button>}
             </div>
             {over && <InlineCTA label={t('dash.proj.reviewExpenses')} page="movements" tone="red" />}
           </div>

@@ -10,7 +10,7 @@ import BackupManager, { BackupStatusBadge } from '../components/backup/BackupMan
 import TemplateSelector from '../components/templates/TemplateSelector.jsx'
 import { useApp } from '../context/AppContext.jsx'
 import { KPI, Card, CardHeader, TxRow, BarRow, FormGroup, FormRow, Btn, Badge, Alert, Empty, ProgressBar, PageHeader } from '../components/ui/index.jsx'
-import { fmtMoney, fmtPct, CAT_COLORS, CATS_INCOME, CATS_EXPENSE, METHODS, RECURRENCES, today, catEmoji, catLabel } from '../utils/index.js'
+import { fmtMoney, fmtPct, CAT_COLORS, CATS_INCOME, CATS_EXPENSE, METHODS, RECURRENCES, today, catEmoji, catLabel, moneyLocale } from '../utils/index.js'
 
 const CURRENCY_SYMBOLS = { CLP: '$', USD: 'US$', EUR: '€', VES: 'Bs.' }
 const CURRENCY_OPTIONS  = [
@@ -635,7 +635,7 @@ export function Debts() {
       notes: `Cuota ${(Number(d.paidInstallments) || 0) + 1} registrada automáticamente`,
     })
     setConfirmPay(null)
-    setPayMsg({ id: d.id, text: `✓ Pago de ${sym}${Math.round(monto).toLocaleString('es-CL')} registrado` })
+    setPayMsg({ id: d.id, text: `✓ Pago de ${sym}${Math.round(monto).toLocaleString(moneyLocale())} registrado` })
     setTimeout(() => setPayMsg(null), 3000)
   }
 
@@ -743,7 +743,7 @@ export function Debts() {
             {confirmPay === d.id && (
               <div style={{display:'flex',alignItems:'center',gap:10,padding:'8px 12px',marginBottom:8,background:'rgba(10,92,62,.06)',borderRadius:6,border:'0.5px solid rgba(10,92,62,.2)',flexWrap:'wrap'}}>
                 <span style={{fontSize:12,color:'var(--tx)',fontFamily:'var(--mono)',flex:1}}>
-                  ¿Registrar pago de <strong>{sym}{Math.round(Math.min(Number(d.minPayment)||0,d.balance)).toLocaleString('es-CL')}</strong> para {d.creditor}?
+                  ¿Registrar pago de <strong>{sym}{Math.round(Math.min(Number(d.minPayment)||0,d.balance)).toLocaleString(moneyLocale())}</strong> para {d.creditor}?
                 </span>
                 <div style={{display:'flex',gap:6}}>
                   <Btn variant="primary" size="xs" onClick={() => handleRegisterPayment(d)}>✓ Confirmar</Btn>
@@ -1138,7 +1138,7 @@ const ChartTooltip = ({ active, payload, label, sym }) => {
       {payload.map((p, i) => (
         <div key={i} style={{ color: p.color || 'var(--tx)', display: 'flex', gap: 8, justifyContent: 'space-between' }}>
           <span>{p.name}</span>
-          <span style={{ fontWeight: 500 }}>{sym}{Math.abs(p.value).toLocaleString('es-CL')}</span>
+          <span style={{ fontWeight: 500 }}>{sym}{Math.abs(p.value).toLocaleString(moneyLocale())}</span>
         </div>
       ))}
 

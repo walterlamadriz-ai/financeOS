@@ -5,6 +5,7 @@
 // − deudas − suscripciones. No es el saldo del banco; es lo que de verdad queda.
 import CountUp from '../../components/CountUp.jsx'
 import { useT } from '../../i18n/useT.js'
+import { moneyLocale } from '../../utils/index.js'
 
 export default function MonthVerdict({ freeFlow, hasData, sym, month }) {
   const { t } = useT()
@@ -40,7 +41,7 @@ export default function MonthVerdict({ freeFlow, hasData, sym, month }) {
         <>
           <div style={{ fontSize: 13.5, color: 'var(--tm)', fontWeight: 500 }}>{label}</div>
           <div className="num" style={{ fontSize: 38, fontWeight: 700, color, lineHeight: 1.05, letterSpacing: '-0.02em' }}>
-            {freeFlow < 0 ? '−' : ''}{sym}<CountUp value={Math.abs(freeFlow)} format={(v) => Math.round(v).toLocaleString('es-CL')} />
+            {freeFlow < 0 ? '−' : ''}{sym}<CountUp value={Math.abs(freeFlow)} format={(v) => Math.round(v).toLocaleString(moneyLocale())} />
           </div>
           <div style={{ fontSize: 11.5, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: 2 }}>{sub}</div>
         </>

@@ -1,6 +1,7 @@
 // src/data/coachRules.js
 import { translations } from '../i18n/translations.js'
 import { effectiveBudgetLimits } from '../utils/budgets.js'
+import { moneyLocale } from '../utils/index.js'
 // Motor de reglas del FinanceOS Coach
 // Configurable sin tocar componentes React
 // Cada regla: id, categoría, condición, severidad, mensaje, acción sugerida
@@ -265,7 +266,7 @@ export const COACH_RULES = [
 ]
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
-function fmt(n) { return (n || 0).toLocaleString('es-CL', { maximumFractionDigits: 0 }) }
+function fmt(n) { return (n || 0).toLocaleString(moneyLocale(), { maximumFractionDigits: 0 }) }
 function pct(n) { return ((n || 0) * 100).toFixed(1) + '%' }
 
 // ── EVALUADOR DE REGLAS ───────────────────────────────────────────────────────

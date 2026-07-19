@@ -9,7 +9,7 @@ import ChartCard from '../../components/charts/ChartCard.jsx'
 import HorizontalBars from '../../components/charts/HorizontalBars.jsx'
 import CategoryDonut from '../../components/charts/CategoryDonut.jsx'
 import { parseTransactionText } from '../../utils/smsParser.js'
-import { catLabel, catEmoji, subLabel } from '../../utils/index.js'
+import { catLabel, catEmoji, subLabel, moneyLocale } from '../../utils/index.js'
 import { pendingDebtMonthly } from '../../utils/personal.js'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -36,7 +36,7 @@ function toAnnual(amount, frequency) {
 }
 
 const SYM   = { CLP:'$', USD:'US$', EUR:'€', VES:'Bs.', MXN:'$', ARS:'$', COP:'$' }
-const fmt   = n => (Number(n)||0).toLocaleString('es-CL', { maximumFractionDigits:0 })
+const fmt   = n => (Number(n)||0).toLocaleString(moneyLocale(), { maximumFractionDigits:0 })
 const fmtM  = (n, sym) => `${sym}${fmt(n)}`
 
 const EXP_CATS = ['Alimentación','Vivienda','Transporte','Salud','Educación',
