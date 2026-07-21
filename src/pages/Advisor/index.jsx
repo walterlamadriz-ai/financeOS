@@ -8,7 +8,7 @@ import useSubscriptionMetrics from '../../hooks/useSubscriptionMetrics.js'
 import { useApp } from '../../context/AppContext.jsx'
 import { useT } from '../../i18n/useT.js'
 import { Card, CardHeader, Alert } from '../../components/ui/index.jsx'
-import { fmtMoney, fmtPct, moneyLocale } from '../../utils/index.js'
+import { fmtMoney, fmtPct, moneyLocale, dateLocale } from '../../utils/index.js'
 import ProGate from '../../components/ui/ProGate.jsx'
 import { FinancialDisclaimer } from '../../components/legal/MicroCopy.jsx'
 import { downloadReportePDF } from './ReportePDF.jsx'
@@ -254,7 +254,7 @@ function AdvisorNotes({ notes, onSave }) {
         </button>
         {notes.updatedAt && (
           <span style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)' }}>
-            {t('adv.notes.updated', { d: new Date(notes.updatedAt).toLocaleDateString('es-CL') })}
+            {t('adv.notes.updated', { d: new Date(notes.updatedAt).toLocaleDateString(dateLocale()) })}
           </span>
         )}
       </div>
@@ -439,7 +439,7 @@ export default function Advisor() {
                 </div>
                 {advisorNotes.meetingDate && (
                   <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: 4 }}>
-                    {t('adv.score.nextMeeting', { d: new Date(advisorNotes.meetingDate + 'T12:00').toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' }) })}
+                    {t('adv.score.nextMeeting', { d: new Date(advisorNotes.meetingDate + 'T12:00').toLocaleDateString(dateLocale(), { day: 'numeric', month: 'long', year: 'numeric' }) })}
                   </div>
                 )}
               </div>

@@ -9,7 +9,7 @@ import ChartCard from '../../components/charts/ChartCard.jsx'
 import HorizontalBars from '../../components/charts/HorizontalBars.jsx'
 import CategoryDonut from '../../components/charts/CategoryDonut.jsx'
 import { parseTransactionText } from '../../utils/smsParser.js'
-import { catLabel, catEmoji, subLabel, moneyLocale } from '../../utils/index.js'
+import { catLabel, catEmoji, subLabel, moneyLocale, dateLocale } from '../../utils/index.js'
 import { pendingDebtMonthly } from '../../utils/personal.js'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -466,7 +466,7 @@ export default function Movements({ setPage }) {
     activeSubs.filter(s=>s.nextPaymentDate).forEach(s => {
       const d = new Date(s.nextPaymentDate)
       if (d >= todayD && d <= in7)
-        al.push({ type:'upcoming', msg:t('mov.alert.upcoming', { name: s.name, date: d.toLocaleDateString('es-CL') }) })
+        al.push({ type:'upcoming', msg:t('mov.alert.upcoming', { name: s.name, date: d.toLocaleDateString(dateLocale()) }) })
     })
     return al
   }, [activeSubs, totalSubs, totalInc])

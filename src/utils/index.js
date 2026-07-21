@@ -18,6 +18,17 @@ export function setMoneyLocale(currency) {
 // Locale activo, para los toLocaleString sueltos que no pasan por fmtMoney.
 export const moneyLocale = () => _moneyLocale
 
+// ── Locale de FECHAS ─────────────────────────────────────────────────────────
+// Ojo: las fechas NO siguen a la moneda sino al IDIOMA de la interfaz. Un usuario
+// en inglés con cuenta en USD debe ver "Sep 2028", no "sept 2028". Por eso este
+// locale es independiente de _moneyLocale.
+let _dateLocale = 'es-CL'
+const LANG_DATE_LOCALE = { es: 'es-CL', en: 'en-US', pt: 'pt-BR' }
+export function setDateLocale(language) {
+  _dateLocale = LANG_DATE_LOCALE[language] || 'es-CL'
+}
+export const dateLocale = () => _dateLocale
+
 export const fmtMoney = (n, symbol = '$') => {
   const abs = Math.abs(Math.round(n || 0))
   return symbol + abs.toLocaleString(_moneyLocale)

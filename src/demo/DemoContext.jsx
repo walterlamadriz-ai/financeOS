@@ -5,7 +5,7 @@
 
 import { createContext, useContext, useReducer, useCallback } from 'react'
 import { DEMO_STATE, DEMO_INCOMES_EXITOSO } from './demoData.js'
-import { setMoneyLocale } from '../utils/index.js'
+import { setMoneyLocale, setDateLocale } from '../utils/index.js'
 
 export const DemoContext = createContext(null)
 
@@ -90,6 +90,7 @@ export function DemoProvider({ children }) {
     // El demo también debe respetar el formato de miles de la moneda elegida
     // (AppContext lo hace en un efecto; aquí el provider es independiente).
     setMoneyLocale(settings.currency || 'CLP')
+    setDateLocale(settings.language || 'es')
   }, [])
 
   // En demo, "borrar todo" recarga datos demo — no puede dejar vacío

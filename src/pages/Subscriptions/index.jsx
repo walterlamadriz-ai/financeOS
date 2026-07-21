@@ -6,7 +6,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
 import { useT } from '../../i18n/useT.js'
 import { dbGetAll, dbAdd, dbDelete } from '../../core/db/index.js'
-import { uid, subEmoji, subLabel, moneyLocale } from '../../utils/index.js'
+import { uid, subEmoji, subLabel, moneyLocale, dateLocale } from '../../utils/index.js'
 import ChartCard from '../../components/charts/ChartCard.jsx'
 import HorizontalBars from '../../components/charts/HorizontalBars.jsx'
 import CategoryDonut from '../../components/charts/CategoryDonut.jsx'
@@ -98,7 +98,7 @@ export function generateAlerts(subs, monthlyIncome, t = null) {
   upcoming.forEach(s => {
     alerts.push({
       type: 'upcoming',
-      msg: tr('subs.alert.upcoming', { name: s.name, date: new Date(s.nextPaymentDate).toLocaleDateString('es-CL') }, `"${s.name}" tiene un pago próximo el ${new Date(s.nextPaymentDate).toLocaleDateString('es-CL')}.`),
+      msg: tr('subs.alert.upcoming', { name: s.name, date: new Date(s.nextPaymentDate).toLocaleDateString(dateLocale()) }, `"${s.name}" tiene un pago próximo el ${new Date(s.nextPaymentDate).toLocaleDateString(dateLocale())}.`),
     })
   })
 
@@ -261,7 +261,7 @@ export default function Subscriptions() {
           { label: t('subs.kpi.annual'),   value: `${currency} ${fmt(totalAnnual)}`,   color: 'var(--tx)' },
           { label: t('subs.kpi.active'),       value: activeSubs.length,                   color: 'var(--tx)' },
           { label: t('subs.kpi.mostExpensive'),   value: mostExpensive ? mostExpensive.name : '—', color: 'var(--amb)' },
-          { label: t('subs.kpi.nextPay'),  value: nextSub ? new Date(nextSub.nextPaymentDate).toLocaleDateString('es-CL') : '—', color: 'var(--tx)' },
+          { label: t('subs.kpi.nextPay'),  value: nextSub ? new Date(nextSub.nextPaymentDate).toLocaleDateString(dateLocale()) : '—', color: 'var(--tx)' },
         ].map(k => (
           <div key={k.label} style={{ background: 'var(--sur)', border: '.5px solid var(--brd)', borderRadius: 'var(--rl)', padding: '14px 16px', boxShadow: 'var(--sh-1)' }}>
             <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 4 }}>{k.label}</div>
@@ -407,7 +407,7 @@ export default function Subscriptions() {
                       <td style={{ padding: '9px 12px', fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)' }}>{(sub.currency || currency)} {fmt(annual)}</td>
                       <td style={{ padding: '9px 12px', fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)' }}>{FREQ_LABELS[sub.frequency] ? t('mov.freq.' + sub.frequency) : sub.frequency}</td>
                       <td style={{ padding: '9px 12px', fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)', whiteSpace: 'nowrap' }}>
-                        {sub.nextPaymentDate ? new Date(sub.nextPaymentDate).toLocaleDateString('es-CL') : '—'}
+                        {sub.nextPaymentDate ? new Date(sub.nextPaymentDate).toLocaleDateString(dateLocale()) : '—'}
                       </td>
                       <td style={{ padding: '9px 12px' }}>
                         <button onClick={() => toggleStatus(sub)} style={{

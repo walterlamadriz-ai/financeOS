@@ -13,7 +13,7 @@ import {
   getSettings, saveSettings, exportAllData, importAllData,
   isUsingFallback, DEFAULT_SETTINGS,
 } from '../core/db/index.js'
-import { uid, SEED_INCOMES, SEED_EXPENSES, SEED_BUDGETS, SEED_DEBTS, SEED_GOALS, setMoneyLocale } from '../utils/index.js'
+import { uid, SEED_INCOMES, SEED_EXPENSES, SEED_BUDGETS, SEED_DEBTS, SEED_GOALS, setMoneyLocale, setDateLocale } from '../utils/index.js'
 import { markLocalChange, pullAndApplyIfNewer, isSyncEnabled, setSyncEnabled, initialSync, pushNow } from '../core/sync.js'
 
 export const AppContext = createContext(null)
@@ -138,6 +138,10 @@ export function AppProvider({ children }) {
   useEffect(() => {
     setMoneyLocale(state.settings?.currency || 'CLP')
   }, [state.settings?.currency])
+  // ── Formato de fechas según el IDIOMA (no la moneda): "Sep" vs "sept" vs "set" ──
+  useEffect(() => {
+    setDateLocale(state.settings?.language || 'es')
+  }, [state.settings?.language])
 
 
   // ── Actions — FIX: DB primero, luego dispatch ─────────────────────────────────

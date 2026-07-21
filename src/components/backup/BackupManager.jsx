@@ -8,6 +8,7 @@ import { useApp } from '../../context/AppContext.jsx'
 import { CLOUD_ENABLED } from '../../core/supabase.js'
 import { cloudPush, cloudPull, cloudStatus } from '../../core/cloudSync.js'
 
+import { dateLocale } from '../../utils/index.js'
 // ── HELPERS ───────────────────────────────────────────────────────────────────
 function daysSince(isoDate) {
   if (!isoDate) return null
@@ -16,7 +17,7 @@ function daysSince(isoDate) {
 
 function formatDate(isoDate) {
   if (!isoDate) return null
-  return new Date(isoDate).toLocaleDateString('es-CL', {
+  return new Date(isoDate).toLocaleDateString(dateLocale(), {
     day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
   })
 }

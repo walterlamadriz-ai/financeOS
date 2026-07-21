@@ -4,7 +4,7 @@
 // AVISO: Contenido informativo. No constituye asesoría financiera certificada.
 
 import { Document, Page, Text, View, StyleSheet, Font, pdf } from '@react-pdf/renderer'
-import { fmtMoney, fmtPct } from '../../utils/index.js'
+import { fmtMoney, fmtPct, dateLocale } from '../../utils/index.js'
 import config from '../../config.js'
 
 // ── COLORES ──────────────────────────────────────────────────────────────────
@@ -167,7 +167,7 @@ const STATUS_BG     = { green: C.grnL, yellow: C.ambL,    red: C.redL }
 const STATUS_LABEL  = { green: 'Saludable', yellow: 'Atención', red: 'Riesgo' }
 
 function today() {
-  return new Date().toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' })
+  return new Date().toLocaleDateString(dateLocale(), { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
 function monthLabel(m) {
@@ -236,7 +236,7 @@ export function ReporteFinancieroPDF({ data }) {
             </Text>
             {advisorNotes?.meetingDate && (
               <Text style={[s.scoreSub, { marginTop: 3, color: C.grn2 }]}>
-                Próxima reunión: {new Date(advisorNotes.meetingDate + 'T12:00').toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' })}
+                Próxima reunión: {new Date(advisorNotes.meetingDate + 'T12:00').toLocaleDateString(dateLocale(), { day: 'numeric', month: 'long', year: 'numeric' })}
               </Text>
             )}
           </View>

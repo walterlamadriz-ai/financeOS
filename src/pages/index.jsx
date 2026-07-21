@@ -10,7 +10,7 @@ import BackupManager, { BackupStatusBadge } from '../components/backup/BackupMan
 import TemplateSelector from '../components/templates/TemplateSelector.jsx'
 import { useApp } from '../context/AppContext.jsx'
 import { KPI, Card, CardHeader, TxRow, BarRow, FormGroup, FormRow, Btn, Badge, Alert, Empty, ProgressBar, PageHeader } from '../components/ui/index.jsx'
-import { fmtMoney, fmtPct, CAT_COLORS, CATS_INCOME, CATS_EXPENSE, METHODS, RECURRENCES, today, catEmoji, catLabel, moneyLocale } from '../utils/index.js'
+import { fmtMoney, fmtPct, CAT_COLORS, CATS_INCOME, CATS_EXPENSE, METHODS, RECURRENCES, today, catEmoji, catLabel, moneyLocale, dateLocale } from '../utils/index.js'
 
 const CURRENCY_SYMBOLS = { CLP: '$', USD: 'US$', EUR: '€', VES: 'Bs.' }
 const CURRENCY_OPTIONS  = [
@@ -718,7 +718,7 @@ export function Debts() {
           : pendInst > 0 ? pendInst : 0
         const finDate     = monthsLeft > 0
           ? new Date(Date.now() + monthsLeft * 30 * 24 * 60 * 60 * 1000)
-              .toLocaleDateString('es-CL', { month:'short', year:'numeric' })
+              .toLocaleDateString(dateLocale(), { month:'short', year:'numeric' })
           : null
         return (
           <Card key={d.id}>

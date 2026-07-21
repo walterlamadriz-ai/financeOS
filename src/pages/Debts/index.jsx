@@ -3,7 +3,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
 import { useT } from '../../i18n/useT.js'
 import { KPI, Card, CardHeader, FormGroup, FormRow, Btn, Alert, Badge, ProgressBar, PageHeader } from '../../components/ui/index.jsx'
-import { fmtMoney, fmtPct, DEBT_TYPES, debtEmoji, moneyLocale } from '../../utils/index.js'
+import { fmtMoney, fmtPct, DEBT_TYPES, debtEmoji, moneyLocale, dateLocale } from '../../utils/index.js'
 import { CURRENCY_SYMBOLS } from '../shared/constants.js'
 import DebtProgressList from '../../components/charts/DebtProgressList.jsx'
 import { loadIndicadores } from '../../utils/indicadores.js'
@@ -333,7 +333,7 @@ export default function Debts() {
           }
           return pendInst > 0 ? pendInst : 0
         })()
-        const finDate   = monthsLeft > 0 ? new Date(Date.now()+monthsLeft*30*24*60*60*1000).toLocaleDateString('es-CL',{month:'short',year:'numeric'}) : null
+        const finDate   = monthsLeft > 0 ? new Date(Date.now()+monthsLeft*30*24*60*60*1000).toLocaleDateString(dateLocale(),{month:'short',year:'numeric'}) : null
         return (
           <Card key={d.id}>
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:6}}>

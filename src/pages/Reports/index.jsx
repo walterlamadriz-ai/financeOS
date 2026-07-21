@@ -4,7 +4,7 @@ import { pdf } from '@react-pdf/renderer'
 import { useApp } from '../../context/AppContext.jsx'
 import { useT } from '../../i18n/useT.js'
 import { KPI, Card, CardHeader, Alert, Empty, PageHeader } from '../../components/ui/index.jsx'
-import { fmtMoney, fmtPct } from '../../utils/index.js'
+import { fmtMoney, fmtPct, dateLocale } from '../../utils/index.js'
 import { ReportsDisclaimer } from '../../components/legal/MicroCopy.jsx'
 import { pendingDebtMonthly } from '../../utils/personal.js'
 import { calcNetWorth } from '../../utils/netWorth.js'
@@ -47,7 +47,7 @@ export default function Reports({ setPage }) {
         necesidad, deseos, expByCat, trendData, overBudget,
         currency: settings.currency || 'CLP',
         netWorth: nw.hasData ? nw : null,
-        generatedAt: new Date().toLocaleDateString('es-CL', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }),
+        generatedAt: new Date().toLocaleDateString(dateLocale(), { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }),
       }
       const blob = await pdf(<ReportPDF data={data} />).toBlob()
       const url  = URL.createObjectURL(blob)
