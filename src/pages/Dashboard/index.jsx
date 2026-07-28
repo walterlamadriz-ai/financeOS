@@ -518,6 +518,19 @@ export default function Dashboard({ setPage }) {
         <div style={{ background:'color-mix(in srgb, var(--pos) 8%, transparent)', border:'.5px solid color-mix(in srgb, var(--pos) 28%, transparent)', borderRadius:'var(--r)', padding:'18px 20px', marginBottom:20 }}>
           <div style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--accent)', textTransform:'uppercase', letterSpacing:'1px', marginBottom:6 }}>{t('dash.start.title')}</div>
           <p style={{ fontSize:13, color:'var(--th)', fontFamily:'var(--mono)', marginBottom:14 }}>{t('dash.start.sub')}</p>
+          {/* Vía rápida: importar la cartola arma el mes de una vez. Es el activo
+              más fuerte de la app (autodetección de bancos) y estaba ausente del
+              primer minuto — solo se ofrecía a mano. Va destacado, antes de los
+              pasos manuales, que quedan como alternativa. */}
+          <button onClick={() => setPage?.('import')} style={{
+            display:'flex', alignItems:'center', gap:10, width:'100%', textAlign:'left',
+            background:'var(--accent)', color:'#fff', border:'none', borderRadius:'var(--r2)',
+            padding:'12px 14px', marginBottom:14, cursor:'pointer', fontFamily:'var(--mono)',
+          }}>
+            <span style={{ fontSize:18, lineHeight:1, flexShrink:0 }}>⇪</span>
+            <span style={{ flex:1, fontSize:12.5, fontWeight:600, lineHeight:1.4 }}>{t('dash.start.import')}</span>
+            <span style={{ fontSize:12, fontWeight:700, whiteSpace:'nowrap' }}>{t('dash.start.importbtn')} →</span>
+          </button>
           <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
             {[
               { n:'1', txt:t('dash.start.s1'),   btn:t('dash.start.s1btn'),    page:'income',   color:'var(--accent)' },
