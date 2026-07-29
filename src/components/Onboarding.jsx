@@ -158,7 +158,7 @@ export default function Onboarding({ onComplete }) {
     finally { setLoading(false) }
   }
 
-  async function finalize(withDemo = false) {
+  async function finalize(withDemo = false, goTo = null) {
     const tpl = activeTemplate
     await updateSettings({
       ...settings,
@@ -173,7 +173,7 @@ export default function Onboarding({ onComplete }) {
       templateSuggestedBudgets: tpl.suggestedBudgets,
       templateAdvisorTip: tpl.advisorTip, templateAlerts: tpl.alerts,
     })
-    onComplete(withDemo)
+    onComplete(goTo)
   }
 
   // Step 0 — Bienvenida
@@ -484,8 +484,18 @@ export default function Onboarding({ onComplete }) {
           {t('onboarding.summary.advisorTip')}
         </div>
       )}
-      <button style={btnP(loading)} onClick={() => finalize()} disabled={loading}>
-        {loading ? t('onboarding.summary.loading') : t('onboarding.summary.enter')}
+      {/* Bifurcación final: importar la cartola es el puente al primer dato REAL
+          (autodetección de banco). Va como acción primaria; el arranque a mano
+          queda como alternativa, sin bloquearlo. Al elegir importar, finalize
+          termina el onboarding y App abre la página de import. */}
+      <div style={{ padding: '10px 12px', background: 'var(--grn-bg)', border: '0.5px solid rgba(26,163,104,.25)', borderRadius: 8, fontSize: 11, color: 'var(--grn)', fontFamily: 'var(--mono)', lineHeight: 1.5, marginBottom: 10 }}>
+        {t('onboarding.summary.importHint')}
+      </div>
+      <button style={btnP(loading)} onClick={() => finalize(false, 'import')} disabled={loading}>
+        {loading ? t('onboarding.summary.loading') : t('onboarding.summary.import')}
+      </button>
+      <button style={{ ...btnG, marginTop: 8 }} onClick={() => finalize()} disabled={loading}>
+        {t('onboarding.summary.enterPlain')}
       </button>
       <button style={btnG} onClick={back}>{t('nav.back')}</button>
     </div></div>

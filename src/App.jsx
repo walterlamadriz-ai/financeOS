@@ -99,7 +99,9 @@ function Inner() {
   const showOnboarding = !loading && !settings.onboardingDone
 
   if (showOnboarding) {
-    return <Onboarding onComplete={() => {}} />
+    // goTo: el onboarding puede pedir abrir una página al terminar (ej. 'import'
+    // cuando el usuario elige subir su cartola). Sin goTo, cae a dashboard.
+    return <Onboarding onComplete={(goTo) => { if (goTo) setPage(goTo) }} />
   }
 
   return (
