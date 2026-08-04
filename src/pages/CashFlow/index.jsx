@@ -253,7 +253,7 @@ export default function CashFlow({ setPage }) {
       <Card>
         <CardHeader title={t('cf.chart.title')} />
         {!hasData
-          ? <Empty text={t('cf.chart.empty')} />
+          ? <Empty text={t('cf.chart.empty')} cta={setPage ? t('empty.importCta') : undefined} onCta={() => setPage?.('import')} />
           : (
             <ResponsiveContainer width="100%" height={220}>
               <AreaChart data={projectionData}>

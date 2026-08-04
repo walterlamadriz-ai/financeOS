@@ -69,8 +69,21 @@ export function Alert({ children, type = 'warn' }) {
   return <div className={[styles.alert, styles[`alert_${type}`]].join(' ')}>{children}</div>
 }
 
-export function Empty({ text = 'Sin registros aún' }) {
-  return <div className={styles.empty}>{text}</div>
+export function Empty({ text = 'Sin registros aún', cta, onCta }) {
+  return (
+    <div className={styles.empty}>
+      {text}
+      {cta && onCta && (
+        <div style={{ marginTop: 12 }}>
+          <button type="button" onClick={onCta} style={{
+            fontFamily: 'var(--mono)', fontSize: 12, fontWeight: 600,
+            color: '#fff', background: 'var(--grn)', border: 'none',
+            borderRadius: 8, padding: '8px 16px', cursor: 'pointer',
+          }}>{cta}</button>
+        </div>
+      )}
+    </div>
+  )
 }
 
 export function TxRow({ dot, name, meta, amount, isIncome, onDelete, onEdit }) {

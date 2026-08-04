@@ -162,7 +162,7 @@ export default function Reports({ setPage }) {
         </Card>
         <Card>
           <CardHeader title={t('reports.rule.title')} />
-          {totalIncome === 0 ? <Empty text={t('reports.rule.empty')} /> : (() => {
+          {totalIncome === 0 ? <Empty text={t('reports.rule.empty')} cta={setPage ? t('empty.importCta') : undefined} onCta={() => setPage?.('import')} /> : (() => {
             const rules = [
               {id:'needs', label:t('reports.rule.needs'), actual:necesidad+totalDebt, ideal:totalIncome*0.5, color:'var(--grn)', max:50},
               {id:'wants', label:t('reports.rule.wants'),               actual:deseos,              ideal:totalIncome*0.3, color:'var(--amb)', max:30},
