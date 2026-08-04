@@ -3,18 +3,98 @@ import * as XLSX from 'xlsx'
 // Parser CSV — sin dependencias externas · 100% local · sin envío de datos
 
 export const MAX_ROWS = 1000
-export const SUPPORTED_TYPES = ['.csv', '.xlsx', '.xls']
+export const SUPPORTED_TYPES = ['.csv', '.xlsx', '.xls', '.pdf']
 
 export async function parseFile(file) {
   const ext = file.name.split('.').pop().toLowerCase()
   if (ext === 'xlsx' || ext === 'xls') {
     return parseXLSX(file)
   }
+  if (ext === 'pdf') {
+    return parsePDF(file)
+  }
   if (ext !== 'csv') {
-    throw new Error('Formato no soportado. Se aceptan archivos .csv, .xlsx y .xls')
+    throw new Error('Formato no soportado. Se aceptan archivos .csv, .xlsx, .xls y .pdf')
   }
   const text = await readAsText(file)
   return parseCSV(text)
+}
+
+// ── PDF (beta) ────────────────────────────────────────────────────────────────
+// Cartolas en PDF de texto. 100% local: pdfjs se carga bajo demanda (dynamic
+// import) y el texto NUNCA sale del dispositivo. Reconstruimos líneas por
+// coordenada Y y detectamos transacciones (una fecha + un monto por línea).
+// Es heurístico y variable por banco → por eso el usuario SIEMPRE revisa antes
+// de importar. Devuelve la misma forma {headers, rows} que el resto del pipeline.
+const PDF_DATE_RE = /(\d{4}-\d{2}-\d{2}|\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4})/
+// Monto: separador de miles y/o decimal, con al menos 3 dígitos o un decimal.
+const PDF_AMOUNT_RE = /-?\$?\s?\d{1,3}(?:[.,]\d{3})+(?:[.,]\d{1,2})?-?|-?\$?\s?\d+[.,]\d{2}-?/g
+
+async function extractPdfLines(file) {
+  const pdfjs = await import('pdfjs-dist')
+  try {
+    pdfjs.GlobalWorkerOptions.workerSrc = (await import('pdfjs-dist/build/pdf.worker.min.mjs?url')).default
+  } catch { /* algunos bundlers resuelven el worker solo */ }
+  const buf = await file.arrayBuffer()
+  const doc = await pdfjs.getDocument({ data: new Uint8Array(buf) }).promise
+  const lines = []
+  for (let p = 1; p <= doc.numPages; p++) {
+    const page = await doc.getPage(p)
+    const content = await page.getTextContent()
+    // Agrupar items por Y (misma línea), luego ordenar por X y unir.
+    const byRow = new Map()
+    for (const it of content.items) {
+      if (!it.str || !it.str.trim()) continue
+      const y = Math.round(it.transform[5])
+      const x = it.transform[4]
+      if (!byRow.has(y)) byRow.set(y, [])
+      byRow.get(y).push({ x, s: it.str })
+    }
+    const ys = [...byRow.keys()].sort((a, b) => b - a) // arriba→abajo
+    for (const y of ys) {
+      const text = byRow.get(y).sort((a, b) => a.x - b.x).map(o => o.s).join(' ').replace(/\s+/g, ' ').trim()
+      if (text) lines.push(text)
+    }
+  }
+  return lines
+}
+
+function parsePdfLinesToRows(lines) {
+  const rows = []
+  let idx = 0
+  for (const line of lines) {
+    const dm = line.match(PDF_DATE_RE)
+    if (!dm) continue
+    const amounts = line.match(PDF_AMOUNT_RE)
+    if (!amounts || amounts.length === 0) continue
+    // Layout típico de cartola: "fecha  descripción  IMPORTE  SALDO". Cuando hay
+    // ≥2 montos, el último es el saldo corrido → el importe del movimiento es el
+    // penúltimo. Con un solo monto, ese es el importe. (El usuario revisa igual.)
+    const amountStr = amounts.length >= 2 ? amounts[amounts.length - 2] : amounts[amounts.length - 1]
+    // Descripción = lo que queda entre la fecha y el monto, sin números sueltos.
+    let desc = line
+      .replace(dm[0], ' ')
+      .replace(amountStr, ' ')
+    // quitar montos intermedios (saldos) de la descripción
+    desc = desc.replace(PDF_AMOUNT_RE, ' ').replace(/\s+/g, ' ').trim()
+    if (!desc) desc = 'Movimiento'
+    rows.push({ _rowIndex: idx++, fecha: dm[0], descripcion: desc, monto: amountStr })
+  }
+  return rows
+}
+
+async function parsePDF(file) {
+  const lines = await extractPdfLines(file)
+  const rows = parsePdfLinesToRows(lines)
+  if (rows.length === 0) {
+    throw new Error('No se detectaron movimientos en el PDF. Puede ser un PDF escaneado (imagen) o un formato no reconocido. Probá con el CSV o Excel del banco.')
+  }
+  return {
+    headers: ['fecha', 'descripcion', 'monto'],
+    rows: rows.slice(0, MAX_ROWS),
+    totalLines: rows.length,
+    sourceType: 'pdf',
+  }
 }
 
 async function parseXLSX(file) {

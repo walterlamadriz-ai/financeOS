@@ -100,7 +100,7 @@ export default function ImportMovements() {
 
   async function handleFile(f) {
     const ext = f.name.split('.').pop().toLowerCase()
-    if (!['csv', 'xlsx', 'xls'].includes(ext)) {
+    if (!['csv', 'xlsx', 'xls', 'pdf'].includes(ext)) {
       setWarning(t('imp.err.format'))
       return
     }
@@ -261,7 +261,7 @@ export default function ImportMovements() {
                   </>
               }
             </div>
-            <input id="csv-input" type="file" accept=".csv,.xlsx,.xls" style={{ display: 'none' }}
+            <input id="csv-input" type="file" accept=".csv,.xlsx,.xls,.pdf" style={{ display: 'none' }}
               onChange={e => e.target.files[0] && handleFile(e.target.files[0])} />
             <div style={s.privacy}>
               <span>◑</span>

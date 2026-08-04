@@ -254,6 +254,21 @@ export default function TemplateSelector({ compact = false, onApplied }) {
       templateAlerts:        template.alerts,
     })
 
+    // 3. #13 — Encender la diferenciación: convertir los presupuestos sugeridos
+    // en presupuestos REALES (limit = ingreso declarado × pct). No-destructivo:
+    // solo crea categorías que aún no tienen presupuesto, y solo si hay ingreso
+    // declarado. Antes esto quedaba solo como referencia y la promesa del modal
+    // ("se configurarán los presupuestos sugeridos") no se cumplía.
+    const income = Number(settings.estimatedMonthlyIncome) || 0
+    if (income > 0 && Array.isArray(template.suggestedBudgets)) {
+      const existing = new Set((budgets || []).map(b => (b.category || '').toLowerCase()))
+      for (const b of template.suggestedBudgets) {
+        if (existing.has((b.category || '').toLowerCase())) continue
+        const limit = Math.round(income * (Number(b.pct) || 0) / 100)
+        if (limit > 0) { try { await addBudget({ category: b.category, limit }) } catch {} }
+      }
+    }
+
     setApplied(template.id)
     setTimeout(() => setApplied(null), 3000)
     onApplied?.(template)
