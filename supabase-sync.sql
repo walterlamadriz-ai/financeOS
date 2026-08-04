@@ -5,6 +5,22 @@
 
 create extension if not exists pgcrypto;
 
+-- 0) Resolver hash: el cliente manda el HASH sha256 (64 hex), no la clave cruda.
+-- Si el input ya es hash lo usa tal cual; si es una clave FNOS la hashea. Debe
+-- coincidir con validate_license. SIN esto, hashear de nuevo el hash da un
+-- doble-hash que NUNCA matchea → invalid_license aunque la licencia sea válida.
+create or replace function public.fnos_resolve_hash(p_input text)
+returns text language sql immutable
+set search_path = public, extensions
+as $$
+  select case
+    when p_input ~ '^[0-9a-f]{64}$' then lower(p_input)
+    else encode(digest(upper(trim(coalesce(p_input, ''))), 'sha256'), 'hex')
+  end
+$$;
+revoke all on function public.fnos_resolve_hash(text) from public;
+grant  execute on function public.fnos_resolve_hash(text) to anon;
+
 -- 1) Tabla: un blob CIFRADO por licencia. El servidor nunca ve los datos en claro.
 create table if not exists public.synced_data (
   key_hash   text primary key references public.licenses(key_hash) on delete cascade,
@@ -28,7 +44,7 @@ begin
   if p_key is null or p_blob is null then
     return jsonb_build_object('ok', false, 'error', 'bad_args');
   end if;
-  v_hash := encode(digest(upper(trim(p_key)), 'sha256'), 'hex');
+  v_hash := public.fnos_resolve_hash(p_key);
   if not exists (select 1 from public.licenses where key_hash = v_hash and status = 'active'
                 and (expires_at is null or expires_at > now())) then
     return jsonb_build_object('ok', false, 'error', 'invalid_license');
@@ -50,7 +66,7 @@ set search_path = public, extensions
 as $$
 declare v_hash text; v_row public.synced_data%rowtype;
 begin
-  v_hash := encode(digest(upper(trim(p_key)), 'sha256'), 'hex');
+  v_hash := public.fnos_resolve_hash(p_key);
   if not exists (select 1 from public.licenses where key_hash = v_hash and status = 'active'
                 and (expires_at is null or expires_at > now())) then
     return jsonb_build_object('ok', false, 'error', 'invalid_license');
