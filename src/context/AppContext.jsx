@@ -334,6 +334,16 @@ export function AppProvider({ children }) {
     try {
       await clearAllData()
       dispatch({ type: 'CLEAR_ALL' })
+      // El valor de las propiedades (patrimonio) vive en settings.propertyValues,
+      // que clearAllData NO toca. Sin esto, el patrimonio sobrevive al "borrar
+      // todo" y aparece precargado en cada licencia. Lo limpiamos aquí para que
+      // el borrado deje realmente todo en cero.
+      const current = (await getSettings()) || {}
+      if (current.propertyValues && Object.keys(current.propertyValues).length) {
+        const { propertyValues, ...rest } = current
+        await saveSettings(rest)
+        dispatch({ type: 'SAVE_SETTINGS', settings: rest })
+      }
       showToast('Todos los datos fueron borrados.', 'ok')
     } catch (e) {
       showToast('Error al borrar datos.', 'error')
