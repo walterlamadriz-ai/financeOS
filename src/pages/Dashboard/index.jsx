@@ -252,6 +252,9 @@ export default function Dashboard({ setPage }) {
         {/* Ahora también visible en móvil — es la tendencia del score, la métrica clave */}
         <span>
           <svg width={W} height={H} style={{ overflow:'visible', display:'block' }}>
+            {/* #08 — relleno de área bajo la línea (tratamiento editorial dataviz):
+                da peso visual a la tendencia sin competir con el trazo. */}
+            <polygon points={`${pts} ${W},${H} 0,${H}`} fill={currentColor} opacity="0.10" stroke="none" />
             <polyline points={pts} fill="none" stroke={currentColor} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" opacity="0.7" />
             <circle cx={pts.split(' ').pop().split(',')[0]} cy={pts.split(' ').pop().split(',')[1]} r="3" fill={currentColor} />
           </svg>
