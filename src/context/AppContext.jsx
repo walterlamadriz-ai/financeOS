@@ -316,11 +316,18 @@ export function AppProvider({ children }) {
     setSyncEnabled(true)
     try {
       const r = await initialSync(rehydrate)
+      // Verificación real: initialSync es resiliente y se traga los fallos de
+      // push. Forzamos un push que SÍ propaga el error para no reportar un
+      // "activado" falso cuando la nube rechaza la licencia (bug histórico).
+      await pushNow()
       showToast(r?.applied ? 'Sincronización activada · datos actualizados desde la nube.' : 'Sincronización activada · tus datos están en la nube.', 'ok')
       return { ok: true, applied: !!r?.applied }
     } catch (e) {
       setSyncEnabled(false)
-      showToast('No se pudo activar el sync. Revisa tu conexión e intenta de nuevo.', 'error')
+      const invalid = /invalid_license/.test(String(e?.message || ''))
+      showToast(invalid
+        ? 'No se pudo activar el sync: el servidor rechazó la licencia. Falta aplicar el fix de sync en Supabase.'
+        : 'No se pudo activar el sync. Revisa tu conexión e intenta de nuevo.', 'error')
       return { ok: false }
     }
   }, [rehydrate, showToast])
