@@ -476,6 +476,44 @@ export default function Onboarding({ onComplete }) {
           </div>
         ))}
       </div>
+      {/* #02 — Punto de partida: diagnóstico HONESTO derivado de lo declarado
+          (ingreso × meta%). Es un objetivo real, no un score inventado con datos
+          que aún no existen. Cierra el "primer minuto" con una cifra motivadora. */}
+      {(() => {
+        const income = Number(answers.estimatedMonthlyIncome) || 0
+        const pct = Number(answers.savingGoal) || 0
+        const sym = { CLP:'$', USD:'US$', EUR:'€', VES:'Bs.', MXN:'$', ARS:'$', COP:'$', PEN:'S/', BRL:'R$', UYU:'$U' }[answers.currency] || '$'
+        const fmt = (n) => sym + Math.round(n).toLocaleString()
+        const perMonth = income * pct / 100
+        const toolKey = { CL:'nav.apvChile', PT:'nav.pprPortugal', EC:'nav.deductions', PE:'nav.deductions', MX:'nav.taxSavings', CO:'nav.taxSavings', US:'nav.taxSavings', ES:'nav.taxSavings', AR:'nav.inflation', VE:'nav.multicurrency' }[(answers.country || 'CL').toUpperCase()]
+        return (
+          <div style={{ padding: '13px 15px', background: 'var(--grn-bg)', border: '0.5px solid rgba(26,163,104,.25)', borderRadius: 10, marginBottom: 12 }}>
+            <div style={{ fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--grn)', marginBottom: 8 }}>
+              {t('onboarding.summary.startTitle')}
+            </div>
+            {income > 0 ? (
+              <>
+                <div className="num" style={{ fontSize: 'var(--fs-hero)', fontWeight: 700, color: 'var(--grn)', lineHeight: 1.02, letterSpacing: '-0.03em' }}>
+                  {fmt(perMonth)}<span style={{ fontSize: 15, fontWeight: 500, color: 'var(--tm)' }}>/{t('onboarding.summary.startPerMonth')}</span>
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--tm)', marginTop: 4 }}>
+                  {t('onboarding.summary.startPlan', { pct })} · {t('onboarding.summary.startYear', { amount: fmt(perMonth * 12) })}
+                </div>
+              </>
+            ) : (
+              <div style={{ fontSize: 12.5, color: 'var(--tm)', lineHeight: 1.5 }}>{t('onboarding.summary.startNoIncome')}</div>
+            )}
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 10 }}>
+              {toolKey && (
+                <span style={{ fontSize: 10, fontFamily: 'var(--mono)', padding: '3px 8px', borderRadius: 20, background: 'var(--sur)', color: 'var(--grn)', border: '0.5px solid rgba(26,163,104,.25)' }}>{t(toolKey)}</span>
+              )}
+              {answers.hasDebts === 'yes' && (
+                <span style={{ fontSize: 10, fontFamily: 'var(--mono)', padding: '3px 8px', borderRadius: 20, background: 'var(--sur)', color: 'var(--tm)', border: '0.5px solid var(--brd)' }}>{t('onboarding.summary.startDebts')}</span>
+              )}
+            </div>
+          </div>
+        )
+      })()}
       <div style={{ padding: '9px 11px', background: '#faeeda', border: '0.5px solid rgba(133,79,11,.2)', borderRadius: 8, fontSize: 10, color: '#854f0b', fontFamily: 'var(--mono)', lineHeight: 1.5, marginBottom: 10 }}>
         {t('onboarding.summary.backupWarning')}
       </div>

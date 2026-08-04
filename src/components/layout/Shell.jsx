@@ -20,17 +20,21 @@ const NAV = [
     { id: 'movements', ic: '↓', lb: 'nav.expenses' },
     { id: 'import',    ic: '⇪', lb: 'nav.import' },
   ] },
-  { sec: 'nav.sec.planning', items: [
-    { id: 'budgets', ic: '▤', lb: 'nav.budgets' },
-    { id: 'debts',   ic: '⊖', lb: 'nav.debts' },
-    { id: 'goals',   ic: '◎', lb: 'nav.goals' },
-    { id: 'projects', ic: '⌂', lb: 'nav.properties' },
+  // #06 — "Tu país" como sección propia: eleva el diferenciador fiscal por país
+  // (antes estaba diluido dentro de Planificación) y de-satura esa sección.
+  { sec: 'nav.sec.country', items: [
     { id: 'apv',     ic: '🇨🇱', cc: 'CL', lb: 'nav.apvChile', countries: ['CL'] },
     { id: 'ppr',     ic: '🇵🇹', cc: 'PT', lb: 'nav.pprPortugal', countries: ['PT'] },
     { id: 'deducciones', ic: '⊟', lb: 'nav.deductions', countries: ['EC', 'PE'] },
     { id: 'ahorrofiscal', ic: '⊡', lb: 'nav.taxSavings', countries: ['MX', 'CO', 'US', 'ES'] },
     { id: 'inflacion',   ic: '↗', lb: 'nav.inflation', countries: ['AR'] },
     { id: 'multimoneda', ic: '⇄', lb: 'nav.multicurrency', countries: ['VE'] },
+  ] },
+  { sec: 'nav.sec.planning', items: [
+    { id: 'budgets', ic: '▤', lb: 'nav.budgets' },
+    { id: 'debts',   ic: '⊖', lb: 'nav.debts' },
+    { id: 'goals',   ic: '◎', lb: 'nav.goals' },
+    { id: 'projects', ic: '⌂', lb: 'nav.properties' },
   ] },
   { sec: 'nav.sec.analysis', items: [
     { id: 'networth', ic: '◆', lb: 'nav.netWorth' },
@@ -119,10 +123,13 @@ export default function Shell({ page, setPage, children }) {
   function NavItems({ onNavigate }) {
     return (
       <>
-        {NAV.map(g => (
+        {NAV.map(g => {
+          const items = g.items.filter(it => !it.countries || it.countries.includes(navCountry))
+          if (items.length === 0) return null   // no mostrar cabecera de sección vacía
+          return (
           <div key={g.sec}>
             <div className={s.sec}>{t(g.sec)}</div>
-            {g.items.filter(it => !it.countries || it.countries.includes(navCountry)).map(it => (
+            {items.map(it => (
               <button
                 key={it.id}
                 type="button"
@@ -138,7 +145,8 @@ export default function Shell({ page, setPage, children }) {
               </button>
             ))}
           </div>
-        ))}
+          )
+        })}
       </>
     )
   }
