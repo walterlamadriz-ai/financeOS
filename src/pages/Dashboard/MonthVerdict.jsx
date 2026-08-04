@@ -40,7 +40,7 @@ export default function MonthVerdict({ freeFlow, hasData, sym, month }) {
       ) : (
         <>
           <div style={{ fontSize: 13.5, color: 'var(--tm)', fontWeight: 500 }}>{label}</div>
-          <div className="num" style={{ fontSize: 38, fontWeight: 700, color, lineHeight: 1.05, letterSpacing: '-0.02em' }}>
+          <div className="num" style={{ fontSize: 'var(--fs-hero)', fontWeight: 700, color, lineHeight: 1.02, letterSpacing: '-0.03em' }}>
             {freeFlow < 0 ? '−' : ''}{sym}<CountUp value={Math.abs(freeFlow)} format={(v) => Math.round(v).toLocaleString(moneyLocale())} />
           </div>
           <div style={{ fontSize: 11.5, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: 2 }}>{sub}</div>

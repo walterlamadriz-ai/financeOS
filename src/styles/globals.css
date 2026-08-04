@@ -1,5 +1,6 @@
 /* src/styles/globals.css */
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+/* Las fuentes ahora se cargan de forma NO bloqueante desde index.html
+   (preconnect + preload + swap media=print). El @import bloqueaba el render. */
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -51,6 +52,7 @@
   --fs-xl:     22px;
   --fs-2xl:    28px;
   --fs-3xl:    36px;   /* números hero / display */
+  --fs-hero:   clamp(42px, 9vw, 54px);   /* veredicto/cifra protagonista — autoridad tipo referencia premium */
   /* Espaciado (ritmo de 4px) */
   --sp-1:      4px;
   --sp-2:      8px;
