@@ -15,6 +15,7 @@ import { projectEndOfMonth } from '../../utils/projection.js'
 import CountUp from '../../components/CountUp.jsx'
 import LivingRing from '../../components/LivingRing.jsx'
 import MonthVerdict from './MonthVerdict.jsx'
+import CountryTool from './CountryTool.jsx'
 import { moneyLocale } from '../../utils/index.js'
 
 const fmt  = (n) => (Number(n) || 0).toLocaleString(moneyLocale(), { maximumFractionDigits: 0 })
@@ -512,6 +513,9 @@ export default function Dashboard({ setPage }) {
           </div>
         )
       })()}
+
+      {/* #03 — Herramienta fiscal del país como protagonista (el foso competitivo). */}
+      <CountryTool country={settings.country} setPage={setPage} />
 
       {/* Empieza aquí */}
       {setPage && kpis.incCount === 0 && kpis.expCount === 0 && (
