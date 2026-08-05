@@ -277,16 +277,41 @@ export function validateRows(rows, mapping, config) {
   })
 }
 
+// Días entre dos fechas ISO (yyyy-mm-dd), en valor absoluto. Devuelve Infinity
+// si alguna no parsea, para que nunca cuente como "cercano" por error.
+function daysApart(a, b) {
+  const ta = Date.parse(a + 'T00:00:00'), tb = Date.parse(b + 'T00:00:00')
+  if (isNaN(ta) || isNaN(tb)) return Infinity
+  return Math.abs(ta - tb) / 86400000
+}
+
 export function detectDuplicates(validatedRows, existingRecords) {
-  const existingKeys = new Set(existingRecords.map(r => `${r.date}|${(r.description||r.concept||'').toLowerCase().trim()}|${Math.round((r.amount||0)*100)}`))
+  // Índice exacto (fecha|descripción|monto) + índice por monto → fechas, para
+  // detectar POSIBLES duplicados aunque la descripción difiera (cartola vs
+  // registro manual): mismo monto y fecha ±2 días. Sirve para "limpiar el mes".
+  const existingKeys = new Set()
+  const byAmount = new Map() // monto(centavos) → [fechas ISO]
+  for (const r of existingRecords) {
+    const cents = Math.round((r.amount || 0) * 100)
+    existingKeys.add(`${r.date}|${(r.description || r.concept || '').toLowerCase().trim()}|${cents}`)
+    if (!byAmount.has(cents)) byAmount.set(cents, [])
+    byAmount.get(cents).push(r.date)
+  }
   const batchKeys = new Set()
   return validatedRows.map(row => {
     if (row.status === 'error') return row
-    const key = `${row.date}|${row.description.toLowerCase().trim()}|${Math.round(row.amount*100)}`
+    const cents = Math.round(row.amount * 100)
+    const key = `${row.date}|${row.description.toLowerCase().trim()}|${cents}`
     const isDuplicateExternal = existingKeys.has(key)
     const isDuplicateBatch = batchKeys.has(key)
     batchKeys.add(key)
-    return { ...row, status: (isDuplicateExternal || isDuplicateBatch) ? 'duplicate' : 'valid', isDuplicateExternal, isDuplicateBatch }
+    // Posible duplicado: mismo monto y fecha ±2 días (descripción distinta).
+    let isProbableDuplicate = false
+    if (!isDuplicateExternal && byAmount.has(cents)) {
+      isProbableDuplicate = byAmount.get(cents).some(d => daysApart(d, row.date) <= 2)
+    }
+    const isDup = isDuplicateExternal || isDuplicateBatch || isProbableDuplicate
+    return { ...row, status: isDup ? 'duplicate' : 'valid', isDuplicateExternal, isDuplicateBatch, isProbableDuplicate }
   })
 }
 

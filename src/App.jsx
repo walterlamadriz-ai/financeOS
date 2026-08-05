@@ -91,7 +91,7 @@ function Inner() {
       case 'inflacion':     return <Inflacion />
       case 'multimoneda':   return <Multimoneda />
       case 'movements':     return <Movements setPage={setPage}/>
-      case 'import':        return <ImportCSV />
+      case 'import':        return <ImportCSV setPage={setPage} />
       default:              return <Dashboard setPage={setPage}/>
     }
   }

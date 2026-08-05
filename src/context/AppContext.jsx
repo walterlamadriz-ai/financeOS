@@ -497,6 +497,7 @@ export function AppProvider({ children }) {
     exportData, exportCSV,  importData,
     enableSync, disableSync,
     showToast, dismissToast, deleteWithUndo,
+    rehydrate,
   }
 
 

@@ -4,6 +4,7 @@
 
 import { useState, useCallback, useMemo } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
+import { markLocalChange } from '../../core/sync.js'
 import { useT } from '../../i18n/useT.js'
 import { dbGetAll, dbAdd } from '../../core/db/index.js'
 import { uid, moneyLocale } from '../../utils/index.js'
@@ -73,8 +74,8 @@ const s = {
 const STEPS = ['imp.step.upload', 'imp.step.map', 'imp.step.review', 'imp.step.import']
 const fmt = (n) => (n || 0).toLocaleString(moneyLocale(), { maximumFractionDigits: 0 })
 
-export default function ImportMovements() {
-  const { settings } = useApp()
+export default function ImportMovements({ setPage } = {}) {
+  const { settings, rehydrate } = useApp()
   const { t } = useT()
   const sym = { CLP:'$', USD:'US$', EUR:'€', VES:'Bs.', MXN:'$', ARS:'$', COP:'$' }[settings?.currency] || '$'
   const isDemo = !!settings?.isDemo
@@ -161,7 +162,10 @@ export default function ImportMovements() {
       existing = [...(inc || []), ...(exp || [])]
     }
     const withDupes = detectDuplicates(validated, existing)
-    setRows(withDupes.map(r => ({ ...r, _include: r.status !== 'error' })))
+    // Por defecto solo se incluyen los NUEVOS (status 'valid'). Duplicados y
+    // posibles duplicados quedan desmarcados para no re-duplicar el mes; el
+    // usuario puede incluirlos con un clic si quiere.
+    setRows(withDupes.map(r => ({ ...r, _include: r.status === 'valid' })))
     setStep(2)
   }
 
@@ -196,6 +200,13 @@ export default function ImportMovements() {
       try { await dbAdd('importBatches', batch) } catch {}
       try { localStorage.setItem('fos_recent_import', JSON.stringify(batch)) } catch {}
       setHistory(prev => [batch, ...prev])
+      // P0 — reflejar lo importado en TODA la app al instante (antes solo quedaba
+      // en IndexedDB y no se veía hasta recargar) y marcar el cambio para que el
+      // sync lo suba a la nube.
+      if (ok > 0) {
+        try { await rehydrate() } catch {}
+        try { markLocalChange() } catch {}
+      }
       if (fail > 0 && ok === 0) { setWarning(t('imp.err.partial', { ok, total, fail })); return }
       if (fail > 0) setWarning(t('imp.err.partial', { ok, total, fail }))
       setResult(batch)
@@ -538,7 +549,12 @@ export default function ImportMovements() {
                 <div style={s.summaryItem}><div style={s.summaryLabel}>{t('imp.history.skipped')}</div><div style={{ ...s.summaryVal, color: 'var(--th)', fontSize: 14 }}>{(result?.skippedRows||0)+(result?.duplicateRows||0)}</div></div>
               </div>
               <p style={{ fontSize: 13, color: 'var(--th)', fontFamily: 'var(--mono)', marginBottom: 16 }}>{t('imp.done.visible')}</p>
-              <button style={{ ...s.btn, ...s.btnPrimary }} onClick={reset}>{t('imp.done.again')}</button>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+                {setPage && (
+                  <button style={{ ...s.btn, ...s.btnPrimary }} onClick={() => setPage('dashboard')}>{t('imp.done.goDashboard')}</button>
+                )}
+                <button style={{ ...s.btn, ...(setPage ? {} : s.btnPrimary) }} onClick={reset}>{t('imp.done.again')}</button>
+              </div>
             </div>
           )}
         </div>
