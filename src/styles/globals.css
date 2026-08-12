@@ -38,7 +38,12 @@
   --cat-1:#2563a8; --cat-2:#0a9d7e; --cat-3:#c2721a; --cat-4:#a03e6b;
   --cat-5:#6b4fbb; --cat-6:#3a8c5a; --cat-7:#b23b3b; --cat-8:#4a8ca8;
   --sans:      'Instrument Sans', sans-serif;
-  --display:   'Space Grotesk', 'Instrument Sans', sans-serif; /* jerarquía con carácter */
+  /* Misma display que la landing: Archivo variable en ancho Y peso. Que app y
+     landing compartan la display es lo que hace que se lean como un producto. */
+  --display:   'Archivo', 'Instrument Sans', sans-serif;
+  /* Ejes de Archivo: font-weight solo no pide el ancho, hay que declararlo. */
+  --vf-hero:   'wdth' 84, 'wght' 850;   /* cifra protagonista */
+  --vf-head:   'wdth' 88, 'wght' 780;   /* titulos de seccion */
   --mono:      'JetBrains Mono', monospace;
   --r:         8px;
   --rl:        12px;
@@ -156,11 +161,17 @@ button { cursor: pointer; font-family: var(--sans); }
 .card-hover:hover { box-shadow: var(--sh-2); transform: translateY(-1px); }
 
 /* Tipografía display — jerarquía con carácter (títulos, no cuerpo). */
-.display { font-family: var(--display); letter-spacing: -0.02em; }
+.display { font-family: var(--display); font-variation-settings: var(--vf-head); letter-spacing: -0.025em; }
 
-/* Números grandes: Space Grotesk tiene cifras tabulares con más presencia que
-   el mono para los montos hero, sin el aire "terminal". */
-.num { font-family: var(--display); font-feature-settings: 'tnum' 1; letter-spacing: -0.01em; }
+/* Números grandes: Archivo condensado da cifras tabulares con mas presencia que
+   el mono para los montos hero, sin el aire "terminal", y ademas ocupan menos
+   ancho — que es lo que permite que un monto largo no rompa la tarjeta.
+   'tnum' se mantiene para que las cifras alineen en columna. */
+.num { font-family: var(--display); font-variation-settings: var(--vf-head);
+       font-feature-settings: 'tnum' 1; letter-spacing: -0.02em; }
+/* La cifra protagonista (veredicto del mes) pide el eje mas pesado. */
+.num-hero { font-family: var(--display); font-variation-settings: var(--vf-hero);
+       font-feature-settings: 'tnum' 1; letter-spacing: -0.03em; }
 
 /* Entrada suave — para escalonar la aparición de tarjetas (Ronda 3 la explota). */
 @keyframes fos-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
