@@ -17,17 +17,20 @@ export default function Settings() {
   const { t } = useT()
   const [installPrompt, setInstallPrompt] = useState(null)
   const [installed, setInstalled] = useState(false)
+  const isIOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream
+  const isStandalone = typeof window !== 'undefined' && (window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true)
 
   useEffect(() => {
     function onBeforeInstall(e) { e.preventDefault(); setInstallPrompt(e) }
     function onAppInstalled() { setInstalled(true); setInstallPrompt(null) }
     window.addEventListener('beforeinstallprompt', onBeforeInstall)
     window.addEventListener('appinstalled', onAppInstalled)
+    if (isStandalone) setInstalled(true)
     return () => {
       window.removeEventListener('beforeinstallprompt', onBeforeInstall)
       window.removeEventListener('appinstalled', onAppInstalled)
     }
-  }, [])
+  }, [isStandalone])
 
   async function handleInstall() {
     if (!installPrompt) return
@@ -215,19 +218,22 @@ export default function Settings() {
           <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',marginTop:4}}>🔒 Datos 100% privados · sin telemetría · sin cookies de seguimiento</div>
         </div>
       </Card>
-      {(installPrompt || installed) && (
+      {(installPrompt || installed || (isIOS && !isStandalone)) && (
         <Card>
           <CardHeader title={t('settings.install.title')} />
           <div style={{...srow, borderBottom:'none'}}>
             <div>
               <div style={slbl}>{installed ? t('settings.install.installed.label') : t('settings.install.pending.label')}</div>
-              <div style={ssub}>{installed ? t('settings.install.installed.sub') : t('settings.install.pending.sub')}</div>
+              <div style={ssub}>
+                {installed ? t('settings.install.installed.sub')
+                  : isIOS ? 'En Safari: tocá el ícono de compartir ⬆ → "Añadir a pantalla de inicio".'
+                  : t('settings.install.pending.sub')}
+              </div>
             </div>
-            {!installed && <Btn variant="ghost" size="sm" onClick={handleInstall}>{t('settings.install.btn')}</Btn>}
+            {!installed && !isIOS && <Btn variant="ghost" size="sm" onClick={handleInstall}>{t('settings.install.btn')}</Btn>}
           </div>
         </Card>
       )}
-      <BackupWarning />
       <div style={{padding:'10px 12px',background:'var(--sur2)',borderRadius:'var(--r)',border:'0.5px solid var(--brd)',fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',lineHeight:1.7,marginTop:8}}>
         FinanceOS v1.5 · MAXNOVA & LUCI Global LLC · Datos locales · Sin servidor · No asesoría financiera certificada
       </div>
