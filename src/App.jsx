@@ -30,6 +30,8 @@ const PPRPage       = lazy(() => import('./pages/PPR/index.jsx'))
 const Deducciones   = lazy(() => import('./pages/Deducciones/index.jsx'))
 const AhorroFiscal  = lazy(() => import('./pages/AhorroFiscal/index.jsx'))
 const Inflacion     = lazy(() => import('./pages/Inflacion/index.jsx'))
+const ResicoMX      = lazy(() => import('./pages/ResicoMX/index.jsx'))
+const MultiDolarAR  = lazy(() => import('./pages/MultiDolarAR/index.jsx'))
 const Multimoneda   = lazy(() => import('./pages/Multimoneda/index.jsx'))
 const Steuer        = lazy(() => import('./pages/Steuer/index.jsx'))
 const ImportCSV     = lazy(() => import('./pages/Import/index.jsx'))
@@ -92,6 +94,8 @@ function Inner() {
       case 'deducciones':   return <Deducciones />
       case 'ahorrofiscal':  return <AhorroFiscal />
       case 'inflacion':     return <Inflacion />
+      case 'resico':        return <ResicoMX />
+      case 'multidolar':    return <MultiDolarAR />
       case 'multimoneda':   return <Multimoneda />
       case 'steuer':        return <Steuer />
       case 'movements':     return <Movements setPage={setPage}/>
