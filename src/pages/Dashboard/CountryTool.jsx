@@ -8,7 +8,7 @@ import { useT } from '../../i18n/useT.js'
 
 // País → herramienta fiscal (mismo mapa que la nav en Shell.jsx).
 const TOOL_BY_COUNTRY = {
-  CL: { id: 'apv',          flag: '🇨🇱', nameKey: 'nav.apvChile' },
+  CL: { id: 'hipoteca',     flag: '🇨🇱', nameKey: 'nav.hipotecaCL' },
   PT: { id: 'ppr',          flag: '🇵🇹', nameKey: 'nav.pprPortugal' },
   EC: { id: 'deducciones',  flag: '🇪🇨', nameKey: 'nav.deductions' },
   PE: { id: 'deducciones',  flag: '🇵🇪', nameKey: 'nav.deductions' },

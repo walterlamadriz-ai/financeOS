@@ -23,6 +23,7 @@ const NAV = [
   // #06 — "Tu país" como sección propia: eleva el diferenciador fiscal por país
   // (antes estaba diluido dentro de Planificación) y de-satura esa sección.
   { sec: 'nav.sec.country', items: [
+    { id: 'hipoteca', ic: '🇨🇱', cc: 'CL', lb: 'nav.hipotecaCL', countries: ['CL'] },
     { id: 'apv',     ic: '🇨🇱', cc: 'CL', lb: 'nav.apvChile', countries: ['CL'] },
     { id: 'ppr',     ic: '🇵🇹', cc: 'PT', lb: 'nav.pprPortugal', countries: ['PT'] },
     { id: 'deducciones', ic: '⊟', lb: 'nav.deductions', countries: ['EC', 'PE'] },

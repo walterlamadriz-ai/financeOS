@@ -4,6 +4,7 @@
 
 const CANASTA_BASICA = 821.80     // USD · canasta básica familiar enero 2026 (SRI)
 const TASA_REBAJA    = 0.18       // rebaja = 18% × min(gastos, N canastas)
+const SBU_2026        = 482       // USD · Salario Básico Unificado 2026 (MDT-2025-195, vigente ene-2026)
 
 // N canastas según cargas familiares — TABLA OFICIAL SRI 2026 (verificada 2026-07-11):
 // 0→7 · 1→9 · 2→11 · 3→14 · 4→17 · 5+→20. Enfermedades catastróficas/raras: 100
@@ -32,6 +33,29 @@ export default {
   categorias: CATEGORIAS,
   needsIngreso: false,
   extraInput: { key: 'cargas', label: 'Cargas familiares', type: 'select', options: [0, 1, 2, 3, 4, 5], default: 0 },
+
+  // Décimos — ingreso extra garantizado por ley, dos picos de intención al año.
+  eventos: {
+    titulo: 'Décimo tercero y cuarto',
+    sub: 'Sueldos adicionales que la ley te garantiza — dos fechas fijas al año',
+    sueldoLabel: 'Sueldo mensual (USD)',
+    items: [
+      {
+        key: 'decimo3',
+        label: 'Décimo Tercero (bono navideño)',
+        when: 'Se paga hasta el 24 de diciembre',
+        calc: (sueldoMensual) => Number(sueldoMensual) || 0,
+        info: 'Un sueldo completo, dividido entre los 12 meses trabajados del año.',
+      },
+      {
+        key: 'decimo4',
+        label: 'Décimo Cuarto',
+        when: 'Costa y Galápagos: hasta 15 marzo · Sierra, Amazonía y Oriente: hasta 15 agosto',
+        calc: () => SBU_2026,
+        info: `Un Salario Básico Unificado fijo ($${SBU_2026}), sin importar tu sueldo real.`,
+      },
+    ],
+  },
 
   calcular({ gastosPorCat = {}, cargas = 0 }) {
     const totalGastos = Object.values(gastosPorCat).reduce((s, v) => s + (Number(v) || 0), 0)

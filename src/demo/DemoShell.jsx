@@ -24,6 +24,7 @@ const Advisor       = lazy(() => import('../pages/Advisor/index.jsx'))
 const Subscriptions = lazy(() => import('../pages/Subscriptions/index.jsx'))
 const Coach         = lazy(() => import('../pages/Coach/index.jsx'))
 const APVPage       = lazy(() => import('../pages/APV/index.jsx'))
+const HipotecaUF    = lazy(() => import('../pages/HipotecaUF/index.jsx'))
 const PPRPage       = lazy(() => import('../pages/PPR/index.jsx'))
 const Deducciones   = lazy(() => import('../pages/Deducciones/index.jsx'))
 const AhorroFiscal  = lazy(() => import('../pages/AhorroFiscal/index.jsx'))
@@ -137,6 +138,7 @@ function DemoInner() {
       case 'subscriptions': return <Subscriptions />
       case 'coach':         return <Coach />
       case 'apv':           return <APVPage />
+      case 'hipoteca':      return <HipotecaUF />
       case 'ppr':           return <PPRPage />
       case 'deducciones':   return <Deducciones />
       case 'ahorrofiscal':  return <AhorroFiscal />

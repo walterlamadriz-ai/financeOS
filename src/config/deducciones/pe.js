@@ -47,6 +47,39 @@ export default {
   ingresoLabel: 'Ingreso anual bruto (S/)',
   extraInput: null,
 
+  // Gratificación + CTS — cuatro fechas fijas al año (jul/dic + may/nov), el pico
+  // de intención financiera más grande del calendario peruano.
+  eventos: {
+    titulo: 'Gratificación y CTS',
+    sub: 'Tus dos beneficios sociales garantizados — cuatro fechas fijas al año',
+    sueldoLabel: 'Sueldo mensual bruto (S/)',
+    extraField: { key: 'mesesTrabajados', label: 'Meses trabajados en el semestre', options: [1, 2, 3, 4, 5, 6], default: 6 },
+    regimenField: { key: 'regimen', label: 'Régimen de salud', options: [{ v: 'essalud', l: 'EsSalud (9%)' }, { v: 'eps', l: 'EPS (6.75%)' }], default: 'essalud' },
+    items: [
+      {
+        key: 'gratificacion',
+        label: 'Gratificación',
+        when: 'Se paga hasta el 15 de julio y el 15 de diciembre',
+        calc: (sueldoMensual, meses, regimen) => {
+          const base = (Number(sueldoMensual) || 0) * (Number(meses) || 6) / 6
+          const bono = base * (regimen === 'eps' ? 0.0675 : 0.09)
+          return base + bono
+        },
+        info: '(sueldo × meses trabajados / 6) + bonificación extraordinaria — la ley te la da libre de descuento previsional.',
+      },
+      {
+        key: 'cts',
+        label: 'CTS (depósito bancario)',
+        when: 'Se deposita hasta el 15 de mayo y el 15 de noviembre',
+        calc: (sueldoMensual, meses) => {
+          const grati6 = (Number(sueldoMensual) || 0) / 6
+          return (((Number(sueldoMensual) || 0) + grati6) / 12) * (Number(meses) || 6)
+        },
+        info: '(sueldo + 1/6 de gratificación) / 12 × meses trabajados — es tuyo, pero queda depositado como colchón de desempleo.',
+      },
+    ],
+  },
+
   calcular({ gastosPorCat = {}, ingresoAnual = 0 }) {
     const desglose = CATEGORIAS.map(c => {
       const monto = Number(gastosPorCat[c.key]) || 0

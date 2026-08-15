@@ -154,7 +154,67 @@ export default function Deducciones() {
             </div>
           </Card>
         )}
+
+        {config.eventos && <EventosCard config={config} fmt={fmt} />}
       </div>
     </ProGate>
+  )
+}
+
+// Tarjeta genérica de "ingresos extra estacionales" (décimos, gratificación, CTS…).
+// Config-driven igual que el resto: cada país declara sus items y su fórmula.
+function EventosCard({ config, fmt }) {
+  const ev = config.eventos
+  const [sueldo, setSueldo] = useState('')
+  const [extra, setExtra] = useState(ev.extraField?.default ?? '')
+  const [regimen, setRegimen] = useState(ev.regimenField?.default ?? '')
+
+  const s = Number(sueldo) || 0
+
+  return (
+    <Card>
+      <CardHeader title={ev.titulo} />
+      <div style={{ fontSize: 12, color: 'var(--tm)', lineHeight: 1.6, marginBottom: 14 }}>{ev.sub}</div>
+
+      <FormRow>
+        <FormGroup label={ev.sueldoLabel}>
+          <input type="number" inputMode="decimal" min="0" value={sueldo} placeholder="0"
+            onChange={e => setSueldo(e.target.value)} />
+        </FormGroup>
+        {ev.extraField && (
+          <FormGroup label={ev.extraField.label}>
+            <select value={extra} onChange={e => setExtra(e.target.value)}>
+              {ev.extraField.options.map(o => <option key={o} value={o}>{o}</option>)}
+            </select>
+          </FormGroup>
+        )}
+      </FormRow>
+
+      {ev.regimenField && (
+        <FormRow>
+          <FormGroup label={ev.regimenField.label}>
+            <select value={regimen} onChange={e => setRegimen(e.target.value)}>
+              {ev.regimenField.options.map(o => <option key={o.v} value={o.v}>{o.l}</option>)}
+            </select>
+          </FormGroup>
+        </FormRow>
+      )}
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, marginTop: 16 }}>
+        {ev.items.map(item => {
+          const monto = s > 0 ? item.calc(s, extra, regimen) : 0
+          return (
+            <div key={item.key} style={{ background: 'var(--sur2)', border: '.5px solid var(--brd)', borderRadius: 'var(--r)', padding: '14px 16px' }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx)', marginBottom: 2 }}>{item.label}</div>
+              <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--th)', marginBottom: 10 }}>{item.when}</div>
+              <div style={{ fontFamily: 'var(--mono)', fontSize: 24, fontWeight: 700, color: 'var(--accent)', lineHeight: 1 }}>
+                {fmt(monto)}
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--tm)', marginTop: 8, lineHeight: 1.5 }}>{item.info}</div>
+            </div>
+          )
+        })}
+      </div>
+    </Card>
   )
 }
