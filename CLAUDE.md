@@ -29,7 +29,7 @@ El navegador integrado tiene bloqueado `*.financeospro.com` por política: verif
 
 ## Reglas que no son negociables
 
-**Paridad i18n.** `src/i18n/translations.js` tiene `es`, `en` y `pt`. Toda clave nueva va en los tres. Una clave que falta no rompe el build: se muestra el identificador crudo en pantalla.
+**Paridad i18n.** `src/i18n/translations.js` tiene `es`, `en`, `pt` y `de` (1161 claves por idioma al 2026-08-14). Toda clave nueva va en los CUATRO. Una clave que falta no rompe el build pero cae al fallback español (ver `useT.js`) — el usuario alemán ve una isla en su UI.
 
 **`DB_VERSION` en `src/core/db/index.js`.** Está en 2. Subirlo obliga a escribir la migración; cambiarlo sin migración deja a los usuarios existentes con la base rota. No tocar a la ligera.
 
@@ -59,5 +59,32 @@ Si el sistema visual cambia aquí, cambia también en `../financeos-landing` (co
 - `src/core/db/index.js` — `DB_VERSION` y migraciones
 - `src/utils/licenseValidator.js` — formato `FNOS-XXXX-XXXX-XXXX`
 - `src/utils/taxCalcCL.js` — UTM de Chile hardcodeada, se queda vieja
+- `src/utils/taxCalcDE.js` — Beitragsbemessungsgrenze DE + Grundfreibetrag hardcodeados
 - `src/utils/apvCalc.js` — fórmula de valor futuro
 - `docs/novedades.html` — histórico, preservar
+
+## Convenciones sensibles al no violar
+
+**Checkbox: siempre con `style={{width:16, height:16, flexShrink:0}}`.** La regla global `input { width:100% }` en `globals.css` aplica también a checkboxes; sin este override el checkbox ocupa el ancho completo del contenedor flex y empuja el texto lejos. Ver `Debts/Income/Movements/Steuer`.
+
+**Agregar un país nuevo requiere tocar SIETE lugares:**
+1. `Onboarding.jsx` — array `COUNTRIES`
+2. `Settings/index.jsx` — `<option>` hardcoded (~L82)
+3. `Dashboard/CountryTool.jsx` — map `TOOL_BY_COUNTRY`
+4. `layout/Shell.jsx` — entry con `countries: ['XX']`
+5. `App.jsx` + `demo/DemoShell.jsx` — lazy import + case
+6. Página `pages/<Tool>/index.jsx` — usando `useT()` para todos los textos
+7. `i18n/translations.js` — claves en los 4 idiomas
+
+**Agregar un idioma nuevo requiere:**
+1. Bloque nuevo `<code>: { ... }` en `translations.js` con paridad completa
+2. `SUPPORTED_LANGUAGES` al final del archivo
+3. `<option>` en `Settings/index.jsx` (~L74)
+4. `LANGUAGES` array en `Onboarding.jsx` (~L39)
+
+**Textos hardcoded en JSX = bug.** Si escribís `<div>Título</div>`, el usuario que cambie idioma va a ver solo esa isla en español. Todo texto visible debe pasar por `useT()` con `t('key')`. Aplica también a `label`/`placeholder`/`title`/`aria-*`.
+
+## Gotchas de deploy y verificación
+
+- **Service worker cachea agresivamente**. Post-deploy, para verificar cambios: `navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()))` + `caches.keys().then(ks => ks.forEach(k => caches.delete(k)))` + hard reload.
+- **`~/Documents/.claude/launch.json`** es la config raíz de preview servers (fuera del repo). Si la ruta canónica del repo cambia, ese archivo también.
