@@ -36,7 +36,7 @@ export default function CountryTool({ country, setPage }) {
         width: '100%', textAlign: 'left', cursor: 'pointer',
         display: 'flex', alignItems: 'center', gap: 16,
         padding: '16px 18px', marginBottom: 16,
-        background: 'var(--grn-tint)', borderLeft: '3px solid var(--grn)',
+        background: 'var(--grn-tint)', border: '.5px solid color-mix(in srgb, var(--grn) 35%, transparent)',
       }}
     >
       <span style={{ fontSize: 30, lineHeight: 1, flexShrink: 0 }} aria-hidden="true">{tool.flag}</span>

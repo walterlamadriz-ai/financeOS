@@ -119,13 +119,13 @@ export default function HipotecaUF() {
             </FormRow>
             {impactoPrepago.mesesAhorrados > 0 && (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 8 }}>
-                <div style={{ background: 'var(--grn-tint)', borderLeft: '3px solid var(--grn)', borderRadius: 'var(--r)', padding: '12px 14px' }}>
+                <div style={{ background: 'var(--grn-tint)', border: '.5px solid color-mix(in srgb, var(--grn) 35%, transparent)', borderRadius: 'var(--r)', padding: '12px 14px' }}>
                   <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--th)', marginBottom: 4 }}>ACORTAS TU CRÉDITO EN</div>
                   <div style={{ fontFamily: 'var(--mono)', fontSize: 20, fontWeight: 700, color: 'var(--grn)' }}>
                     {Math.floor(impactoPrepago.mesesAhorrados / 12)} años {impactoPrepago.mesesAhorrados % 12} meses
                   </div>
                 </div>
-                <div style={{ background: 'var(--grn-tint)', borderLeft: '3px solid var(--grn)', borderRadius: 'var(--r)', padding: '12px 14px' }}>
+                <div style={{ background: 'var(--grn-tint)', border: '.5px solid color-mix(in srgb, var(--grn) 35%, transparent)', borderRadius: 'var(--r)', padding: '12px 14px' }}>
                   <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--th)', marginBottom: 4 }}>AHORRAS EN INTERÉS</div>
                   <div style={{ fontFamily: 'var(--mono)', fontSize: 20, fontWeight: 700, color: 'var(--grn)' }}>
                     {fmtUF(impactoPrepago.interesesAhorradosUF)}{uf && <span style={{ fontSize: 12, fontWeight: 400 }}> · {fmtCLP(impactoPrepago.interesesAhorradosUF * uf)}</span>}
