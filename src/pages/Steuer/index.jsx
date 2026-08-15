@@ -10,12 +10,25 @@
 import { useState, useMemo } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
 import { useT } from '../../i18n/useT.js'
-import { Card, CardHeader, FormRow, FormGroup, ProgressBar, Alert, PageHeader } from '../../components/ui/index.jsx'
+import { Card, CardHeader, FormRow, FormGroup, ProgressBar, Alert, PageHeader, Btn } from '../../components/ui/index.jsx'
 import ProGate from '../../components/ui/ProGate.jsx'
 import { calcDescuentosDE, BUNDESLAENDER } from '../../utils/taxCalcDE.js'
 import { getDeduccionesConfig, autofillGastos } from '../../utils/deduccionesEngine.js'
 
 const fmtEUR = (n) => `€${(Number(n) || 0).toLocaleString('de-DE', { maximumFractionDigits: 0 })}`
+
+// Mapeo categoría interna → sección de la Anlage N (declaración Elster).
+// Los NOMBRES de sección son estables; los números de Zeile cambian de año
+// a año y de formulario a formulario — por eso no se citan aquí. Es lo que
+// un alemán normalmente paga a WISO/Taxfix (€30-70/año) por generar: un
+// resumen ya categorizado, listo para ubicar en Elster por nombre.
+const ELSTER_SECCIONES = {
+  pendler: 'Wege zwischen Wohnung und erster Tätigkeitsstätte (Entfernungspauschale)',
+  homeoffice: 'Homeoffice-Pauschale',
+  fortbildung: 'Aufwendungen für Fortbildung',
+  arbeitsmittel: 'Arbeitsmittel',
+  bewerbung: 'Bewerbungskosten',
+}
 
 export default function Steuer() {
   const { settings, expenses } = useApp()
@@ -228,7 +241,73 @@ function WerbungskostenCard({ expenses, settings }) {
             </div>
           ))}
         </div>
+
+        <ElsterExport desglose={result.desglose} year={year} t={t} />
       </div>
     </Card>
+  )
+}
+
+// Genera un resumen de texto listo para transcribir a Elster — el "producto"
+// que WISO/Taxfix cobran €30-70/año por entregar. Solo formatea lo que el
+// desglose ya calculó, sin lógica fiscal nueva. Nombres de sección estables;
+// los números de Zeile de Elster cambian por año/versión de formulario, así
+// que no se citan (buscar por nombre dentro de Elster es más fiable).
+function ElsterExport({ desglose, year, t }) {
+  const [abierto, setAbierto] = useState(false)
+  const [copiado, setCopiado] = useState(false)
+
+  const lineas = desglose.filter(d => d.monto > 0)
+  const total = lineas.reduce((s, d) => s + d.monto, 0)
+
+  const texto = [
+    `Werbungskosten ${year} — resumen para Elster (Anlage N)`,
+    '',
+    ...lineas.map(d => `${ELSTER_SECCIONES[d.key]}: ${fmtEUR(d.monto)}`),
+    '',
+    `Total Werbungskosten: ${fmtEUR(total)}`,
+    '',
+    'Generado con FinanceOS — verificar cifras antes de declarar.',
+  ].join('\n')
+
+  async function copiar() {
+    try {
+      await navigator.clipboard.writeText(texto)
+      setCopiado(true)
+      setTimeout(() => setCopiado(false), 2000)
+    } catch {}
+  }
+
+  function descargar() {
+    const blob = new Blob([texto], { type: 'text/plain;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `werbungskosten-${year}.txt`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  if (lineas.length === 0) return null
+
+  return (
+    <div style={{ marginTop: 16, borderTop: '.5px solid var(--brd)', paddingTop: 12 }}>
+      <Btn variant="ghost" size="sm" onClick={() => setAbierto(o => !o)}>
+        {abierto ? '▾' : '▸'} Exportar resumen para Elster
+      </Btn>
+      {abierto && (
+        <div style={{ marginTop: 10 }}>
+          <pre style={{
+            fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--tx)', background: 'var(--sur2)',
+            border: '.5px solid var(--brd)', borderRadius: 'var(--r)', padding: '12px 14px',
+            whiteSpace: 'pre-wrap', lineHeight: 1.6, marginBottom: 8,
+          }}>{texto}</pre>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Btn variant="ghost" size="sm" onClick={copiar}>{copiado ? '✓ Copiado' : 'Copiar'}</Btn>
+            <Btn variant="ghost" size="sm" onClick={descargar}>Descargar .txt</Btn>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
