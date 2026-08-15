@@ -117,13 +117,14 @@ export default function Settings() {
             style={{
               width:44, height:24, borderRadius:12, position:'relative', flexShrink:0, cursor:'pointer',
               background: settings.showDualCurrency ? 'var(--grn)' : 'var(--brd2)',
-              border: 'none', transition:'.2s', padding:0,
+              border: 'none', transition:'background .2s', padding:0,
             }}
           >
             <span style={{
-              position:'absolute', top:3, left: settings.showDualCurrency ? 23 : 3,
-              width:18, height:18, borderRadius:'50%', background:'#fff', transition:'.2s',
-              display:'block',
+              position:'absolute', top:3, left:3,
+              width:18, height:18, borderRadius:'50%', background:'#fff',
+              transform: settings.showDualCurrency ? 'translateX(20px)' : 'translateX(0)',
+              transition:'transform .2s', display:'block',
             }}/>
           </button>
         </div>
