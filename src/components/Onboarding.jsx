@@ -260,6 +260,7 @@ export default function Onboarding({ onComplete }) {
     { code: 'US',    flag: '🇺🇸', label: 'Estados Unidos', currency: 'USD' },
     { code: 'ES',    flag: '🇪🇸', label: 'España',          currency: 'EUR' },
     { code: 'PT',    flag: '🇵🇹', label: 'Portugal',        currency: 'EUR' },
+    { code: 'DE',    flag: '🇩🇪', label: 'Alemania',        currency: 'EUR' },
     { code: 'OTHER', flag: '🌎', label: 'Otro',            currency: 'USD' },
   ]
   if (step === 3) return (
@@ -286,6 +287,11 @@ export default function Onboarding({ onComplete }) {
       {answers.country === 'CL' && (
         <div style={{ padding: '8px 10px', background: 'var(--grn-bg)', borderRadius: 8, border: '0.5px solid rgba(26,163,104,.2)', fontSize: 10, color: 'var(--grn)', fontFamily: 'var(--mono)', marginBottom: 10 }}>
           {t('onboarding.country.chileHint')}
+        </div>
+      )}
+      {answers.country === 'DE' && (
+        <div style={{ padding: '8px 10px', background: 'var(--grn-bg)', borderRadius: 8, border: '0.5px solid rgba(26,163,104,.2)', fontSize: 10, color: 'var(--grn)', fontFamily: 'var(--mono)', marginBottom: 10 }}>
+          {t('onboarding.country.germanyHint')}
         </div>
       )}
       <div style={{ display: 'flex', gap: 7, marginTop: 4 }}>

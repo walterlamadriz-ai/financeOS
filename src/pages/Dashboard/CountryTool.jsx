@@ -18,6 +18,7 @@ const TOOL_BY_COUNTRY = {
   ES: { id: 'ahorrofiscal', flag: '🇪🇸', nameKey: 'nav.taxSavings' },
   AR: { id: 'inflacion',    flag: '🇦🇷', nameKey: 'nav.inflation' },
   VE: { id: 'multimoneda',  flag: '🇻🇪', nameKey: 'nav.multicurrency' },
+  DE: { id: 'steuer',       flag: '🇩🇪', nameKey: 'nav.steuerDE' },
 }
 
 export default function CountryTool({ country, setPage }) {

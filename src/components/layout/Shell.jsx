@@ -29,6 +29,7 @@ const NAV = [
     { id: 'ahorrofiscal', ic: '⊡', lb: 'nav.taxSavings', countries: ['MX', 'CO', 'US', 'ES'] },
     { id: 'inflacion',   ic: '↗', lb: 'nav.inflation', countries: ['AR'] },
     { id: 'multimoneda', ic: '⇄', lb: 'nav.multicurrency', countries: ['VE'] },
+    { id: 'steuer',      ic: '🇩🇪', cc: 'DE', lb: 'nav.steuerDE', countries: ['DE'] },
   ] },
   { sec: 'nav.sec.planning', items: [
     { id: 'budgets', ic: '▤', lb: 'nav.budgets' },

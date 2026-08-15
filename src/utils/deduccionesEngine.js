@@ -36,8 +36,9 @@ export function calcDeducciones(config, inputs) {
 // Registro de configs disponibles (clave = código de país en mayúsculas)
 import ec from '../config/deducciones/ec.js'
 import pe from '../config/deducciones/pe.js'
+import de from '../config/deducciones/de.js'
 
-const REGISTRY = { EC: ec, PE: pe }
+const REGISTRY = { EC: ec, PE: pe, DE: de }
 
 export function getDeduccionesConfig(country) {
   return REGISTRY[String(country || '').toUpperCase()] || null
