@@ -156,9 +156,23 @@ async function parseXLSX(file) {
 function readAsText(file) {
   return new Promise((res, rej) => {
     const r = new FileReader()
-    r.onload = e => res(e.target.result)
+    r.onload = e => {
+      try {
+        const buf = e.target.result
+        const utf8 = new TextDecoder('utf-8', { fatal: false }).decode(buf)
+        // Si el decode UTF-8 metió caracteres de reemplazo, el archivo probablemente
+        // es ISO-8859-1 (típico en exports de Comdirect y bancos EU tradicionales).
+        if (utf8.includes('�')) {
+          res(new TextDecoder('iso-8859-1').decode(buf))
+        } else {
+          res(utf8)
+        }
+      } catch (err) {
+        rej(new Error('No se pudo decodificar el archivo'))
+      }
+    }
     r.onerror = () => rej(new Error('No se pudo leer el archivo'))
-    r.readAsText(file, 'UTF-8')
+    r.readAsArrayBuffer(file)
   })
 }
 

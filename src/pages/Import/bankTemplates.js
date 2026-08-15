@@ -299,6 +299,90 @@ export const BANK_TEMPLATES = [
     config: { mode: 'single', negativeIsExpense: true },
     hint: 'Extracto Nequi — separador coma',
   },
+
+  // ── ALEMANIA / DACH ─────────────────────────────────────────────────────────
+  // Formato numérico DE: decimal coma, miles punto (1.234,56)
+  // Fechas DE: DD.MM.YYYY
+  {
+    id: 'n26',
+    name: 'N26',
+    flag: '🇩🇪',
+    country: 'DE',
+    delimiter: ',',
+    fingerprint: ['booking date', 'payment reference', 'amount', 'account name'],
+    mapping: {
+      date:        'Booking Date',
+      description: 'Payment Reference',
+      amount:      'Amount (EUR)',
+    },
+    config: { mode: 'single', negativeIsExpense: true },
+    dateFormat: 'YYYY-MM-DD',
+    hint: 'N26 Export — separador coma, decimal punto (formato inglés)',
+  },
+  {
+    id: 'dkb',
+    name: 'DKB Deutsche Kreditbank',
+    flag: '🇩🇪',
+    country: 'DE',
+    delimiter: ';',
+    fingerprint: ['buchungsdatum', 'wertstellung', 'verwendungszweck', 'betrag'],
+    mapping: {
+      date:        'Buchungsdatum',
+      description: 'Verwendungszweck',
+      amount:      'Betrag (€)',
+    },
+    config: { mode: 'single', negativeIsExpense: true, numberFormat: 'de' },
+    dateFormat: 'DD.MM.YYYY',
+    hint: 'DKB Umsätze — separador punto y coma, formato numérico alemán',
+  },
+  {
+    id: 'sparkasse',
+    name: 'Sparkasse',
+    flag: '🇩🇪',
+    country: 'DE',
+    delimiter: ';',
+    fingerprint: ['auftragskonto', 'buchungstag', 'verwendungszweck', 'betrag'],
+    mapping: {
+      date:        'Buchungstag',
+      description: 'Verwendungszweck',
+      amount:      'Betrag',
+    },
+    config: { mode: 'single', negativeIsExpense: true, numberFormat: 'de' },
+    dateFormat: 'DD.MM.YY',
+    hint: 'Sparkasse Umsätze (CSV-CAMT) — separador punto y coma',
+  },
+  {
+    id: 'ing-de',
+    name: 'ING Deutschland',
+    flag: '🇩🇪',
+    country: 'DE',
+    delimiter: ';',
+    fingerprint: ['buchung', 'valuta', 'auftraggeber', 'buchungstext', 'betrag'],
+    mapping: {
+      date:        'Buchung',
+      description: 'Verwendungszweck',
+      amount:      'Betrag',
+    },
+    config: { mode: 'single', negativeIsExpense: true, numberFormat: 'de' },
+    dateFormat: 'DD.MM.YYYY',
+    hint: 'ING Umsätze — separador punto y coma, formato alemán',
+  },
+  {
+    id: 'comdirect',
+    name: 'Comdirect',
+    flag: '🇩🇪',
+    country: 'DE',
+    delimiter: ';',
+    fingerprint: ['buchungstag', 'wertstellung', 'vorgang', 'umsatz'],
+    mapping: {
+      date:        'Buchungstag',
+      description: 'Buchungstext',
+      amount:      'Umsatz',
+    },
+    config: { mode: 'single', negativeIsExpense: true, numberFormat: 'de' },
+    dateFormat: 'DD.MM.YYYY',
+    hint: 'Comdirect Umsätze — ojo: encoding ISO-8859-1',
+  },
 ]
 
 /**
