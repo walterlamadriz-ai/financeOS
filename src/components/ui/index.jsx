@@ -1,6 +1,7 @@
 // src/components/ui/index.jsx
 // Shared UI primitives
 
+import { useId, Children, cloneElement, isValidElement } from 'react'
 import styles from './ui.module.css'
 
 export function Btn({ children, variant = 'ghost', size = 'md', onClick, disabled, style }) {
@@ -47,16 +48,26 @@ export function ProgressBar({ value, max = 100, color = 'green', height = 5 }) {
   const pct = Math.min(max > 0 ? (value / max) * 100 : 0, 100)
   return (
     <div className={styles.progBg} style={{ height }}>
-      <div className={[styles.progFill, styles[`prog_${color}`]].join(' ')} style={{ width: pct + '%' }} />
+      <div className={[styles.progFill, styles[`prog_${color}`]].join(' ')} style={{ transform: `scaleX(${pct / 100})` }} />
     </div>
   )
 }
 
 export function FormGroup({ label, children }) {
+  const autoId = useId()
+  let assigned = false
+  const kids = Children.map(children, (child) => {
+    if (!assigned && isValidElement(child) && typeof child.type === 'string' &&
+        ['input', 'select', 'textarea'].includes(child.type) && !child.props.id) {
+      assigned = true
+      return cloneElement(child, { id: autoId })
+    }
+    return child
+  })
   return (
     <div className={styles.fg}>
-      {label && <label className={styles.fl}>{label}</label>}
-      {children}
+      {label && <label className={styles.fl} htmlFor={assigned ? autoId : undefined}>{label}</label>}
+      {kids}
     </div>
   )
 }
@@ -120,7 +131,7 @@ export function BarRow({ label, valueLabel, value, max, color }) {
         <span>{valueLabel}</span>
       </div>
       <div className={styles.barBg}>
-        <div className={styles.barFill} style={{ width: pct + '%', background: color }} />
+        <div className={styles.barFill} style={{ transform: `scaleX(${pct / 100})`, background: color }} />
       </div>
     </div>
   )

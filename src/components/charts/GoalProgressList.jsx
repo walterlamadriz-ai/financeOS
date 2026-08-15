@@ -74,7 +74,7 @@ export default function GoalProgressList({ goals, sym = '$' }) {
           <span style={{ fontSize:12, fontWeight:700, color:'var(--accent)', fontFamily:'var(--mono)' }}>{(totalProg*100).toFixed(0)}%</span>
         </div>
         <div style={{ height:8, background:'var(--sur2)', borderRadius:4, overflow:'hidden' }}>
-          <div style={{ height:'100%', width:`${Math.min(totalProg*100,100)}%`, background:'var(--accent)', borderRadius:4, transition:'width .4s ease' }}/>
+          <div style={{ height:'100%', width:'100%', transform:`scaleX(${Math.min(totalProg,1)})`, transformOrigin:'left', background:'var(--accent)', borderRadius:4, transition:'transform .4s ease' }}/>
         </div>
       </div>
 
@@ -100,7 +100,7 @@ export default function GoalProgressList({ goals, sym = '$' }) {
 
             {/* Barra */}
             <div style={{ height:7, background:'var(--sur2)', borderRadius:4, overflow:'hidden', marginBottom:8 }}>
-              <div style={{ height:'100%', width:`${Math.min(g.prog*100,100)}%`, background:g.status.color, borderRadius:4, transition:'width .4s ease' }}/>
+              <div style={{ height:'100%', width:'100%', transform:`scaleX(${Math.min(g.prog,1)})`, transformOrigin:'left', background:g.status.color, borderRadius:4, transition:'transform .4s ease' }}/>
             </div>
 
             {/* Cifras */}

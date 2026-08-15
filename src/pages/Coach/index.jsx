@@ -21,8 +21,7 @@ function SignalCard({ signal }) {
   const color = COACH_CONFIG.severityColors[signal.severity] || 'var(--th)'
   return (
     <div style={{
-      background: 'var(--sur)', border: `.5px solid var(--brd)`,
-      borderLeft: `3px solid ${color}`,
+      background: 'var(--sur)', border: `.5px solid color-mix(in srgb, ${color} 35%, transparent)`,
       borderRadius: 'var(--r)', padding: '12px 14px', marginBottom: 8,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
@@ -92,7 +91,7 @@ function KpiBar({ label, value, pct, color }) {
         <span style={{ fontWeight: 600, color: color || 'var(--tx)', fontFamily: 'var(--mono)' }}>{value}</span>
       </div>
       <div style={{ height: 4, background: 'var(--sur2)', borderRadius: 2, overflow: 'hidden' }}>
-        <div style={{ height: '100%', width: `${Math.min(pct * 100, 100)}%`, background: color || 'var(--grn)', borderRadius: 2, transition: 'width .4s' }} />
+        <div style={{ height: '100%', width: '100%', transform: `scaleX(${Math.min(pct, 1)})`, transformOrigin: 'left', background: color || 'var(--grn)', borderRadius: 2, transition: 'transform .4s' }} />
       </div>
     </div>
   )

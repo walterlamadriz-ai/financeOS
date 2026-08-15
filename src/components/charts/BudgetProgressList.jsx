@@ -72,10 +72,12 @@ export default function BudgetProgressList({ budgets, expByCat, sym = '$' }) {
           <div style={{ height: 8, background: 'var(--sur2)', borderRadius: 4, overflow: 'hidden', marginBottom: 8 }}>
             <div style={{
               height: '100%',
-              width: `${r.ratio * 100}%`,
+              width: '100%',
+              transform: `scaleX(${r.ratio})`,
+              transformOrigin: 'left',
               background: r.status.color,
               borderRadius: 4,
-              transition: 'width .4s ease',
+              transition: 'transform .4s ease',
             }}/>
           </div>
 

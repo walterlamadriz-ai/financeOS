@@ -27,6 +27,22 @@ export default function QuickAdd({ open, defaultType = 'expense', onClose }) {
   const [detected, setDetected] = useState(false)    // feedback "detectado"
   const amountRef = useRef(null)
   const sheetRef = useRef(null)
+  const [dragY, setDragY] = useState(0)
+  const dragState = useRef({ startY: 0, dragging: false })
+
+  // Asa arrastrable: baja la hoja con el dedo, la cierra si se suelta pasado el umbral.
+  function onHandleTouchStart(e) { dragState.current = { startY: e.touches[0].clientY, dragging: true } }
+  function onHandleTouchMove(e) {
+    if (!dragState.current.dragging) return
+    const dy = e.touches[0].clientY - dragState.current.startY
+    if (dy > 0) setDragY(dy)
+  }
+  function onHandleTouchEnd() {
+    if (!dragState.current.dragging) return
+    dragState.current.dragging = false
+    if (dragY > 80) onClose?.()
+    setDragY(0)
+  }
 
   // Reglas comercio→categoría aprendidas (1.2). Viven en settings (local, se exportan/sincronizan).
   const merchantRules = (settings && typeof settings.merchantRules === 'object') ? settings.merchantRules : {}
@@ -134,11 +150,18 @@ export default function QuickAdd({ open, defaultType = 'expense', onClose }) {
           width: '100%', maxWidth: 460, background: 'var(--sur)', borderTopLeftRadius: 20, borderTopRightRadius: 20,
           borderRadius: window.innerWidth > 520 ? 20 : '20px 20px 0 0',
           marginBottom: window.innerWidth > 520 ? 'auto' : 0, marginTop: window.innerWidth > 520 ? 'auto' : 0,
-          padding: `20px 20px calc(20px + env(safe-area-inset-bottom))`, boxShadow: 'var(--sh-3)', animation: 'qaUp .22s cubic-bezier(.22,.61,.36,1)',
+          padding: `20px 20px calc(20px + env(safe-area-inset-bottom))`, boxShadow: 'var(--sh-3)',
+          animation: dragState.current.dragging ? 'none' : 'qaUp .22s cubic-bezier(.22,.61,.36,1)',
+          transform: dragY ? `translateY(${dragY}px)` : undefined,
+          transition: dragY ? 'none' : 'transform .2s ease',
         }}
       >
-        {/* Asa */}
-        <div style={{ width: 38, height: 4, borderRadius: 2, background: 'var(--brd2)', margin: '0 auto 16px' }} />
+        {/* Asa — arrastrable para cerrar, mismo gesto que un share sheet nativo */}
+        <div
+          onTouchStart={onHandleTouchStart} onTouchMove={onHandleTouchMove} onTouchEnd={onHandleTouchEnd}
+          style={{ width: 38, height: 4, borderRadius: 2, background: 'var(--brd2)', backgroundClip: 'content-box',
+            margin: '-20px auto -4px', padding: '20px 40px', touchAction: 'none', boxSizing: 'content-box' }}
+        />
 
         {/* Toggle tipo */}
         <div style={{ display: 'flex', gap: 6, background: 'var(--sur3)', borderRadius: 10, padding: 4, marginBottom: 18 }}>

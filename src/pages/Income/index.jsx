@@ -108,7 +108,7 @@ export default function Income({ setPage }) {
               </div>
             )}
             {pasteMsg && (
-              <div style={{ marginTop:8, fontSize:11, color: pasteMsg.ok ? 'var(--grn)' : '#e84142', fontFamily:'var(--mono)' }}>
+              <div style={{ marginTop:8, fontSize:11, color: pasteMsg.ok ? 'var(--grn)' : 'var(--red)', fontFamily:'var(--mono)' }}>
                 {pasteMsg.text}
               </div>
             )}

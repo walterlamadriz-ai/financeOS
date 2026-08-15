@@ -23,7 +23,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
       manifest: {
-        name: 'FinanceOS', short_name: 'FinanceOS',
+        name: 'FinanceOS', short_name: 'FinanceOS', lang: 'es',
         theme_color: '#1a6b4a', background_color: '#f4f3ef',
         display: 'standalone', start_url: '/app/',
         icons: [

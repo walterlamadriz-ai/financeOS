@@ -45,7 +45,7 @@ export default function HorizontalBars({ records, sym = '$', maxItems = 6, value
               </span>
             </div>
             <div style={{ height: 6, background: 'var(--sur2)', borderRadius: 3, overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${barW}%`, background: COLORS[i % COLORS.length], borderRadius: 3, transition: 'width .4s ease' }}/>
+              <div style={{ height: '100%', width: '100%', transform: `scaleX(${barW / 100})`, transformOrigin: 'left', background: COLORS[i % COLORS.length], borderRadius: 3, transition: 'transform .4s ease' }}/>
             </div>
           </div>
         )

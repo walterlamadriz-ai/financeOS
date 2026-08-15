@@ -2,10 +2,10 @@
 
 /* BUTTON */
 .btn {
-  display: inline-flex; align-items: center; gap: 5px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
   border-radius: var(--r); font-size: 12px; font-family: var(--sans);
   font-weight: 500; border: 0.5px solid var(--brd2);
-  padding: 7px 14px;
+  padding: 7px 14px; min-height: 44px;
   /* propiedades explícitas (no `all`) + press feedback con ease-out fuerte (Emil) */
   transition: background .15s ease, border-color .15s ease, opacity .15s ease,
               box-shadow .15s ease, transform .16s var(--ease-out, ease-out);
@@ -19,7 +19,7 @@
 .btn_danger { background: transparent; color: var(--red); border-color: var(--red); }
 .btn_danger:hover { background: var(--red-bg); }
 .btn_sm { padding: 4px 10px; font-size: 11px; }
-.btn_xs { padding: 2px 7px; font-size: 10px; border-color: transparent; }
+.btn_xs { padding: 2px 7px; font-size: 11px; border-color: transparent; }
 
 /* CARD */
 .card {
@@ -40,16 +40,16 @@
   padding: 14px 16px; border: 0.5px solid var(--brd);
   box-shadow: var(--sh-1);
 }
-.kpiLbl { font-size: 10px; color: var(--tm); font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.kpiLbl { font-size: 11px; color: var(--tm); font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
 .kpiVal { font-size: 22px; font-weight: 700; font-family: var(--display); letter-spacing: -0.01em; font-feature-settings: 'tnum' 1; color: var(--tx); }
 .kpi_green { color: var(--grn); }
 .kpi_red   { color: var(--red); }
 .kpi_amber { color: var(--amb); }
-.kpiSub { font-size: 10px; color: var(--th); font-family: var(--mono); margin-top: 2px; }
+.kpiSub { font-size: 11px; color: var(--th); font-family: var(--mono); margin-top: 2px; }
 
 /* BADGE */
 .badge {
-  font-size: 9px; font-family: var(--mono); padding: 2px 7px;
+  font-size: 11px; font-family: var(--mono); padding: 2px 7px;
   border-radius: 20px; font-weight: 500; display: inline-block;
 }
 .badge_green { background: var(--grn-bg); color: var(--grn); }
@@ -59,7 +59,7 @@
 
 /* PROGRESS */
 .progBg { background: var(--sur3); border-radius: 3px; overflow: hidden; }
-.progFill { height: 100%; border-radius: 3px; transition: width 0.4s; }
+.progFill { height: 100%; width: 100%; border-radius: 3px; transform-origin: left; transition: transform 0.4s; will-change: transform; }
 .prog_green { background: var(--grn); }
 .prog_red   { background: var(--red); }
 .prog_amber { background: var(--amb); }
@@ -67,7 +67,7 @@
 
 /* FORM */
 .fg { margin-bottom: 10px; }
-.fl { font-size: 10px; font-family: var(--mono); color: var(--tm); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+.fl { font-size: 11px; font-family: var(--mono); color: var(--tm); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
 .frow { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .frow > * { min-width: 0; }  /* permite que los inputs (ej. fecha) encojan sin desbordar */
 @media (max-width: 480px) { .frow { grid-template-columns: 1fr; } }  /* móvil: una columna */
@@ -89,11 +89,11 @@
 .txDot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 .txInfo { flex: 1; min-width: 0; }
 .txName { font-size: 12px; color: var(--tx); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.txMeta { font-size: 10px; color: var(--th); font-family: var(--mono); }
+.txMeta { font-size: 11px; color: var(--th); font-family: var(--mono); }
 .txAmt  { font-size: 12px; font-family: var(--mono); font-weight: 500; flex-shrink: 0; }
 .txInc  { color: var(--grn); }
 .txExp  { color: var(--red); }
-.delBtn { background: transparent; border: none; color: var(--th); font-size: 10px; padding: 2px 5px; border-radius: 4px; transition: background .15s ease, color .15s ease, transform .16s var(--ease-out, ease-out); }
+.delBtn { background: transparent; border: none; color: var(--th); font-size: 11px; padding: 2px 5px; border-radius: 4px; transition: background .15s ease, color .15s ease, transform .16s var(--ease-out, ease-out); }
 .delBtn:hover { background: var(--red-bg); color: var(--red); }
 .delBtn:active { transform: scale(0.9); }
 
@@ -103,7 +103,7 @@
 .barLbl span:first-child { color: var(--tx); }
 .barLbl span:last-child  { color: var(--tm); font-family: var(--mono); }
 .barBg  { height: 5px; background: var(--sur3); border-radius: 3px; overflow: hidden; }
-.barFill { height: 100%; border-radius: 3px; transition: width 0.4s; }
+.barFill { height: 100%; width: 100%; border-radius: 3px; transform-origin: left; transition: transform 0.4s; will-change: transform; }
 
 /* PAGE HEADER */
 .pageHeader { margin-bottom: 18px; }

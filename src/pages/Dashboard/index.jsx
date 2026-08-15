@@ -1,9 +1,10 @@
 // src/pages/Dashboard/index.jsx
 // Dashboard Visual Polish — FinanceOS v1.1.1
 
-import { useMemo, useEffect, useState } from 'react'
+import { useMemo, useEffect, useState, useRef } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
 import { useT } from '../../i18n/useT.js'
+import { useDialogA11y } from '../../hooks/useDialogA11y.js'
 import ChartCard from '../../components/charts/ChartCard.jsx'
 import IncomeExpenseBar from '../../components/charts/IncomeExpenseBar.jsx'
 import CategoryDonut from '../../components/charts/CategoryDonut.jsx'
@@ -89,6 +90,11 @@ export default function Dashboard({ setPage }) {
   const monthExpenses = useMemo(() =>
     expenses.filter(r => r?.date?.startsWith(activeMonth)),
     [expenses, activeMonth]
+  )
+
+  const monthIncomes = useMemo(() =>
+    incomes.filter(r => r?.date?.startsWith(activeMonth)),
+    [incomes, activeMonth]
   )
 
   // Gasto mensual equivalente de suscripciones ACTIVAS (weekly×4.33, quarterly/3,
@@ -310,19 +316,24 @@ export default function Dashboard({ setPage }) {
   }
 
   function MonthlyCloseModal() {
+    const boxRef = useRef(null)
+    useDialogA11y(showCloseModal, dismissClose, boxRef)
     if (!showCloseModal) return null
     const balance = kpis.balance
     const ok = balance >= 0
     return (
-      <div style={{
+      <div
+        role="dialog" aria-modal="true" aria-label={t('dash.close.title')}
+        onClick={dismissClose}
+        style={{
         position:'fixed', inset:0, zIndex:500,
         background:'rgba(0,0,0,.55)', backdropFilter:'blur(4px)',
         display:'flex', alignItems:'center', justifyContent:'center', padding:16,
       }}>
-        <div style={{
+        <div ref={boxRef} tabIndex={-1} onClick={e => e.stopPropagation()} style={{
           background:'var(--sur)', border:`.5px solid var(--brd)`, borderRadius:16,
           padding:'24px 20px', maxWidth:380, width:'100%',
-          maxHeight:'85vh', overflowY:'auto',
+          maxHeight:'85vh', overflowY:'auto', outline:'none',
           boxShadow:'0 24px 64px rgba(0,0,0,.25)',
         }}>
           <div style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--th)', textTransform:'uppercase', letterSpacing:'1px', marginBottom:8 }}>
@@ -665,7 +676,7 @@ export default function Dashboard({ setPage }) {
       {topSignals.length > 0 && (
         <div className="card rise" style={{ padding:'16px 18px', marginBottom:16 }}>
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
-            <div style={{ fontFamily:'var(--mono)', fontSize:10, color:'var(--th)', textTransform:'uppercase', letterSpacing:'.8px' }}>{t('dash.signals.title')}</div>
+            <h2 style={{ margin:0, fontFamily:'var(--mono)', fontSize:10, fontWeight:600, color:'var(--th)', textTransform:'uppercase', letterSpacing:'.8px' }}>{t('dash.signals.title')}</h2>
             {setPage && (
               <button type="button" onClick={() => setPage('coach')}
                 style={{ fontSize:11, fontFamily:'var(--mono)', color:'var(--accent)', cursor:'pointer', background:'none', border:0, padding:0 }}>
@@ -716,7 +727,7 @@ export default function Dashboard({ setPage }) {
               ))}
             </div>
             <div style={{ height:4, borderRadius:2, background:'var(--brd2)', overflow:'hidden', marginBottom:4 }}>
-              <div style={{ height:'100%', width:`${pctMonth}%`, background: over ? 'var(--red)' : 'var(--accent)', borderRadius:2, transition:'.3s' }} />
+              <div style={{ height:'100%', width:'100%', transform:`scaleX(${pctMonth / 100})`, transformOrigin:'left', background: over ? 'var(--red)' : 'var(--accent)', borderRadius:2, transition:'transform .3s' }} />
             </div>
             {avgExp > 0 && avgExpMonths > 0 && (
               <div style={{ fontSize:10, fontFamily:'var(--mono)', color:'var(--th)', marginBottom:4, opacity:.8 }}>
@@ -739,7 +750,7 @@ export default function Dashboard({ setPage }) {
           {!compact && (
             <div className="fos-hide-mobile">
               <ChartCard title={t('dash.chart.flow.title')} subtitle={t('dash.chart.flow.sub')} minHeight={220}>
-                <MoneyFlow incomes={incomes} expenses={monthExpenses} subscriptions={subs} debts={debts} sym={sym}/>
+                <MoneyFlow incomes={monthIncomes} expenses={monthExpenses} subscriptions={subs} debts={debts} sym={sym}/>
               </ChartCard>
             </div>
           )}

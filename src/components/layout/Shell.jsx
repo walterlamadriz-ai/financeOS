@@ -5,6 +5,7 @@ import { useApp } from '../../context/AppContext.jsx'
 import { useT } from '../../i18n/useT.js'
 import s from './shell.module.css'
 import { BackupStatusBadge } from '../backup/BackupManager.jsx'
+import { useDialogA11y } from '../../hooks/useDialogA11y.js'
 import QuickAdd from '../QuickAdd.jsx'
 import PrivacySeal from '../PrivacySeal.jsx'
 import CountryBadge from '../CountryBadge.jsx'
@@ -73,6 +74,7 @@ export default function Shell({ page, setPage, children }) {
   // ── Drawer móvil ────────────────────────────────────────────────────────────
   const [drawerOpen, setDrawerOpen] = useState(false)
   const drawerRef = useRef(null)
+  useDialogA11y(drawerOpen, () => setDrawerOpen(false), drawerRef)
 
   // ── FAB speed-dial (Ingreso / Egreso) ────────────────────────────────────────
   const [fabOpen, setFabOpen] = useState(false)
@@ -143,7 +145,7 @@ export default function Shell({ page, setPage, children }) {
                 onClick={() => onNavigate(it.id)}
                 aria-current={page === it.id ? 'page' : undefined}
               >
-                <span className={s.ic}>{SHOW_FIRMA && it.cc ? <CountryBadge code={it.cc} /> : it.ic}</span>
+                <span className={s.ic} aria-hidden="true">{SHOW_FIRMA && it.cc ? <CountryBadge code={it.cc} /> : it.ic}</span>
                 {t(it.lb)}
                 {it.proOnly && (
                   <span style={{ marginLeft:'auto', fontSize:8, fontFamily:'var(--mono)', background:'color-mix(in srgb, var(--warn) 18%, transparent)', color:'var(--amb)', borderRadius:4, padding:'1px 5px', letterSpacing:'.5px', fontWeight:700 }}>PRO</span>
@@ -197,7 +199,8 @@ export default function Shell({ page, setPage, children }) {
       {drawerOpen && <div className={s.overlay} onClick={() => setDrawerOpen(false)} />}
 
       {/* ── DRAWER MÓVIL ── */}
-      <nav ref={drawerRef} className={s.drawer + (drawerOpen ? ' ' + s.drawerOpen : '')}>
+      <nav ref={drawerRef} tabIndex={-1} role="dialog" aria-modal={drawerOpen} aria-label={t('nav.menuLabel')}
+        className={s.drawer + (drawerOpen ? ' ' + s.drawerOpen : '')}>
         <div className={s.drawerHeader}>
           <div className={s.logo} style={{border:'none', padding:0, margin:0}}>
             <div className={s.logoName}>FinanceOS</div>
@@ -242,11 +245,11 @@ export default function Shell({ page, setPage, children }) {
           <span className={s.topRight}>FinanceOS · {settings.currency || 'CLP'}</span>
         </div>
 
-        <div className={s.content}>
+        <main className={s.content}>
           <div className={s.contentInner}>
             {children}
           </div>
-        </div>
+        </main>
 
         {/* FAB — abre captura rápida directa (1 tap), solo móvil */}
         <div className={s.fabWrap}>

@@ -180,7 +180,7 @@ export default function Reports({ setPage }) {
                         <span style={{fontFamily:'var(--mono)',color:ok?'var(--grn)':'var(--red)',fontSize:11}}>{t('reports.rule.idealPct', { actual: actualPct.toFixed(1), max: r.max, mark: ok?'✓':'⚠' })}</span>
                       </div>
                       <div style={{height:8,background:'var(--sur3)',borderRadius:4,overflow:'hidden'}}>
-                        <div style={{height:'100%',width:Math.min(actualPct/r.max*100,100)+'%',background:ok?r.color:'var(--red)',borderRadius:4,transition:'width .4s'}}/>
+                        <div style={{height:'100%',width:'100%',transform:`scaleX(${Math.min(actualPct/r.max,1)})`,transformOrigin:'left',background:ok?r.color:'var(--red)',borderRadius:4,transition:'transform .4s'}}/>
                       </div>
                       <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginTop:2,display:'flex',justifyContent:'space-between'}}>
                         <span>{fmtMoney(r.actual,sym)}</span><span>{t('reports.rule.ideal', { v: fmtMoney(r.ideal,sym) })}</span>

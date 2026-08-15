@@ -14,7 +14,7 @@
   --brd2:      rgba(0,0,0,0.16);
   --tx:        #1a1a18;
   --tm:        #5f5d55;   /* 6.4:1 AA */
-  --th:        #767469;   /* 4.54:1 AA — era #9a9890 (2.60:1, fallaba) */
+  --th:        #6e6c61;   /* 4.75:1 sobre --bg / 5.28:1 sobre --sur — era #767469 (4.54:1 solo sobre --sur, fallaba 4.23:1 sobre --bg) */
   --grn:       #1a6b4a;
   --grn-bg:    #e8f5ef;
   --grn-lt:    #d0eddf;
@@ -117,6 +117,14 @@ html, body, #root {
   font-size: 14px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+
+html, body {
+  overscroll-behavior: none; /* sin rebote/pull-to-refresh del navegador — sensación nativa */
+}
+
+button, a, [role="button"] {
+  -webkit-tap-highlight-color: transparent; /* antes solo estaba en .btn — quedaba el flash azul nativo en botones con estilos inline */
 }
 
 /* Scrollbar */

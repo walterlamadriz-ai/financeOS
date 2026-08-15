@@ -2,27 +2,32 @@
 // Selector de plantillas por perfil — FinanceOS Fase 7
 // Aplica categorías y presupuestos sugeridos SIN borrar transacciones reales
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
 import { useT } from '../../i18n/useT.js'
+import { useDialogA11y } from '../../hooks/useDialogA11y.js'
 import TEMPLATES from '../../data/templates.js'
 
 // ── MODAL BASE ─────────────────────────────────────────────────────────────
-function Modal({ isOpen, onClose, children, maxWidth = 540 }) {
+function Modal({ isOpen, onClose, children, maxWidth = 540, label }) {
+  const boxRef = useRef(null)
+  useDialogA11y(isOpen, onClose, boxRef)
   if (!isOpen) return null
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 1000,
-      background: 'rgba(0,0,0,.45)', display: 'flex',
-      alignItems: 'center', justifyContent: 'center', padding: 20,
-      overflowY: 'auto',
-    }} onClick={onClose}>
-      <div style={{
+    <div
+      role="dialog" aria-modal="true" aria-label={label}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 1000,
+        background: 'rgba(0,0,0,.45)', display: 'flex',
+        alignItems: 'center', justifyContent: 'center', padding: 20,
+        overflowY: 'auto',
+      }} onClick={onClose}>
+      <div ref={boxRef} tabIndex={-1} style={{
         background: 'var(--sur)', borderRadius: 12,
         maxWidth, width: '100%',
         boxShadow: '0 20px 60px rgba(0,0,0,.2)',
         border: '0.5px solid var(--brd2)',
-        maxHeight: '90vh', overflowY: 'auto',
+        maxHeight: '90vh', overflowY: 'auto', outline: 'none',
       }} onClick={e => e.stopPropagation()}>
         {children}
       </div>

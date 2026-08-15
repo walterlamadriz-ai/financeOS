@@ -160,11 +160,11 @@ function RothHSACard({ fmt, ingresoAnual }) {
         </FormRow>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 14 }}>
-          <div style={{ background: rothVsTrad.convieneTraditional ? 'var(--grn-tint)' : 'var(--sur2)', borderLeft: rothVsTrad.convieneTraditional ? '3px solid var(--grn)' : '3px solid transparent', borderRadius: 'var(--r)', padding: '12px 14px' }}>
+          <div style={{ background: rothVsTrad.convieneTraditional ? 'var(--grn-tint)' : 'var(--sur2)', border: rothVsTrad.convieneTraditional ? '.5px solid color-mix(in srgb, var(--grn) 35%, transparent)' : '.5px solid var(--brd)', borderRadius: 'var(--r)', padding: '12px 14px' }}>
             <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--th)', marginBottom: 4 }}>TRADITIONAL — VALOR NETO FUTURO</div>
             <div style={{ fontFamily: 'var(--mono)', fontSize: 18, fontWeight: 700, color: rothVsTrad.convieneTraditional ? 'var(--grn)' : 'var(--tx)' }}>{fmt(rothVsTrad.traditionalNeto)}</div>
           </div>
-          <div style={{ background: !rothVsTrad.convieneTraditional ? 'var(--grn-tint)' : 'var(--sur2)', borderLeft: !rothVsTrad.convieneTraditional ? '3px solid var(--grn)' : '3px solid transparent', borderRadius: 'var(--r)', padding: '12px 14px' }}>
+          <div style={{ background: !rothVsTrad.convieneTraditional ? 'var(--grn-tint)' : 'var(--sur2)', border: !rothVsTrad.convieneTraditional ? '.5px solid color-mix(in srgb, var(--grn) 35%, transparent)' : '.5px solid var(--brd)', borderRadius: 'var(--r)', padding: '12px 14px' }}>
             <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--th)', marginBottom: 4 }}>ROTH — VALOR FUTURO</div>
             <div style={{ fontFamily: 'var(--mono)', fontSize: 18, fontWeight: 700, color: !rothVsTrad.convieneTraditional ? 'var(--grn)' : 'var(--tx)' }}>{fmt(rothVsTrad.rothFinal)}</div>
           </div>

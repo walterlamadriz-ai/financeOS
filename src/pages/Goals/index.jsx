@@ -254,7 +254,7 @@ export default function Goals({ setPage }) {
                     </div>
                   </div>
                   <div style={{height:8,background:'var(--brd)',borderRadius:4,overflow:'hidden',marginBottom:8}}>
-                    <div style={{height:'100%',width:(p*100)+'%',background:clr,borderRadius:4,transition:'width .4s'}}/>
+                    <div style={{height:'100%',width:'100%',transform:`scaleX(${p})`,transformOrigin:'left',background:clr,borderRadius:4,transition:'transform .4s'}}/>
                   </div>
                   {/* Meta de emergencia creada con la recomendación anterior (6 meses):
                       ofrecer ajuste de un tap a la recomendación vigente (3 meses de gastos) */}

@@ -2,7 +2,7 @@
 // Onboarding inicial — FinanceOS Fase 8 (reescrito completo)
 // 9 pasos (0-8): Bienvenida → Uso → Perfil → País → Config → Ingreso → Objetivo → Plantilla → Resumen
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef, useEffect } from 'react'
 import { useApp } from '../context/AppContext.jsx'
 import { useT } from '../i18n/useT.js'
 import TEMPLATES from '../data/templates.js'
@@ -137,6 +137,14 @@ export default function Onboarding({ onComplete }) {
   const next = () => setStep(s => Math.min(s + 1, TOTAL))
   const back = () => setStep(s => Math.max(s - 1, 0))
 
+  // Mueve el foco al título del paso nuevo — sin esto un lector de pantalla
+  // no se entera de que la pantalla cambió al avanzar/retroceder.
+  const headingRef = useRef(null)
+  useEffect(() => {
+    const id = setTimeout(() => headingRef.current?.focus(), 50)
+    return () => clearTimeout(id)
+  }, [step])
+
   async function loadDemoData() {
     setLoading(true)
     try {
@@ -193,7 +201,7 @@ export default function Onboarding({ onComplete }) {
       </div>
       <div style={{ textAlign: 'center', marginBottom: 22 }}>
         <div style={{ width: 52, height: 52, borderRadius: 13, margin: '0 auto 12px', background: 'var(--grn-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, color: 'var(--grn)' }}>◈</div>
-        <h1 style={{ ...h1s, textAlign: 'center' }}>{t('onboarding.welcome.title')}</h1>
+        <h1 ref={headingRef} tabIndex={-1} style={{ ...h1s, textAlign: 'center', outline: 'none' }}>{t('onboarding.welcome.title')}</h1>
         <p style={{ ...subs, textAlign: 'center' }}>{t('onboarding.welcome.sub')}</p>
       </div>
       <div style={{ padding: '10px 13px', background: 'var(--grn-bg)', borderRadius: 8, border: '0.5px solid rgba(26,163,104,.2)', fontSize: 11, color: 'var(--grn)', fontFamily: 'var(--mono)', lineHeight: 1.6, marginBottom: 18 }}>
@@ -211,7 +219,7 @@ export default function Onboarding({ onComplete }) {
   if (step === 1) return (
     <div style={wrap}><div style={box}>
       <ProgressBar step={1} total={TOTAL} />
-      <h2 style={h1s}>{t('onboarding.useType.title')}</h2>
+      <h2 ref={headingRef} tabIndex={-1} style={{ ...h1s, outline: 'none' }}>{t('onboarding.useType.title')}</h2>
       <p style={subs}>{t('onboarding.useType.sub')}</p>
       {USE_TYPES.map(u => <OptionCard key={u.id} icon={u.icon} label={t(u.label)} desc={t(u.desc)} selected={answers.useType === u.id} onClick={() => set('useType', u.id)} />)}
       <div style={{ display: 'flex', gap: 7, marginTop: 7 }}>
@@ -225,11 +233,11 @@ export default function Onboarding({ onComplete }) {
   if (step === 2) return (
     <div style={wrap}><div style={{ ...box, maxWidth: 490 }}>
       <ProgressBar step={2} total={TOTAL} />
-      <h2 style={h1s}>{t('onboarding.profile.title')}</h2>
+      <h2 ref={headingRef} tabIndex={-1} style={{ ...h1s, outline: 'none' }}>{t('onboarding.profile.title')}</h2>
       <p style={subs}>{answers.useType === 'advisor' ? t('onboarding.profile.sub.advisor') : t('onboarding.profile.sub.default')}</p>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7 }}>
         {TEMPLATES.map(tpl => (
-          <button key={tpl.id} onClick={() => set('profileId', tpl.id)} style={{
+          <button key={tpl.id} onClick={() => set('profileId', tpl.id)} aria-pressed={answers.profileId === tpl.id} style={{
             padding: '10px 11px', borderRadius: 10, cursor: 'pointer',
             border: answers.profileId === tpl.id ? `1.5px solid ${tpl.color}` : '0.5px solid var(--brd2)',
             background: answers.profileId === tpl.id ? `${tpl.color}0d` : 'var(--sur2)',
@@ -267,7 +275,7 @@ export default function Onboarding({ onComplete }) {
   if (step === 3) return (
     <div style={wrap}><div style={box}>
       <ProgressBar step={3} total={TOTAL} />
-      <h2 style={h1s}>{t('onboarding.country.title')}</h2>
+      <h2 ref={headingRef} tabIndex={-1} style={{ ...h1s, outline: 'none' }}>{t('onboarding.country.title')}</h2>
       <p style={subs}>{t('onboarding.country.sub')}</p>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 7, marginBottom: 14 }}>
         {COUNTRIES.map(c => (
@@ -276,7 +284,7 @@ export default function Onboarding({ onComplete }) {
             set('currency', c.currency)
             // Alemania: cambiar UI a alemán automáticamente (mismo espíritu que "reglas de tu país")
             if (c.code === 'DE') updateSettings({ ...settings, language: 'de' })
-          }} style={{
+          }} aria-pressed={answers.country === c.code} style={{
             padding: '10px 8px', borderRadius: 10, cursor: 'pointer',
             border: answers.country === c.code ? '1.5px solid var(--grn)' : '0.5px solid var(--brd2)',
             background: answers.country === c.code ? 'var(--grn-bg)' : 'var(--sur2)',
@@ -308,7 +316,7 @@ export default function Onboarding({ onComplete }) {
   if (step === 4) return (
     <div style={wrap}><div style={box}>
       <ProgressBar step={4} total={TOTAL} />
-      <h2 style={h1s}>{t('onboarding.basics.title')}</h2>
+      <h2 ref={headingRef} tabIndex={-1} style={{ ...h1s, outline: 'none' }}>{t('onboarding.basics.title')}</h2>
       <p style={subs}>{t('onboarding.basics.sub')}</p>
       <div style={{ marginBottom: 14 }}>
         <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx)', marginBottom: 7 }}>{t('settings.currency.label')}</div>
@@ -339,7 +347,7 @@ export default function Onboarding({ onComplete }) {
         <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx)', marginBottom: 6 }}>{t('onboarding.basics.hasDebts')}</div>
         <div style={{ display: 'flex', gap: 6 }}>
           {[{ id: 'yes', label: t('onboarding.yes') }, { id: 'no', label: t('onboarding.no') }].map(o => (
-            <button key={o.id} onClick={() => set('hasDebts', o.id)} style={{
+            <button key={o.id} onClick={() => set('hasDebts', o.id)} aria-pressed={answers.hasDebts === o.id} style={{
               flex: 1, padding: '7px', borderRadius: 8, fontSize: 12, cursor: 'pointer',
               border: answers.hasDebts === o.id ? '1.5px solid var(--grn)' : '0.5px solid var(--brd2)',
               background: answers.hasDebts === o.id ? 'var(--grn-bg)' : 'var(--sur2)',
@@ -360,7 +368,7 @@ export default function Onboarding({ onComplete }) {
   if (step === 5) return (
     <div style={wrap}><div style={box}>
       <ProgressBar step={5} total={TOTAL} />
-      <h2 style={h1s}>{t('onboarding.income.title')}</h2>
+      <h2 ref={headingRef} tabIndex={-1} style={{ ...h1s, outline: 'none' }}>{t('onboarding.income.title')}</h2>
       <p style={subs}>{t('onboarding.income.sub')}</p>
       <div style={{ marginBottom: 14 }}>
         <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', marginBottom: 6 }}>
@@ -395,13 +403,13 @@ export default function Onboarding({ onComplete }) {
   if (step === 6) return (
     <div style={wrap}><div style={box}>
       <ProgressBar step={6} total={TOTAL} />
-      <h2 style={h1s}>{t('onboarding.goalExp.title')}</h2>
+      <h2 ref={headingRef} tabIndex={-1} style={{ ...h1s, outline: 'none' }}>{t('onboarding.goalExp.title')}</h2>
       <p style={subs}>{t('onboarding.goalExp.sub')}</p>
       {MAIN_GOALS.map(g => <OptionCard key={g.id} icon={g.icon} label={t(g.label)} desc={t(g.desc)} selected={answers.mainGoal === g.id} onClick={() => set('mainGoal', g.id)} />)}
       <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx)', marginTop: 12, marginBottom: 6 }}>{t('onboarding.goalExp.experienceLabel')}</div>
       <div style={{ display: 'flex', gap: 6 }}>
         {EXPERIENCE_LEVELS.map(e => (
-          <button key={e.id} onClick={() => set('experience', e.id)} style={{
+          <button key={e.id} onClick={() => set('experience', e.id)} aria-pressed={answers.experience === e.id} style={{
             flex: 1, padding: '8px 5px', borderRadius: 8, fontSize: 10, cursor: 'pointer',
             border: answers.experience === e.id ? '1.5px solid var(--grn)' : '0.5px solid var(--brd2)',
             background: answers.experience === e.id ? 'var(--grn-bg)' : 'var(--sur2)',
@@ -422,7 +430,7 @@ export default function Onboarding({ onComplete }) {
   if (step === 7) return (
     <div style={wrap}><div style={box}>
       <ProgressBar step={7} total={TOTAL} />
-      <h2 style={h1s}>{t('onboarding.template.title')}</h2>
+      <h2 ref={headingRef} tabIndex={-1} style={{ ...h1s, outline: 'none' }}>{t('onboarding.template.title')}</h2>
       <p style={subs}>{t('onboarding.template.sub')}</p>
       <div style={{ padding: '13px', borderRadius: 10, border: `1.5px solid ${activeTemplate.color}`, background: `${activeTemplate.color}08`, marginBottom: 13 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 9 }}>

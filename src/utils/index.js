@@ -55,14 +55,29 @@ export const CAT_COLORS = {
   Salud: '#4a9ad4',
   Educación: '#7f77dd',
   Entretenimiento: '#e05a4a',
+  Entretención: '#e05a4a', // alias — algunos registros históricos usan esta grafía
   Servicios: '#0f6e56',
   Ropa: '#d4537e',
   Otro: '#888780',
+  Otros: '#888780', // alias — algunos registros históricos usan plural
   Salario: '#1a6b4a',
   Freelance: '#4a9ad4',
   Inversión: '#7f77dd',
   Arriendo: '#d4982a',
   Bono: '#3dbe7a',
+  // Categorías de suscripciones (antes solo definidas localmente en Movements)
+  Tecnología: '#818cf8',
+  Deporte: '#4ade80',
+  Viajes: '#f472b6',
+  Streaming: '#00b8d9',
+  Música: '#a78bfa',
+  Software: '#60a5fa',
+  Gimnasio: '#4ade80',
+  Seguro: '#f5a623',
+  Cloud: '#818cf8',
+  Delivery: '#fb923c',
+  Suscripción: '#00d4aa',
+  Productividad: '#34d399',
 }
 
 // Emoji por categoría — hace el registro más ágil y amigable. Fallback: solo el nombre.

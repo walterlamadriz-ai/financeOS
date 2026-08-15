@@ -9,7 +9,7 @@ import ChartCard from '../../components/charts/ChartCard.jsx'
 import HorizontalBars from '../../components/charts/HorizontalBars.jsx'
 import CategoryDonut from '../../components/charts/CategoryDonut.jsx'
 import { parseTransactionText } from '../../utils/smsParser.js'
-import { catLabel, catEmoji, subLabel, moneyLocale, dateLocale } from '../../utils/index.js'
+import { catLabel, catEmoji, subLabel, moneyLocale, dateLocale, CAT_COLORS } from '../../utils/index.js'
 import { pendingDebtMonthly } from '../../utils/personal.js'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -66,16 +66,6 @@ const FREQS    = [
   { value:'quarterly', label:'mov.freq.quarterly' },
   { value:'weekly',    label:'mov.freq.weekly' },
 ]
-const CAT_COLORS = {
-  'Alimentación':'#f5a623','Vivienda':'#ff4d6a','Transporte':'#00b8d9',
-  'Salud':'#a78bfa','Educación':'#34d399','Ropa':'#fb923c',
-  'Entretención':'#60a5fa','Servicios':'#00d4aa','Tecnología':'#818cf8',
-  'Deporte':'#4ade80','Viajes':'#f472b6','Otros':'#888780',
-  'Streaming':'#00b8d9','Música':'#a78bfa','Software':'#60a5fa',
-  'Gimnasio':'#4ade80','Seguro':'#f5a623','Cloud':'#818cf8',
-  'Delivery':'#fb923c','Suscripción':'#00d4aa','Productividad':'#34d399',
-}
-
 // ── Formulario Gasto ──────────────────────────────────────────────────────────
 function FormGasto({ onSave, onCancel, sym, projects = [], onImport }) {
   const { t } = useT()
@@ -160,7 +150,7 @@ function FormGasto({ onSave, onCancel, sym, projects = [], onImport }) {
           </div>
         )}
         {pasteMsg && (
-          <div style={{ marginTop:8, fontSize:11, color: pasteMsg.ok ? 'var(--grn)' : '#e84142', fontFamily:'var(--mono)' }}>
+          <div style={{ marginTop:8, fontSize:11, color: pasteMsg.ok ? 'var(--grn)' : 'var(--red)', fontFamily:'var(--mono)' }}>
             {pasteMsg.text}
           </div>
         )}
@@ -704,11 +694,13 @@ export default function Movements({ setPage }) {
                 </div>
                 {updateExpense && (
                   <button onClick={()=>{setEditingId(e.id);setEditForm({description:e.description||'',amount:e.amount,date:e.date,category:e.category,subcategory:e.subcategory||''})}}
-                    style={{background:'none',border:'none',color:'var(--th)',fontSize:11,cursor:'pointer',padding:'2px 4px'}} title={t('mov.edit.editTitle')}>✏️</button>
+                    style={{background:'none',border:'none',color:'var(--th)',fontSize:11,cursor:'pointer',padding:0,minWidth:44,minHeight:44,display:'inline-flex',alignItems:'center',justifyContent:'center',flexShrink:0}}
+                    title={t('mov.edit.editTitle')} aria-label={`${t('mov.edit.editTitle')}: ${e.description || catLabel(e.category)}`}>✏️</button>
                 )}
                 {delExpense && (
                   <button onClick={()=>deleteWithUndo('expenses', e, t('common.deleted'), t('common.undo'))}
-                    style={{background:'none',border:'none',color:'var(--th)',fontSize:10,cursor:'pointer',padding:'2px 4px'}} title={t('mov.edit.delTitle')}>✕</button>
+                    style={{background:'none',border:'none',color:'var(--th)',fontSize:10,cursor:'pointer',padding:0,minWidth:44,minHeight:44,display:'inline-flex',alignItems:'center',justifyContent:'center',flexShrink:0}}
+                    title={t('mov.edit.delTitle')} aria-label={`${t('mov.edit.delTitle')}: ${e.description || catLabel(e.category)}`}>✕</button>
                 )}
               </div>
             ))}
@@ -789,11 +781,13 @@ export default function Movements({ setPage }) {
                     </div>
                     {updateSubscription && (
                       <button onClick={()=>{setEditingSubId(sub.id);setEditSubForm({name:sub.name||'',amount:sub.amount,frequency:sub.frequency,category:sub.category})}}
-                        style={{background:'none',border:'none',color:'var(--th)',fontSize:11,cursor:'pointer',padding:'2px 4px'}} title={t('mov.edit.editTitle')}>✏️</button>
+                        style={{background:'none',border:'none',color:'var(--th)',fontSize:11,cursor:'pointer',padding:0,minWidth:44,minHeight:44,display:'inline-flex',alignItems:'center',justifyContent:'center',flexShrink:0}}
+                        title={t('mov.edit.editTitle')} aria-label={`${t('mov.edit.editTitle')}: ${sub.name}`}>✏️</button>
                     )}
                     {deleteSubscription && (
                       <button onClick={()=>deleteWithUndo('subscriptions', sub, t('common.deleted'), t('common.undo'))}
-                        style={{background:'none',border:'none',color:'var(--th)',fontSize:10,cursor:'pointer',padding:'2px 4px'}} title={t('mov.edit.delTitle')}>✕</button>
+                        style={{background:'none',border:'none',color:'var(--th)',fontSize:10,cursor:'pointer',padding:0,minWidth:44,minHeight:44,display:'inline-flex',alignItems:'center',justifyContent:'center',flexShrink:0}}
+                        title={t('mov.edit.delTitle')} aria-label={`${t('mov.edit.delTitle')}: ${sub.name}`}>✕</button>
                     )}
                   </div>
                 )
