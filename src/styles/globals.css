@@ -25,7 +25,7 @@
   --amb-bg:    #fef8e8;
   --blu:       #1a5a8a;
   --blu-bg:    #e8f2fb;
-  --accent:    #0a9d7e;   /* verde-teal de acento — AA sobre fondos claros */
+  --accent:    #08795f;   /* verde-teal de acento — 5.37:1 sobre --sur / 4.84:1 sobre --bg, verificado con calculo WCAG real (era #0a9d7e, 3.42:1, fallaba) */
   --accent-bg: rgba(10,157,126,0.08);
   --accent2:   #1a7a99;   /* cyan de acento secundario */
   /* ── Semántica por rol (el DATO, no la marca). --grn = marca/estructura. ── */

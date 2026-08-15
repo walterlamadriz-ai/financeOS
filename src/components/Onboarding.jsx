@@ -337,6 +337,7 @@ export default function Onboarding({ onComplete }) {
           {t('onboarding.basics.savingGoalLabel')} <span style={{ color: 'var(--grn)' }}>{answers.savingGoal}%</span>
         </div>
         <input type="range" min={5} max={50} step={5} value={answers.savingGoal}
+          aria-label={t('onboarding.basics.savingGoalLabel')}
           onChange={e => set('savingGoal', Number(e.target.value))}
           style={{ width: '100%', accentColor: 'var(--grn)' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: 'var(--th)', fontFamily: 'var(--mono)' }}>
@@ -379,6 +380,7 @@ export default function Onboarding({ onComplete }) {
           min="0"
           value={answers.estimatedMonthlyIncome}
           placeholder={t('onboarding.income.placeholder')}
+          aria-label={t('onboarding.income.label', { currency: answers.currency || 'tu moneda' })}
           onChange={e => set('estimatedMonthlyIncome', e.target.value)}
           style={{
             width: '100%', padding: '10px 12px', borderRadius: 8, fontSize: 14,

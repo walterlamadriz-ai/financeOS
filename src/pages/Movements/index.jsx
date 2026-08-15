@@ -11,6 +11,7 @@ import CategoryDonut from '../../components/charts/CategoryDonut.jsx'
 import { parseTransactionText } from '../../utils/smsParser.js'
 import { catLabel, catEmoji, subLabel, moneyLocale, dateLocale, CAT_COLORS } from '../../utils/index.js'
 import { pendingDebtMonthly } from '../../utils/personal.js'
+import { FormGroup } from '../../components/ui/index.jsx'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36)
@@ -157,20 +158,20 @@ function FormGasto({ onSave, onCancel, sym, projects = [], onImport }) {
       </div>
 
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))', gap:10, marginBottom:10 }}>
-        <div><label style={lbl}>{t('mov.form.desc')}</label>
+        <FormGroup label={t('mov.form.desc')}>
           <input style={inp} value={f.description} placeholder={t('mov.form.descPh')}
-            onChange={e => set('description', e.target.value)}/></div>
-        <div><label style={lbl}>{t('mov.form.amount', { sym })}</label>
+            onChange={e => set('description', e.target.value)}/></FormGroup>
+        <FormGroup label={t('mov.form.amount', { sym })}>
           <input style={inp} type="number" inputMode="decimal" min="0" value={f.amount} placeholder="0"
-            onChange={e => set('amount', e.target.value)}/></div>
-        <div><label style={lbl}>{t('mov.form.date')}</label>
+            onChange={e => set('amount', e.target.value)}/></FormGroup>
+        <FormGroup label={t('mov.form.date')}>
           <input style={inp} type="date" value={f.date}
-            onChange={e => set('date', e.target.value)}/></div>
-        <div><label style={lbl}>{t('mov.form.category')}</label>
+            onChange={e => set('date', e.target.value)}/></FormGroup>
+        <FormGroup label={t('mov.form.category')}>
           <select style={inp} value={f.category} onChange={handleCatChange}>
             {EXP_CATS.map(c => <option key={c} value={c}>{catLabel(c)}</option>)}
           </select>
-        </div>
+        </FormGroup>
         {subcatOptions.length > 0 && (
           <div style={{ gridColumn:'1 / -1' }}>
             <label style={lbl}>
@@ -194,21 +195,22 @@ function FormGasto({ onSave, onCancel, sym, projects = [], onImport }) {
             </div>
           </div>
         )}
-        <div><label style={lbl}>{t('mov.form.method')}</label>
+        <FormGroup label={t('mov.form.method')}>
           <select style={inp} value={f.method} onChange={e => set('method', e.target.value)}>
-            {METHODS.map(m => <option key={m}>{m}</option>)}</select></div>
-        <div><label style={lbl}>{t('mov.form.type')}</label>
+            {METHODS.map(m => <option key={m}>{m}</option>)}</select></FormGroup>
+        <FormGroup label={t('mov.form.type')}>
           <select style={inp} value={f.type} onChange={e => set('type', e.target.value)}>
-            <option>Necesidad</option><option>Deseo</option></select></div>
+            <option>Necesidad</option><option>Deseo</option></select></FormGroup>
       </div>
       <label style={{ display:'flex', alignItems:'flex-start', gap:8, fontSize:12, color:'var(--tm)', cursor:'pointer', marginBottom:12, lineHeight:1.4 }}>
         <input type="checkbox" checked={!!f.inv} onChange={e => set('inv', e.target.checked)} style={{ width:16, height:16, flexShrink:0, marginTop:1 }} />
         <span style={{ minWidth:0 }}>{t('mov.form.invCheck')}</span>
       </label>
       <div style={{ marginBottom:12 }}>
-        <label style={lbl}>{t('mov.form.project')}</label>
-        <input style={inp} list="fnos-projects-exp" value={f.project} placeholder={t('mov.form.projectPh')}
-          onChange={e => set('project', e.target.value)}/>
+        <FormGroup label={t('mov.form.project')}>
+          <input style={inp} list="fnos-projects-exp" value={f.project} placeholder={t('mov.form.projectPh')}
+            onChange={e => set('project', e.target.value)}/>
+        </FormGroup>
         <datalist id="fnos-projects-exp">{projects.map(p => <option key={p} value={p} />)}</datalist>
       </div>
       <div style={{ display:'flex', gap:8, justifyContent:'flex-end' }}>
@@ -250,22 +252,22 @@ function FormSub({ onSave, onCancel }) {
         {t('mov.form.subTitle')}
       </div>
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))', gap:10, marginBottom:10 }}>
-        <div><label style={lbl}>{t('mov.form.name')}</label>
+        <FormGroup label={t('mov.form.name')}>
           <input style={inp} value={f.name} placeholder={t('mov.form.namePh')}
-            onChange={e => set('name', e.target.value)}/></div>
-        <div><label style={lbl}>{t('mov.form.amountSimple')}</label>
+            onChange={e => set('name', e.target.value)}/></FormGroup>
+        <FormGroup label={t('mov.form.amountSimple')}>
           <input style={inp} type="number" inputMode="decimal" value={f.amount} placeholder="0"
-            onChange={e => set('amount', e.target.value)}/></div>
-        <div><label style={lbl}>{t('mov.form.freq')}</label>
+            onChange={e => set('amount', e.target.value)}/></FormGroup>
+        <FormGroup label={t('mov.form.freq')}>
           <select style={inp} value={f.frequency} onChange={e => set('frequency', e.target.value)}>
             {FREQS.map(fr => <option key={fr.value} value={fr.value}>{t(fr.label)}</option>)}
-          </select></div>
-        <div><label style={lbl}>{t('mov.form.category')}</label>
+          </select></FormGroup>
+        <FormGroup label={t('mov.form.category')}>
           <select style={inp} value={f.category} onChange={e => set('category', e.target.value)}>
-            {SUB_CATS.map(c => <option key={c} value={c}>{subLabel(c)}</option>)}</select></div>
-        <div><label style={lbl}>{t('mov.form.nextPay')}</label>
+            {SUB_CATS.map(c => <option key={c} value={c}>{subLabel(c)}</option>)}</select></FormGroup>
+        <FormGroup label={t('mov.form.nextPay')}>
           <input style={inp} type="date" value={f.nextPaymentDate}
-            onChange={e => set('nextPaymentDate', e.target.value)}/></div>
+            onChange={e => set('nextPaymentDate', e.target.value)}/></FormGroup>
       </div>
       <div style={{ display:'flex', gap:8, justifyContent:'flex-end' }}>
         <button onClick={onCancel} style={{ background:'none', border:'.5px solid var(--brd)',
@@ -644,21 +646,21 @@ export default function Movements({ setPage }) {
             ) : listExp.map((e,i) => editingId === e.id ? (
               <div key={e.id} style={{padding:'10px 14px',borderBottom:i<listExp.length-1?'.5px solid var(--brd)':'none',background:'rgba(232,65,66,.03)'}}>
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(130px,1fr))',gap:6,marginBottom:6}}>
-                  <input type="text" value={editForm.description||''} placeholder={t('mov.edit.descPh')}
+                  <input type="text" value={editForm.description||''} placeholder={t('mov.edit.descPh')} aria-label={t('mov.form.desc')}
                     onChange={ev=>setEditForm(f=>({...f,description:ev.target.value}))}
                     style={{gridColumn:'1/-1',padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
-                  <input type="number" inputMode="decimal" min="0" value={editForm.amount||''} placeholder={t('mov.edit.amountPh')}
+                  <input type="number" inputMode="decimal" min="0" value={editForm.amount||''} placeholder={t('mov.edit.amountPh')} aria-label={t('mov.form.amount', { sym })}
                     onChange={ev=>setEditForm(f=>({...f,amount:ev.target.value}))}
                     style={{padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
-                  <input type="date" value={editForm.date||''}
+                  <input type="date" value={editForm.date||''} aria-label={t('mov.form.date')}
                     onChange={ev=>setEditForm(f=>({...f,date:ev.target.value}))}
                     style={{padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
-                  <select value={editForm.category||e.category}
+                  <select value={editForm.category||e.category} aria-label={t('mov.form.category')}
                     onChange={ev=>setEditForm(f=>({...f,category:ev.target.value,subcategory:''}))}
                     style={{padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}>
                     {EXP_CATS.map(c=><option key={c}>{c}</option>)}
                   </select>
-                  <select value={editForm.subcategory??e.subcategory??''}
+                  <select value={editForm.subcategory??e.subcategory??''} aria-label={t('mov.form.subcat')}
                     onChange={ev=>setEditForm(f=>({...f,subcategory:ev.target.value}))}
                     style={{padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}>
                     <option value="">{t('mov.edit.subcatNone')}</option>
@@ -741,13 +743,13 @@ export default function Movements({ setPage }) {
                   return (
                     <div key={sub.id} style={{padding:'10px 14px',borderBottom:i<arr.length-1?'.5px solid var(--brd)':'none',background:'rgba(245,166,35,.05)'}}>
                       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(130px,1fr))',gap:6,marginBottom:6}}>
-                        <input type="text" value={editSubForm.name||''} placeholder={t('mov.edit.namePh')}
+                        <input type="text" value={editSubForm.name||''} placeholder={t('mov.edit.namePh')} aria-label={t('mov.form.name')}
                           onChange={ev=>setEditSubForm(f=>({...f,name:ev.target.value}))}
                           style={{gridColumn:'1/-1',padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
-                        <input type="number" inputMode="decimal" min="0" value={editSubForm.amount||''} placeholder={t('mov.edit.amountPh')}
+                        <input type="number" inputMode="decimal" min="0" value={editSubForm.amount||''} placeholder={t('mov.edit.amountPh')} aria-label={t('mov.form.amountSimple')}
                           onChange={ev=>setEditSubForm(f=>({...f,amount:ev.target.value}))}
                           style={{padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}/>
-                        <select value={editSubForm.frequency||sub.frequency}
+                        <select value={editSubForm.frequency||sub.frequency} aria-label={t('mov.form.freq')}
                           onChange={ev=>setEditSubForm(f=>({...f,frequency:ev.target.value}))}
                           style={{padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}>
                           {FREQS.map(f => <option key={f.value} value={f.value}>{t(f.label)}</option>)}
