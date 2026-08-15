@@ -40,6 +40,7 @@ const LANGUAGES = [
   { code: 'es', flag: '🇪🇸', label: 'Español' },
   { code: 'en', flag: '🇺🇸', label: 'English' },
   { code: 'pt', flag: '🇵🇹', label: 'Português' },
+  { code: 'de', flag: '🇩🇪', label: 'Deutsch' },
 ]
 
 function recommendTemplate({ profileId, useType, mainGoal, hasDebts }) {
@@ -273,6 +274,8 @@ export default function Onboarding({ onComplete }) {
           <button key={c.code} onClick={() => {
             set('country', c.code)
             set('currency', c.currency)
+            // Alemania: cambiar UI a alemán automáticamente (mismo espíritu que "reglas de tu país")
+            if (c.code === 'DE') updateSettings({ ...settings, language: 'de' })
           }} style={{
             padding: '10px 8px', borderRadius: 10, cursor: 'pointer',
             border: answers.country === c.code ? '1.5px solid var(--grn)' : '0.5px solid var(--brd2)',

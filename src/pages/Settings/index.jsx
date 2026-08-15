@@ -75,6 +75,7 @@ export default function Settings() {
             <option value="es">Español</option>
             <option value="en">English</option>
             <option value="pt">Português</option>
+            <option value="de">Deutsch</option>
           </select>
         </div>
         <div style={srow}>

@@ -65,7 +65,7 @@ function LohnabzuegeCard() {
         </FormGroup>
       </FormRow>
       <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--tx)', margin: '4px 0 12px', cursor: 'pointer' }}>
-        <input type="checkbox" checked={kirche} onChange={e => setKirche(e.target.checked)} />
+        <input type="checkbox" checked={kirche} onChange={e => setKirche(e.target.checked)} style={{ width: 16, height: 16, flexShrink: 0 }} />
         Kirchensteuerpflichtig (pago impuesto eclesiástico)
       </label>
 

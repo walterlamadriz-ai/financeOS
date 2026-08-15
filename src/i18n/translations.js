@@ -3400,4 +3400,4 @@ export const translations = {
   },
 }
 
-export const SUPPORTED_LANGUAGES = ['es', 'en', 'pt']
+export const SUPPORTED_LANGUAGES = ['es', 'en', 'pt', 'de']
