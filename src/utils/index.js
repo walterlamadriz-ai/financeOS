@@ -117,6 +117,24 @@ export const CATS_INCOME  = ['Salario', 'Freelance', 'Inversión', 'Arriendo', '
 // creado en "Entretenimiento" nunca detectaba gasto real registrado en "Entretención".
 export const CATS_EXPENSE = ['Alimentación', 'Vivienda', 'Transporte', 'Salud', 'Educación',
   'Ropa', 'Entretención', 'Servicios', 'Tecnología', 'Deporte', 'Viajes', 'Otros']
+
+// Categorías EFECTIVAS = canónicas + las que haya agregado la plantilla de perfil
+// activa (data/templates.js vía TemplateSelector/Onboarding, guardadas en
+// settings.categoriesExpense/categoriesIncome). Sin plantilla aplicada, es
+// exactamente CATS_EXPENSE/CATS_INCOME — no cambia el comportamiento por defecto.
+// Antes esos campos de settings se guardaban pero ningún formulario los leía: una
+// plantilla como "Pareja o familia" ofrecía "Educación hijos" en la vista previa,
+// pero esa categoría nunca era seleccionable al registrar un gasto real, así que
+// el presupuesto sugerido que la plantilla creaba quedaba en 0% gastado para siempre.
+export function getCategoriesExpense(settings) {
+  const extra = Array.isArray(settings?.categoriesExpense) ? settings.categoriesExpense : []
+  return [...CATS_EXPENSE, ...extra.filter(c => c && !CATS_EXPENSE.includes(c))]
+}
+export function getCategoriesIncome(settings) {
+  const extra = Array.isArray(settings?.categoriesIncome) ? settings.categoriesIncome : []
+  return [...CATS_INCOME, ...extra.filter(c => c && !CATS_INCOME.includes(c))]
+}
+
 export const METHODS      = ['Débito', 'Crédito', 'Efectivo', 'Transferencia']
 export const RECURRENCES  = ['Único', 'Mensual', 'Quincenal', 'Semanal']
 

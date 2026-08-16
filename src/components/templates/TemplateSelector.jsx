@@ -240,18 +240,9 @@ export default function TemplateSelector({ compact = false, onApplied }) {
     setPreview(null)
     setConfirm(null)
 
-    // 1. Actualizar settings con nuevas categorías y template activo
-    await updateSettings({
-      ...settings,
-      activeTemplateId:   template.id,
-      activeTemplateName: template.name,
-      categoriesIncome:   template.categoriesIncome,
-      categoriesExpense:  template.categoriesExpense,
-    })
-
-    // 2. Los presupuestos sugeridos se guardan como referencia (sin montos fijos)
-    // El asesor los configura manualmente con los montos reales del cliente
-    // Guardamos solo la estructura en settings para que el asesor los use de guía
+    // 1. Actualizar settings con nuevas categorías y template activo. Los
+    // presupuestos sugeridos se guardan como referencia (sin montos fijos) — el
+    // asesor los configura manualmente con los montos reales del cliente.
     await updateSettings({
       ...settings,
       activeTemplateId:      template.id,
@@ -263,7 +254,7 @@ export default function TemplateSelector({ compact = false, onApplied }) {
       templateAlerts:        template.alerts,
     })
 
-    // 3. #13 — Encender la diferenciación: convertir los presupuestos sugeridos
+    // 2. #13 — Encender la diferenciación: convertir los presupuestos sugeridos
     // en presupuestos REALES (limit = ingreso declarado × pct). No-destructivo:
     // solo crea categorías que aún no tienen presupuesto, y solo si hay ingreso
     // declarado. Antes esto quedaba solo como referencia y la promesa del modal

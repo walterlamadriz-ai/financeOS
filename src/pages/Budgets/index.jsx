@@ -3,7 +3,7 @@ import { useState, useMemo } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
 import { useT } from '../../i18n/useT.js'
 import { KPI, Card, CardHeader, FormGroup, FormRow, Btn, Alert, PageHeader } from '../../components/ui/index.jsx'
-import { fmtMoney, fmtPct, CATS_EXPENSE, catLabel } from '../../utils/index.js'
+import { fmtMoney, fmtPct, getCategoriesExpense, catLabel } from '../../utils/index.js'
 import { CURRENCY_SYMBOLS, monthLabel } from '../shared/constants.js'
 import MonthSelector from '../shared/MonthSelector.jsx'
 
@@ -18,6 +18,7 @@ export default function Budgets() {
   const rolloverOn    = !!settings.budgetRollover
 
   const activeMonth   = settings.activeMonth || new Date().toISOString().slice(0, 7)
+  const categoriesExpense = useMemo(() => getCategoriesExpense(settings), [settings])
 
   // Mes anterior para calcular rollover
   const prevMonth = useMemo(() => {
@@ -119,7 +120,7 @@ export default function Budgets() {
             <CardHeader title={t('budgets.new')} />
             {err && <Alert type="danger">⚠ {err}</Alert>}
             <FormRow>
-              <FormGroup label={t('budgets.form.category')}><select value={f.category} onChange={e => setF(p => ({...p,category:e.target.value}))}>{CATS_EXPENSE.map(c => <option key={c} value={c}>{catLabel(c)}</option>)}</select></FormGroup>
+              <FormGroup label={t('budgets.form.category')}><select value={f.category} onChange={e => setF(p => ({...p,category:e.target.value}))}>{categoriesExpense.map(c => <option key={c} value={c}>{catLabel(c)}</option>)}</select></FormGroup>
               <FormGroup label={t('budgets.form.limit', { currency: settings.currency||'CLP' })}><input type="number" inputMode="decimal" min="0" value={f.limit} placeholder="0" onChange={e => setF(p => ({...p,limit:e.target.value}))} /></FormGroup>
             </FormRow>
             <Btn variant="primary" onClick={submit}>{t('budgets.form.submit')}</Btn>

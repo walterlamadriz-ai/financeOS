@@ -9,7 +9,7 @@ import ChartCard from '../../components/charts/ChartCard.jsx'
 import HorizontalBars from '../../components/charts/HorizontalBars.jsx'
 import CategoryDonut from '../../components/charts/CategoryDonut.jsx'
 import { parseTransactionText } from '../../utils/smsParser.js'
-import { catLabel, catEmoji, subLabel, moneyLocale, dateLocale, CAT_COLORS, CATS_EXPENSE } from '../../utils/index.js'
+import { catLabel, catEmoji, subLabel, moneyLocale, dateLocale, CAT_COLORS, getCategoriesExpense } from '../../utils/index.js'
 import { pendingDebtMonthly } from '../../utils/personal.js'
 import { FormGroup } from '../../components/ui/index.jsx'
 
@@ -67,13 +67,14 @@ const FREQS    = [
   { value:'weekly',    label:'mov.freq.weekly' },
 ]
 // ── Formulario Gasto ──────────────────────────────────────────────────────────
-function FormGasto({ onSave, onCancel, sym, projects = [], onImport }) {
+function FormGasto({ onSave, onCancel, sym, projects = [], onImport, settings }) {
   const { t } = useT()
   const [f, setF] = useState({
     description:'', amount:'', date:todayStr(),
     category:'Alimentación', subcategory:'', method:'Débito', type:'Necesidad', notes:'', project:''
   })
   const set = (k,v) => setF(p => ({ ...p, [k]:v }))
+  const categoriesExpense = getCategoriesExpense(settings)
   const inp = { background:'var(--sur)', border:'.5px solid var(--brd)', borderRadius:6,
     padding:'7px 10px', fontSize:13, color:'var(--tx)', width:'100%',
     boxSizing:'border-box', fontFamily:'var(--mono)' }
@@ -168,7 +169,7 @@ function FormGasto({ onSave, onCancel, sym, projects = [], onImport }) {
             onChange={e => set('date', e.target.value)}/></FormGroup>
         <FormGroup label={t('mov.form.category')}>
           <select style={inp} value={f.category} onChange={handleCatChange}>
-            {CATS_EXPENSE.map(c => <option key={c} value={c}>{catLabel(c)}</option>)}
+            {categoriesExpense.map(c => <option key={c} value={c}>{catLabel(c)}</option>)}
           </select>
         </FormGroup>
         {subcatOptions.length > 0 && (
@@ -305,6 +306,7 @@ export default function Movements({ setPage }) {
 
   const sym         = SYM[settings.currency] || '$'
   const activeMonth = settings.activeMonth || new Date().toISOString().slice(0,7)
+  const categoriesExpense = useMemo(() => getCategoriesExpense(settings), [settings])
 
   const [showAdd,   setShowAdd]   = useState(false)
   const [showGasto, setShowGasto] = useState(false)
@@ -582,7 +584,7 @@ export default function Movements({ setPage }) {
           </div>
         )}
 
-        {showGasto && <FormGasto sym={sym} projects={projectOptions} onSave={handleSaveGasto} onCancel={() => setShowGasto(false)} onImport={setPage ? () => setPage('import') : undefined}/>}
+        {showGasto && <FormGasto sym={sym} projects={projectOptions} settings={settings} onSave={handleSaveGasto} onCancel={() => setShowGasto(false)} onImport={setPage ? () => setPage('import') : undefined}/>}
         {showSub   && <FormSub              onSave={handleSaveSub}   onCancel={() => setShowSub(false)}/>}
       </div>
 
@@ -657,7 +659,7 @@ export default function Movements({ setPage }) {
                   <select value={editForm.category||e.category} aria-label={t('mov.form.category')}
                     onChange={ev=>setEditForm(f=>({...f,category:ev.target.value,subcategory:''}))}
                     style={{padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}>
-                    {CATS_EXPENSE.map(c=><option key={c}>{c}</option>)}
+                    {categoriesExpense.map(c=><option key={c}>{c}</option>)}
                   </select>
                   <select value={editForm.subcategory??e.subcategory??''} aria-label={t('mov.form.subcat')}
                     onChange={ev=>setEditForm(f=>({...f,subcategory:ev.target.value}))}

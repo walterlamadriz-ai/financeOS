@@ -3,7 +3,7 @@ import { useState, useMemo } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
 import { useT } from '../../i18n/useT.js'
 import { KPI, Card, CardHeader, TxRow, FormGroup, FormRow, Btn, Alert, PageHeader } from '../../components/ui/index.jsx'
-import { fmtMoney, CAT_COLORS, CATS_INCOME, RECURRENCES, today, catLabel } from '../../utils/index.js'
+import { fmtMoney, CAT_COLORS, getCategoriesIncome, RECURRENCES, today, catLabel } from '../../utils/index.js'
 import { CURRENCY_SYMBOLS, monthLabel } from '../shared/constants.js'
 import MonthSelector from '../shared/MonthSelector.jsx'
 import { parseTransactionText } from '../../utils/smsParser.js'
@@ -21,6 +21,7 @@ export default function Income({ setPage }) {
   const [showPaste, setShowPaste] = useState(false)
   const [pasteText, setPasteText] = useState('')
   const [pasteMsg, setPasteMsg]   = useState(null)
+  const categoriesIncome = useMemo(() => getCategoriesIncome(settings), [settings])
 
   function detectFromPaste() {
     const r = parseTransactionText(pasteText)
@@ -122,7 +123,7 @@ export default function Income({ setPage }) {
             <FormGroup label={t('income.form.date')}><input type="date" value={f.date} onChange={e => setF(p => ({ ...p, date: e.target.value }))} /></FormGroup>
           </FormRow>
           <FormRow>
-            <FormGroup label={t('income.form.category')}><select value={f.category} onChange={e => setF(p => ({ ...p, category: e.target.value }))}>{CATS_INCOME.map(c => <option key={c} value={c}>{catLabel(c)}</option>)}</select></FormGroup>
+            <FormGroup label={t('income.form.category')}><select value={f.category} onChange={e => setF(p => ({ ...p, category: e.target.value }))}>{categoriesIncome.map(c => <option key={c} value={c}>{catLabel(c)}</option>)}</select></FormGroup>
             <FormGroup label={t('income.form.recurrence')}><select value={f.recurrence} onChange={e => setF(p => ({ ...p, recurrence: e.target.value }))}>{RECURRENCES.map(r => <option key={r}>{r}</option>)}</select></FormGroup>
           </FormRow>
           <FormGroup label={t('income.form.notes')}><input type="text" value={f.notes} placeholder={t('income.form.notesPh')} onChange={e => setF(p => ({ ...p, notes: e.target.value }))} /></FormGroup>
@@ -169,7 +170,7 @@ export default function Income({ setPage }) {
                         <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:3}}>{t('income.edit.category')}</div>
                         <select value={editForm.category||''} onChange={e=>setEditForm(f=>({...f,category:e.target.value}))}
                           style={{width:'100%',padding:'5px 8px',fontSize:12,borderRadius:5,border:'0.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}>
-                          {CATS_INCOME.map(c=><option key={c} value={c}>{catLabel(c)}</option>)}
+                          {categoriesIncome.map(c=><option key={c} value={c}>{catLabel(c)}</option>)}
                         </select>
                       </div>
                     </div>
