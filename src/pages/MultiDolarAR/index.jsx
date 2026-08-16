@@ -6,6 +6,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
+import { useT } from '../../i18n/useT.js'
 import { Card, CardHeader, FormRow, FormGroup, Alert, PageHeader } from '../../components/ui/index.jsx'
 import ProGate from '../../components/ui/ProGate.jsx'
 import { loadTasaAR } from '../../utils/tasaAR.js'
@@ -26,12 +27,13 @@ const DOLARES = [
 
 export default function MultiDolarAR() {
   const { settings } = useApp()
+  const { t } = useT()
   const country = (settings.country || 'CL').toUpperCase()
 
   if (country !== 'AR') {
     return (
       <div style={{ padding: 32, textAlign: 'center', color: 'var(--th)', fontFamily: 'var(--mono)', fontSize: 13 }}>
-        Este módulo está disponible solo para Argentina 🇦🇷
+        {t('multidolarar.onlyAR')}
       </div>
     )
   }
@@ -40,17 +42,17 @@ export default function MultiDolarAR() {
   useEffect(() => { loadTasaAR().then(setLive) }, [])
 
   return (
-    <ProGate feature="El panel multi-dólar">
+    <ProGate feature={t('multidolarar.proFeature')}>
       <div className="stack">
-        <PageHeader title="Dólar y rendimientos" sub="A qué dólar convertís hoy, y en qué la dejás mientras tanto" />
+        <PageHeader title={t('multidolarar.title')} sub={t('multidolarar.sub')} />
 
-        <Alert type="info">⚠ Estimación educativa, no asesoría financiera. Cotizaciones de referencia — el precio real varía por operador.</Alert>
+        <Alert type="info">⚠ {t('multidolarar.disclaimer')}</Alert>
 
         <Card>
-          <CardHeader title="Cotizaciones de hoy" right={
+          <CardHeader title={t('multidolarar.rates.title')} right={
             live && (
               <span style={{ fontSize: 10, fontFamily: 'var(--mono)', color: live.source === 'api' ? 'var(--accent)' : 'var(--th)' }}>
-                {live.source === 'api' ? '● en vivo' : '○ referencial (sin conexión)'}
+                {live.source === 'api' ? `● ${t('multidolarar.rates.live')}` : `○ ${t('multidolarar.rates.offline')}`}
               </span>
             )
           } />
@@ -73,6 +75,7 @@ export default function MultiDolarAR() {
 }
 
 function RendimientosCard({ blue }) {
+  const { t } = useT()
   const [capital, setCapital] = useState('')
   const [dias, setDias] = useState('30')
   const [tnas, setTnas] = useState(TNA_DEFAULTS)
@@ -85,21 +88,21 @@ function RendimientosCard({ blue }) {
     const c = Number(capital) || 0
     const d = Number(dias) || 0
     return [
-      { key: 'plazoFijo', label: 'Plazo fijo tradicional', ...calcRendimiento(c, tnas.plazoFijo, d) },
-      { key: 'cuentaRemunerada', label: 'Cuenta remunerada / billetera', ...calcRendimiento(c, tnas.cuentaRemunerada, d) },
-      { key: 'fciMoneyMarket', label: 'FCI money market', ...calcRendimiento(c, tnas.fciMoneyMarket, d) },
+      { key: 'plazoFijo', label: t('multidolarar.instrumentos.plazoFijo'), ...calcRendimiento(c, tnas.plazoFijo, d) },
+      { key: 'cuentaRemunerada', label: t('multidolarar.instrumentos.cuentaRemunerada'), ...calcRendimiento(c, tnas.cuentaRemunerada, d) },
+      { key: 'fciMoneyMarket', label: t('multidolarar.instrumentos.fciMoneyMarket'), ...calcRendimiento(c, tnas.fciMoneyMarket, d) },
     ]
-  }, [capital, dias, tnas])
+  }, [capital, dias, tnas, t])
 
   return (
     <Card>
-      <CardHeader title="¿Dónde rinde más tu plata?" />
+      <CardHeader title={t('multidolarar.rendimientos.title')} />
       <FormRow>
-        <FormGroup label="Monto en pesos">
+        <FormGroup label={t('multidolarar.rendimientos.montoLabel')}>
           <input type="number" inputMode="decimal" min="0" value={capital} placeholder="0"
             onChange={e => setCapital(e.target.value)} />
         </FormGroup>
-        <FormGroup label="Plazo (días)">
+        <FormGroup label={t('multidolarar.rendimientos.diasLabel')}>
           <input type="number" inputMode="decimal" min="1" max="365" value={dias}
             onChange={e => setDias(e.target.value)} />
         </FormGroup>
@@ -109,7 +112,7 @@ function RendimientosCard({ blue }) {
         {instrumentos.map(inst => (
           <div key={inst.key} style={{ background: 'var(--sur2)', border: '.5px solid var(--brd)', borderRadius: 'var(--r)', padding: '14px 16px' }}>
             <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--tx)', marginBottom: 8 }}>{inst.label}</div>
-            <FormGroup label="TNA (%) — ajustá con la tasa real">
+            <FormGroup label={t('multidolarar.rendimientos.tnaLabel')}>
               <input type="number" inputMode="decimal" min="0" step="0.1" value={tnas[inst.key]}
                 onChange={e => setTna(inst.key, e.target.value)} />
             </FormGroup>
@@ -117,19 +120,19 @@ function RendimientosCard({ blue }) {
               {fmtARS(inst.final)}
             </div>
             <div style={{ fontSize: 11, color: 'var(--tm)', marginTop: 4 }}>
-              +{fmtARS(inst.interes)} de interés · {blue ? fmtUSD(inst.final / blue) : '—'} al blue de hoy
+              {t('multidolarar.rendimientos.interesNote', { interes: fmtARS(inst.interes), usd: blue ? fmtUSD(inst.final / blue) : '—' })}
             </div>
             <div style={{ fontSize: 11, color: 'var(--th)', marginTop: 6, paddingTop: 6, borderTop: '.5px solid var(--brd)' }}>
-              TEA <span style={{ fontFamily: 'var(--mono)', fontWeight: 600 }}>{(inst.tea * 100).toFixed(1)}%</span> si renovás cada 30 días
+              {t('multidolarar.rendimientos.teaNote', { pct: (inst.tea * 100).toFixed(1) })}
             </div>
           </div>
         ))}
       </div>
 
       <div style={{ fontSize: 11, color: 'var(--th)', lineHeight: 1.6, marginTop: 14, padding: '10px 12px', background: 'var(--sur2)', borderRadius: 8, border: '.5px solid var(--brd)' }}>
-        El monto final usa <strong>interés simple</strong> sobre el plazo que ingresaste, sin renovar: es lo que cobrás si retirás al vencimiento. La TEA de cada tarjeta muestra el rendimiento compuesto equivalente si renovás cada 30 días durante un año — ese es el número comparable entre instrumentos.
+        {t('multidolarar.rendimientos.explainer1')}
         <br /><br />
-        El equivalente en dólares asume que el blue no se mueve durante el plazo. Si el dólar sube más rápido que tu tasa, perdés poder de compra en dólares aunque ganaste en pesos.
+        {t('multidolarar.rendimientos.explainer2')}
       </div>
     </Card>
   )
