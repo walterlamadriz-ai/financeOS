@@ -7,6 +7,7 @@ import { KPI, Card, CardHeader, Alert, Empty, PageHeader } from '../../component
 import { fmtMoney, fmtPct, dateLocale } from '../../utils/index.js'
 import { ReportsDisclaimer } from '../../components/legal/MicroCopy.jsx'
 import { pendingDebtMonthly } from '../../utils/personal.js'
+import { effectiveBudgetLimits } from '../../utils/budgets.js'
 import { calcNetWorth } from '../../utils/netWorth.js'
 import { CURRENCY_SYMBOLS, monthLabel } from '../shared/constants.js'
 import MonthSelector from '../shared/MonthSelector.jsx'
@@ -81,7 +82,12 @@ export default function Reports({ setPage }) {
   const necesidad    = useMemo(() => mExpenses.filter(r=>r.type==='Necesidad').reduce((s,r) => s+r.amount, 0), [mExpenses])
   const deseos       = useMemo(() => mExpenses.filter(r=>r.type==='Deseo').reduce((s,r) => s+r.amount, 0), [mExpenses])
   const expByCat     = useMemo(() => { const m={}; mExpenses.forEach(e=>{m[e.category]=(m[e.category]||0)+e.amount}); return m }, [mExpenses])
-  const overBudget   = useMemo(() => budgets.filter(b=>(expByCat[b.category]||0)>b.limit), [budgets, expByCat])
+  // Límite EFECTIVO (con rollover si está activo) — mismo cálculo que la página
+  // Presupuestos. Antes usaba b.limit crudo: con rollover activo, Presupuestos
+  // podía decir "dentro del límite" mientras Reportes decía "excedido" para la
+  // misma categoría el mismo mes.
+  const effLimits    = useMemo(() => effectiveBudgetLimits({ budgets, expenses, activeMonth, settings }), [budgets, expenses, activeMonth, settings])
+  const overBudget   = useMemo(() => budgets.filter(b=>(expByCat[b.category]||0)>(effLimits[b.category]||0)), [budgets, expByCat, effLimits])
   const neededToSave = Math.max(0, totalIncome*(settings.savingGoalPct/100||0.25)-Math.max(0,balance))
 
   const trendData = useMemo(() => {
@@ -162,6 +168,7 @@ export default function Reports({ setPage }) {
         </Card>
         <Card>
           <CardHeader title={t('reports.rule.title')} />
+          <div style={{fontSize:11,color:'var(--th)',fontFamily:'var(--sans)',lineHeight:1.5,marginTop:-2,marginBottom:10}}>{t('reports.rule.sub')}</div>
           {totalIncome === 0 ? <Empty text={t('reports.rule.empty')} cta={setPage ? t('empty.importCta') : undefined} onCta={() => setPage?.('import')} /> : (() => {
             const rules = [
               {id:'needs', label:t('reports.rule.needs'), actual:necesidad+totalDebt, ideal:totalIncome*0.5, color:'var(--grn)', max:50},
@@ -195,39 +202,55 @@ export default function Reports({ setPage }) {
         <Card>
           <CardHeader title={t('reports.trend.title')} />
           {trendData.every(d=>d.Ingresos===0&&d.Gastos===0) ? <Empty text={t('reports.trend.empty')} /> : (
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={trendData} barGap={4} barCategoryGap="30%">
-                <CartesianGrid {...gridStyle}/>
-                <XAxis dataKey="mes" tick={axisStyle} axisLine={false} tickLine={false}/>
-                <YAxis tick={axisStyle} axisLine={false} tickLine={false} tickFormatter={v=>v>=1000000?(v/1000000).toFixed(1)+'M':v>=1000?(v/1000).toFixed(0)+'K':v}/>
-                <RTooltip contentStyle={ttStyle}/>
-                <Legend wrapperStyle={{fontSize:11,fontFamily:'var(--mono)',paddingTop:8}}/>
-                <Bar dataKey="Ingresos" name={t('reports.trend.income')} fill="var(--grn)" radius={[3,3,0,0]} opacity={0.85}/>
-                <Bar dataKey="Gastos"   name={t('reports.trend.expenses')} fill="var(--red)" radius={[3,3,0,0]} opacity={0.75}/>
-              </BarChart>
-            </ResponsiveContainer>
+            <>
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={trendData} barGap={4} barCategoryGap="30%">
+                  <CartesianGrid {...gridStyle}/>
+                  <XAxis dataKey="mes" tick={axisStyle} axisLine={false} tickLine={false}/>
+                  <YAxis tick={axisStyle} axisLine={false} tickLine={false} tickFormatter={v=>v>=1000000?(v/1000000).toFixed(1)+'M':v>=1000?(v/1000).toFixed(0)+'K':v}/>
+                  <RTooltip contentStyle={ttStyle}/>
+                  <Legend wrapperStyle={{fontSize:11,fontFamily:'var(--mono)',paddingTop:8}}/>
+                  <Bar dataKey="Ingresos" name={t('reports.trend.income')} fill="var(--grn)" radius={[3,3,0,0]} opacity={0.85}/>
+                  <Bar dataKey="Gastos"   name={t('reports.trend.expenses')} fill="var(--red)" radius={[3,3,0,0]} opacity={0.75}/>
+                </BarChart>
+              </ResponsiveContainer>
+              {/* recharts no expone los datos del gráfico a un lector de pantalla —
+                  esta tabla tiene la misma información, oculta solo visualmente. */}
+              <table className="sr-only">
+                <caption>{t('reports.trend.title')}</caption>
+                <thead><tr><th scope="col">{t('common.month')}</th><th scope="col">{t('reports.trend.income')}</th><th scope="col">{t('reports.trend.expenses')}</th></tr></thead>
+                <tbody>{trendData.map(d => <tr key={d.mes}><th scope="row">{d.mes}</th><td>{fmtMoney(d.Ingresos,sym)}</td><td>{fmtMoney(d.Gastos,sym)}</td></tr>)}</tbody>
+              </table>
+            </>
           )}
         </Card>
       </div>
       <Card>
         <CardHeader title={t('reports.savings.title')} />
         {trendData.every(d=>d.Ahorro===0) ? <Empty text={t('reports.savings.empty')} /> : (
-          <ResponsiveContainer width="100%" height={160}>
-            <AreaChart data={trendData}>
-              <defs>
-                <linearGradient id="ahorroGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%"  stopColor="var(--grn)" stopOpacity={0.2}/>
-                  <stop offset="95%" stopColor="var(--grn)" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid {...gridStyle}/>
-              <XAxis dataKey="mes" tick={axisStyle} axisLine={false} tickLine={false}/>
-              <YAxis tick={axisStyle} axisLine={false} tickLine={false} tickFormatter={v=>v>=1000000?(v/1000000).toFixed(1)+'M':v>=1000?(v/1000).toFixed(0)+'K':v}/>
-              <RTooltip contentStyle={ttStyle}/>
-              <ReferenceLine y={0} stroke="var(--brd2)"/>
-              <Area type="monotone" dataKey="Ahorro" name={t('reports.savings.series')} stroke="var(--grn)" strokeWidth={2} fill="url(#ahorroGrad)"/>
-            </AreaChart>
-          </ResponsiveContainer>
+          <>
+            <ResponsiveContainer width="100%" height={160}>
+              <AreaChart data={trendData}>
+                <defs>
+                  <linearGradient id="ahorroGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%"  stopColor="var(--grn)" stopOpacity={0.2}/>
+                    <stop offset="95%" stopColor="var(--grn)" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid {...gridStyle}/>
+                <XAxis dataKey="mes" tick={axisStyle} axisLine={false} tickLine={false}/>
+                <YAxis tick={axisStyle} axisLine={false} tickLine={false} tickFormatter={v=>v>=1000000?(v/1000000).toFixed(1)+'M':v>=1000?(v/1000).toFixed(0)+'K':v}/>
+                <RTooltip contentStyle={ttStyle}/>
+                <ReferenceLine y={0} stroke="var(--brd2)"/>
+                <Area type="monotone" dataKey="Ahorro" name={t('reports.savings.series')} stroke="var(--grn)" strokeWidth={2} fill="url(#ahorroGrad)"/>
+              </AreaChart>
+            </ResponsiveContainer>
+            <table className="sr-only">
+              <caption>{t('reports.savings.title')}</caption>
+              <thead><tr><th scope="col">{t('common.month')}</th><th scope="col">{t('reports.savings.series')}</th></tr></thead>
+              <tbody>{trendData.map(d => <tr key={d.mes}><th scope="row">{d.mes}</th><td>{fmtMoney(d.Ahorro,sym)}</td></tr>)}</tbody>
+            </table>
+          </>
         )}
       </Card>
       <Card>

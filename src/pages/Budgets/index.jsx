@@ -139,15 +139,21 @@ export default function Budgets() {
             )}
             {(() => {
               const inc = ingresoNeto
+              // Categorías tomadas 1:1 de CATS_EXPENSE (utils/index.js) — la misma lista
+              // que usa el formulario de gasto. Antes usaban nombres propios
+              // ("Entretenimiento", "Ropa y calzado", "Restaurantes") que ningún gasto
+              // real podía tener nunca, así que el presupuesto quedaba en 0% gastado
+              // para siempre. "Restaurantes" se fusiona en Alimentación (12%→17%)
+              // porque comer afuera ya es una subcategoría de Alimentación en el
+              // formulario de gasto, no una categoría propia.
               const sugs = [
                 {cat:'Vivienda',pct:0.25,grupo:t('budgets.group.needs')},
-                {cat:'Alimentación',pct:0.12,grupo:t('budgets.group.needs')},
+                {cat:'Alimentación',pct:0.17,grupo:t('budgets.group.needs')},
                 {cat:'Transporte',pct:0.08,grupo:t('budgets.group.needs')},
                 {cat:'Salud',pct:0.05,grupo:t('budgets.group.needs')},
-                {cat:'Entretenimiento',pct:0.08,grupo:t('budgets.group.lifestyle')},
+                {cat:'Entretención',pct:0.08,grupo:t('budgets.group.lifestyle')},
                 {cat:'Educación',pct:0.07,grupo:t('budgets.group.lifestyle')},
-                {cat:'Ropa y calzado',pct:0.05,grupo:t('budgets.group.lifestyle')},
-                {cat:'Restaurantes',pct:0.05,grupo:t('budgets.group.lifestyle')},
+                {cat:'Ropa',pct:0.05,grupo:t('budgets.group.lifestyle')},
                 {cat:'Otros',pct:0.05,grupo:t('budgets.group.lifestyle')},
                 {cat:ahorroLabel,pct:0.20,grupo:t('budgets.group.savings'),highlight:true},
               ]

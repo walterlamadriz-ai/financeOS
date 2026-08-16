@@ -31,3 +31,20 @@ export function pendingDebtMonthly(debts, monthExpenses) {
     .reduce((s, e) => s + (Number(e.amount) || 0), 0)
   return Math.max(0, minTotal - paid)
 }
+
+// ── Ratio de deuda personal ──────────────────────────────────────────────────
+// Fuente única para el score, el Modo Asesor y el Coach — antes cada uno tenía
+// su propio cálculo, con dos bugs distintos:
+//  (a) sumaban TODA la deuda, incluida la de propiedades de inversión (cuyo
+//      dividendo ya se refleja en el flujo de esa propiedad, no en el bolsillo
+//      personal) — infla el ratio de alguien con una hipoteca de inversión sana;
+//  (b) con ingreso $0, unos daban ratio 0 ("sin carga") y otros ratio 1 ("carga
+//      máxima") para la MISMA situación — Modo Asesor mostraba "Saludable" en
+//      verde mientras el score daba 0 de 20 puntos.
+// Convención correcta: ingreso $0 + deuda personal > 0 es el escenario de MÁS
+// riesgo, no de menos — así que el ratio debe ser el máximo (1), no 0.
+export function personalDebtRatio(debts, annualIncome) {
+  const totalDebt = personalDebts(debts).reduce((s, d) => s + (Number(d.balance) || 0), 0)
+  const ratio = annualIncome > 0 ? totalDebt / annualIncome : (totalDebt > 0 ? 1 : 0)
+  return { totalDebt, ratio }
+}

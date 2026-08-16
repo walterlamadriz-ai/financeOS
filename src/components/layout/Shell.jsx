@@ -76,6 +76,15 @@ export default function Shell({ page, setPage, children }) {
   const drawerRef = useRef(null)
   useDialogA11y(drawerOpen, () => setDrawerOpen(false), drawerRef)
 
+  // React 18 no serializa `inert` como prop JSX (llega hasta 19) — sin esto, el
+  // drawer cerrado queda navegable por teclado y visible para lectores de
+  // pantalla pese a estar fuera de pantalla vía transform. Seteo directo al DOM.
+  useEffect(() => {
+    if (!drawerRef.current) return
+    if (drawerOpen) drawerRef.current.removeAttribute('inert')
+    else drawerRef.current.setAttribute('inert', '')
+  }, [drawerOpen])
+
   // ── FAB speed-dial (Ingreso / Egreso) ────────────────────────────────────────
   const [fabOpen, setFabOpen] = useState(false)
   const [quickAdd, setQuickAdd] = useState(null) // null | 'expense' | 'income'
@@ -100,6 +109,17 @@ export default function Shell({ page, setPage, children }) {
     document.body.style.overflow = drawerOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
   }, [drawerOpen])
+
+  // ── Foco al cambiar de página ────────────────────────────────────────────────
+  // Sin esto, un lector de pantalla no se entera de que la página cambió: el foco
+  // se queda en el botón del sidebar que se clickeó. Mismo patrón que ya usa
+  // Onboarding.jsx (headingRef) — acá se aplica al landmark <main>, con su nombre
+  // accesible dinámico, en vez de tocar cada página una por una.
+  const contentRef = useRef(null)
+  useEffect(() => {
+    const id = setTimeout(() => contentRef.current?.focus(), 50)
+    return () => clearTimeout(id)
+  }, [page])
 
   // ── Historial de navegación ──────────────────────────────────────────────────
   const [history, setHistory] = useState([])
@@ -199,6 +219,8 @@ export default function Shell({ page, setPage, children }) {
       {drawerOpen && <div className={s.overlay} onClick={() => setDrawerOpen(false)} />}
 
       {/* ── DRAWER MÓVIL ── */}
+      {/* inert cuando está cerrado se setea vía ref más arriba, no como prop JSX
+          (ver comentario junto a drawerRef). */}
       <nav ref={drawerRef} tabIndex={-1} role="dialog" aria-modal={drawerOpen} aria-label={t('nav.menuLabel')}
         className={s.drawer + (drawerOpen ? ' ' + s.drawerOpen : '')}>
         <div className={s.drawerHeader}>
@@ -245,7 +267,7 @@ export default function Shell({ page, setPage, children }) {
           <span className={s.topRight}>FinanceOS · {settings.currency || 'CLP'}</span>
         </div>
 
-        <main className={s.content}>
+        <main className={s.content} ref={contentRef} tabIndex={-1} style={{ outline: 'none' }} aria-label={t(pageLabel(page))}>
           <div className={s.contentInner}>
             {children}
           </div>

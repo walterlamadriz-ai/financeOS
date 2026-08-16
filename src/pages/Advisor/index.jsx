@@ -16,6 +16,7 @@ import TemplateSelector from '../../components/templates/TemplateSelector.jsx'
 import config from '../../config.js'
 import { calcNetWorth } from '../../utils/netWorth.js'
 import { countBudgetsExceeded } from '../../utils/budgets.js'
+import { personalDebtRatio, personalDebts } from '../../utils/personal.js'
 
 const CURRENCY_SYMBOLS = { CLP: '$', USD: 'US$', EUR: '€', VES: 'Bs.', MXN: '$', ARS: '$' }
 
@@ -35,8 +36,11 @@ function calcTrafficLight(metrics, t) {
     signals.push({ id: 'saving', label: t('adv.tl.saving'), status: 'red',    value: fmtPct(metrics.savingRate), note: t('adv.tl.saving.red', { pct: fmtPct(metrics.savingRate) }) })
   }
 
-  // 2. Ratio deuda / ingreso mensual
-  const debtRatio = metrics.mIncome > 0 ? metrics.totalDebt / (metrics.mIncome * 12) : 0
+  // 2. Ratio deuda / ingreso anual — ya viene calculado en metrics.debtRatio
+  // (personalDebtRatio, utils/personal.js): con ingreso $0 y deuda, es carga
+  // máxima (1), no 0 — antes este semáforo decía "Saludable" en verde
+  // exactamente cuando el score daba 0 de 20 puntos para la misma situación.
+  const debtRatio = metrics.debtRatio ?? 0
   if (debtRatio <= 0.30) {
     signals.push({ id: 'debt', label: t('adv.tl.debt'), status: 'green',  value: fmtPct(debtRatio), note: t('adv.tl.debt.green', { pct: fmtPct(debtRatio) }) })
   } else if (debtRatio <= 0.60) {
@@ -331,8 +335,10 @@ export default function Advisor() {
   const mExpense = monthExpenses.reduce((s, r) => s + r.amount, 0)
   const mBalance = mIncome - mExpense
   const savingRate = mIncome > 0 ? mBalance / mIncome : 0
-  const totalDebt = debts.reduce((s, d) => s + d.balance, 0)
-  const totalMinPayments = debts.reduce((s, d) => s + (d.minPayment || 0), 0)
+  // Solo deuda del ámbito personal (excluye propiedades de inversión) — mismo
+  // cálculo que el score y el Coach, ver personalDebtRatio en utils/personal.js.
+  const { totalDebt, ratio: debtRatio } = personalDebtRatio(debts, mIncome * 12)
+  const totalMinPayments = personalDebts(debts).reduce((s, d) => s + (d.minPayment || 0), 0)
 
   // Presupuestos excedidos
   const expByCat = useMemo(() => {
@@ -347,8 +353,8 @@ export default function Advisor() {
   const goalsProgress = goals.map(g => ({ ...g, pct: g.target > 0 ? g.saved / g.target : 0 }))
   const avgGoalPct = goalsProgress.length > 0 ? goalsProgress.reduce((s, g) => s + g.pct, 0) / goalsProgress.length : 0
 
-  const metrics = { savingRate, mIncome, mExpense, mBalance, totalDebt, goals, budgets, overBudgetCount, monthExpenses, debts, sym }
-  const signals = useMemo(() => calcTrafficLight(metrics, t), [savingRate, mIncome, mBalance, totalDebt, overBudgetCount, goals.length, settings.language])
+  const metrics = { savingRate, mIncome, mExpense, mBalance, totalDebt, debtRatio, goals, budgets, overBudgetCount, monthExpenses, debts, sym }
+  const signals = useMemo(() => calcTrafficLight(metrics, t), [savingRate, mIncome, mBalance, totalDebt, debtRatio, overBudgetCount, goals.length, settings.language])
   const alerts  = useMemo(() => calcAlerts(metrics, t),       [savingRate, mIncome, mBalance, debts, monthExpenses, goals, overBudgetCount, settings.language])
 
   // Score general (0-100) basado en semáforos

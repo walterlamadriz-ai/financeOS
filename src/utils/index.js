@@ -58,14 +58,13 @@ export const CAT_COLORS = {
   Entretención: '#e05a4a', // alias — algunos registros históricos usan esta grafía
   Servicios: '#0f6e56',
   Ropa: '#d4537e',
-  Otro: '#888780',
-  Otros: '#888780', // alias — algunos registros históricos usan plural
+  Otro: '#888780', // categorías de INGRESO usan singular (ver CATS_INCOME)
+  Otros: '#888780', // categorías de GASTO usan plural (ver CATS_EXPENSE)
   Salario: '#1a6b4a',
   Freelance: '#4a9ad4',
   Inversión: '#7f77dd',
   Arriendo: '#d4982a',
   Bono: '#3dbe7a',
-  // Categorías de suscripciones (antes solo definidas localmente en Movements)
   Tecnología: '#818cf8',
   Deporte: '#4ade80',
   Viajes: '#f472b6',
@@ -83,12 +82,10 @@ export const CAT_COLORS = {
 // Emoji por categoría — hace el registro más ágil y amigable. Fallback: solo el nombre.
 export const CAT_EMOJIS = {
   Vivienda: '🏠', Alimentación: '🛒', Transporte: '🚗', Salud: '⚕️', Educación: '📚',
-  Entretenimiento: '🎬', Servicios: '💡', Ropa: '👕', Tecnología: '💻', Mascota: '🐾',
-  Propiedad: '🏢', Inversión: '📈', Otro: '📦',
+  Entretenimiento: '🎬', Entretención: '🎬', Servicios: '💡', Ropa: '👕', Tecnología: '💻', Mascota: '🐾',
+  Propiedad: '🏢', Inversión: '📈', Otro: '📦', Deporte: '🏃', Viajes: '✈️',
   Salario: '💼', Freelance: '🧑‍💻', Arriendo: '🔑', Bono: '🎁', Pensión: '🏦', 'Negocio propio': '🏪',
-  // Alias usados por las sugerencias de presupuesto (nombres distintos a las categorías canónicas).
-  // 🍔 queda para comer fuera; 🛒 (Alimentación) es el mercado del mes.
-  'Ropa y calzado': '👕', Restaurantes: '🍔', Otros: '📦', Ahorro: '💰',
+  Otros: '📦', Ahorro: '💰',
 }
 // Devuelve el emoji de la categoría (o '' si no tiene).
 export const catEmoji = (c) => CAT_EMOJIS[c] || ''
@@ -114,7 +111,12 @@ export const DEBT_EMOJIS = { Tarjeta: '💳', Hipoteca: '🏠', Auto: '🚗', Cr
 export const debtEmoji = (tp) => DEBT_EMOJIS[tp] || '💳'
 
 export const CATS_INCOME  = ['Salario', 'Freelance', 'Inversión', 'Arriendo', 'Bono', 'Otro']
-export const CATS_EXPENSE = ['Vivienda', 'Alimentación', 'Transporte', 'Salud', 'Educación', 'Entretenimiento', 'Servicios', 'Ropa', 'Otro']
+// Única fuente de verdad de categorías de gasto — la usan el formulario de gasto
+// (Movements), el selector manual de presupuesto y el generador 50/30/20 (Budgets).
+// Antes había 3 listas distintas y ligeramente distintas entre sí: un presupuesto
+// creado en "Entretenimiento" nunca detectaba gasto real registrado en "Entretención".
+export const CATS_EXPENSE = ['Alimentación', 'Vivienda', 'Transporte', 'Salud', 'Educación',
+  'Ropa', 'Entretención', 'Servicios', 'Tecnología', 'Deporte', 'Viajes', 'Otros']
 export const METHODS      = ['Débito', 'Crédito', 'Efectivo', 'Transferencia']
 export const RECURRENCES  = ['Único', 'Mensual', 'Quincenal', 'Semanal']
 
@@ -129,7 +131,7 @@ export const SEED_EXPENSES = [
   { id: uid(), date: '2025-05-01', description: 'Arriendo', amount: 480000, category: 'Vivienda', method: 'Transferencia', type: 'Necesidad', recurrence: 'Mensual', notes: '' },
   { id: uid(), date: '2025-05-03', description: 'Supermercado', amount: 185000, category: 'Alimentación', method: 'Débito', type: 'Necesidad', recurrence: 'Único', notes: '' },
   { id: uid(), date: '2025-05-04', description: 'Bencina', amount: 62000, category: 'Transporte', method: 'Débito', type: 'Necesidad', recurrence: 'Único', notes: '' },
-  { id: uid(), date: '2025-05-05', description: 'Netflix', amount: 18000, category: 'Entretenimiento', method: 'Crédito', type: 'Deseo', recurrence: 'Mensual', notes: '' },
+  { id: uid(), date: '2025-05-05', description: 'Netflix', amount: 18000, category: 'Entretención', method: 'Crédito', type: 'Deseo', recurrence: 'Mensual', notes: '' },
   { id: uid(), date: '2025-05-06', description: 'Farmacia', amount: 35000, category: 'Salud', method: 'Débito', type: 'Necesidad', recurrence: 'Único', notes: '' },
 ]
 
@@ -137,7 +139,7 @@ export const SEED_BUDGETS = [
   { id: uid(), category: 'Vivienda', limit: 500000 },
   { id: uid(), category: 'Alimentación', limit: 300000 },
   { id: uid(), category: 'Transporte', limit: 80000 },
-  { id: uid(), category: 'Entretenimiento', limit: 60000 },
+  { id: uid(), category: 'Entretención', limit: 60000 },
   { id: uid(), category: 'Salud', limit: 100000 },
 ]
 

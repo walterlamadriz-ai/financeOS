@@ -100,7 +100,7 @@ function RendimientosCard({ blue }) {
             onChange={e => setCapital(e.target.value)} />
         </FormGroup>
         <FormGroup label="Plazo (días)">
-          <input type="number" inputMode="decimal" min="1" value={dias}
+          <input type="number" inputMode="decimal" min="1" max="365" value={dias}
             onChange={e => setDias(e.target.value)} />
         </FormGroup>
       </FormRow>
@@ -119,11 +119,16 @@ function RendimientosCard({ blue }) {
             <div style={{ fontSize: 11, color: 'var(--tm)', marginTop: 4 }}>
               +{fmtARS(inst.interes)} de interés · {blue ? fmtUSD(inst.final / blue) : '—'} al blue de hoy
             </div>
+            <div style={{ fontSize: 11, color: 'var(--th)', marginTop: 6, paddingTop: 6, borderTop: '.5px solid var(--brd)' }}>
+              TEA <span style={{ fontFamily: 'var(--mono)', fontWeight: 600 }}>{(inst.tea * 100).toFixed(1)}%</span> si renovás cada 30 días
+            </div>
           </div>
         ))}
       </div>
 
-      <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', lineHeight: 1.6, marginTop: 14, padding: '10px 12px', background: 'var(--sur2)', borderRadius: 8, border: '.5px solid var(--brd)' }}>
+      <div style={{ fontSize: 11, color: 'var(--th)', lineHeight: 1.6, marginTop: 14, padding: '10px 12px', background: 'var(--sur2)', borderRadius: 8, border: '.5px solid var(--brd)' }}>
+        El monto final usa <strong>interés simple</strong> sobre el plazo que ingresaste, sin renovar: es lo que cobrás si retirás al vencimiento. La TEA de cada tarjeta muestra el rendimiento compuesto equivalente si renovás cada 30 días durante un año — ese es el número comparable entre instrumentos.
+        <br /><br />
         El equivalente en dólares asume que el blue no se mueve durante el plazo. Si el dólar sube más rápido que tu tasa, perdés poder de compra en dólares aunque ganaste en pesos.
       </div>
     </Card>

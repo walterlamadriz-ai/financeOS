@@ -19,6 +19,39 @@ export default function Multimoneda() {
   const country = (settings.country || 'CL').toUpperCase()
   const config = CONFIGS[country]
 
+  const [bs, setBs] = useState('')
+  const [usd, setUsd] = useState('')
+  const [tasa, setTasa] = useState(config?.tasaDefault ?? '')
+  const [fuenteTasa, setFuenteTasa] = useState('paralelo')
+  const [live, setLive] = useState(null)
+
+  useEffect(() => {
+    if (!config) return
+    loadTasaVE().then(data => {
+      setLive(data)
+      // Si la API no trajo paralelo, caemos al oficial de forma EXPLÍCITA
+      // (moviendo el selector), no dejando un paralelo inventado.
+      if (data.paraleloDisponible && data.paralelo > 0) {
+        setFuenteTasa('paralelo')
+        setTasa(data.paralelo)
+      } else {
+        setFuenteTasa('oficial')
+        setTasa(data.oficial)
+      }
+    })
+  }, [config])
+
+  // La tasa vacía o inválida NO cae a un default silencioso: bloquea el cálculo.
+  const tasaNum = Number(tasa)
+  const tasaValida = String(tasa).trim() !== '' && Number.isFinite(tasaNum) && tasaNum > 0
+
+  const result = useMemo(
+    () => (config && tasaValida
+      ? config.calcular({ saldoBsS: Number(bs) || 0, saldoUSD: Number(usd) || 0, tasa: tasaNum })
+      : null),
+    [config, bs, usd, tasaNum, tasaValida]
+  )
+
   if (!config) {
     return (
       <div style={{ padding: 32, textAlign: 'center', color: 'var(--th)', fontFamily: 'var(--mono)', fontSize: 13 }}>
@@ -27,28 +60,16 @@ export default function Multimoneda() {
     )
   }
 
-  const [bs, setBs] = useState('')
-  const [usd, setUsd] = useState('')
-  const [tasa, setTasa] = useState(config.tasaDefault)
-  const [fuenteTasa, setFuenteTasa] = useState('paralelo')
-  const [live, setLive] = useState(null)
-
-  useEffect(() => {
-    loadTasaVE().then(data => {
-      setLive(data)
-      setTasa(data.paralelo)
-    })
-  }, [])
-
   function elegirFuente(f) {
+    if (f === 'paralelo' && live && !live.paraleloDisponible) return
     setFuenteTasa(f)
-    if (live) setTasa(live[f])
+    if (live && Number(live[f]) > 0) setTasa(live[f])
   }
 
-  const result = useMemo(
-    () => config.calcular({ saldoBsS: Number(bs) || 0, saldoUSD: Number(usd) || 0, tasa: Number(tasa) || config.tasaDefault }),
-    [bs, usd, tasa]
-  )
+  // El indicador solo dice "en vivo" si la tasa que se está usando ES la que
+  // vino de la API. Si el usuario la editó, deja de ser un dato en vivo.
+  const tasaEsLive = Boolean(live && live.source === 'api' && tasaValida && Number(live[fuenteTasa]) === tasaNum)
+  const paraleloNoDisponible = Boolean(live && !live.paraleloDisponible)
 
   const fmtUSD = (n) => `$${(Number(n) || 0).toLocaleString('es-VE', { maximumFractionDigits: 2 })}`
 
@@ -64,8 +85,10 @@ export default function Multimoneda() {
         <Card>
           <CardHeader title="Tasa Bs/USD" right={
             live && (
-              <span style={{ fontSize: 10, fontFamily: 'var(--mono)', color: live.source === 'api' ? 'var(--accent)' : 'var(--th)' }}>
-                {live.source === 'api' ? '● en vivo' : '○ referencial (sin conexión)'}
+              <span style={{ fontSize: 10, fontFamily: 'var(--mono)', color: tasaEsLive ? 'var(--accent)' : 'var(--th)' }}>
+                {live.source !== 'api'
+                  ? '○ referencial (sin conexión)'
+                  : tasaEsLive ? '● en vivo' : '○ tasa editada a mano'}
               </span>
             )
           } />
@@ -76,20 +99,36 @@ export default function Multimoneda() {
               background: fuenteTasa === 'oficial' ? 'var(--grn-bg)' : 'var(--sur2)',
               color: fuenteTasa === 'oficial' ? 'var(--grn)' : 'var(--tx)',
             }}>
-              BCV oficial{live && <span style={{ display: 'block', fontFamily: 'var(--mono)', fontSize: 14, fontWeight: 700, marginTop: 2 }}>{live.oficial.toLocaleString('es-VE')}</span>}
+              BCV oficial{live && <span style={{ display: 'block', fontFamily: 'var(--mono)', fontSize: 14, fontWeight: 700, marginTop: 2 }}>{Number(live.oficial).toLocaleString('es-VE')}</span>}
             </button>
-            <button type="button" onClick={() => elegirFuente('paralelo')} style={{
-              flex: 1, padding: '9px 12px', borderRadius: 8, cursor: 'pointer', fontSize: 12,
+            <button type="button" onClick={() => elegirFuente('paralelo')} disabled={paraleloNoDisponible} style={{
+              flex: 1, padding: '9px 12px', borderRadius: 8, fontSize: 12,
+              cursor: paraleloNoDisponible ? 'not-allowed' : 'pointer',
+              opacity: paraleloNoDisponible ? 0.55 : 1,
               border: fuenteTasa === 'paralelo' ? '1.5px solid var(--grn)' : '0.5px solid var(--brd2)',
               background: fuenteTasa === 'paralelo' ? 'var(--grn-bg)' : 'var(--sur2)',
               color: fuenteTasa === 'paralelo' ? 'var(--grn)' : 'var(--tx)',
             }}>
-              Paralelo{live && <span style={{ display: 'block', fontFamily: 'var(--mono)', fontSize: 14, fontWeight: 700, marginTop: 2 }}>{live.paralelo.toLocaleString('es-VE')}</span>}
+              Paralelo{live && (
+                <span style={{ display: 'block', fontFamily: paraleloNoDisponible ? 'inherit' : 'var(--mono)', fontSize: paraleloNoDisponible ? 11 : 14, fontWeight: paraleloNoDisponible ? 400 : 700, marginTop: 2 }}>
+                  {paraleloNoDisponible ? 'no disponible' : Number(live.paralelo).toLocaleString('es-VE')}
+                </span>
+              )}
             </button>
           </div>
+          {paraleloNoDisponible && (
+            <div style={{ fontSize: 11, color: 'var(--th)', lineHeight: 1.5, marginBottom: 10 }}>
+              La fuente no devolvió el paralelo en esta consulta. Se está usando el oficial del BCV — la brecha real con el paralelo no está reflejada. Si tenés una referencia del día, cargala abajo.
+            </div>
+          )}
           <FormGroup label="Tasa a usar (editable si tienes una referencia mejor)">
             <input type="number" inputMode="decimal" min="0" step="0.01" value={tasa} onChange={e => setTasa(e.target.value)} />
           </FormGroup>
+          {!tasaValida && (
+            <div style={{ marginTop: 8, background: 'var(--warn-bg)', border: '.5px solid var(--warn)', borderRadius: 8, padding: '10px 12px', fontSize: 12, color: 'var(--warn)', lineHeight: 1.5 }}>
+              Ingresá una tasa válida (mayor a 0) para calcular. No usamos una tasa vieja por defecto: un patrimonio convertido a una tasa equivocada es peor que no mostrarlo.
+            </div>
+          )}
         </Card>
 
         <Card>
@@ -123,7 +162,7 @@ export default function Multimoneda() {
             <ProgressBar value={result.exposicionBsPct} max={100} color={result.alerta ? 'red' : 'green'} height={6} />
             {result.alerta ? (
               <div style={{ fontSize: 12, color: 'var(--red)', marginTop: 10, lineHeight: 1.5 }}>
-                Alta exposición al bolívar ({Math.round(result.exposicionBsPct)}%). El BsS se devalúa frente al dólar — considera preservar parte de tu valor en USD.
+                Alta exposición al bolívar ({Math.round(result.exposicionBsPct)}%, sobre el umbral de {config.umbralExposicion}%). El BsS se devalúa frente al dólar — considera preservar parte de tu valor en USD.
               </div>
             ) : (
               <div style={{ fontSize: 12, color: 'var(--accent)', marginTop: 10, fontWeight: 600 }}>

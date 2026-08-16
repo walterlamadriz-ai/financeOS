@@ -8,6 +8,7 @@ import { useT } from '../../i18n/useT.js'
 import { KPI, Card, CardHeader, Alert, Empty, ProgressBar, PageHeader } from '../../components/ui/index.jsx'
 import { fmtMoney, fmtPct, moneyLocale } from '../../utils/index.js'
 import { projectEndOfMonth } from '../../utils/projection.js'
+import { effectiveBudgetLimits } from '../../utils/budgets.js'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, ReferenceLine, ReferenceArea, Legend,
@@ -101,14 +102,19 @@ export default function CashFlow({ setPage }) {
   const monthlyNetFlow = monthlyEstimate.avgInc - monthlyEstimate.avgExp
 
   // ── Proyección fin de mes ─────────────────────────────────────────────────
+  // Límite EFECTIVO (con rollover si está activo) — mismo cálculo que la página
+  // Presupuestos. Antes sumaba b.limit crudo: con rollover activo, el "ritmo de
+  // gasto" se calculaba contra un presupuesto más chico del que el usuario
+  // realmente tenía disponible ese mes.
+  const effLimits = useMemo(() => effectiveBudgetLimits({ budgets, expenses, activeMonth, settings }), [budgets, expenses, activeMonth, settings])
   const eomProjection = useMemo(() => {
     // Núcleo compartido con el Dashboard (mismos números en ambas vistas)
     const core = projectEndOfMonth({ incomes, expenses, activeMonth })
-    const totalBudget = budgets.reduce((s, b) => s + (b.limit || 0), 0)
+    const totalBudget = budgets.reduce((s, b) => s + (effLimits[b.category] || 0), 0)
     const pctBudgetUsed = totalBudget > 0 ? core.curExp / totalBudget : null
     const pace = pctBudgetUsed !== null ? pctBudgetUsed - core.pctElapsed : null
     return { ...core, pctMonthElapsed: core.pctElapsed, totalBudget, pctBudgetUsed, pace }
-  }, [incomes, expenses, activeMonth, budgets])
+  }, [incomes, expenses, activeMonth, budgets, effLimits])
 
   // ── Proyección 6 meses hacia adelante ────────────────────────────────────
   const projectionData = useMemo(() => {
@@ -149,6 +155,12 @@ export default function CashFlow({ setPage }) {
         title={t('cf.title')}
         sub={t('cf.sub')}
       />
+
+      {/* Antes este aviso vivía en el disclaimer de letra chica al pie de la
+          página — alguien que escanea (no lee párrafos largos) nunca lo veía,
+          y es el único aviso de toda la pantalla cuyo costo de ignorarlo es
+          perder datos de verdad. */}
+      <Alert type="warning">{t('cf.incognitoWarning')}</Alert>
 
       {!hasData && (
         <Alert type="info">
@@ -255,6 +267,7 @@ export default function CashFlow({ setPage }) {
         {!hasData
           ? <Empty text={t('cf.chart.empty')} cta={setPage ? t('empty.importCta') : undefined} onCta={() => setPage?.('import')} />
           : (
+            <>
             <ResponsiveContainer width="100%" height={220}>
               <AreaChart data={projectionData}>
                 <defs>
@@ -289,6 +302,14 @@ export default function CashFlow({ setPage }) {
                   strokeDasharray="5 4" strokeOpacity={0.75} fill="none" />
               </AreaChart>
             </ResponsiveContainer>
+            {/* recharts no expone los datos a un lector de pantalla — misma
+                información que el gráfico, oculta solo visualmente. */}
+            <table className="sr-only">
+              <caption>{t('cf.chart.title')}</caption>
+              <thead><tr><th scope="col">{t('common.month')}</th><th scope="col">{t('cf.chart.series')}{projectionData.some(d=>!d.actual) ? ` / ${t('cf.chart.estimate')}` : ''}</th></tr></thead>
+              <tbody>{projectionData.map(d => <tr key={d.mes}><th scope="row">{d.mes}{d.actual ? '' : ` (${t('cf.chart.estimate')})`}</th><td>{fmtMoney(d.Balance, sym)}</td></tr>)}</tbody>
+            </table>
+            </>
           )
         }
       </Card>

@@ -21,7 +21,7 @@
   --grn-tint:  rgba(26,107,74,0.06);
   --red:       #c0392b;
   --red-bg:    #fdf0ee;
-  --amb:       #9a6500;
+  --amb:       #8a5a00;  /* antes #9a6500 — 4.47:1 sobre --bg, falla AA (4.5:1) */
   --amb-bg:    #fef8e8;
   --blu:       #1a5a8a;
   --blu-bg:    #e8f2fb;
@@ -90,7 +90,7 @@
   --grn-bg:    #0f2218;
   --grn-lt:    #163d26;
   --grn-tint:  rgba(61,190,122,0.10);
-  --red:       #e05a4a;
+  --red:       #e46f60;  /* antes #e05a4a — 4.28:1 sobre --sur2, falla AA (4.5:1) */
   --red-bg:    #2a120f;
   --amb:       #d4982a;
   --amb-bg:    #261e08;
@@ -149,7 +149,18 @@ input, select, textarea {
   transition: border-color 0.15s;
 }
 input:focus, select:focus, textarea:focus { border-color: var(--grn); }
+/* outline:none de arriba mata el :focus-visible global — sin esto, los
+   formularios (justo donde más se navega por teclado) quedaban con un
+   indicador de foco más débil que el resto de la app (solo 1px de borde). */
+input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--grn); outline-offset: 1px; }
 select option { background: var(--sur); }
+
+/* Visualmente oculto pero legible por lectores de pantalla — para tablas de
+   datos que acompañan a un gráfico (recharts no expone sus datos por sí solo). */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
 
 /* Buttons */
 button { cursor: pointer; font-family: var(--sans); }

@@ -15,6 +15,41 @@ export default function Deducciones() {
   const activeMonth = settings.activeMonth || new Date().toISOString().slice(0, 7)
   const year = activeMonth.slice(0, 4)
 
+  // Reglas de hooks: TODOS los hooks van antes del guard de país. Si
+  // settings.country cambia con el componente montado, un hook después del
+  // return hace que React renderice menos hooks de los esperados y la pantalla
+  // queda en blanco. Referencia de estructura correcta: pages/Steuer/index.jsx.
+
+  // Autollenado de gastos del año desde lo ya registrado
+  const autofilled = useMemo(
+    () => (config ? autofillGastos(config, expenses, year) : {}),
+    [config, expenses, year]
+  )
+
+  // Ingreso anual estimado desde ingresos del año (si el config lo necesita)
+  const ingresoEstimado = useMemo(() => {
+    if (!config?.needsIngreso) return 0
+    return Math.round((incomes || [])
+      .filter(r => String(r?.date || '').startsWith(year))
+      .reduce((s, r) => s + (Number(r.amount) || 0), 0))
+  }, [incomes, year, config?.needsIngreso])
+
+  const [gastos, setGastos] = useState(autofilled)
+  const [ingreso, setIngreso] = useState(ingresoEstimado || '')
+  const [extra, setExtra] = useState(config?.extraInput?.default ?? '')
+
+  function setGasto(key, val) {
+    setGastos(p => ({ ...p, [key]: val === '' ? 0 : Number(val) }))
+  }
+
+  const result = useMemo(() => {
+    if (!config) return null
+    const inputs = { gastosPorCat: gastos }
+    if (config.needsIngreso) inputs.ingresoAnual = Number(ingreso) || 0
+    if (config.extraInput) inputs[config.extraInput.key] = Number(extra) || 0
+    return calcDeducciones(config, inputs)
+  }, [config, gastos, ingreso, extra])
+
   // Guard: país sin módulo
   if (!config) {
     return (
@@ -25,35 +60,6 @@ export default function Deducciones() {
   }
 
   const sym = config.sym
-
-  // Autollenado de gastos del año desde lo ya registrado
-  const autofilled = useMemo(
-    () => autofillGastos(config, expenses, year),
-    [config, expenses, year]
-  )
-
-  // Ingreso anual estimado desde ingresos del año (si el config lo necesita)
-  const ingresoEstimado = useMemo(() => {
-    if (!config.needsIngreso) return 0
-    return Math.round((incomes || [])
-      .filter(r => String(r?.date || '').startsWith(year))
-      .reduce((s, r) => s + (Number(r.amount) || 0), 0))
-  }, [incomes, year, config.needsIngreso])
-
-  const [gastos, setGastos] = useState(autofilled)
-  const [ingreso, setIngreso] = useState(ingresoEstimado || '')
-  const [extra, setExtra] = useState(config.extraInput?.default ?? '')
-
-  function setGasto(key, val) {
-    setGastos(p => ({ ...p, [key]: val === '' ? 0 : Number(val) }))
-  }
-
-  const result = useMemo(() => {
-    const inputs = { gastosPorCat: gastos }
-    if (config.needsIngreso) inputs.ingresoAnual = Number(ingreso) || 0
-    if (config.extraInput) inputs[config.extraInput.key] = Number(extra) || 0
-    return calcDeducciones(config, inputs)
-  }, [config, gastos, ingreso, extra])
 
   const fmt = (n) => `${sym}${(Number(n) || 0).toLocaleString('es-' + (config.pais === 'EC' ? 'EC' : 'PE'), { maximumFractionDigits: 0 })}`
 

@@ -4,6 +4,7 @@
 
 import { translations } from '../i18n/translations.js'
 import { effectiveBudgetLimits } from './budgets.js'
+import { personalDebtRatio } from './personal.js'
 
 function esFallback(key) { return translations.es?.[key] ?? key }
 
@@ -37,8 +38,7 @@ export function calcFinancialScore({ savingRate, budgets, expenses, debts, goals
     ? incomes.filter(r => r?.date?.startsWith(activeMonth)).reduce((s, r) => s + (Number(r.amount) || 0), 0)
     : 0
   const annualIncome = monthlyIncome * 12
-  const totalDebt = Array.isArray(debts) ? debts.reduce((s, d) => s + (Number(d.balance) || 0), 0) : 0
-  const debtLoad = annualIncome > 0 ? totalDebt / annualIncome : (totalDebt > 0 ? 1 : 0)
+  const { totalDebt, ratio: debtLoad } = personalDebtRatio(debts, annualIncome)
   const debtPts = totalDebt === 0 ? 20 : debtLoad < 0.20 ? 15 : debtLoad < 0.50 ? 10 : 0
   score += debtPts
   breakdown.push({ label: tr('score.debtLoad'), pts: debtPts, max: 20 })

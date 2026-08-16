@@ -17,6 +17,12 @@ export default function IRSPortugal() {
   const { settings } = useApp()
   const country = (settings.country || 'CL').toUpperCase()
 
+  // Regras dos hooks: TODOS os hooks antes de qualquer return condicional.
+  // Se settings.country mudar com o componente montado, um hook depois do
+  // return faz o React renderizar menos hooks do que esperava e o ecrã fica
+  // em branco. Referência de estrutura correta: pages/Steuer/index.jsx.
+  const [modo, setModo] = useState('empregado')
+
   if (country !== 'PT') {
     return (
       <div style={{ padding: 32, textAlign: 'center', color: 'var(--th)', fontFamily: 'var(--mono)', fontSize: 13 }}>
@@ -24,8 +30,6 @@ export default function IRSPortugal() {
       </div>
     )
   }
-
-  const [modo, setModo] = useState('empregado')
 
   return (
     <ProGate feature="O simulador de IRS">
@@ -85,28 +89,42 @@ function EmpregadoCard() {
 
       {result && result.isento && (
         <div style={{ fontSize: 13, color: 'var(--accent)', fontWeight: 600, textAlign: 'center', padding: '12px 0' }}>
-          ✓ Abaixo do mínimo de existência ({fmtEUR(MINIMO_EXISTENCIA)}/ano) — isento de IRS.
+          ✓ Mínimo de existência ({fmtEUR(MINIMO_EXISTENCIA)}/ano) — isento de IRS.
         </div>
       )}
 
-      {result && !result.isento && (
+      {result && (
         <>
           <div style={{ textAlign: 'center', padding: '8px 0 16px' }}>
             <div style={{ fontFamily: 'var(--mono)', fontSize: 34, fontWeight: 700, color: 'var(--accent)', lineHeight: 1 }}>
-              {fmtEUR(result.retencaoMensal)}
+              {fmtEUR(result.liquidoMensal)}
             </div>
             <div style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)', marginTop: 6 }}>
-              retenção mensal estimada · taxa efetiva {(result.taxaEfetiva * 100).toFixed(1)}%
+              líquido mensal estimado (14 meses) · taxa efetiva de IRS {(result.taxaEfetiva * 100).toFixed(1)}%
             </div>
           </div>
           <div style={{ marginTop: 4, borderTop: '.5px solid var(--brd)', paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--tx)' }}>
-              <span>Líquido mensal estimado</span>
-              <span style={{ fontFamily: 'var(--mono)', fontWeight: 600 }}>{fmtEUR(result.liquidoMensal)}</span>
+              <span>Retenção de IRS / mês</span>
+              <span style={{ fontFamily: 'var(--mono)' }}>−{fmtEUR(result.retencaoMensal)}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--tx)' }}>
+              <span>Segurança Social / mês (11%)</span>
+              <span style={{ fontFamily: 'var(--mono)' }}>−{fmtEUR(result.ssMensal)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--tx)' }}>
               <span>IRS anual</span>
               <span style={{ fontFamily: 'var(--mono)' }}>{fmtEUR(result.irsAnual)}</span>
+            </div>
+            {result.solidariedade > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--tx)' }}>
+                <span>… dos quais taxa adicional de solidariedade</span>
+                <span style={{ fontFamily: 'var(--mono)' }}>{fmtEUR(result.solidariedade)}</span>
+              </div>
+            )}
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--tx)' }}>
+              <span>Dedução específica aplicada</span>
+              <span style={{ fontFamily: 'var(--mono)' }}>{fmtEUR(result.deducaoEspecifica)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--tx)' }}>
               <span>Rendimento coletável</span>
@@ -114,7 +132,10 @@ function EmpregadoCard() {
             </div>
           </div>
           <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', lineHeight: 1.6, marginTop: 14, padding: '10px 12px', background: 'var(--sur2)', borderRadius: 8, border: '.5px solid var(--brd)' }}>
-            Assume dedução específica automática de €4.587,09 (Categoria A). Não inclui deduções de saúde, educação ou habitação — essas reduzem o IRS na declaração anual.
+            Dedução específica (art. 25.º CIRS) = o maior entre €4.587,09 e as contribuições obrigatórias para a Segurança Social (11%)
+            {result.deducaoPorSS ? ' — no seu caso mandam as contribuições.' : ' — no seu caso manda o valor fixo.'}
+            {' '}O mínimo de existência (art. 70.º) garante que o rendimento depois de IRS nunca desce abaixo de {fmtEUR(MINIMO_EXISTENCIA)}/ano.
+            Não inclui deduções de saúde, educação ou habitação — essas reduzem o IRS na declaração anual.
           </div>
         </>
       )}
@@ -151,12 +172,33 @@ function RecibosVerdesCard() {
               <span style={{ fontFamily: 'var(--mono)' }}>{fmtEUR(result.baseTributavel)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--tx)' }}>
+              <span>Dedução por contribuições à SS</span>
+              <span style={{ fontFamily: 'var(--mono)' }}>−{fmtEUR(result.deducaoSS)}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--tx)' }}>
               <span>Rendimento coletável</span>
               <span style={{ fontFamily: 'var(--mono)' }}>{fmtEUR(result.rendimentoColetavel)}</span>
             </div>
+            {result.solidariedade > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--tx)' }}>
+                <span>… dos quais taxa adicional de solidariedade</span>
+                <span style={{ fontFamily: 'var(--mono)' }}>{fmtEUR(result.solidariedade)}</span>
+              </div>
+            )}
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--tx)' }}>
+              <span>Segurança Social anual (21,4% sobre 70%)</span>
+              <span style={{ fontFamily: 'var(--mono)' }}>−{fmtEUR(result.ssAnual)}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--tx)' }}>
+              <span>Líquido mensal estimado</span>
+              <span style={{ fontFamily: 'var(--mono)', fontWeight: 600 }}>{fmtEUR(result.liquidoMensal)}</span>
+            </div>
           </div>
           <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', lineHeight: 1.6, marginTop: 14, padding: '10px 12px', background: 'var(--sur2)', borderRadius: 8, border: '.5px solid var(--brd)' }}>
-            Regime simplificado — coeficiente 0,75 sobre prestação de serviços profissionais, válido até €200.000/ano de faturação. Pagamentos por conta em julho/setembro/dezembro.
+            Regime simplificado — coeficiente 0,75 sobre prestação de serviços profissionais, válido até €200.000/ano de faturação.
+            O coeficiente já incorpora os gastos presumidos: não se soma a dedução específica da Categoria A. Deduz-se apenas a parte
+            das contribuições obrigatórias que excede 10% do rendimento bruto. As contribuições são estimadas em 21,4% sobre 70% da
+            faturação — se estiver isento ou tiver outra base de incidência, o valor real difere. Pagamentos por conta em julho/setembro/dezembro.
           </div>
         </>
       )}

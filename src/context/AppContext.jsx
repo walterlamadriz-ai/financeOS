@@ -83,6 +83,9 @@ export function AppProvider({ children }) {
     ])
     dispatch({ type: 'HYDRATE', payload: { incomes, expenses, budgets, debts, goals, subscriptions, settings } })
     document.documentElement.setAttribute('data-theme', settings.theme || 'light')
+    // Sin esto un lector de pantalla pronuncia toda la app con reglas fonéticas
+    // españolas aunque el idioma elegido sea inglés, portugués o alemán.
+    document.documentElement.setAttribute('lang', settings.language || 'es')
   }, [])
 
   // ── Borrado con deshacer ──────────────────────────────────────────────────────
@@ -306,6 +309,7 @@ export function AppProvider({ children }) {
       await saveSettings(settings)
       dispatch({ type: 'SAVE_SETTINGS', settings })
       document.documentElement.setAttribute('data-theme', settings.theme || 'light')
+      document.documentElement.setAttribute('lang', settings.language || 'es')
     } catch (e) {
       showToast('Error al guardar ajustes.', 'error')
     }

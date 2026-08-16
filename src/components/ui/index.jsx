@@ -4,10 +4,13 @@
 import { useId, Children, cloneElement, isValidElement } from 'react'
 import styles from './ui.module.css'
 
-export function Btn({ children, variant = 'ghost', size = 'md', onClick, disabled, style }) {
+export function Btn({ children, variant = 'ghost', size = 'md', onClick, disabled, style, ...rest }) {
+  // ...rest: sin esto no había forma de pasarle aria-expanded/aria-pressed a un
+  // <Btn> — se perdían en 9 disclosures/toggles distintos de la app que SÍ
+  // necesitaban exponer su estado a un lector de pantalla.
   const cls = [styles.btn, styles[`btn_${variant}`], styles[`btn_${size}`]].join(' ')
   return (
-    <button className={cls} onClick={onClick} disabled={disabled} style={style}>
+    <button className={cls} onClick={onClick} disabled={disabled} style={style} {...rest}>
       {children}
     </button>
   )
@@ -22,9 +25,13 @@ export function Card({ children, style, className }) {
 }
 
 export function CardHeader({ title, right }) {
+  // <h2>, no <span>: un usuario de lector de pantalla navega por headings (tecla
+  // "H") para saltar entre secciones. Con <span> no había forma de hacerlo en
+  // ninguna pantalla que use Card — todo el estilo se preserva a mano porque el
+  // h2 del navegador trae su propio tamaño/peso/margen por defecto.
   return (
     <div className={styles.cardHd}>
-      <span>{title}</span>
+      <h2 style={{ margin: 0, font: 'inherit', color: 'inherit', textTransform: 'inherit', letterSpacing: 'inherit' }}>{title}</h2>
       {right && <span>{right}</span>}
     </div>
   )
@@ -44,10 +51,12 @@ export function Badge({ children, color = 'green' }) {
   return <span className={[styles.badge, styles[`badge_${color}`]].join(' ')}>{children}</span>
 }
 
-export function ProgressBar({ value, max = 100, color = 'green', height = 5 }) {
+export function ProgressBar({ value, max = 100, color = 'green', height = 5, label }) {
   const pct = Math.min(max > 0 ? (value / max) * 100 : 0, 100)
   return (
-    <div className={styles.progBg} style={{ height }}>
+    <div className={styles.progBg} style={{ height }}
+      role="progressbar" aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100}
+      aria-label={label || undefined}>
       <div className={[styles.progFill, styles[`prog_${color}`]].join(' ')} style={{ transform: `scaleX(${pct / 100})` }} />
     </div>
   )
@@ -77,7 +86,18 @@ export function FormRow({ children }) {
 }
 
 export function Alert({ children, type = 'warn' }) {
-  return <div className={[styles.alert, styles[`alert_${type}`]].join(' ')}>{children}</div>
+  // role="alert" ya implica aria-live="assertive" (errores: interrumpen);
+  // role="status" implica "polite" (advertencias/info: esperan una pausa).
+  const isDanger = type === 'danger'
+  return (
+    <div
+      className={[styles.alert, styles[`alert_${type}`]].join(' ')}
+      role={isDanger ? 'alert' : 'status'}
+      aria-live={isDanger ? 'assertive' : 'polite'}
+    >
+      {children}
+    </div>
+  )
 }
 
 export function Empty({ text = 'Sin registros aún', cta, onCta }) {

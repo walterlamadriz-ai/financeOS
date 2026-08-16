@@ -52,10 +52,15 @@ function recommendTemplate({ profileId, useType, mainGoal, hasDebts }) {
 }
 
 function ProgressBar({ step, total }) {
+  // Los puntitos son puramente decorativos para un lector de pantalla sin
+  // role="progressbar" — no había forma de saber cuánto faltaba del flujo.
   return (
-    <div style={{ display: 'flex', gap: 5, marginBottom: 28, justifyContent: 'center' }}>
+    <div
+      role="progressbar" aria-valuenow={step + 1} aria-valuemin={1} aria-valuemax={total}
+      aria-label={`Paso ${step + 1} de ${total}`}
+      style={{ display: 'flex', gap: 5, marginBottom: 28, justifyContent: 'center' }}>
       {Array.from({ length: total }).map((_, i) => (
-        <div key={i} style={{
+        <div key={i} aria-hidden="true" style={{
           height: 4, borderRadius: 20, transition: 'all .3s',
           width: i < step ? 28 : i === step ? 20 : 8,
           background: i <= step ? 'var(--grn)' : 'var(--brd2)',
@@ -67,7 +72,7 @@ function ProgressBar({ step, total }) {
 
 function OptionCard({ icon, label, desc, selected, onClick, color = 'var(--grn)' }) {
   return (
-    <button onClick={onClick} style={{
+    <button onClick={onClick} aria-pressed={selected} style={{
       width: '100%', textAlign: 'left', padding: '11px 13px',
       borderRadius: 10, cursor: 'pointer', transition: 'all .15s',
       border: selected ? `1.5px solid ${color}` : '0.5px solid var(--brd2)',
@@ -122,6 +127,7 @@ export default function Onboarding({ onComplete }) {
   const TOTAL = 8
   const [step, setStep] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [deLangDismissed, setDeLangDismissed] = useState(false)
   const [answers, setAnswers] = useState({
     useType: '', profileId: '',
     country: settings.country || 'CL',
@@ -230,13 +236,20 @@ export default function Onboarding({ onComplete }) {
   )
 
   // Step 2 — Perfil
+  // "Cliente con deuda" / "Cliente con meta de ahorro" están escritas en
+  // segunda persona para un asesor eligiendo la plantilla de OTRO — confunden
+  // a quien ya contestó "Uso personal" un paso atrás (¿"cliente"? soy yo).
+  // Esos dos perfiles siguen disponibles para quien SÍ es asesor.
+  const profileTemplates = answers.useType === 'advisor'
+    ? TEMPLATES
+    : TEMPLATES.filter(tpl => tpl.id !== 'deudas' && tpl.id !== 'ahorro')
   if (step === 2) return (
     <div style={wrap}><div style={{ ...box, maxWidth: 490 }}>
       <ProgressBar step={2} total={TOTAL} />
       <h2 ref={headingRef} tabIndex={-1} style={{ ...h1s, outline: 'none' }}>{t('onboarding.profile.title')}</h2>
       <p style={subs}>{answers.useType === 'advisor' ? t('onboarding.profile.sub.advisor') : t('onboarding.profile.sub.default')}</p>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7 }}>
-        {TEMPLATES.map(tpl => (
+        {profileTemplates.map(tpl => (
           <button key={tpl.id} onClick={() => set('profileId', tpl.id)} aria-pressed={answers.profileId === tpl.id} style={{
             padding: '10px 11px', borderRadius: 10, cursor: 'pointer',
             border: answers.profileId === tpl.id ? `1.5px solid ${tpl.color}` : '0.5px solid var(--brd2)',
@@ -282,8 +295,6 @@ export default function Onboarding({ onComplete }) {
           <button key={c.code} onClick={() => {
             set('country', c.code)
             set('currency', c.currency)
-            // Alemania: cambiar UI a alemán automáticamente (mismo espíritu que "reglas de tu país")
-            if (c.code === 'DE') updateSettings({ ...settings, language: 'de' })
           }} aria-pressed={answers.country === c.code} style={{
             padding: '10px 8px', borderRadius: 10, cursor: 'pointer',
             border: answers.country === c.code ? '1.5px solid var(--grn)' : '0.5px solid var(--brd2)',
@@ -305,6 +316,19 @@ export default function Onboarding({ onComplete }) {
           {t('onboarding.country.germanyHint')}
         </div>
       )}
+      {answers.country === 'DE' && (settings.language || 'es') !== 'de' && !deLangDismissed && (
+        <div style={{ padding: '8px 10px', background: 'var(--sur2)', borderRadius: 8, border: '0.5px solid var(--brd2)', fontSize: 11, color: 'var(--tx)', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <span style={{ flex: 1, minWidth: 140 }}>{t('onboarding.country.germanyLangOffer')}</span>
+          <button type="button" onClick={() => { updateSettings({ ...settings, language: 'de' }); setDeLangDismissed(true) }}
+            style={{ padding: '5px 10px', borderRadius: 6, border: '1px solid var(--grn)', background: 'var(--grn-bg)', color: 'var(--grn)', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>
+            {t('onboarding.country.switchToGerman')}
+          </button>
+          <button type="button" onClick={() => setDeLangDismissed(true)}
+            style={{ padding: '5px 10px', borderRadius: 6, border: '0.5px solid var(--brd2)', background: 'transparent', color: 'var(--th)', fontSize: 11, cursor: 'pointer' }}>
+            {t('onboarding.country.keepCurrentLang')}
+          </button>
+        </div>
+      )}
       <div style={{ display: 'flex', gap: 7, marginTop: 4 }}>
         <button style={{ ...btnG, width: 'auto', padding: '8px 14px', marginTop: 0 }} onClick={back}>{t('nav.back')}</button>
         <button style={{ ...btnP(false), flex: 1, marginTop: 0 }} onClick={next}>{t('onboarding.continue')}</button>
@@ -322,7 +346,7 @@ export default function Onboarding({ onComplete }) {
         <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--tx)', marginBottom: 7 }}>{t('settings.currency.label')}</div>
         <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
           {CURRENCIES.map(c => (
-            <button key={c.code} onClick={() => set('currency', c.code)} style={{
+            <button key={c.code} onClick={() => set('currency', c.code)} aria-pressed={answers.currency === c.code} style={{
               padding: '5px 10px', borderRadius: 20, fontSize: 11, cursor: 'pointer',
               border: answers.currency === c.code ? '1.5px solid var(--grn)' : '0.5px solid var(--brd2)',
               background: answers.currency === c.code ? 'var(--grn-bg)' : 'var(--sur2)',
@@ -478,7 +502,7 @@ export default function Onboarding({ onComplete }) {
       <ProgressBar step={TOTAL} total={TOTAL} />
       <div style={{ textAlign: 'center', marginBottom: 18 }}>
         <div style={{ width: 46, height: 46, borderRadius: 12, margin: '0 auto 10px', background: 'var(--grn-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, color: 'var(--grn)' }}>✓</div>
-        <h2 style={{ ...h1s, textAlign: 'center' }}>{t('onboarding.summary.title')}</h2>
+        <h2 ref={headingRef} tabIndex={-1} style={{ ...h1s, textAlign: 'center', outline: 'none' }}>{t('onboarding.summary.title')}</h2>
         <p style={{ ...subs, textAlign: 'center' }}>{t('onboarding.summary.sub')}</p>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 0, marginBottom: 14 }}>

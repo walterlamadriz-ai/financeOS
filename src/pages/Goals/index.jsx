@@ -110,7 +110,7 @@ export default function Goals({ setPage }) {
         )
       })()}
       <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
-        <Btn variant="primary" onClick={() => setShow(s=>!s)}>{show ? t('goals.toggle.close') : t('goals.toggle.new')}</Btn>
+        <Btn variant="primary" onClick={() => setShow(s=>!s)} aria-expanded={show}>{show ? t('goals.toggle.close') : t('goals.toggle.new')}</Btn>
         <Btn variant="ghost"   onClick={openSuggestions}>{t('goals.suggestBtn')}</Btn>
       </div>
 

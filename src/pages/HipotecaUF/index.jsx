@@ -126,11 +126,20 @@ export default function HipotecaUF() {
                   </div>
                 </div>
                 <div style={{ background: 'var(--grn-tint)', border: '.5px solid color-mix(in srgb, var(--grn) 35%, transparent)', borderRadius: 'var(--r)', padding: '12px 14px' }}>
-                  <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--th)', marginBottom: 4 }}>AHORRAS EN INTERÉS</div>
+                  <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--th)', marginBottom: 4 }}>AHORRAS EN INTERÉS (NETO)</div>
                   <div style={{ fontFamily: 'var(--mono)', fontSize: 20, fontWeight: 700, color: 'var(--grn)' }}>
-                    {fmtUF(impactoPrepago.interesesAhorradosUF)}{uf && <span style={{ fontSize: 12, fontWeight: 400 }}> · {fmtCLP(impactoPrepago.interesesAhorradosUF * uf)}</span>}
+                    {fmtUF(impactoPrepago.interesesAhorradosNetosUF)}{uf && <span style={{ fontSize: 12, fontWeight: 400 }}> · {fmtCLP(impactoPrepago.interesesAhorradosNetosUF * uf)}</span>}
+                  </div>
+                  <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--th)', marginTop: 6, lineHeight: 1.5 }}>
+                    {fmtUF(impactoPrepago.interesesAhorradosUF)} de interés ahorrado − {fmtUF(impactoPrepago.comisionPrepagoUF)} de comisión de prepago
                   </div>
                 </div>
+              </div>
+            )}
+            {impactoPrepago.mesesAhorrados > 0 && (
+              <div style={{ marginTop: 12, fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--th)', lineHeight: 1.6, padding: '8px 10px', background: 'var(--sur2)', border: '.5px solid var(--brd)', borderRadius: 'var(--r)' }}>
+                La comisión de prepago se estima en el <strong>máximo legal</strong>: 1,5 meses de interés sobre el capital prepagado, el tope que fija la Ley 18.010 art. 10 para créditos reajustables (en UF).
+                Tu banco puede cobrar menos, o nada — revisá tu escritura antes de decidir.
               </div>
             )}
           </Card>

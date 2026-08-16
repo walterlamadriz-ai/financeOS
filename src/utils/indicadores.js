@@ -7,11 +7,33 @@ const LS_KEY = 'fnos_indicadores_v1'
 const TTL_MS = 24 * 60 * 60 * 1000
 const BASE    = 'https://mindicador.cl/api'
 
+// Estos tres valores envejecen apenas mindicador.cl esté caído más de 24h — no
+// hay forma de que este archivo "se mantenga solo" al día. Por eso el consumidor
+// (Debts/index.jsx) expone result.source al usuario cuando cae acá, en vez de
+// mostrar el valor de respaldo como si fuera el del día.
 export const FALLBACK = {
-  utm:   69542,  // UTM diciembre 2025
-  uf:    39724,  // UF diciembre 2025
+  utm:   71649,  // UTM agosto 2026
+  uf:    40854,  // UF agosto 2026
   dolar: 975,    // USD/CLP referencial
 }
+
+// ── Parámetros previsionales Chile ─────────────────────────────────────────
+// Viven acá, junto a UTM/UF, porque son del mismo tipo: valores que caducan
+// cada año y hay que renovar a mano. mindicador.cl NO los publica, así que no
+// hay forma de refrescarlos por API — la única vía es editar este bloque.
+//
+// Topes imponibles 2026 — Superintendencia de Pensiones, vigentes desde las
+// remuneraciones de febrero 2026 (reajuste por Índice de Remuneraciones Reales
+// INE nov2024–nov2025 = +2,5%). Revisar cada enero en spensiones.cl.
+// Histórico: 2025 fueron 87,8 UF y 131,9 UF.
+export const TOPE_AFP_SALUD_UF = 90.0   // AFP + salud + ley de accidentes del trabajo
+export const TOPE_CESANTIA_UF  = 135.2  // seguro de cesantía
+
+// Comisión de administración AFP, en % de la renta imponible. Es un PROMEDIO
+// de mercado, NO la comisión exacta de la AFP del usuario: el rango real va de
+// ~0,49% (AFP más barata) a ~1,45% (más cara). El formulario todavía no permite
+// elegir AFP; cuando lo permita, reemplazar este promedio por la comisión real.
+export const COMISION_AFP_PROMEDIO_PCT = 1.17
 
 function getCached() {
   try {

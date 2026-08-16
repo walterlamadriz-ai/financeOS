@@ -65,9 +65,18 @@ export default function PPRPage() {
     const gains = Math.max(0, projected - balance - totalContrib)
     const exitTax = gains * 0.08 // condições legais de resgate
 
+    // Os tetos do art. 21.º EBF descem com a idade (400 → 350 → 300), por isso
+    // multiplicar o benefício do ano atual pelos anos que faltam sobrestima o
+    // acumulado. Calcula-se ano a ano com o teto que corresponde a cada idade.
+    let totalBenefits = 0
+    for (let i = 0; i < years; i++) {
+      totalBenefits += Math.min(contrib * 0.20, deductionCap(age + i).cap)
+    }
+    const benefitAvg = years > 0 ? totalBenefits / years : 0
+
     return { cap, maxContribution, bracket, benefit, benefitMaxed, extraToMax, extraBenefit,
              years, projected, totalContrib, gains, exitTax,
-             totalBenefits: benefit * years }
+             totalBenefits, benefitAvg }
   }, [f])
 
   return (
@@ -118,7 +127,7 @@ export default function PPRPage() {
             <KPI label="Poupança projetada" value={fmtEur(r.projected)}
               sub={`aos ${f.retireAge} anos · ${r.years} anos de aportes`} />
             <KPI label="Benefícios fiscais acumulados" value={fmtEur(r.totalBenefits)} color="green"
-              sub={`${fmtEur(r.benefit)}/ano × ${r.years} anos (idade atual)`} />
+              sub={`${r.years} anos, teto a descer com a idade · média ${fmtEur(r.benefitAvg)}/ano`} />
             <KPI label="Rendimentos estimados" value={fmtEur(r.gains)}
               sub={`IRS no resgate legal ≈ ${fmtEur(r.exitTax)} (8%)`} />
           </div>

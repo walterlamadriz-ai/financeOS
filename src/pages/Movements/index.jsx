@@ -9,7 +9,7 @@ import ChartCard from '../../components/charts/ChartCard.jsx'
 import HorizontalBars from '../../components/charts/HorizontalBars.jsx'
 import CategoryDonut from '../../components/charts/CategoryDonut.jsx'
 import { parseTransactionText } from '../../utils/smsParser.js'
-import { catLabel, catEmoji, subLabel, moneyLocale, dateLocale, CAT_COLORS } from '../../utils/index.js'
+import { catLabel, catEmoji, subLabel, moneyLocale, dateLocale, CAT_COLORS, CATS_EXPENSE } from '../../utils/index.js'
 import { pendingDebtMonthly } from '../../utils/personal.js'
 import { FormGroup } from '../../components/ui/index.jsx'
 
@@ -40,9 +40,8 @@ const SYM   = { CLP:'$', USD:'US$', EUR:'€', VES:'Bs.', MXN:'$', ARS:'$', COP:
 const fmt   = n => (Number(n)||0).toLocaleString(moneyLocale(), { maximumFractionDigits:0 })
 const fmtM  = (n, sym) => `${sym}${fmt(n)}`
 
-const EXP_CATS = ['Alimentación','Vivienda','Transporte','Salud','Educación',
-  'Ropa','Entretención','Servicios','Tecnología','Deporte','Viajes','Otros']
-
+// La lista de categorías vive en utils/index.js (CATS_EXPENSE) — es la fuente
+// compartida con Budgets, para que un presupuesto siempre pueda matchear gasto real.
 const SUBCATS = {
   'Alimentación':  ['Supermercado','Delivery','Restaurante','Café / Bar','Panadería','Feria / Mercado','Otro'],
   'Vivienda':      ['Arriendo / Hipoteca','Agua','Luz','Gas','Internet','Seguros hogar','Reparaciones','Otro'],
@@ -169,7 +168,7 @@ function FormGasto({ onSave, onCancel, sym, projects = [], onImport }) {
             onChange={e => set('date', e.target.value)}/></FormGroup>
         <FormGroup label={t('mov.form.category')}>
           <select style={inp} value={f.category} onChange={handleCatChange}>
-            {EXP_CATS.map(c => <option key={c} value={c}>{catLabel(c)}</option>)}
+            {CATS_EXPENSE.map(c => <option key={c} value={c}>{catLabel(c)}</option>)}
           </select>
         </FormGroup>
         {subcatOptions.length > 0 && (
@@ -658,7 +657,7 @@ export default function Movements({ setPage }) {
                   <select value={editForm.category||e.category} aria-label={t('mov.form.category')}
                     onChange={ev=>setEditForm(f=>({...f,category:ev.target.value,subcategory:''}))}
                     style={{padding:'5px 8px',fontSize:11,borderRadius:5,border:'.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}>
-                    {EXP_CATS.map(c=><option key={c}>{c}</option>)}
+                    {CATS_EXPENSE.map(c=><option key={c}>{c}</option>)}
                   </select>
                   <select value={editForm.subcategory??e.subcategory??''} aria-label={t('mov.form.subcat')}
                     onChange={ev=>setEditForm(f=>({...f,subcategory:ev.target.value}))}

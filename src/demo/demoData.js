@@ -81,28 +81,28 @@ export const DEMO_EXPENSES = [
   { id: d('e6'),  date: day(M0, 11), description: 'Mercado semana 2',              amount:  168_000, category: 'Alimentación',    method: 'Débito',        type: 'Necesidad', recurrence: 'Único',   notes: '' },
   { id: d('e7'),  date: day(M0, 14), description: 'Internet hogar',               amount:   79_000, category: 'Servicios',       method: 'Débito',        type: 'Necesidad', recurrence: 'Mensual', notes: '' },
   // Mes actual — Deseos
-  { id: d('e8'),  date: day(M0,  4), description: 'Netflix',                      amount:   47_900, category: 'Entretenimiento', method: 'Crédito',       type: 'Deseo',     recurrence: 'Mensual', notes: '' },
-  { id: d('e9'),  date: day(M0,  4), description: 'Spotify',                      amount:   16_900, category: 'Entretenimiento', method: 'Crédito',       type: 'Deseo',     recurrence: 'Mensual', notes: '' },
+  { id: d('e8'),  date: day(M0,  4), description: 'Netflix',                      amount:   47_900, category: 'Entretención', method: 'Crédito',       type: 'Deseo',     recurrence: 'Mensual', notes: '' },
+  { id: d('e9'),  date: day(M0,  4), description: 'Spotify',                      amount:   16_900, category: 'Entretención', method: 'Crédito',       type: 'Deseo',     recurrence: 'Mensual', notes: '' },
   { id: d('e10'), date: day(M0,  8), description: 'Adobe Creative Cloud',         amount:   62_000, category: 'Educación',       method: 'Crédito',       type: 'Deseo',     recurrence: 'Mensual', notes: 'Herramienta de trabajo' },
   { id: d('e11'), date: day(M0, 10), description: 'Almuerzo cliente — Zona Rosa',  amount:   82_000, category: 'Alimentación',    method: 'Crédito',       type: 'Deseo',     recurrence: 'Único',   notes: 'Reunión de negocio' },
   { id: d('e12'), date: day(M0, 13), description: 'Ropa — descuento 40%',         amount:  210_000, category: 'Ropa',            method: 'Crédito',       type: 'Deseo',     recurrence: 'Único',   notes: 'Outlet Unicentro' },
-  { id: d('e13'), date: day(M0, 15), description: 'Salida con amigas',            amount:  120_000, category: 'Entretenimiento', method: 'Débito',        type: 'Deseo',     recurrence: 'Único',   notes: '' },
+  { id: d('e13'), date: day(M0, 15), description: 'Salida con amigas',            amount:  120_000, category: 'Entretención', method: 'Débito',        type: 'Deseo',     recurrence: 'Único',   notes: '' },
   // Mes anterior
   { id: d('e14'), date: day(M1,  1), description: 'Arriendo apartamento',         amount:  950_000, category: 'Vivienda',        method: 'Transferencia', type: 'Necesidad', recurrence: 'Mensual', notes: '' },
   { id: d('e15'), date: day(M1,  2), description: 'Servicios públicos',           amount:  138_000, category: 'Servicios',       method: 'PSE',           type: 'Necesidad', recurrence: 'Mensual', notes: '' },
-  { id: d('e16'), date: day(M1,  4), description: 'Netflix',                      amount:   47_900, category: 'Entretenimiento', method: 'Crédito',       type: 'Deseo',     recurrence: 'Mensual', notes: '' },
-  { id: d('e17'), date: day(M1,  4), description: 'Spotify',                      amount:   16_900, category: 'Entretenimiento', method: 'Crédito',       type: 'Deseo',     recurrence: 'Mensual', notes: '' },
+  { id: d('e16'), date: day(M1,  4), description: 'Netflix',                      amount:   47_900, category: 'Entretención', method: 'Crédito',       type: 'Deseo',     recurrence: 'Mensual', notes: '' },
+  { id: d('e17'), date: day(M1,  4), description: 'Spotify',                      amount:   16_900, category: 'Entretención', method: 'Crédito',       type: 'Deseo',     recurrence: 'Mensual', notes: '' },
   { id: d('e18'), date: day(M1,  5), description: 'Mercado + domicilios',         amount:  420_000, category: 'Alimentación',    method: 'Débito',        type: 'Necesidad', recurrence: 'Único',   notes: '' },
   { id: d('e19'), date: day(M1,  7), description: 'Internet hogar',               amount:   79_000, category: 'Servicios',       method: 'Débito',        type: 'Necesidad', recurrence: 'Mensual', notes: '' },
   { id: d('e20'), date: day(M1, 10), description: 'Adobe Creative Cloud',         amount:   62_000, category: 'Educación',       method: 'Crédito',       type: 'Deseo',     recurrence: 'Mensual', notes: '' },
   { id: d('e21'), date: day(M1, 12), description: 'TransMilenio recarga',         amount:   52_000, category: 'Transporte',      method: 'Débito',        type: 'Necesidad', recurrence: 'Mensual', notes: '' },
-  { id: d('e22'), date: day(M1, 18), description: 'Concierto + cena',             amount:  185_000, category: 'Entretenimiento', method: 'Débito',        type: 'Deseo',     recurrence: 'Único',   notes: '' },
+  { id: d('e22'), date: day(M1, 18), description: 'Concierto + cena',             amount:  185_000, category: 'Entretención', method: 'Débito',        type: 'Deseo',     recurrence: 'Único',   notes: '' },
   { id: d('e23'), date: day(M1, 25), description: 'Ropa trabajo',                 amount:  145_000, category: 'Ropa',            method: 'Crédito',       type: 'Deseo',     recurrence: 'Único',   notes: '' },
   // Hace 2 meses
   { id: d('e24'), date: day(M2,  1), description: 'Arriendo apartamento',         amount:  950_000, category: 'Vivienda',        method: 'Transferencia', type: 'Necesidad', recurrence: 'Mensual', notes: '' },
   { id: d('e25'), date: day(M2,  2), description: 'Servicios públicos',           amount:  142_000, category: 'Servicios',       method: 'PSE',           type: 'Necesidad', recurrence: 'Mensual', notes: '' },
-  { id: d('e26'), date: day(M2,  4), description: 'Netflix',                      amount:   47_900, category: 'Entretenimiento', method: 'Crédito',       type: 'Deseo',     recurrence: 'Mensual', notes: '' },
-  { id: d('e27'), date: day(M2,  4), description: 'Spotify',                      amount:   16_900, category: 'Entretenimiento', method: 'Crédito',       type: 'Deseo',     recurrence: 'Mensual', notes: '' },
+  { id: d('e26'), date: day(M2,  4), description: 'Netflix',                      amount:   47_900, category: 'Entretención', method: 'Crédito',       type: 'Deseo',     recurrence: 'Mensual', notes: '' },
+  { id: d('e27'), date: day(M2,  4), description: 'Spotify',                      amount:   16_900, category: 'Entretención', method: 'Crédito',       type: 'Deseo',     recurrence: 'Mensual', notes: '' },
   { id: d('e28'), date: day(M2,  6), description: 'Mercado del mes',              amount:  395_000, category: 'Alimentación',    method: 'Débito',        type: 'Necesidad', recurrence: 'Único',   notes: '' },
   { id: d('e29'), date: day(M2,  7), description: 'Internet hogar',               amount:   79_000, category: 'Servicios',       method: 'Débito',        type: 'Necesidad', recurrence: 'Mensual', notes: '' },
   { id: d('e30'), date: day(M2, 10), description: 'Adobe Creative Cloud',         amount:   62_000, category: 'Educación',       method: 'Crédito',       type: 'Deseo',     recurrence: 'Mensual', notes: '' },
@@ -111,8 +111,8 @@ export const DEMO_EXPENSES = [
   // Hace 3 meses
   { id: d('e33'), date: day(M3,  1), description: 'Arriendo apartamento',         amount:  950_000, category: 'Vivienda',        method: 'Transferencia', type: 'Necesidad', recurrence: 'Mensual', notes: '' },
   { id: d('e34'), date: day(M3,  2), description: 'Servicios públicos',           amount:  135_000, category: 'Servicios',       method: 'PSE',           type: 'Necesidad', recurrence: 'Mensual', notes: '' },
-  { id: d('e35'), date: day(M3,  4), description: 'Netflix',                      amount:   47_900, category: 'Entretenimiento', method: 'Crédito',       type: 'Deseo',     recurrence: 'Mensual', notes: '' },
-  { id: d('e36'), date: day(M3,  4), description: 'Spotify',                      amount:   16_900, category: 'Entretenimiento', method: 'Crédito',       type: 'Deseo',     recurrence: 'Mensual', notes: '' },
+  { id: d('e35'), date: day(M3,  4), description: 'Netflix',                      amount:   47_900, category: 'Entretención', method: 'Crédito',       type: 'Deseo',     recurrence: 'Mensual', notes: '' },
+  { id: d('e36'), date: day(M3,  4), description: 'Spotify',                      amount:   16_900, category: 'Entretención', method: 'Crédito',       type: 'Deseo',     recurrence: 'Mensual', notes: '' },
   { id: d('e37'), date: day(M3,  5), description: 'Mercado del mes',              amount:  368_000, category: 'Alimentación',    method: 'Débito',        type: 'Necesidad', recurrence: 'Único',   notes: '' },
   { id: d('e38'), date: day(M3,  7), description: 'Internet hogar',               amount:   79_000, category: 'Servicios',       method: 'Débito',        type: 'Necesidad', recurrence: 'Mensual', notes: '' },
   { id: d('e39'), date: day(M3, 10), description: 'Adobe Creative Cloud',         amount:   62_000, category: 'Educación',       method: 'Crédito',       type: 'Deseo',     recurrence: 'Mensual', notes: '' },
@@ -121,8 +121,8 @@ export const DEMO_EXPENSES = [
   // Hace 4 meses
   { id: d('e42'), date: day(M4,  1), description: 'Arriendo apartamento',         amount:  950_000, category: 'Vivienda',        method: 'Transferencia', type: 'Necesidad', recurrence: 'Mensual', notes: '' },
   { id: d('e43'), date: day(M4,  2), description: 'Servicios públicos',           amount:  130_000, category: 'Servicios',       method: 'PSE',           type: 'Necesidad', recurrence: 'Mensual', notes: '' },
-  { id: d('e44'), date: day(M4,  4), description: 'Netflix',                      amount:   47_900, category: 'Entretenimiento', method: 'Crédito',       type: 'Deseo',     recurrence: 'Mensual', notes: '' },
-  { id: d('e45'), date: day(M4,  4), description: 'Spotify',                      amount:   16_900, category: 'Entretenimiento', method: 'Crédito',       type: 'Deseo',     recurrence: 'Mensual', notes: '' },
+  { id: d('e44'), date: day(M4,  4), description: 'Netflix',                      amount:   47_900, category: 'Entretención', method: 'Crédito',       type: 'Deseo',     recurrence: 'Mensual', notes: '' },
+  { id: d('e45'), date: day(M4,  4), description: 'Spotify',                      amount:   16_900, category: 'Entretención', method: 'Crédito',       type: 'Deseo',     recurrence: 'Mensual', notes: '' },
   { id: d('e46'), date: day(M4,  5), description: 'Mercado del mes',              amount:  355_000, category: 'Alimentación',    method: 'Débito',        type: 'Necesidad', recurrence: 'Único',   notes: '' },
   { id: d('e47'), date: day(M4,  7), description: 'Internet hogar',               amount:   79_000, category: 'Servicios',       method: 'Débito',        type: 'Necesidad', recurrence: 'Mensual', notes: '' },
   { id: d('e48'), date: day(M4, 10), description: 'Adobe Creative Cloud',         amount:   62_000, category: 'Educación',       method: 'Crédito',       type: 'Deseo',     recurrence: 'Mensual', notes: '' },
@@ -130,8 +130,8 @@ export const DEMO_EXPENSES = [
   // Hace 5 meses
   { id: d('e50'), date: day(M5,  1), description: 'Arriendo apartamento',         amount:  950_000, category: 'Vivienda',        method: 'Transferencia', type: 'Necesidad', recurrence: 'Mensual', notes: '' },
   { id: d('e51'), date: day(M5,  2), description: 'Servicios públicos',           amount:  128_000, category: 'Servicios',       method: 'PSE',           type: 'Necesidad', recurrence: 'Mensual', notes: '' },
-  { id: d('e52'), date: day(M5,  4), description: 'Netflix',                      amount:   47_900, category: 'Entretenimiento', method: 'Crédito',       type: 'Deseo',     recurrence: 'Mensual', notes: '' },
-  { id: d('e53'), date: day(M5,  4), description: 'Spotify',                      amount:   16_900, category: 'Entretenimiento', method: 'Crédito',       type: 'Deseo',     recurrence: 'Mensual', notes: '' },
+  { id: d('e52'), date: day(M5,  4), description: 'Netflix',                      amount:   47_900, category: 'Entretención', method: 'Crédito',       type: 'Deseo',     recurrence: 'Mensual', notes: '' },
+  { id: d('e53'), date: day(M5,  4), description: 'Spotify',                      amount:   16_900, category: 'Entretención', method: 'Crédito',       type: 'Deseo',     recurrence: 'Mensual', notes: '' },
   { id: d('e54'), date: day(M5,  5), description: 'Mercado del mes',              amount:  342_000, category: 'Alimentación',    method: 'Débito',        type: 'Necesidad', recurrence: 'Único',   notes: '' },
   { id: d('e55'), date: day(M5,  7), description: 'Internet hogar',               amount:   79_000, category: 'Servicios',       method: 'Débito',        type: 'Necesidad', recurrence: 'Mensual', notes: '' },
   { id: d('e56'), date: day(M5, 10), description: 'Adobe Creative Cloud',         amount:   62_000, category: 'Educación',       method: 'Crédito',       type: 'Deseo',     recurrence: 'Mensual', notes: '' },
@@ -140,12 +140,12 @@ export const DEMO_EXPENSES = [
 ]
 
 // ── PRESUPUESTOS ──────────────────────────────────────────────────────────────
-// Alimentación excedido (123%), Entretenimiento excedido (163%) → activa Coach
+// Alimentación excedido (123%), Entretención excedido (163%) → activa Coach
 export const DEMO_BUDGETS = [
   { id: d('b1'), category: 'Vivienda',        limit:  950_000 },
   { id: d('b2'), category: 'Alimentación',    limit:  400_000 },  // gasto real: $482k → 120%
   { id: d('b3'), category: 'Transporte',      limit:  120_000 },
-  { id: d('b4'), category: 'Entretenimiento', limit:  120_000 },  // gasto real: $187k → 156%
+  { id: d('b4'), category: 'Entretención', limit:  120_000 },  // gasto real: $187k → 156%
   { id: d('b5'), category: 'Salud',           limit:   80_000 },
   { id: d('b6'), category: 'Servicios',       limit:  280_000 },
   { id: d('b7'), category: 'Educación',       limit:  100_000 },

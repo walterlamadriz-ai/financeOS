@@ -2,6 +2,7 @@
 import { translations } from '../i18n/translations.js'
 import { effectiveBudgetLimits } from '../utils/budgets.js'
 import { moneyLocale } from '../utils/index.js'
+import { personalDebtRatio } from '../utils/personal.js'
 // Motor de reglas del FinanceOS Coach
 // Configurable sin tocar componentes React
 // Cada regla: id, categoría, condición, severidad, mensaje, acción sugerida
@@ -335,10 +336,10 @@ export function calcCoachMetrics({ incomes, expenses, budgets, debts, goals, sub
     return used >= COACH_CONFIG.thresholds.budgetOverUsePct && used < COACH_CONFIG.thresholds.budgetExceededPct
   }).length
 
-  // Deudas
-  const totalDebt = debts.reduce((s, d) => s + (d.balance || 0), 0)
+  // Deudas — solo ámbito personal (excluye deudas de propiedad/inversión), mismo
+  // cálculo que el score y el Modo Asesor (ver personalDebtRatio en utils/personal.js).
   const annualIncome = monthlyIncome * 12
-  const debtLoad = annualIncome > 0 ? totalDebt / annualIncome : 0
+  const { totalDebt, ratio: debtLoad } = personalDebtRatio(debts, annualIncome)
 
   // Fondo de emergencia
   const emergencyGoal = goals.find(g => {

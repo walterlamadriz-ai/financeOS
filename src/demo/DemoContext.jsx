@@ -87,6 +87,7 @@ export function DemoProvider({ children }) {
   const updateSettings = useCallback((settings) => {
     dispatch({ type: 'SAVE_SETTINGS', settings })
     document.documentElement.setAttribute('data-theme', settings.theme || 'light')
+    document.documentElement.setAttribute('lang', settings.language || 'es')
     // El demo también debe respetar el formato de miles de la moneda elegida
     // (AppContext lo hace en un efecto; aquí el provider es independiente).
     setMoneyLocale(settings.currency || 'CLP')

@@ -6,7 +6,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
 import { Card, CardHeader, FormRow, FormGroup, Btn } from '../../components/ui/index.jsx'
 import { calcAPV } from '../../utils/apvCalc.js'
-import { calcBeneficioAPV, calcDescuentos, calcImpuestoAnual, calcGapTramo, calcArbitraje, calcBrutoDesdeLiquido, setIndicadores } from '../../utils/taxCalcCL.js'
+import { calcBeneficioAPV, calcDescuentos, calcImpuestoAnual, calcGapTramo, calcArbitraje, calcBrutoDesdeLiquido, setIndicadores, getParametrosCL } from '../../utils/taxCalcCL.js'
 import { loadIndicadores } from '../../utils/indicadores.js'
 import ProGate from '../../components/ui/ProGate.jsx'
 
@@ -25,6 +25,9 @@ export default function APVPage() {
       setIndInfo(ind)
     })
   }, [])
+  // Parámetros vigentes (topes imponibles, comisión AFP, UTM/UTA y año tributario).
+  // Se recalcula cuando llegan los indicadores, porque setIndicadores() muta el módulo.
+  const params = useMemo(() => getParametrosCL(), [indInfo])
 
   // Estima el sueldo bruto desde el ingreso líquido del mes (previsional + impuesto único de 2ª cat.)
   // Solo categorías de renta del trabajo (no arriendo, inversión, etc.)
@@ -82,7 +85,8 @@ export default function APVPage() {
       monthlyContribution: Number(apvF.monthlyContribution),
       currentAge: Number(apvF.currentAge),
       targetAge: Number(apvF.targetAge),
-      expectedReturn: Number(apvF.expectedReturn) || 5
+      expectedReturn: Number(apvF.expectedReturn) || 5,
+      utm: indInfo?.utm
     })
     setApvResult(r)
     if (apvF.grossMonthly && Number(apvF.grossMonthly) > 0) {
@@ -113,7 +117,10 @@ export default function APVPage() {
           {indInfo && (
             <span style={{display:'block',marginTop:6,opacity:0.85}}>
               UTM: ${indInfo.utm.toLocaleString()} · UF: ${indInfo.uf.toLocaleString()} · USD: ${(indInfo.dolar||0).toLocaleString()}
-              {indInfo.source === 'api' ? ' · actualizado hoy' : ' · valores ref. dic 2025'}
+              {indInfo.source === 'api' ? ' · actualizado hoy' : ' · valores de respaldo'}
+              <span style={{display:'block',marginTop:2}}>
+                Topes imponibles {params.topeAfpSaludUF} UF (AFP/salud) · {params.topeCesantiaUF} UF (cesantía) — vigentes 2026
+              </span>
             </span>
           )}
         </div>
@@ -137,7 +144,8 @@ export default function APVPage() {
               const gm = Number(apvF.grossMonthly)
               const desc = calcDescuentos(gm)
               const rentaAnual = gm * 12 + (Number(apvF.annualBonus) || 0)
-              const baseAnual = Math.max(0, rentaAnual - desc.total * 12)
+              // Solo las cotizaciones rebajan la base imponible; la comisión de la AFP no.
+              const baseAnual = Math.max(0, rentaAnual - desc.totalDeducible * 12)
               const imp = calcImpuestoAnual(baseAnual)
               return (
                 <div style={{marginTop:12}}>
@@ -155,9 +163,13 @@ export default function APVPage() {
                     <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',background:'var(--bg)',padding:'4px 8px',borderRadius:4}}>AFP: ${desc.afp.toLocaleString()}/mes</div>
                     <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',background:'var(--bg)',padding:'4px 8px',borderRadius:4}}>Salud: ${desc.salud.toLocaleString()}/mes</div>
                     <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',background:'var(--bg)',padding:'4px 8px',borderRadius:4}}>Cesantía: ${desc.cesantia.toLocaleString()}/mes</div>
+                    <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',background:'var(--bg)',padding:'4px 8px',borderRadius:4}}>Comisión AFP: ${desc.comision.toLocaleString()}/mes</div>
                     <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',background:'var(--bg)',padding:'4px 8px',borderRadius:4}}>Tramo {imp.tramo} · {(imp.tasaMarginal*100).toFixed(0)}% marginal</div>
                   </div>
-                  <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginTop:6}}>Descuentos orientativos: AFP 10% + Salud 7% + Cesantía 0.6%</div>
+                  <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginTop:6,lineHeight:1.5}}>
+                    Descuentos orientativos: AFP 10% + Salud 7% + Cesantía 0.6% + comisión AFP {params.comisionAfpPct}%.
+                    La comisión es un <strong>promedio de mercado</strong> (va de 0,49% a 1,45% según la AFP) y, a diferencia de las cotizaciones, no rebaja la base del impuesto.
+                  </div>
                 </div>
               )
             })()}
@@ -201,8 +213,9 @@ export default function APVPage() {
                   <div style={{display:'flex',alignItems:'center',gap:20,flexWrap:'wrap'}}>
                     {(() => {
                       const total = taxResult.impuestoSinAPV
-                      const mejor = taxResult.mayorBeneficio === 'B' ? taxResult.ahorroRegB : taxResult.ahorroRegA
-                      const pct = total > 0 ? mejor / total : 0
+                      // El donut mide reducción de IMPUESTO. Solo el Régimen B la produce:
+                      // el bono del A es un depósito estatal, no baja el impuesto.
+                      const pct = total > 0 ? taxResult.ahorroRegB / total : 0
                       const r = 40, cx = 50, cy = 50
                       const circ = 2 * Math.PI * r
                       const dash = pct * circ
@@ -213,9 +226,9 @@ export default function APVPage() {
                             <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--grn)" strokeWidth="12"
                               strokeDasharray={`${dash} ${circ}`} strokeDashoffset={circ/4} strokeLinecap="round"/>
                             <text x={cx} y={cy-6} textAnchor="middle" fontSize="10" fill="var(--grn)" fontWeight="700" fontFamily="var(--mono)">{(pct*100).toFixed(0)}%</text>
-                            <text x={cx} y={cy+8} textAnchor="middle" fontSize="7" fill="var(--th)" fontFamily="var(--mono)">ahorro</text>
+                            <text x={cx} y={cy+8} textAnchor="middle" fontSize="7" fill="var(--th)" fontFamily="var(--mono)">menos</text>
                           </svg>
-                          <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)'}}>vs impuesto sin APV</div>
+                          <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)'}}>impuesto con Reg. B</div>
                         </div>
                       )
                     })()}
@@ -226,12 +239,12 @@ export default function APVPage() {
                           <span style={{fontSize:12,fontFamily:'var(--mono)',color:'var(--tx)',fontWeight:600}}>${taxResult.impuestoSinAPV.toLocaleString()}/año</span>
                         </div>
                         <div style={{display:'flex',justifyContent:'space-between',padding:'8px 12px',background:'rgba(10,92,62,.06)',borderRadius:6,border:'0.5px solid rgba(10,92,62,.2)'}}>
-                          <span style={{fontSize:12,fontFamily:'var(--mono)',color:'var(--grn)'}}>Reg. A → ahorro</span>
-                          <span style={{fontSize:12,fontFamily:'var(--mono)',color:'var(--grn)',fontWeight:700}}>+${taxResult.ahorroRegA.toLocaleString()}/año</span>
+                          <span style={{fontSize:12,fontFamily:'var(--mono)',color:'var(--grn)'}}>Con Reg. B → menos impuesto</span>
+                          <span style={{fontSize:12,fontFamily:'var(--mono)',color:'var(--grn)',fontWeight:700}}>−${taxResult.ahorroRegB.toLocaleString()}/año</span>
                         </div>
-                        <div style={{display:'flex',justifyContent:'space-between',padding:'8px 12px',background:'rgba(10,92,62,.06)',borderRadius:6,border:'0.5px solid rgba(10,92,62,.2)'}}>
-                          <span style={{fontSize:12,fontFamily:'var(--mono)',color:'var(--grn)'}}>Reg. B → ahorro</span>
-                          <span style={{fontSize:12,fontFamily:'var(--mono)',color:'var(--grn)',fontWeight:700}}>+${taxResult.ahorroRegB.toLocaleString()}/año</span>
+                        <div style={{display:'flex',justifyContent:'space-between',padding:'8px 12px',background:'var(--bg)',borderRadius:6}}>
+                          <span style={{fontSize:12,fontFamily:'var(--mono)',color:'var(--th)'}}>Con Reg. A → impuesto</span>
+                          <span style={{fontSize:12,fontFamily:'var(--mono)',color:'var(--tx)',fontWeight:600}}>${taxResult.impuestoConRegA.toLocaleString()}/año (sin cambio)</span>
                         </div>
                         <div style={{padding:'6px 12px',background:'var(--bg)',borderRadius:6}}>
                           <span style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)'}}>Mayor beneficio orientativo: </span>
@@ -241,8 +254,21 @@ export default function APVPage() {
                       </div>
                     </div>
                   </div>
+                  {/* El bono del Régimen A NO es rebaja de impuesto: es plata que el
+                      Estado deposita en la cuenta APV. Por eso va en bloque aparte y
+                      nunca restado del impuesto anual. */}
+                  <div style={{marginTop:12,padding:'10px 12px',background:'var(--bg)',borderRadius:8,border:'0.5px dashed color-mix(in srgb, var(--grn) 45%, transparent)'}}>
+                    <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:4}}>Aporte estatal a tu cuenta APV (Régimen A)</div>
+                    <div style={{fontSize:18,fontWeight:700,color:'var(--grn)',fontFamily:'var(--mono)'}}>+${taxResult.bonoEstatalRegA.toLocaleString()}/año</div>
+                    <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginTop:4,lineHeight:1.5}}>
+                      No baja tu impuesto: es un depósito del Estado (15% del aporte, tope 6 UTM) que entra a tu cuenta APV y queda inmovilizado hasta el retiro.
+                      {taxResult.bonoLimitadoPor10x && <> <strong>Limitado por el tope de 10× tus cotizaciones obligatorias del año</strong> (DL 3.500).</>}
+                    </div>
+                  </div>
                   <div style={{marginTop:10,fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',lineHeight:1.5}}>
-                    Estimación anual orientativa. UTM ref. ${taxResult.UTMref.toLocaleString()} · AFP 10% + Salud 7% + Cesantía 0.6%. No constituye asesoría tributaria. Consulta con el SII.
+                    Estimación anual orientativa para el año tributario {params.anioTributario} (rentas {params.anioComercial}).
+                    UTM mensual ref. ${taxResult.UTMref.toLocaleString()}{taxResult.utaEsAproximada && <> · UTA estimada como UTM×12 (la UTA legal usa la UTM de <strong>diciembre</strong>, así que el impuesto anual es aproximado)</>}.
+                    AFP 10% + Salud 7% + Cesantía 0.6% + comisión AFP {params.comisionAfpPct}%. No constituye asesoría tributaria. Consulta con el SII.
                   </div>
                 </div>
               )}
@@ -289,7 +315,7 @@ export default function APVPage() {
                 </div>
                 {apvF.regime !== 'unsure' && (
                   <div style={{marginTop:12,padding:'8px 12px',background:'var(--bg)',borderRadius:6,fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',lineHeight:1.6}}>
-                    {apvF.regime === 'A' ? '📌 Reg. A: Bonificación estatal 15% del aporte anual (tope ~6 UTM). No rebaja base imponible.' : '📌 Reg. B: Rebaja base imponible. Tope orientativo 600 UF anuales. Sin bonificación directa.'}
+                    {apvF.regime === 'A' ? '📌 Reg. A: el Estado deposita en tu cuenta APV el 15% del aporte anual (tope 6 UTM, y hasta 10× tus cotizaciones obligatorias). No rebaja tu impuesto ni tu base imponible.' : '📌 Reg. B: Rebaja base imponible. Tope orientativo 600 UF anuales. Sin bonificación directa.'}
                   </div>
                 )}
                 <div style={{marginTop:10,fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',lineHeight:1.5}}>
@@ -307,7 +333,7 @@ export default function APVPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',background:'var(--sur2)'}}>
                     <div style={{padding:'8px 12px',fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',textTransform:'uppercase',letterSpacing:'.5px'}}>Situación</div>
                     <div style={{padding:'8px 12px',fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',textTransform:'uppercase',letterSpacing:'.5px',borderLeft:'0.5px solid var(--brd)'}}>Impuesto anual est. ($)</div>
-                    <div style={{padding:'8px 12px',fontSize:10,fontFamily:'var(--mono)',color:'var(--grn)',textTransform:'uppercase',letterSpacing:'.5px',borderLeft:'0.5px solid var(--brd)'}}>Ahorro anual est. ($)</div>
+                    <div style={{padding:'8px 12px',fontSize:10,fontFamily:'var(--mono)',color:'var(--grn)',textTransform:'uppercase',letterSpacing:'.5px',borderLeft:'0.5px solid var(--brd)'}}>Beneficio anual est. ($)</div>
                   </div>
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',borderTop:'0.5px solid var(--brd)'}}>
                     <div style={{padding:'10px 12px',fontSize:12,fontFamily:'var(--mono)',color:'var(--tx)'}}>Sin APV</div>
@@ -316,13 +342,23 @@ export default function APVPage() {
                   </div>
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',borderTop:'0.5px solid var(--brd)',background:'var(--sur2)'}}>
                     <div style={{padding:'10px 12px',fontSize:12,fontFamily:'var(--mono)',color:'var(--tx)'}}>Régimen A</div>
-                    <div style={{padding:'10px 12px',fontSize:12,fontFamily:'var(--mono)',color:'var(--tx)',borderLeft:'0.5px solid var(--brd)'}}>${(taxResult.impuestoSinAPV-taxResult.ahorroRegA).toLocaleString()}</div>
-                    <div style={{padding:'10px 12px',fontSize:12,fontFamily:'var(--mono)',color:'var(--grn)',fontWeight:600,borderLeft:'0.5px solid var(--brd)'}}>+${taxResult.ahorroRegA.toLocaleString()}</div>
+                    {/* Mismo impuesto que sin APV: el Régimen A no rebaja la base imponible. */}
+                    <div style={{padding:'10px 12px',fontSize:12,fontFamily:'var(--mono)',color:'var(--tx)',borderLeft:'0.5px solid var(--brd)'}}>
+                      ${taxResult.impuestoConRegA.toLocaleString()}
+                      <span style={{fontSize:9,color:'var(--th)',display:'block'}}>igual que sin APV</span>
+                    </div>
+                    <div style={{padding:'10px 12px',fontSize:12,fontFamily:'var(--mono)',color:'var(--grn)',fontWeight:600,borderLeft:'0.5px solid var(--brd)'}}>
+                      +${taxResult.bonoEstatalRegA.toLocaleString()}
+                      <span style={{fontSize:9,color:'var(--th)',fontWeight:400,display:'block'}}>aporte estatal a tu cuenta APV</span>
+                    </div>
                   </div>
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',borderTop:'0.5px solid var(--brd)'}}>
                     <div style={{padding:'10px 12px',fontSize:12,fontFamily:'var(--mono)',color:'var(--tx)'}}>Régimen B</div>
                     <div style={{padding:'10px 12px',fontSize:12,fontFamily:'var(--mono)',color:'var(--tx)',borderLeft:'0.5px solid var(--brd)'}}>${taxResult.impuestoConRegB.toLocaleString()}</div>
-                    <div style={{padding:'10px 12px',fontSize:12,fontFamily:'var(--mono)',color:'var(--grn)',fontWeight:600,borderLeft:'0.5px solid var(--brd)'}}>+${taxResult.ahorroRegB.toLocaleString()}</div>
+                    <div style={{padding:'10px 12px',fontSize:12,fontFamily:'var(--mono)',color:'var(--grn)',fontWeight:600,borderLeft:'0.5px solid var(--brd)'}}>
+                      +${taxResult.ahorroRegB.toLocaleString()}
+                      <span style={{fontSize:9,color:'var(--th)',fontWeight:400,display:'block'}}>menos impuesto al SII</span>
+                    </div>
                   </div>
                 </div>
                 <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:12}}>
@@ -334,11 +370,15 @@ export default function APVPage() {
                   <div style={{background:'var(--bg)',borderRadius:8,padding:'10px 12px'}}>
                     <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:4}}>Mayor beneficio orientativo</div>
                     <div style={{fontSize:14,fontWeight:700,color:'var(--grn)',fontFamily:'var(--mono)'}}>Régimen {taxResult.mayorBeneficio}</div>
-                    <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)'}}>+${taxResult.mayorBeneficio==='A'?taxResult.ahorroRegA.toLocaleString():taxResult.ahorroRegB.toLocaleString()}/año est.</div>
+                    <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)'}}>+${taxResult.mayorBeneficio==='A'?taxResult.bonoEstatalRegA.toLocaleString():taxResult.ahorroRegB.toLocaleString()}/año est.</div>
+                    <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginTop:2}}>{taxResult.mayorBeneficio==='A'?'depósito en tu cuenta APV':'menos impuesto este año'}</div>
                   </div>
                 </div>
                 <div style={{padding:'8px 12px',background:'rgba(0,0,0,.03)',borderRadius:6,fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',lineHeight:1.6}}>
-                  Estimación anual orientativa basada en aporte mensual × 12. UTM referencial ${taxResult.UTMref.toLocaleString()} · Descuentos AFP 10% + Salud 7% + Cesantía 0.6% (orientativos). No constituye asesoría tributaria ni previsional. Consulta con un contador o el SII.
+                  Estimación anual orientativa basada en aporte mensual × 12, año tributario {params.anioTributario} (rentas {params.anioComercial}).
+                  UTM mensual referencial ${taxResult.UTMref.toLocaleString()} · Descuentos AFP 10% + Salud 7% + Cesantía 0.6% + comisión AFP {params.comisionAfpPct}% promedio (orientativos).
+                  El beneficio del Régimen A es un aporte del Estado a tu cuenta APV, no una rebaja de impuesto, y además está limitado a 10× tus cotizaciones obligatorias del año (DL 3.500).
+                  No constituye asesoría tributaria ni previsional. Consulta con un contador o el SII.
                 </div>
               </div>
             )}
@@ -365,7 +405,7 @@ export default function APVPage() {
                   </div>
                 </div>
                 <div style={{marginTop:8,fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',lineHeight:1.5}}>
-                  Solo aplica Regimen B. Tope legal 600 UF = ${gapResult.topeRegB.toLocaleString()} (UF dic 2025). Estimacion orientativa. Verifica en sii.cl.
+                  Solo aplica Regimen B. Tope legal 600 UF = ${gapResult.topeRegB.toLocaleString()} (UF ${indInfo?.source === 'api' ? 'de hoy' : 'de respaldo'}). Estimacion orientativa. Verifica en sii.cl.
                 </div>
               </div>
             )}

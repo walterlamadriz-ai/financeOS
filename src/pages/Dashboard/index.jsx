@@ -484,7 +484,7 @@ export default function Dashboard({ setPage }) {
           <div style={{ fontFamily:'var(--mono)', fontSize:11, letterSpacing:'1.2px', textTransform:'uppercase', color:'var(--grn2)', marginBottom:6 }}>Dashboard · {activeMonth}</div>
           <h1 className="display" style={{ fontSize:26, fontWeight:700, color:'var(--tx)', marginBottom:4 }}>{t('dash.title')}</h1>
         </div>
-        <button onClick={toggleCompact} title={compact ? t('dash.view.show') : t('dash.view.hide')}
+        <button onClick={toggleCompact} title={compact ? t('dash.view.show') : t('dash.view.hide')} aria-expanded={!compact}
           style={{ background:'none', border:'.5px solid var(--brd2)', borderRadius:7, padding:'6px 12px', fontSize:11, fontFamily:'var(--mono)', color:'var(--tm)', cursor:'pointer', whiteSpace:'nowrap', flexShrink:0 }}>
           {compact ? t('dash.view.detailed') : t('dash.view.compact')}
         </button>
@@ -589,7 +589,7 @@ export default function Dashboard({ setPage }) {
         </div>
       )}
       {/* KPI Cards */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))', gap:12, marginBottom:16 }}>
+      <div aria-live="polite" style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(150px, 1fr))', gap:12, marginBottom:16 }}>
         {KPIS.map((k, i) => (
           <div key={i} className="card card-hover rise" style={{ padding:'14px 16px', position:'relative', overflow:'hidden', animationDelay:`${i*40}ms` }}>
             <div style={{ position:'absolute', top:-16, right:-16, width:56, height:56, borderRadius:'50%', background:`${k.color}`, opacity:.08 }}/>

@@ -15,6 +15,20 @@ export default function Inflacion() {
   const country = (settings.country || 'CL').toUpperCase()
   const config = CONFIGS[country]
 
+  // Reglas de hooks: TODOS los hooks van antes de cualquier return condicional.
+  // Si settings.country cambia con el componente montado, un hook después del
+  // return hace que React renderice menos hooks de los esperados y la pantalla
+  // queda en blanco. Referencia de estructura correcta: pages/Steuer/index.jsx.
+  const [monto, setMonto] = useState('')
+  const [desde, setDesde] = useState(config?.primero ?? '')
+  const [hasta, setHasta] = useState(config?.ultimo ?? '')
+
+  const result = useMemo(() => {
+    if (!config) return null
+    if (desde > hasta) return null
+    return config.calcular({ monto: Number(monto) || 0, desde, hasta })
+  }, [config, monto, desde, hasta])
+
   if (!config) {
     return (
       <div style={{ padding: 32, textAlign: 'center', color: 'var(--th)', fontFamily: 'var(--mono)', fontSize: 13 }}>
@@ -24,18 +38,6 @@ export default function Inflacion() {
   }
 
   const sym = config.sym
-  const [monto, setMonto] = useState('')
-  const [desde, setDesde] = useState(config.primero)
-  const [hasta, setHasta] = useState(config.ultimo)
-
-  const result = useMemo(
-    () => calc(),
-    [monto, desde, hasta]
-  )
-  function calc() {
-    if (desde > hasta) return null
-    return config.calcular({ monto: Number(monto) || 0, desde, hasta })
-  }
 
   const fmt = (n) => `${sym}${(Number(n) || 0).toLocaleString('es-AR', { maximumFractionDigits: 0 })}`
   const fmtMes = (ym) => {

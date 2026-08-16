@@ -36,7 +36,7 @@ function Modal({ isOpen, onClose, children, maxWidth = 540, label }) {
 }
 
 // ── PREVIEW MODAL ──────────────────────────────────────────────────────────
-function PreviewModal({ template, onClose, onApply }) {
+function PreviewModal({ template, onClose, onApply, isAdvisor }) {
   const { t: tr } = useT()
   if (!template) return null
 
@@ -142,16 +142,20 @@ function PreviewModal({ template, onClose, onApply }) {
           ))}
         </div>
 
-        {/* Consejo del asesor */}
-        <div style={{
-          padding: '10px 12px', background: 'var(--grn-bg)',
-          borderRadius: 8, border: '0.5px solid rgba(26,163,104,.2)',
-        }}>
-          <div style={{ fontSize: 10, fontFamily: 'var(--mono)', fontWeight: 600, color: 'var(--grn)', marginBottom: 4 }}>
-            💡 Consejo para el asesor
+        {/* Consejo del asesor — solo tiene sentido si el usuario eligió "Con clientes"
+            en el onboarding. Antes se mostraba a todos, incluido quien usa la app
+            para sus propias finanzas personales (que no tiene ningún "cliente"). */}
+        {isAdvisor && (
+          <div style={{
+            padding: '10px 12px', background: 'var(--grn-bg)',
+            borderRadius: 8, border: '0.5px solid rgba(26,163,104,.2)',
+          }}>
+            <div style={{ fontSize: 10, fontFamily: 'var(--mono)', fontWeight: 600, color: 'var(--grn)', marginBottom: 4 }}>
+              💡 Consejo para el asesor
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--grn)', lineHeight: 1.6 }}>{template.advisorTip}</div>
           </div>
-          <div style={{ fontSize: 11, color: 'var(--grn)', lineHeight: 1.6 }}>{template.advisorTip}</div>
-        </div>
+        )}
 
         {/* Aviso */}
         <div style={{
@@ -448,6 +452,7 @@ export default function TemplateSelector({ compact = false, onApplied }) {
         template={preview}
         onClose={() => setPreview(null)}
         onApply={handleApplyClick}
+        isAdvisor={compact || settings.onboardingUseType === 'advisor'}
       />
       <ConfirmModal
         template={confirm}

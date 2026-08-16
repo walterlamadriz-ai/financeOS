@@ -3,6 +3,7 @@
 // Fuente: IRS (brackets 2026, 401k limit 2026). Vigencia 2026.
 
 import { tasaMarginal, impuestoProgresivo } from '../../utils/marginal.js'
+import { STANDARD_DEDUCTION_2026, limite401k } from '../../utils/taxCalcUS.js'
 
 const LIMIT_401K = 24500          // IRS elective deferral 2026 (IRA aparte: +$7.500)
 
@@ -27,16 +28,21 @@ export default {
   titulo: '401(k) contribution tax-savings projector',
   subtitulo: 'Estimate how much federal income tax you save with Traditional 401(k) contributions',
   disclaimer: 'Educational estimate, not tax advice. Single-filer federal brackets only (ignores state tax, credits, IRA). Consult a tax professional or the IRS.',
-  ingresoLabel: 'Annual taxable income (USD)',
+  ingresoLabel: 'Annual gross income (USD)',
   aporteLabel: 'Planned annual 401(k) contribution (USD)',
-  resumenTope: 'Tope deducible: límite 401(k) ' + LIMIT_401K.toLocaleString('en-US') + ' (la IRA suma otros $7.500 aparte).',
+  resumenTope: 'Tope deducible: límite 401(k) ' + LIMIT_401K.toLocaleString('en-US') + ' + catch-up según edad (la IRA suma otros $7.500 aparte). Se descuenta la standard deduction ($' + STANDARD_DEDUCTION_2026.single.toLocaleString('en-US') + ') antes de aplicar los tramos.',
 
-  calcular({ ingresoAnual = 0, aporteAnual = 0 }) {
-    const ingreso = Number(ingresoAnual) || 0
+  // ingresoAnual es BRUTO. Los tramos BR están definidos sobre taxable income,
+  // así que hay que restar la standard deduction antes de aplicarlos — si no,
+  // la tasa marginal sale inflada (un bruto de $52.000 daría 22% en vez de 12%).
+  calcular({ ingresoAnual = 0, aporteAnual = 0, edad = 0 }) {
+    const bruto = Number(ingresoAnual) || 0
     const aporte = Number(aporteAnual) || 0
-    const tope = Math.min(LIMIT_401K, ingreso) // no se puede deducir más que el ingreso
+    const gravable = Math.max(0, bruto - STANDARD_DEDUCTION_2026.single)
+    const topeLegal = limite401k(edad).total
+    const tope = Math.min(topeLegal, bruto) // no se puede diferir más que el ingreso
     const deducible = Math.min(aporte, tope)
-    const ahorro = impuestoProgresivo(BR, ingreso) - impuestoProgresivo(BR, ingreso - deducible)
+    const ahorro = impuestoProgresivo(BR, gravable) - impuestoProgresivo(BR, Math.max(0, gravable - deducible))
     const topePct = tope > 0 ? Math.min(100, (aporte / tope) * 100) : 0
     const faltaParaTope = Math.max(0, tope - aporte)
     return {
@@ -45,8 +51,9 @@ export default {
       tope: Math.round(tope),
       topePct,
       faltaParaTope: Math.round(faltaParaTope),
-      marginal: tasaMarginal(BR, ingreso),
-      resumen: 'Saving = tax without the contribution − tax with it (federal brackets, single).',
+      gravable: Math.round(gravable),
+      marginal: tasaMarginal(BR, gravable),
+      resumen: 'Saving = tax without the contribution − tax with it (federal brackets, single, after standard deduction).',
     }
   },
 }

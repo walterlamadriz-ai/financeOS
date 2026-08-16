@@ -12,7 +12,8 @@ import { useApp } from '../../context/AppContext.jsx'
 import { useT } from '../../i18n/useT.js'
 import { Card, CardHeader, FormRow, FormGroup, ProgressBar, Alert, PageHeader, Btn } from '../../components/ui/index.jsx'
 import ProGate from '../../components/ui/ProGate.jsx'
-import { calcDescuentosDE, BUNDESLAENDER } from '../../utils/taxCalcDE.js'
+import { calcDescuentosDE, calcZvE, BUNDESLAENDER, ARBEITNEHMER_PAUSCHBETRAG } from '../../utils/taxCalcDE.js'
+import { tasaMarginalDE } from '../../config/deducciones/de.js'
 import { getDeduccionesConfig, autofillGastos } from '../../utils/deduccionesEngine.js'
 
 const fmtEUR = (n) => `€${(Number(n) || 0).toLocaleString('de-DE', { maximumFractionDigits: 0 })}`
@@ -60,12 +61,15 @@ function LohnabzuegeCard() {
   const [brutto, setBrutto] = useState('')
   const [kirche, setKirche] = useState(false)
   const [bundesland, setBundesland] = useState('NW')
+  // Kinderlosenzuschlag de la Pflegeversicherung (+0.6% íntegro del empleado):
+  // se aplica salvo que se marque "tengo hijos", igual que los Brutto-Netto-Rechner alemanes.
+  const [hatKinder, setHatKinder] = useState(false)
 
   const result = useMemo(() => {
     const b = Number(brutto) || 0
     if (b <= 0) return null
-    return calcDescuentosDE(b, { kirchensteuerpflichtig: kirche, bundesland })
-  }, [brutto, kirche, bundesland])
+    return calcDescuentosDE(b, { kirchensteuerpflichtig: kirche, bundesland, hatKinder })
+  }, [brutto, kirche, bundesland, hatKinder])
 
   return (
     <Card>
@@ -84,6 +88,10 @@ function LohnabzuegeCard() {
       <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--tx)', margin: '4px 0 12px', cursor: 'pointer' }}>
         <input type="checkbox" checked={kirche} onChange={e => setKirche(e.target.checked)} style={{ width: 16, height: 16, flexShrink: 0 }} />
         {t('steuer.lohn.kircheLabel')}
+      </label>
+      <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--tx)', margin: '-8px 0 12px', cursor: 'pointer' }}>
+        <input type="checkbox" checked={hatKinder} onChange={e => setHatKinder(e.target.checked)} style={{ width: 16, height: 16, flexShrink: 0 }} />
+        {t('steuer.lohn.kinderLabel')}
       </label>
 
       {result && (
@@ -162,22 +170,21 @@ function WerbungskostenCard({ expenses, settings }) {
       (Number(gastos.fortbildung) || 0) +
       (Number(gastos.arbeitsmittel) || 0) +
       (Number(gastos.bewerbung) || 0)
-    const PAUSCH = 1230
+    const PAUSCH = ARBEITNEHMER_PAUSCHBETRAG
     const superaPauschale = totalGastos > PAUSCH
     const excedente = Math.max(0, totalGastos - PAUSCH)
     const ing = Number(ingreso) || 0
-    let tasa
-    if (ing <= 20000) tasa = 0.14
-    else if (ing <= 40000) tasa = 0.24
-    else if (ing <= 62800) tasa = 0.30
-    else if (ing <= 100000) tasa = 0.35
-    else if (ing <= 277825) tasa = 0.42
-    else tasa = 0.45
+    // La tasa marginal se evalúa sobre el zvE (bruto − Werbungskosten −
+    // Sonderausgaben-Pauschbetrag − Vorsorgepauschale), no sobre el bruto.
+    // Única fuente de la escala: tasaMarginalDE en config/deducciones/de.js.
+    const zvE = calcZvE(ing, { werbungskostenAnual: Math.max(totalGastos, PAUSCH) })
+    const tasa = tasaMarginalDE(zvE)
     return {
       ahorro: Math.round(excedente * tasa),
       pausch: PAUSCH,
       totalGastos: Math.round(totalGastos),
-      topePct: totalGastos > 0 ? Math.min(100, (totalGastos / PAUSCH) * 100) : 0,
+      // No es un tope: pasar de 100% es justamente el objetivo.
+      topePct: totalGastos > 0 ? (totalGastos / PAUSCH) * 100 : 0,
       superaPauschale,
       tasa,
       desglose: [
@@ -230,7 +237,12 @@ function WerbungskostenCard({ expenses, settings }) {
           <span>{t('steuer.werb.aprovechamiento')}</span>
           <span>{Math.round(result.topePct)}%</span>
         </div>
-        <ProgressBar value={result.topePct} max={100} color={result.topePct >= 100 ? 'green' : 'amber'} height={6} />
+        {/* El Pauschbetrag es un SUELO, no un techo: la barra se llena al 100%
+            cuando los gastos igualan el mínimo automático, y superarlo es lo bueno. */}
+        <ProgressBar value={Math.min(100, result.topePct)} max={100} color={result.topePct >= 100 ? 'green' : 'amber'} height={6} />
+        <div style={{ fontSize: 11, color: 'var(--tm)', marginTop: 6, lineHeight: 1.5 }}>
+          {t('steuer.werb.aprovechamientoHint')}
+        </div>
 
         <div style={{ marginTop: 16, borderTop: '.5px solid var(--brd)', paddingTop: 12 }}>
           <div style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 8 }}>{t('steuer.werb.desglose')}</div>
