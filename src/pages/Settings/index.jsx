@@ -11,6 +11,7 @@ import { isSyncEnabled, syncMeta, syncAvailable } from '../../core/sync.js'
 import { pushSupported, isPushEnabled, enablePush, disablePush } from '../../core/push.js'
 import { useT } from '../../i18n/useT.js'
 import { moneyLocale } from '../../utils/index.js'
+import { validateTaxId, TAX_ID_COUNTRIES, TAX_ID_LABEL } from '../../utils/taxIdValidation.js'
 
 export default function Settings() {
   const { settings, updateSettings, clearAll, loadDemo, exportCSV, enableSync, disableSync } = useApp()
@@ -95,6 +96,7 @@ export default function Settings() {
             <option value="OTHER">🌎 Otro</option>
           </select>
         </div>
+        <TaxIdField country={settings.country} taxId={settings.taxId} updateSettings={updateSettings} settings={settings} />
         <div style={srow}>
           <div><div style={slbl}>{t('settings.theme.label')}</div><div style={ssub}>{t('settings.theme.sub')}</div></div>
           <div style={{display:'flex',gap:6}}>
@@ -240,6 +242,61 @@ export default function Settings() {
       <div style={{padding:'10px 12px',background:'var(--sur2)',borderRadius:'var(--r)',border:'0.5px solid var(--brd)',fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',lineHeight:1.7,marginTop:8}}>
         FinanceOS v1.5 · MAXNOVA & LUCI Global LLC · Datos locales · Sin servidor · No asesoría financiera certificada
       </div>
+    </div>
+  )
+}
+
+// ── Identificador fiscal (RUT/RFC/CUIT/RIF/NIF/USt-IdNr/EIN según país) ────────
+// Validación 100 % local (dígito verificador real para CL/MX/AR/VE/ES/PT;
+// solo formato para DE/US — ver src/utils/taxIdValidation.js para el porqué).
+// No se llama a VIES desde acá: el endpoint REST de VIES no manda cabeceras
+// CORS, así que un fetch() desde el navegador de la app fallaría siempre.
+function TaxIdField({ country, taxId, updateSettings, settings }) {
+  const { t } = useT()
+  const cc = (country || '').toUpperCase()
+  if (!TAX_ID_COUNTRIES.includes(cc)) return null
+
+  const label = TAX_ID_LABEL[cc]
+  const result = taxId ? validateTaxId(cc, taxId) : null
+
+  const srow = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 0', borderBottom: '0.5px solid var(--brd)' }
+  const sub = { fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: 1 }
+  const lbl = { fontSize: 13, fontWeight: 500, color: 'var(--tx)' }
+
+  let feedback = null
+  if (result) {
+    if (result.valid === true) {
+      feedback = { text: t('settings.taxId.valid', { label }), color: 'var(--pos, #2e7d32)' }
+    } else if (result.reason === 'checkDigit') {
+      feedback = { text: t('settings.taxId.invalidCheckDigit'), color: 'var(--neg, #c0392b)' }
+    } else if (result.reason === 'format') {
+      feedback = { text: t('settings.taxId.invalidFormat', { label }), color: 'var(--neg, #c0392b)' }
+    }
+  }
+
+  return (
+    <div style={{ ...srow, flexDirection: 'column', alignItems: 'flex-start', gap: 8 }}>
+      <div>
+        <div style={lbl}>{t('settings.taxId.title', { label })}</div>
+        <div style={sub}>{t('settings.taxId.sub')}</div>
+      </div>
+      <input
+        type="text"
+        value={taxId || ''}
+        placeholder={t('settings.taxId.placeholder', { label })}
+        onChange={e => updateSettings({ ...settings, taxId: e.target.value })}
+        style={{
+          width: '100%', padding: '7px 10px', borderRadius: 6, border: '.5px solid var(--brd2)',
+          background: 'var(--sur2)', color: 'var(--tx)', fontSize: 13, fontFamily: 'var(--mono)',
+          textTransform: 'uppercase',
+        }}
+      />
+      {feedback && (
+        <div style={{ fontSize: 11, fontFamily: 'var(--mono)', color: feedback.color }}>{feedback.text}</div>
+      )}
+      {result?.checkedVia === 'format-only' && (
+        <div style={{ ...sub, lineHeight: 1.5 }}>{t('settings.taxId.formatOnly', { label })}</div>
+      )}
     </div>
   )
 }
