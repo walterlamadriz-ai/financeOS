@@ -297,7 +297,7 @@ function RothHSACard({ fmt, ingresoAnual, edad }) {
         </div>
         {hsa.faltaParaTope > 0 ? (
           <div style={{ fontSize: 12, color: 'var(--tm)', lineHeight: 1.5 }}>
-            Podés aportar <strong style={{ color: 'var(--accent)' }}>{fmt(hsa.faltaParaTope)}</strong> más este año antes de tocar el límite ({fmt(hsa.limite)}).
+            Puedes aportar <strong style={{ color: 'var(--accent)' }}>{fmt(hsa.faltaParaTope)}</strong> más este año antes de tocar el límite ({fmt(hsa.limite)}).
           </div>
         ) : (
           <div style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600 }}>✓ Alcanzaste el límite de aporte {coverage === 'family' ? 'familiar' : 'individual'}.</div>

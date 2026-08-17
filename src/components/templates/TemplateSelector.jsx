@@ -435,7 +435,7 @@ export default function TemplateSelector({ compact = false, onApplied }) {
         fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', lineHeight: 1.5,
       }}>
         Las plantillas configuran categorías y presupuestos sugeridos. Tus transacciones, deudas y metas registradas no se modifican.
-        Podés editar las categorías en cualquier momento desde Ajustes.
+        Puedes editar las categorías en cualquier momento desde Ajustes.
       </div>
 
       {/* Modals */}
