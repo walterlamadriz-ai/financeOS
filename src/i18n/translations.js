@@ -1284,10 +1284,10 @@ export const translations = {
     'settings.install.btn': 'Instalar →',
     'settings.taxId.title': 'Identificador fiscal ({label})',
     'settings.taxId.sub': 'Validación local del dígito verificador, sin conexión — el número no sale de este dispositivo.',
-    'settings.taxId.placeholder': 'Ingresá tu {label}',
+    'settings.taxId.placeholder': 'Ingresa tu {label}',
     'settings.taxId.valid': '✓ {label} válido',
     'settings.taxId.invalidFormat': 'Formato de {label} inválido',
-    'settings.taxId.invalidCheckDigit': 'El dígito verificador no coincide — revisá el número',
+    'settings.taxId.invalidCheckDigit': 'El dígito verificador no coincide — revisa el número',
     'settings.taxId.formatOnly': 'Solo se verifica el formato: no hay un dígito verificador público para el {label} de este país.',
   },
   en: {
