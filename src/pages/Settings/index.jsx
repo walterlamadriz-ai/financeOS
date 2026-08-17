@@ -12,12 +12,19 @@ import { pushSupported, isPushEnabled, enablePush, disablePush } from '../../cor
 import { useT } from '../../i18n/useT.js'
 import { moneyLocale } from '../../utils/index.js'
 import { validateTaxId, TAX_ID_COUNTRIES, TAX_ID_LABEL } from '../../utils/taxIdValidation.js'
+import { loadFixerRates } from '../../utils/tasaFixer.js'
 
 export default function Settings() {
   const { settings, updateSettings, clearAll, loadDemo, exportCSV, enableSync, disableSync } = useApp()
   const { t } = useT()
   const [installPrompt, setInstallPrompt] = useState(null)
   const [installed, setInstalled] = useState(false)
+  const [fx, setFx] = useState(null) // { rates, source: 'fixer'|'fallback' } — null mientras carga
+
+  useEffect(() => { loadFixerRates().then(setFx) }, [])
+  // Tasa a usar: la de Fixer si ya cargó, si no el hardcodeado de siempre —
+  // nunca deja al usuario esperando un fetch para ver/editar el campo.
+  const liveRate = (currency) => fx?.rates?.[currency] ?? DEFAULT_USD_RATES[currency]
   const isIOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream
   const isStandalone = typeof window !== 'undefined' && (window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true)
 
@@ -66,7 +73,7 @@ export default function Settings() {
         <CardHeader title={t('settings.preferences')} />
         <div style={srow}>
           <div><div style={slbl}>{t('settings.currency.label')}</div><div style={ssub}>{t('settings.currency.sub')}</div></div>
-          <select style={{width:'auto'}} value={settings.currency||'CLP'} onChange={e=>updateSettings({...settings,currency:e.target.value})}>
+          <select style={{width:'auto'}} value={settings.currency||'CLP'} onChange={e=>updateSettings({...settings,currency:e.target.value,usdRate:0})}>
             {CURRENCY_OPTIONS.map(c=><option key={c.code} value={c.code}>{c.label}</option>)}
           </select>
         </div>
@@ -114,7 +121,7 @@ export default function Settings() {
           <button
             onClick={() => {
               const next = !settings.showDualCurrency
-              const rate = settings.usdRate || DEFAULT_USD_RATES[settings.currency || 'CLP'] || 1
+              const rate = settings.usdRate || liveRate(settings.currency || 'CLP') || 1
               updateSettings({ ...settings, showDualCurrency: next, usdRate: rate })
             }}
             style={{
@@ -141,8 +148,8 @@ export default function Settings() {
             <div style={{display:'flex', alignItems:'center', gap:8, width:'100%'}}>
               <input
                 type="number" inputMode="decimal" min="0" step="any"
-                value={settings.usdRate || DEFAULT_USD_RATES[settings.currency] || ''}
-                placeholder={String(DEFAULT_USD_RATES[settings.currency] || '')}
+                value={settings.usdRate || liveRate(settings.currency) || ''}
+                placeholder={String(liveRate(settings.currency) || '')}
                 onChange={e => updateSettings({...settings, usdRate: parseFloat(e.target.value) || 0})}
                 style={{flex:1, padding:'7px 10px', borderRadius:6, border:'.5px solid var(--brd2)',
                   background:'var(--sur2)', color:'var(--tx)', fontSize:13, fontFamily:'var(--mono)'}}
@@ -151,10 +158,15 @@ export default function Settings() {
                 {t('settings.exchangeRate.perUsd', { currency: settings.currency || 'CLP' })}
               </span>
               <Btn variant="ghost" size="sm"
-                onClick={() => updateSettings({...settings, usdRate: DEFAULT_USD_RATES[settings.currency] || 1})}>
+                onClick={() => updateSettings({...settings, usdRate: liveRate(settings.currency) || 1})}>
                 {t('settings.exchangeRate.reset')}
               </Btn>
             </div>
+            {fx && (
+              <div style={{fontSize:10, color: fx.source === 'fixer' ? 'var(--grn)' : 'var(--th)', fontFamily:'var(--mono)'}}>
+                {fx.source === 'fixer' ? `● ${t('settings.exchangeRate.live')}` : `○ ${t('settings.exchangeRate.offline')}`}
+              </div>
+            )}
             {settings.usdRate > 0 && (
               <div style={{fontSize:10, color:'var(--accent)', fontFamily:'var(--mono)'}}>
                 → US$1 = {Number(settings.usdRate).toLocaleString(moneyLocale())} {settings.currency} · US$100 = {(settings.usdRate * 100).toLocaleString(moneyLocale())} {settings.currency}
