@@ -230,8 +230,8 @@ export default function Settings() {
         <CardHeader title="¿Dónde se guardan tus datos?" />
         <div style={{fontSize:12,color:'var(--tm)',lineHeight:1.8,display:'flex',flexDirection:'column',gap:8}}>
           <div><span style={{fontWeight:600,color:'var(--tx)'}}>IndexedDB del navegador</span> — todos tus ingresos, gastos, presupuestos, metas y deudas se guardan localmente en este dispositivo usando la base de datos interna del navegador.</div>
-          <div><span style={{fontWeight:600,color:'var(--tx)'}}>Sin servidor</span> — FinanceOS no envía tus datos a ningún servidor externo. No existe una cuenta de usuario, no hay sincronización en la nube.</div>
-          <div><span style={{fontWeight:600,color:'var(--tx)'}}>Respaldo manual</span> — si cambias de dispositivo o reinstalas el navegador, usa "Respaldo y restauración" para exportar e importar tu archivo JSON.</div>
+          <div><span style={{fontWeight:600,color:'var(--tx)'}}>El servidor nunca puede leerlos</span> — no hay cuenta de usuario ni login. Si activás la sincronización opcional (sección "Sync" más arriba), tus datos se cifran en este dispositivo antes de salir: el servidor solo recibe un archivo cifrado, nunca montos ni categorías en claro.</div>
+          <div><span style={{fontWeight:600,color:'var(--tx)'}}>Respaldo</span> — con la sincronización activada, tus datos quedan respaldados cifrados en la nube. Sin ella, usa "Respaldo y restauración" para exportar e importar tu archivo JSON manualmente.</div>
           <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',marginTop:4}}>🔒 Datos 100% privados · sin telemetría · sin cookies de seguimiento</div>
         </div>
       </Card>
@@ -252,7 +252,7 @@ export default function Settings() {
         </Card>
       )}
       <div style={{padding:'10px 12px',background:'var(--sur2)',borderRadius:'var(--r)',border:'0.5px solid var(--brd)',fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',lineHeight:1.7,marginTop:8}}>
-        FinanceOS v1.5 · MAXNOVA & LUCI Global LLC · Datos locales · Sin servidor · No asesoría financiera certificada
+        FinanceOS v1.5 · MAXNOVA & LUCI Global LLC · Datos locales · Cifrado de extremo a extremo · No asesoría financiera certificada
       </div>
     </div>
   )
