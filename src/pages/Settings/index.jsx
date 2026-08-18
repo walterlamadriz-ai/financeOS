@@ -231,7 +231,7 @@ export default function Settings() {
         <div style={{fontSize:12,color:'var(--tm)',lineHeight:1.8,display:'flex',flexDirection:'column',gap:8}}>
           <div><span style={{fontWeight:600,color:'var(--tx)'}}>IndexedDB del navegador</span> — todos tus ingresos, gastos, presupuestos, metas y deudas se guardan localmente en este dispositivo usando la base de datos interna del navegador.</div>
           <div><span style={{fontWeight:600,color:'var(--tx)'}}>Sin servidor</span> — FinanceOS no envía tus datos a ningún servidor externo. No existe una cuenta de usuario, no hay sincronización en la nube.</div>
-          <div><span style={{fontWeight:600,color:'var(--tx)'}}>Respaldo manual</span> — si cambiás de dispositivo o reinstalás el navegador, usá "Respaldo y restauración" para exportar e importar tu archivo JSON.</div>
+          <div><span style={{fontWeight:600,color:'var(--tx)'}}>Respaldo manual</span> — si cambias de dispositivo o reinstalas el navegador, usa "Respaldo y restauración" para exportar e importar tu archivo JSON.</div>
           <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',marginTop:4}}>🔒 Datos 100% privados · sin telemetría · sin cookies de seguimiento</div>
         </div>
       </Card>
@@ -243,7 +243,7 @@ export default function Settings() {
               <div style={slbl}>{installed ? t('settings.install.installed.label') : t('settings.install.pending.label')}</div>
               <div style={ssub}>
                 {installed ? t('settings.install.installed.sub')
-                  : isIOS ? 'En Safari: tocá el ícono de compartir ⬆ → "Añadir a pantalla de inicio".'
+                  : isIOS ? 'En Safari: toca el ícono de compartir ⬆ → "Añadir a pantalla de inicio".'
                   : t('settings.install.pending.sub')}
               </div>
             </div>

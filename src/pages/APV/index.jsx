@@ -286,7 +286,7 @@ export default function APVPage() {
                   <div style={{background:'var(--bg)',borderRadius:8,padding:'10px 12px',borderBottom:'2px solid var(--brd)'}}>
                     <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:4}}>EN 5 AÑOS MÁS</div>
                     <div style={{fontSize:16,fontWeight:700,color:'var(--tx)',fontFamily:'var(--mono)'}}>{apvResult.projection5years>=1000000?'$'+(apvResult.projection5years/1000000).toFixed(1)+'M':'$'+apvResult.projection5years.toLocaleString()}</div>
-                    <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginTop:2}}>si empezás en 5 años</div>
+                    <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginTop:2}}>si empiezas en 5 años</div>
                   </div>
                   <div style={{background:'var(--bg)',borderRadius:8,padding:'10px 12px',borderBottom:'2px solid #e84142'}}>
                     <div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:4}}>COSTO DE ESPERAR</div>

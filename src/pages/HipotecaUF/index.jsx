@@ -139,7 +139,7 @@ export default function HipotecaUF() {
             {impactoPrepago.mesesAhorrados > 0 && (
               <div style={{ marginTop: 12, fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--th)', lineHeight: 1.6, padding: '8px 10px', background: 'var(--sur2)', border: '.5px solid var(--brd)', borderRadius: 'var(--r)' }}>
                 La comisión de prepago se estima en el <strong>máximo legal</strong>: 1,5 meses de interés sobre el capital prepagado, el tope que fija la Ley 18.010 art. 10 para créditos reajustables (en UF).
-                Tu banco puede cobrar menos, o nada — revisá tu escritura antes de decidir.
+                Tu banco puede cobrar menos, o nada — revisa tu escritura antes de decidir.
               </div>
             )}
           </Card>

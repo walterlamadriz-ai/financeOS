@@ -88,7 +88,7 @@ export default function ReportPDF({ data }) {
   if (savingRate >= 0.25) {
     recs.push({ type: 'ok', text: `Tasa de ahorro ${pct(savingRate)} — supera la meta del ${savingGoalPct}%. Excelente.` })
   } else {
-    recs.push({ type: 'warn', text: `Tasa de ahorro ${pct(savingRate)} — meta: ${savingGoalPct}%. Ajustá gastos variables.` })
+    recs.push({ type: 'warn', text: `Tasa de ahorro ${pct(savingRate)} — meta: ${savingGoalPct}%. Ajusta gastos variables.` })
   }
   if (overBudget.length > 0) {
     recs.push({ type: 'danger', text: `Presupuestos excedidos: ${overBudget.map(b => b.category).join(', ')}.` })
@@ -265,7 +265,7 @@ export default function ReportPDF({ data }) {
           <Text style={s.footTxt}>
             FinanceOS v1.5 · MAXNOVA {'&'} LUCI Global LLC · Datos procesados localmente, sin servidores.{'\n'}
             Este reporte es de carácter orientativo y NO constituye asesoría financiera, tributaria, legal ni de inversión.
-            Consultá a un profesional certificado para decisiones financieras formales.
+            Consulta a un profesional certificado para decisiones financieras formales.
           </Text>
         </View>
 

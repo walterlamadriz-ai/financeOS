@@ -363,7 +363,7 @@ export default function BackupManager() {
           </div>
           <div style={{ fontSize: 11, color: 'var(--tm)', lineHeight: 1.7, fontFamily: 'var(--mono)' }}>
             Tus datos se guardan en este navegador, en este dispositivo. FinanceOS no tiene servidor
-            — nada sale de tu dispositivo. Si borrás el navegador, limpiás la caché o cambiás de
+            — nada sale de tu dispositivo. Si borras el navegador, limpias la caché o cambias de
             dispositivo <strong style={{ color: 'var(--tx)' }}>sin un respaldo previo, los datos se perderán permanentemente</strong>.
             FinanceOS no puede recuperarlos.
           </div>

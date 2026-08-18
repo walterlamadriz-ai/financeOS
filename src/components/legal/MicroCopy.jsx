@@ -37,8 +37,8 @@ export function BackupWarning({ variant = 'full' }) {
         fontSize: 11, color: '#854f0b', fontFamily: 'var(--mono)',
         lineHeight: 1.5, marginTop: 6,
       }}>
-        ⚠ Exportá un respaldo JSON periódicamente. Los datos locales pueden perderse
-        si borrás el navegador o cambiás de dispositivo.
+        ⚠ Exporta un respaldo JSON periódicamente. Los datos locales pueden perderse
+        si borras el navegador o cambias de dispositivo.
       </p>
     )
   }
@@ -51,9 +51,9 @@ export function BackupWarning({ variant = 'full' }) {
     }}>
       <span style={{ flexShrink: 0, fontSize: 16, marginTop: 1 }}>⚠</span>
       <div>
-        <strong>Tus datos viven en este dispositivo.</strong> Si borrás el navegador,
-        limpiás la caché o cambiás de dispositivo sin exportar un respaldo, perderás
-        todos tus datos de forma permanente. Exportá un respaldo JSON desde{' '}
+        <strong>Tus datos viven en este dispositivo.</strong> Si borras el navegador,
+        limpias la caché o cambias de dispositivo sin exportar un respaldo, perderás
+        todos tus datos de forma permanente. Exporta un respaldo JSON desde{' '}
         <strong>Ajustes → Exportar JSON</strong> al menos una vez al mes.
       </div>
     </div>
@@ -87,7 +87,7 @@ export function LocalStorageNotice() {
     }}>
       <strong style={{ color: 'var(--tx)' }}>¿Dónde están tus datos?</strong>{' '}
       Guardados en este navegador, en este dispositivo. FinanceOS no tiene servidor —
-      tus datos nunca salen de acá. Exportá un respaldo JSON para acceder desde
+      tus datos nunca salen de aquí. Exporta un respaldo JSON para acceder desde
       otro dispositivo.
     </div>
   )

@@ -50,15 +50,15 @@ export function generateAlerts(activeSubs, monthlyIncome) {
 
   // Más de 2 streaming
   if ((byCat['Streaming'] || []).length >= 2) {
-    alerts.push({ type: 'duplicate', msg: `Tenés ${byCat['Streaming'].length} suscripciones en Streaming. Revisá si todas se usan regularmente.` })
+    alerts.push({ type: 'duplicate', msg: `Tienes ${byCat['Streaming'].length} suscripciones en Streaming. Revisa si todas se usan regularmente.` })
   }
   // Más de 1 música
   if ((byCat['Música'] || []).length > 1) {
-    alerts.push({ type: 'duplicate', msg: `Hay ${byCat['Música'].length} servicios de música activos. Evaluá si ambos son necesarios.` })
+    alerts.push({ type: 'duplicate', msg: `Hay ${byCat['Música'].length} servicios de música activos. Evalúa si ambos son necesarios.` })
   }
   // Más de 1 almacenamiento
   if ((byCat['Almacenamiento'] || []).length > 1) {
-    alerts.push({ type: 'duplicate', msg: `Hay ${byCat['Almacenamiento'].length} servicios de almacenamiento. Considerá consolidarlos.` })
+    alerts.push({ type: 'duplicate', msg: `Hay ${byCat['Almacenamiento'].length} servicios de almacenamiento. Considera consolidarlos.` })
   }
   // Sin fecha de próximo pago
   const sinFecha = activeSubs.filter(s => !s.nextPaymentDate)

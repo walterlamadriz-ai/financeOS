@@ -214,8 +214,8 @@ function RothHSACard({ fmt, ingresoAnual, edad }) {
       <Card>
         <CardHeader title="Roth vs Traditional" />
         <div style={{ fontSize: 12, color: 'var(--tm)', lineHeight: 1.6, marginBottom: 14 }}>
-          Mismo aporte nominal a cada cuenta, mismo crecimiento. En Traditional entra completo y tributás al retirarlo;
-          en Roth ya tributaste y sale libre. Lo que inclina la balanza es la deducción de hoy: si la invertís, Traditional
+          Mismo aporte nominal a cada cuenta, mismo crecimiento. En Traditional entra completo y tributas al retirarlo;
+          en Roth ya tributaste y sale libre. Lo que inclina la balanza es la deducción de hoy: si la inviertes, Traditional
           gana cuando tu tasa de hoy es mayor que la del retiro.
         </div>
         <FormRow>
@@ -258,12 +258,12 @@ function RothHSACard({ fmt, ingresoAnual, edad }) {
         </div>
         <div style={{ fontSize: 12, color: 'var(--tm)', marginTop: 10, lineHeight: 1.5 }}>
           {rothVsTrad.convieneTraditional
-            ? <>Con estos números, <strong style={{ color: 'var(--accent)' }}>Traditional</strong> te deja {fmt(rothVsTrad.diferencia)} más — tiene sentido si esperás pagar menos impuesto al retirarte que hoy.</>
-            : <><strong style={{ color: 'var(--accent)' }}>Roth</strong> te deja {fmt(rothVsTrad.diferencia)} más — tiene sentido si tu tasa de hoy es más baja que la que esperás pagar retirado.</>}
+            ? <>Con estos números, <strong style={{ color: 'var(--accent)' }}>Traditional</strong> te deja {fmt(rothVsTrad.diferencia)} más — tiene sentido si esperas pagar menos impuesto al retirarte que hoy.</>
+            : <><strong style={{ color: 'var(--accent)' }}>Roth</strong> te deja {fmt(rothVsTrad.diferencia)} más — tiene sentido si tu tasa de hoy es más baja que la que esperas pagar retirado.</>}
         </div>
         <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', lineHeight: 1.6, marginTop: 12, padding: '10px 12px', background: 'var(--sur2)', borderRadius: 8, border: '.5px solid var(--brd)' }}>
           Asume que la deducción de hoy ({fmt(rothVsTrad.ahorroFiscalHoy)}) se invierte al mismo retorno y no paga impuesto sobre las ganancias.
-          Si te la gastás, o si ya topeás el límite legal en ambas cuentas, Roth gana siempre a igual aporte nominal.
+          Si te la gastas, o si ya topeas el límite legal en ambas cuentas, Roth gana siempre a igual aporte nominal.
         </div>
       </Card>
 
@@ -274,7 +274,7 @@ function RothHSACard({ fmt, ingresoAnual, edad }) {
           Límites 2026: {fmt(LIMITES_2026.hsaSelfOnly)} individual / {fmt(LIMITES_2026.hsaFamily)} familiar
           {topeHsa.catchUp > 0
             ? <> · catch-up 55+ aplicado (+{fmt(topeHsa.catchUp)}) → tu tope es <strong style={{ color: 'var(--accent)' }}>{fmt(topeHsa.total)}</strong>.</>
-            : <> · con 55 años o más suma {fmt(LIMITES_2026.hsaCatchUp55)} de catch-up (indicá tu edad arriba).</>}
+            : <> · con 55 años o más suma {fmt(LIMITES_2026.hsaCatchUp55)} de catch-up (indica tu edad arriba).</>}
         </div>
         <FormRow>
           <FormGroup label="Cobertura">
