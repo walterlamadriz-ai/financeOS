@@ -184,7 +184,7 @@ function FormGasto({ onSave, onCancel, sym, projects = [], onImport, settings })
                   style={{
                     padding:'4px 10px', borderRadius:16, fontSize:11, cursor:'pointer',
                     fontFamily:'var(--mono)', border:`.5px solid ${f.subcategory === sc ? 'var(--accent)' : 'var(--brd2)'}`,
-                    background: f.subcategory === sc ? 'rgba(0,212,170,.12)' : 'var(--sur2)',
+                    background: f.subcategory === sc ? 'var(--accent-bg)' : 'var(--sur2)',
                     color: f.subcategory === sc ? 'var(--accent)' : 'var(--th)',
                     fontWeight: f.subcategory === sc ? 600 : 400,
                     transition:'.12s',
@@ -497,11 +497,11 @@ export default function Movements({ setPage }) {
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(130px,1fr))',
         gap:10, marginBottom:20 }}>
         {[
-          { label:t('mov.kpi.income'),      value:fmtM(totalInc, sym),      color:'var(--accent,#00d4aa)', sub: invInc > 0 ? t('mov.kpi.invTag', { v: fmtM(invInc, sym) }) : null },
+          { label:t('mov.kpi.income'),      value:fmtM(totalInc, sym),      color:'var(--accent)', sub: invInc > 0 ? t('mov.kpi.invTag', { v: fmtM(invInc, sym) }) : null },
           { label:t('mov.kpi.oneOff'), value:fmtM(totalExp, sym),      color:'var(--red)', sub: invExp > 0 ? t('mov.kpi.invTag', { v: fmtM(invExp, sym) }) : null },
           { label:t('mov.kpi.recurring'),   value:fmtM(totalSubs, sym),     color:'var(--amb,#f5a623)' },
           { label:t('mov.kpi.totalOut'), value:fmtM(totalEgresos, sym),  color:'var(--red)' },
-          { label:t('mov.kpi.available'),    value:fmtM(balance, sym),       color: balance >= 0 ? 'var(--accent,#00d4aa)' : 'var(--red)', sub: (invInc > 0 || invExp > 0) ? t('mov.kpi.personalExcl') : t('mov.kpi.afterDebts') },
+          { label:t('mov.kpi.available'),    value:fmtM(balance, sym),       color: balance >= 0 ? 'var(--accent)' : 'var(--red)', sub: (invInc > 0 || invExp > 0) ? t('mov.kpi.personalExcl') : t('mov.kpi.afterDebts') },
         ].map((k,i) => (
           <div key={i} style={kpiBox}>
             <div style={{ fontFamily:'var(--mono)', fontSize:9, color:'var(--th)',

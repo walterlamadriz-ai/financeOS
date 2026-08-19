@@ -79,7 +79,7 @@ export default function Budgets() {
           title={t('budgets.rollover.title')}
           style={{
             marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6,
-            background: rolloverOn ? 'rgba(0,212,170,.1)' : 'var(--sur2)',
+            background: rolloverOn ? 'var(--accent-bg)' : 'var(--sur2)',
             border: `.5px solid ${rolloverOn ? 'var(--accent)' : 'var(--brd2)'}`,
             borderRadius: 20, padding: '5px 12px', cursor: 'pointer',
             fontSize: 11, fontFamily: 'var(--mono)',
@@ -100,7 +100,7 @@ export default function Budgets() {
         </button>
       </div>
       {rolloverOn && (
-        <div style={{ padding: '8px 12px', background: 'rgba(0,212,170,.06)', border: '.5px solid rgba(0,212,170,.2)', borderRadius: 8, fontSize: 11, color: 'var(--accent)', fontFamily: 'var(--mono)', lineHeight: 1.6 }}>
+        <div style={{ padding: '8px 12px', background: 'var(--accent-bg)', border: '.5px solid var(--accent)', borderRadius: 8, fontSize: 11, color: 'var(--accent)', fontFamily: 'var(--mono)', lineHeight: 1.6 }}>
           {t('budgets.rollover.banner', { prev: monthLabel(prevMonth), cur: monthLabel(activeMonth) })}
         </div>
       )}
@@ -243,7 +243,7 @@ export default function Budgets() {
                           <button onClick={() => deleteWithUndo('budgets', b, t('common.deleted'), t('common.undo'))} aria-label={t('common.confirmDelete')} style={{position:'absolute',top:4,right:4,background:'none',border:'none',color:'var(--th)',fontSize:10,cursor:'pointer',padding:'1px 4px'}}>✕</button>
                           <div style={{fontSize:10,fontWeight:600,color:'var(--tx)',fontFamily:'var(--mono)',textAlign:'center',lineHeight:1.2,paddingRight:10}}>{catLabel(b.category)}</div>
                           {carry > 0 && (
-                            <div style={{fontSize:8,fontFamily:'var(--mono)',color:'var(--accent)',background:'rgba(0,212,170,.1)',borderRadius:4,padding:'1px 5px'}}>
+                            <div style={{fontSize:8,fontFamily:'var(--mono)',color:'var(--accent)',background:'var(--accent-bg)',borderRadius:4,padding:'1px 5px'}}>
                               ↻ +{fmtMoney(carry,sym)}
                             </div>
                           )}

@@ -437,18 +437,18 @@ export default function Debts() {
                   <span>{t('debts.card.installments')}</span><span>{paidInst}/{totalInst}</span>
                 </div>
                 <div style={{height:5,background:'var(--brd)',borderRadius:3,overflow:'hidden'}}>
-                  <div style={{height:'100%',width:`${Math.min(instProg*100,100)}%`,background:'var(--accent,#00d4aa)',borderRadius:3,transition:'.3s'}}/>
+                  <div style={{height:'100%',width:`${Math.min(instProg*100,100)}%`,background:'var(--accent)',borderRadius:3,transition:'.3s'}}/>
                 </div>
                 <div style={{display:'flex',justifyContent:'space-between',marginTop:3,fontSize:10,fontFamily:'var(--mono)'}}>
-                  <span style={{color:'var(--accent,#00d4aa)'}}>{t('debts.card.instPaid', { n: paidInst })}</span>
+                  <span style={{color:'var(--accent)'}}>{t('debts.card.instPaid', { n: paidInst })}</span>
                   <span style={{color:'var(--amb,#f5a623)'}}>{t('debts.card.instPending', { n: pendInst })}</span>
                 </div>
               </div>
             )}
             {monthsLeft > 0 && (
-              <div style={{marginTop:6,padding:'8px 10px',borderRadius:6,background:'rgba(0,212,170,.06)',border:'.5px solid rgba(0,212,170,.2)',display:'flex',gap:16,flexWrap:'wrap'}}>
+              <div style={{marginTop:6,padding:'8px 10px',borderRadius:6,background:'var(--accent-bg)',border:'.5px solid var(--accent)',display:'flex',gap:16,flexWrap:'wrap'}}>
                 <div><div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:'.5px',marginBottom:2}}>{t('debts.card.monthsLeft')}</div><div style={{fontSize:14,fontWeight:700,color:'var(--tx)',fontFamily:'var(--mono)'}}>{monthsLeft}</div></div>
-                {finDate && <div><div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:'.5px',marginBottom:2}}>{t('debts.card.estEnd')}</div><div style={{fontSize:14,fontWeight:700,color:'var(--accent,#00d4aa)',fontFamily:'var(--mono)'}}>📅 {finDate}</div></div>}
+                {finDate && <div><div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:'.5px',marginBottom:2}}>{t('debts.card.estEnd')}</div><div style={{fontSize:14,fontWeight:700,color:'var(--accent)',fontFamily:'var(--mono)'}}>📅 {finDate}</div></div>}
                 {d.minPayment > 0 && <div><div style={{fontSize:9,color:'var(--th)',fontFamily:'var(--mono)',textTransform:'uppercase',letterSpacing:'.5px',marginBottom:2}}>{t('debts.card.totalLeft')}</div><div style={{fontSize:14,fontWeight:700,color:'var(--red)',fontFamily:'var(--mono)'}}>{fmtMoney(d.balance,sym)}</div></div>}
               </div>
             )}

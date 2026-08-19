@@ -27,7 +27,7 @@ const s = {
   step: (active, done) => ({
     flex: 1, textAlign: 'center', padding: '8px 4px', borderRadius: 8,
     fontSize: 11, fontFamily: 'var(--mono)',
-    background: done ? 'var(--grn-bg)' : active ? 'rgba(0,212,170,.1)' : 'var(--sur)',
+    background: done ? 'var(--grn-bg)' : active ? 'var(--accent-bg)' : 'var(--sur)',
     color: done ? 'var(--grn)' : active ? 'var(--accent)' : 'var(--th)',
     border: `.5px solid ${done ? 'var(--grn)' : active ? 'var(--accent)' : 'var(--brd)'}`,
   }),
@@ -35,11 +35,11 @@ const s = {
     border: `1.5px dashed ${drag ? 'var(--accent)' : 'var(--brd2)'}`,
     borderRadius: 12, padding: '40px 24px', textAlign: 'center',
     cursor: 'pointer', transition: '.2s',
-    background: drag ? 'rgba(0,212,170,.04)' : 'var(--sur2)',
+    background: drag ? 'var(--accent-bg)' : 'var(--sur2)',
   }),
   privacy: {
     display: 'flex', alignItems: 'flex-start', gap: 8,
-    background: 'rgba(0,212,170,.06)', border: '.5px solid rgba(0,212,170,.2)',
+    background: 'var(--accent-bg)', border: '.5px solid var(--accent)',
     borderRadius: 8, padding: '10px 12px', marginTop: 12,
     fontSize: 11, color: 'var(--accent)', fontFamily: 'var(--mono)', lineHeight: 1.5,
   },
@@ -56,7 +56,7 @@ const s = {
   td: { padding: '7px 10px', borderBottom: '.5px solid var(--brd)', fontFamily: 'var(--mono)', verticalAlign: 'top' },
   badge: (status) => ({
     display: 'inline-block', padding: '2px 7px', borderRadius: 20, fontSize: 10, fontWeight: 600,
-    background: status === 'valid' ? 'rgba(0,212,170,.12)' : status === 'duplicate' ? 'rgba(245,166,35,.12)' : 'rgba(255,77,106,.12)',
+    background: status === 'valid' ? 'var(--accent-bg)' : status === 'duplicate' ? 'rgba(245,166,35,.12)' : 'rgba(255,77,106,.12)',
     color: status === 'valid' ? 'var(--accent)' : status === 'duplicate' ? 'var(--amb)' : 'var(--red)',
   }),
   summaryGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(120px,1fr))', gap: 10, marginBottom: 16 },
@@ -605,7 +605,7 @@ export default function ImportMovements({ setPage } = {}) {
             </table>
           </div>
 
-          <div style={{ background: 'rgba(0,212,170,.06)', border: '.5px solid rgba(0,212,170,.2)', borderRadius: 8, padding: '12px 14px', fontSize: 12, color: 'var(--tx)', fontFamily: 'var(--mono)', marginBottom: 16 }}>
+          <div style={{ background: 'var(--accent-bg)', border: '.5px solid var(--accent)', borderRadius: 8, padding: '12px 14px', fontSize: 12, color: 'var(--tx)', fontFamily: 'var(--mono)', marginBottom: 16 }}>
             {t('imp.review.note')}
           </div>
 

@@ -242,7 +242,7 @@ export default function CashFlow({ setPage }) {
               </div>
             )}
             {pace !== null && pace <= 0 && curExp > 0 && (
-              <div style={{ marginTop: 12, padding: '8px 12px', background: 'rgba(0,212,170,.06)', border: '.5px solid rgba(0,212,170,.2)', borderRadius: 8, fontSize: 11, color: 'var(--accent)', fontFamily: 'var(--mono)' }}>
+              <div style={{ marginTop: 12, padding: '8px 12px', background: 'var(--accent-bg)', border: '.5px solid var(--accent)', borderRadius: 8, fontSize: 11, color: 'var(--accent)', fontFamily: 'var(--mono)' }}>
                 {t('cf.alert.under', { pct: Math.abs((pace * 100).toFixed(0)) })}
               </div>
             )}

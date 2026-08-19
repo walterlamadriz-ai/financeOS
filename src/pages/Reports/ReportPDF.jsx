@@ -6,7 +6,8 @@ import {
 } from '@react-pdf/renderer'
 import { moneyLocale } from '../../utils/index.js'
 
-const ACCENT  = '#00d4aa'
+const ACCENT  = '#08795f'  // --accent (positivo/ingreso), no la marca
+const BRAND   = '#3dbe7a'  // --grn en su variante dark: header del PDF es oscuro, y --grn claro (#1a6b4a) da 2.74:1 sobre #0f1923 (falla AA)
 const RED     = '#ff4d6a'
 const AMBER   = '#f5a623'
 const DARK    = '#0f1923'
@@ -18,7 +19,7 @@ const s = StyleSheet.create({
   page:    { fontFamily:'Helvetica', backgroundColor: WHITE, paddingHorizontal: 36, paddingVertical: 32, fontSize: 9, color: DARK },
   // Header
   header:  { backgroundColor: DARK, marginHorizontal: -36, marginTop: -32, paddingHorizontal: 36, paddingVertical: 20, marginBottom: 20 },
-  hTitle:  { fontSize: 20, fontFamily: 'Helvetica-Bold', color: ACCENT, letterSpacing: 0.5, marginBottom: 3 },
+  hTitle:  { fontSize: 20, fontFamily: 'Helvetica-Bold', color: BRAND, letterSpacing: 0.5, marginBottom: 3 },
   hSub:    { fontSize: 9, color: '#94a3b8', fontFamily: 'Helvetica' },
   hRow:    { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
   hMeta:   { fontSize: 8, color: '#64748b', textAlign: 'right' },
