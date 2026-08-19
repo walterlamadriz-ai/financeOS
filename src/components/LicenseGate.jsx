@@ -96,7 +96,13 @@ export default function LicenseGate({ onActivate }) {
 
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }}>
-          <div style={{ width: 34, height: 34, background: 'var(--grn)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 14 }}>F</div>
+          <div style={{ width: 34, height: 34, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}>
+            <svg viewBox="0 0 200 200" role="img" aria-label="FinanceOS" style={{ display: 'block', width: '100%', height: '100%' }}>
+              <rect width="200" height="200" fill="#1a6b4a" />
+              <path d="M159.56 71.56A66 66 0 1 1 128.44 40.44L113.01 55.88A46 46 0 1 0 144.12 86.99Z" fill="#ffffff" />
+              <circle cx="88.69" cy="111.31" r="22" fill="#D4B863" />
+            </svg>
+          </div>
           <div>
             <div style={{ fontFamily: 'var(--display)', fontSize: 17, fontWeight: 600, color: 'var(--tx)', letterSpacing: '-.3px' }}>FinanceOS</div>
             <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--th)', marginTop: 1 }}>v1.5 · MAXNOVA & LUCI Global LLC</div>
