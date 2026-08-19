@@ -1,8 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="FinanceOS">
-  <rect width="512" height="512" rx="96" fill="#1a6b4a"/>
-  <g fill="#f4f3ef">
-    <rect x="178" y="120" width="78" height="286"/>
-    <rect x="178" y="120" width="196" height="72"/>
-    <rect x="178" y="236" width="150" height="66"/>
-  </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="FinanceOS"><rect width="200" height="200" rx="0" fill="#1a6b4a"/><path d="M159.56 71.56A66 66 0 1 1 128.44 40.44L113.01 55.88A46 46 0 1 0 144.12 86.99Z" fill="#ffffff"/><circle cx="88.69" cy="111.31" r="22" fill="#D4B863"/></svg>
