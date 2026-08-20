@@ -7,6 +7,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
+import { useT } from '../../i18n/useT.js'
 import { Card, CardHeader, FormRow, FormGroup, ProgressBar, Alert, PageHeader } from '../../components/ui/index.jsx'
 import ProGate from '../../components/ui/ProGate.jsx'
 import veConfig from '../../config/multimoneda/ve.js'
@@ -16,6 +17,7 @@ const CONFIGS = { VE: veConfig }
 
 export default function Multimoneda() {
   const { settings } = useApp()
+  const { t } = useT()
   const country = (settings.country || 'CL').toUpperCase()
   const config = CONFIGS[country]
 
@@ -55,7 +57,7 @@ export default function Multimoneda() {
   if (!config) {
     return (
       <div style={{ padding: 32, textAlign: 'center', color: 'var(--th)', fontFamily: 'var(--mono)', fontSize: 13 }}>
-        Este módulo está disponible para Venezuela 🇻🇪
+        {t('multimoneda.onlyVE')}
       </div>
     )
   }
@@ -74,21 +76,21 @@ export default function Multimoneda() {
   const fmtUSD = (n) => `$${(Number(n) || 0).toLocaleString('es-VE', { maximumFractionDigits: 2 })}`
 
   return (
-    <ProGate feature="El panel multimoneda">
+    <ProGate feature={t('multimoneda.proFeature')}>
       <div className="stack">
-        <PageHeader title={config.titulo} sub={config.subtitulo} />
+        <PageHeader title={t('multimoneda.title')} sub={t('multimoneda.sub')} />
 
         <Alert type="info">
-          ⚠ {config.disclaimer}
+          ⚠ {t('multimoneda.disclaimer')}
         </Alert>
 
         <Card>
-          <CardHeader title="Tasa Bs/USD" right={
+          <CardHeader title={t('multimoneda.tasa.title')} right={
             live && (
               <span style={{ fontSize: 10, fontFamily: 'var(--mono)', color: tasaEsLive ? 'var(--accent)' : 'var(--th)' }}>
                 {live.source !== 'api'
-                  ? '○ referencial (sin conexión)'
-                  : tasaEsLive ? '● en vivo' : '○ tasa editada a mano'}
+                  ? `○ ${t('multimoneda.live.off')}`
+                  : tasaEsLive ? `● ${t('multimoneda.live.on')}` : `○ ${t('multimoneda.live.edited')}`}
               </span>
             )
           } />
@@ -99,7 +101,7 @@ export default function Multimoneda() {
               background: fuenteTasa === 'oficial' ? 'var(--grn-bg)' : 'var(--sur2)',
               color: fuenteTasa === 'oficial' ? 'var(--grn)' : 'var(--tx)',
             }}>
-              BCV oficial{live && <span style={{ display: 'block', fontFamily: 'var(--mono)', fontSize: 14, fontWeight: 700, marginTop: 2 }}>{Number(live.oficial).toLocaleString('es-VE')}</span>}
+              {t('multimoneda.tasa.bcvOficial')}{live && <span style={{ display: 'block', fontFamily: 'var(--mono)', fontSize: 14, fontWeight: 700, marginTop: 2 }}>{Number(live.oficial).toLocaleString('es-VE')}</span>}
             </button>
             <button type="button" onClick={() => elegirFuente('paralelo')} disabled={paraleloNoDisponible} style={{
               flex: 1, padding: '9px 12px', borderRadius: 8, fontSize: 12,
@@ -109,35 +111,35 @@ export default function Multimoneda() {
               background: fuenteTasa === 'paralelo' ? 'var(--grn-bg)' : 'var(--sur2)',
               color: fuenteTasa === 'paralelo' ? 'var(--grn)' : 'var(--tx)',
             }}>
-              Paralelo{live && (
+              {t('multimoneda.tasa.paralelo')}{live && (
                 <span style={{ display: 'block', fontFamily: paraleloNoDisponible ? 'inherit' : 'var(--mono)', fontSize: paraleloNoDisponible ? 11 : 14, fontWeight: paraleloNoDisponible ? 400 : 700, marginTop: 2 }}>
-                  {paraleloNoDisponible ? 'no disponible' : Number(live.paralelo).toLocaleString('es-VE')}
+                  {paraleloNoDisponible ? t('multimoneda.tasa.noDisponible') : Number(live.paralelo).toLocaleString('es-VE')}
                 </span>
               )}
             </button>
           </div>
           {paraleloNoDisponible && (
             <div style={{ fontSize: 11, color: 'var(--th)', lineHeight: 1.5, marginBottom: 10 }}>
-              La fuente no devolvió el paralelo en esta consulta. Se está usando el oficial del BCV — la brecha real con el paralelo no está reflejada. Si tenés una referencia del día, cargala abajo.
+              {t('multimoneda.tasa.noParaleloHint')}
             </div>
           )}
-          <FormGroup label="Tasa a usar (editable si tienes una referencia mejor)">
+          <FormGroup label={t('multimoneda.tasa.inputLabel')}>
             <input type="number" inputMode="decimal" min="0" step="0.01" value={tasa} onChange={e => setTasa(e.target.value)} />
           </FormGroup>
           {!tasaValida && (
             <div style={{ marginTop: 8, background: 'var(--warn-bg)', border: '.5px solid var(--warn)', borderRadius: 8, padding: '10px 12px', fontSize: 12, color: 'var(--warn)', lineHeight: 1.5 }}>
-              Ingresá una tasa válida (mayor a 0) para calcular. No usamos una tasa vieja por defecto: un patrimonio convertido a una tasa equivocada es peor que no mostrarlo.
+              {t('multimoneda.tasa.invalidHint')}
             </div>
           )}
         </Card>
 
         <Card>
-          <CardHeader title="Tus saldos" />
+          <CardHeader title={t('multimoneda.saldos.title')} />
           <FormRow>
-            <FormGroup label="Saldo en bolívares (Bs)">
+            <FormGroup label={t('multimoneda.saldos.bsLabel')}>
               <input type="number" inputMode="decimal" min="0" value={bs} placeholder="0" onChange={e => setBs(e.target.value)} />
             </FormGroup>
-            <FormGroup label="Saldo en dólares (USD)">
+            <FormGroup label={t('multimoneda.saldos.usdLabel')}>
               <input type="number" inputMode="decimal" min="0" value={usd} placeholder="0" onChange={e => setUsd(e.target.value)} />
             </FormGroup>
           </FormRow>
@@ -145,28 +147,28 @@ export default function Multimoneda() {
 
         {result && (
           <Card>
-            <CardHeader title="Patrimonio total en dólares" />
+            <CardHeader title={t('multimoneda.resultado.title')} />
             <div style={{ textAlign: 'center', padding: '8px 0 16px' }}>
               <div style={{ fontFamily: 'var(--mono)', fontSize: 32, fontWeight: 700, color: 'var(--accent)', lineHeight: 1 }}>
                 {fmtUSD(result.totalUSD)}
               </div>
               <div style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)', marginTop: 6 }}>
-                Bs convertidos: {fmtUSD(result.bsEnUSD)} · USD: {fmtUSD(Number(usd) || 0)}
+                {t('multimoneda.resultado.desglose', { bs: fmtUSD(result.bsEnUSD), usd: fmtUSD(Number(usd) || 0) })}
               </div>
             </div>
 
             <div style={{ marginBottom: 6, display: 'flex', justifyContent: 'space-between', fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)' }}>
-              <span>Exposición al bolívar</span>
+              <span>{t('multimoneda.resultado.exposicionLabel')}</span>
               <span>{Math.round(result.exposicionBsPct)}%</span>
             </div>
             <ProgressBar value={result.exposicionBsPct} max={100} color={result.alerta ? 'red' : 'green'} height={6} />
             {result.alerta ? (
               <div style={{ fontSize: 12, color: 'var(--red)', marginTop: 10, lineHeight: 1.5 }}>
-                Alta exposición al bolívar ({Math.round(result.exposicionBsPct)}%, sobre el umbral de {config.umbralExposicion}%). El BsS se devalúa frente al dólar — considera preservar parte de tu valor en USD.
+                {t('multimoneda.resultado.alertaHint', { pct: Math.round(result.exposicionBsPct), umbral: config.umbralExposicion })}
               </div>
             ) : (
               <div style={{ fontSize: 12, color: 'var(--accent)', marginTop: 10, fontWeight: 600 }}>
-                ✓ Exposición al bolívar bajo control.
+                ✓ {t('multimoneda.resultado.okHint')}
               </div>
             )}
           </Card>
