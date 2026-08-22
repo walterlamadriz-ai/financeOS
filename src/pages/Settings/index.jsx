@@ -73,7 +73,16 @@ export default function Settings() {
         <CardHeader title={t('settings.preferences')} />
         <div style={srow}>
           <div><div style={slbl}>{t('settings.currency.label')}</div><div style={ssub}>{t('settings.currency.sub')}</div></div>
-          <select style={{width:'auto'}} value={settings.currency||'CLP'} onChange={e=>updateSettings({...settings,currency:e.target.value,usdRate:0})}>
+          <select style={{width:'auto'}} value={settings.currency||'CLP'} onChange={e=>{
+            const nextCurrency = e.target.value
+            // La tasa vieja no sirve para la moneda nueva (bug ya arreglado una vez:
+            // "usdRate carried over numerically across currency changes"). Pero
+            // resetear a 0 sin más apaga la moneda dual en el Dashboard en silencio
+            // (dualOn exige usdRate > 0) — recomputamos ya mismo si el toggle está
+            // activo, en vez de dejar un 0 a la espera de que el usuario vuelva acá.
+            const nextRate = settings.showDualCurrency ? (liveRate(nextCurrency) || 0) : 0
+            updateSettings({...settings, currency: nextCurrency, usdRate: nextRate})
+          }}>
             {CURRENCY_OPTIONS.map(c=><option key={c.code} value={c.code}>{c.label}</option>)}
           </select>
         </div>

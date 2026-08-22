@@ -18,6 +18,7 @@ import LivingRing from '../../components/LivingRing.jsx'
 import MonthVerdict from './MonthVerdict.jsx'
 import CountryTool from './CountryTool.jsx'
 import { moneyLocale } from '../../utils/index.js'
+import { DEFAULT_USD_RATES } from '../shared/constants.js'
 
 const fmt  = (n) => (Number(n) || 0).toLocaleString(moneyLocale(), { maximumFractionDigits: 0 })
 const pct  = (n) => ((Number(n) || 0) * 100).toFixed(1) + '%'
@@ -38,8 +39,13 @@ export default function Dashboard({ setPage }) {
 
   const sym         = { CLP:'$', USD:'US$', EUR:'€', VES:'Bs.', MXN:'$', ARS:'$', COP:'$', PEN:'S/', BRL:'R$', UYU:'$U' }[settings.currency] || '$'
   const activeMonth = settings.activeMonth || new Date().toISOString().slice(0, 7)
-  const dualOn      = !!settings.showDualCurrency && settings.currency !== 'USD' && Number(settings.usdRate) > 0
-  const usdRate     = Number(settings.usdRate) || 1
+  // Defensa extra contra usdRate quedando en 0 (bug ya arreglado en el origen —
+  // Settings ahora recomputa al cambiar de moneda — pero esto cubre a quien ya
+  // tenía un 0 guardado en IndexedDB de antes del fix): si el usuario activó la
+  // moneda dual, mostrarla igual con la tasa por defecto en vez de apagarla.
+  const effectiveUsdRate = Number(settings.usdRate) || DEFAULT_USD_RATES[settings.currency] || 0
+  const dualOn      = !!settings.showDualCurrency && settings.currency !== 'USD' && effectiveUsdRate > 0
+  const usdRate     = effectiveUsdRate || 1
   const toUSD       = (n) => `≈ US$${((Number(n) || 0) / usdRate).toLocaleString(moneyLocale(), { maximumFractionDigits: 0 })}`
 
   const kpis = useMemo(() => {
