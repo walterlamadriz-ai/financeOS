@@ -28,6 +28,21 @@ const ALLOWED_ORIGINS = ['https://app.financeospro.com', 'https://demo.financeos
 // from the USD entry instead.
 const SYMBOLS = ['USD', 'CLP', 'MXN', 'ARS', 'COP', 'PEN', 'BRL', 'UYU', 'VES'];
 
+// Cross-rate: (units of X per EUR) / (units of USD per EUR) = units of X per USD.
+// Works for USD itself too (gives exactly 1). Extracted as its own export so it
+// can be unit-tested without invoking the edge handler (network, env vars, etc).
+export function computeCrossRates(eurRates) {
+  const usdPerEur = eurRates.USD; // "1 EUR = this many USD"
+  if (!usdPerEur) return null;
+  const rates = {};
+  for (const [code, perEur] of Object.entries(eurRates)) {
+    rates[code] = Number((perEur / usdPerEur).toFixed(6));
+  }
+  // EUR was the base, so it was never in `rates` — derive it the same way.
+  rates.EUR = Number((1 / usdPerEur).toFixed(6));
+  return rates;
+}
+
 function buildHeaders(req) {
   const origin = req.headers.get('origin') || '';
   const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
@@ -66,19 +81,10 @@ export default async function handler(req) {
     }
 
     const eurRates = json.rates; // "1 EUR = X" for each requested symbol (includes USD, not EUR)
-    const usdPerEur = eurRates.USD; // "1 EUR = this many USD"
-    if (!usdPerEur) {
+    const rates = computeCrossRates(eurRates);
+    if (!rates) {
       return new Response(JSON.stringify({ error: 'missing_pivot' }), { status: 502, headers: HEADERS });
     }
-
-    // Cross-rate: (units of X per EUR) / (units of USD per EUR) = units of X per USD.
-    // Works for USD itself too (gives exactly 1).
-    const rates = {};
-    for (const [code, perEur] of Object.entries(eurRates)) {
-      rates[code] = Number((perEur / usdPerEur).toFixed(6));
-    }
-    // EUR was the base, so it was never in `rates` — derive it the same way.
-    rates.EUR = Number((1 / usdPerEur).toFixed(6));
 
     return new Response(JSON.stringify({ rates, source: 'fixer', fetchedAt: Date.now() }), { status: 200, headers: HEADERS });
   } catch (err) {
