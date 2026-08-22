@@ -60,39 +60,6 @@ export function BackupWarning({ variant = 'full' }) {
   )
 }
 
-// ── PRIVACY BADGE ─────────────────────────────────────────────────────────────
-// Usar en: Dashboard (primera vez), onboarding, ajustes
-export function PrivacyBadge() {
-  return (
-    <div style={{
-      display: 'inline-flex', alignItems: 'center', gap: 6,
-      padding: '4px 10px', background: 'var(--grn-bg)',
-      border: '0.5px solid rgba(26,163,104,.2)', borderRadius: 20,
-      fontSize: 11, color: 'var(--grn)', fontFamily: 'var(--mono)',
-    }}>
-      <span>🔒</span>
-      <span>Datos locales · Sin servidor · Sin cuentas</span>
-    </div>
-  )
-}
-
-// ── LOCAL STORAGE NOTICE ──────────────────────────────────────────────────────
-// Usar en: primera carga, ajustes, exportación
-export function LocalStorageNotice() {
-  return (
-    <div style={{
-      padding: '10px 14px', background: 'var(--sur2)',
-      border: '0.5px solid var(--brd)', borderRadius: 8,
-      fontSize: 12, color: 'var(--tm)', lineHeight: 1.6,
-    }}>
-      <strong style={{ color: 'var(--tx)' }}>¿Dónde están tus datos?</strong>{' '}
-      Guardados en este navegador, en este dispositivo. FinanceOS no tiene servidor —
-      tus datos nunca salen de aquí. Exporta un respaldo JSON para acceder desde
-      otro dispositivo.
-    </div>
-  )
-}
-
 // ── PROJECTION DISCLAIMER ─────────────────────────────────────────────────────
 // Usar en: módulo de Proyección de flujo de caja
 export function ProjectionDisclaimer() {

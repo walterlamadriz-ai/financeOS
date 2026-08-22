@@ -264,7 +264,7 @@ export default function ReportPDF({ data }) {
         <View style={s.footer} fixed>
           <View style={s.divider} />
           <Text style={s.footTxt}>
-            FinanceOS v1.5 · MAXNOVA {'&'} LUCI Global LLC · Datos procesados localmente, sin servidores.{'\n'}
+            FinanceOS v1.5 · MAXNOVA {'&'} LUCI Global LLC · Datos procesados localmente · Cifrado de extremo a extremo.{'\n'}
             Este reporte es de carácter orientativo y NO constituye asesoría financiera, tributaria, legal ni de inversión.
             Consulta a un profesional certificado para decisiones financieras formales.
           </Text>

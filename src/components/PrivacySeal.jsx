@@ -1,10 +1,10 @@
 // src/components/PrivacySeal.jsx
 // El Sello — la privacidad de FinanceOS como artefacto: un tampón de notario.
-// "Tus datos nunca tocan un servidor" convertido en objeto de confianza física.
-// Ningún SaaS puede estamparlo, porque su modelo exige subir tus datos.
-// Puro SVG, sin dependencias. Se estampa una vez al montar (respeta reduced-motion).
+// Los datos viven en el dispositivo; la sincronización opcional viaja cifrada
+// y el servidor nunca puede leerla en claro. Puro SVG, sin dependencias.
+// Se estampa una vez al montar (respeta reduced-motion).
 
-export default function PrivacySeal({ size = 72, label = 'DATOS 100% LOCALES · FINANCEOS · ', title = 'Tus datos nunca salen de este dispositivo' }) {
+export default function PrivacySeal({ size = 72, label = 'DATOS 100% LOCALES · FINANCEOS · ', title = 'Cifrado de extremo a extremo' }) {
   const c = 50
   return (
     <svg viewBox="0 0 100 100" width={size} height={size} role="img" aria-label={title}

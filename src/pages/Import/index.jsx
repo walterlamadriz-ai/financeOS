@@ -13,7 +13,6 @@ import {
   parseFile, detectColumns, validateRows, detectDuplicates,
   createImportBatch, buildTransactions, MAX_ROWS,
 } from './fileParser.js'
-import { connectBank, listPlaidItems, syncPlaidItem, disconnectPlaidItem } from '../../lib/plaidClient.js'
 
 const s = {
   page: {},
@@ -95,57 +94,10 @@ export default function ImportMovements({ setPage } = {}) {
   const [result, setResult] = useState(null)
   const [warning, setWarning] = useState(null)
 
-  // Solo 'US': México da INVALID_FIELD en Plaid hasta que se solicite acceso
-  // al país desde el dashboard de Plaid — ver comentario en create-link-token.js.
-  const plaidAvailable = settings?.country === 'US'
-  const [plaidItems, setPlaidItems] = useState([])
-  const [connectingBank, setConnectingBank] = useState(false)
-  const [syncingItemId, setSyncingItemId] = useState(null)
-  const [plaidNotice, setPlaidNotice] = useState(null) // { itemId?, text, isError }
-
   useState(() => {
     if (isDemo) return
     dbGetAll('importBatches').then(d => setHistory(d || []))
-    if (plaidAvailable) listPlaidItems().then(setPlaidItems)
   })
-
-  async function handleConnectBank() {
-    setConnectingBank(true)
-    setPlaidNotice(null)
-    try {
-      const item = await connectBank({ language: settings?.language })
-      if (item) {
-        setPlaidItems(await listPlaidItems())
-        await rehydrate()
-        setPlaidNotice({ itemId: item.itemId, text: t('imp.plaid.syncResult', { added: item.added, modified: item.modified, removed: item.removed }), isError: false })
-      }
-    } catch (err) {
-      setPlaidNotice({ text: t('imp.plaid.error', { msg: err.message }), isError: true })
-    } finally {
-      setConnectingBank(false)
-    }
-  }
-
-  async function handleSyncItem(item) {
-    setSyncingItemId(item.itemId)
-    setPlaidNotice(null)
-    try {
-      const r = await syncPlaidItem(item)
-      setPlaidItems(await listPlaidItems())
-      await rehydrate()
-      setPlaidNotice({ itemId: item.itemId, text: t('imp.plaid.syncResult', r), isError: false })
-    } catch (err) {
-      setPlaidNotice({ itemId: item.itemId, text: err.needsReauth ? t('imp.plaid.reauthNeeded') : t('imp.plaid.error', { msg: err.message }), isError: true })
-    } finally {
-      setSyncingItemId(null)
-    }
-  }
-
-  async function handleDisconnectItem(itemId) {
-    if (!window.confirm(t('imp.plaid.disconnectConfirm'))) return
-    await disconnectPlaidItem(itemId)
-    setPlaidItems(await listPlaidItems())
-  }
 
   async function handleFile(f) {
     const ext = f.name.split('.').pop().toLowerCase()
@@ -331,50 +283,6 @@ export default function ImportMovements({ setPage } = {}) {
               <span>{t('imp.upload.hint')}</span>
             </div>
           </div>
-
-          {/* Plaid — conectar banco (solo EEUU/México, cobertura real de Plaid) */}
-          {plaidAvailable && (
-            <div style={s.card}>
-              <div style={s.cardTitle}>{t('imp.plaid.title')}</div>
-              <p style={{ fontSize: 12, color: 'var(--th)', marginBottom: 10 }}>{t('imp.plaid.sub')}</p>
-              <p style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', marginBottom: 14, lineHeight: 1.5 }}>
-                ◑ {t('imp.plaid.privacyNote')}
-              </p>
-
-              {plaidItems.map(item => (
-                <div key={item.itemId} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '10px 0', borderTop: '.5px solid var(--brd)' }}>
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx)' }}>{item.institutionName || '—'}</div>
-                    <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)' }}>
-                      {t('imp.plaid.lastSync', { when: item.lastSyncAt ? new Date(item.lastSyncAt).toLocaleString(moneyLocale()) : t('imp.plaid.never') })}
-                    </div>
-                    {plaidNotice?.itemId === item.itemId && (
-                      <div style={{ fontSize: 11, color: plaidNotice.isError ? 'var(--red, #e5484d)' : 'var(--grn)', marginTop: 2 }}>{plaidNotice.text}</div>
-                    )}
-                  </div>
-                  <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-                    <button onClick={() => handleSyncItem(item)} disabled={syncingItemId === item.itemId}
-                      style={{ fontSize: 11, padding: '6px 10px', borderRadius: 6, border: '.5px solid var(--brd2)', background: 'var(--sur2)', color: 'var(--tx)', cursor: 'pointer' }}>
-                      {syncingItemId === item.itemId ? t('imp.plaid.syncing') : t('imp.plaid.sync')}
-                    </button>
-                    <button onClick={() => handleDisconnectItem(item.itemId)}
-                      style={{ fontSize: 11, padding: '6px 10px', borderRadius: 6, border: '.5px solid var(--brd2)', background: 'transparent', color: 'var(--th)', cursor: 'pointer' }}>
-                      {t('imp.plaid.disconnect')}
-                    </button>
-                  </div>
-                </div>
-              ))}
-
-              {plaidNotice && !plaidNotice.itemId && (
-                <div style={{ fontSize: 12, color: plaidNotice.isError ? 'var(--red, #e5484d)' : 'var(--grn)', marginBottom: 10 }}>{plaidNotice.text}</div>
-              )}
-
-              <button onClick={handleConnectBank} disabled={connectingBank}
-                style={{ marginTop: plaidItems.length ? 14 : 0, fontSize: 12, fontWeight: 600, padding: '9px 14px', borderRadius: 8, border: 'none', background: 'var(--grn)', color: '#fff', cursor: 'pointer' }}>
-                {connectingBank ? t('imp.plaid.connecting') : plaidItems.length ? t('imp.plaid.connectAnother') : t('imp.plaid.connect')}
-              </button>
-            </div>
-          )}
 
           {/* Panel bancos soportados */}
           <div style={s.card}>
