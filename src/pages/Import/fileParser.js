@@ -1,4 +1,3 @@
-import * as XLSX from 'xlsx'
 // src/pages/Import/fileParser.js
 // Parser CSV — sin dependencias externas · 100% local · sin envío de datos
 
@@ -98,6 +97,10 @@ async function parsePDF(file) {
 }
 
 async function parseXLSX(file) {
+  // Carga bajo demanda (dynamic import) — mismo criterio que pdfjs-dist en
+  // extractPdfLines(): un CSV no necesita esta librería en absoluto, así que
+  // no debería bajar en el chunk de Import solo por abrir la página.
+  const XLSX = await import('xlsx')
   return new Promise((res, rej) => {
     const reader = new FileReader()
     reader.onload = (e) => {
