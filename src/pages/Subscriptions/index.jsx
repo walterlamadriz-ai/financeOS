@@ -87,6 +87,22 @@ export function generateAlerts(subs, monthlyIncome, t = null) {
     })
   }
 
+  // Subió de precio desde el último cambio registrado (ver priceHistory en save())
+  active.forEach(s => {
+    const hist = Array.isArray(s.priceHistory) ? s.priceHistory : []
+    if (hist.length === 0) return
+    const last = hist[hist.length - 1]
+    const prevAmt = Number(last.amount) || 0
+    const curAmt = Number(s.amount) || 0
+    if (prevAmt > 0 && curAmt > prevAmt) {
+      const pct = ((curAmt - prevAmt) / prevAmt) * 100
+      alerts.push({
+        type: 'priceIncrease',
+        msg: tr('subs.alert.priceIncrease', { name: s.name, pct: pct.toFixed(0) }, `"${s.name}" subió ${pct.toFixed(0)}% desde el último registro.`),
+      })
+    }
+  })
+
   // Próximo pago en los próximos 7 días
   const today = new Date()
   const in7   = new Date(today); in7.setDate(today.getDate() + 7)
@@ -178,14 +194,22 @@ export default function Subscriptions() {
   async function save() {
     if (!form.name.trim() || !form.amount) return
     const now  = new Date().toISOString()
+    const newAmount = parseFloat(form.amount) || 0
+    // Guardamos el monto viejo antes de pisarlo — sin esto no hay forma de
+    // detectar que una suscripción subió de precio (ver generateAlerts).
+    const prev = editing ? dbSubs.find(s => s.id === editing) : null
+    const priceHistory = prev && Number(prev.amount) !== newAmount
+      ? [...(prev.priceHistory || []), { amount: Number(prev.amount) || 0, at: prev.updatedAt || prev.createdAt || now }].slice(-12)
+      : (prev?.priceHistory || [])
     const item = {
       ...form,
       id:        editing || uid(),
-      amount:    parseFloat(form.amount) || 0,
+      amount:    newAmount,
       currency:  form.currency || currency,
-      createdAt: editing ? (dbSubs.find(s => s.id === editing)?.createdAt || now) : now,
+      createdAt: editing ? (prev?.createdAt || now) : now,
       updatedAt: now,
       status:    form.status || 'active',
+      priceHistory,
     }
     if (isDemo) {
       setDbSubs(prev => editing
@@ -289,11 +313,11 @@ export default function Subscriptions() {
             <div key={i} style={{
               padding: '9px 12px', borderRadius: 'var(--r)', fontSize: 11,
               fontFamily: 'var(--mono)', lineHeight: 1.5,
-              background: a.type === 'duplicate' ? 'var(--amb-bg)' : a.type === 'upcoming' ? 'var(--grn-bg)' : 'var(--sur2)',
-              border: `.5px solid ${a.type === 'duplicate' ? 'var(--amb)' : a.type === 'upcoming' ? 'var(--grn)' : 'var(--brd)'}`,
-              color: a.type === 'duplicate' ? 'var(--amb)' : a.type === 'upcoming' ? 'var(--grn)' : 'var(--tm)',
+              background: a.type === 'duplicate' || a.type === 'priceIncrease' ? 'var(--amb-bg)' : a.type === 'upcoming' ? 'var(--grn-bg)' : 'var(--sur2)',
+              border: `.5px solid ${a.type === 'duplicate' || a.type === 'priceIncrease' ? 'var(--amb)' : a.type === 'upcoming' ? 'var(--grn)' : 'var(--brd)'}`,
+              color: a.type === 'duplicate' || a.type === 'priceIncrease' ? 'var(--amb)' : a.type === 'upcoming' ? 'var(--grn)' : 'var(--tm)',
             }}>
-              {a.type === 'duplicate' ? '⚠ ' : a.type === 'upcoming' ? '📅 ' : 'ℹ '}{a.msg}
+              {a.type === 'duplicate' || a.type === 'priceIncrease' ? '⚠ ' : a.type === 'upcoming' ? '📅 ' : 'ℹ '}{a.msg}
             </div>
           ))}
         </div>
