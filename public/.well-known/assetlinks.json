@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.financeospro.app.twa",
+        "sha256_cert_fingerprints": ["AE:0F:8E:2F:06:15:5B:1B:06:BF:60:80:DA:AF:B9:E5:AA:A2:6D:B1:C1:4E:64:BD:9A:48:51:96:F8:98:6F:CE"]
+      }
+    }]
