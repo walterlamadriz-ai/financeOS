@@ -63,7 +63,7 @@ function planFromAmount(amountTotal: number | null): "personal" | "pro" {
   return (amountTotal ?? 0) >= 2400 ? "pro" : "personal";
 }
 
-async function issueLicense(key: string, plan: string, email: string | null, session: string) {
+async function issueLicense(key: string, plan: string, email: string | null, session: string, paymentIntent: string | null) {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/issue_license`, {
     method: "POST",
     headers: {
@@ -71,9 +71,30 @@ async function issueLicense(key: string, plan: string, email: string | null, ses
       Authorization: `Bearer ${SERVICE_ROLE}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ p_key: key, p_plan: plan, p_email: email, p_session: session }),
+    body: JSON.stringify({ p_key: key, p_plan: plan, p_email: email, p_session: session, p_payment_intent: paymentIntent }),
   });
   if (!res.ok) throw new Error(`issue_license failed: ${res.status} ${await res.text()}`);
+}
+
+// FISC-1 (auditoría 2026-08-21): revoca la licencia asociada a un payment_intent
+// cuando Stripe manda charge.refunded o charge.dispute.created. Antes de esto
+// ningún evento revocaba nada — ver supabase-license-revoke.sql para el
+// detalle de por qué se matchea por payment_intent y no por session id.
+async function revokeLicense(paymentIntent: string): Promise<{ ok: boolean; error?: string }> {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/revoke_license`, {
+    method: "POST",
+    headers: {
+      apikey: SERVICE_ROLE,
+      Authorization: `Bearer ${SERVICE_ROLE}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ p_payment_intent: paymentIntent }),
+  });
+  if (!res.ok) {
+    console.error(`revoke_license failed: ${res.status} ${await res.text()}`);
+    return { ok: false, error: `http_${res.status}` };
+  }
+  return await res.json();
 }
 
 async function sendKeyEmail(to: string, key: string, plan: string) {
@@ -134,14 +155,32 @@ Deno.serve(async (req) => {
     const email = session.customer_details?.email ?? session.customer_email ?? null;
     const plan = planFromAmount(amount);
     const key = generateKey();
+    // session.payment_intent viene en el propio evento para checkouts de pago
+    // único (mode:'payment') — se guarda para poder revocar más adelante si
+    // Stripe manda un charge.refunded/charge.dispute.created (ver revokeLicense).
+    const paymentIntent = typeof session.payment_intent === "string" ? session.payment_intent : (session.payment_intent?.id ?? null);
     try {
-      await issueLicense(key, plan, email, session.id ?? null);
+      await issueLicense(key, plan, email, session.id ?? null, paymentIntent);
       if (email) await sendKeyEmail(email, key, plan);
       // Log siempre la clave (para test/retiro manual aunque no haya email)
-      console.log(`Licencia emitida: plan=${plan} email=${email} key=${key} session=${session.id}`);
+      console.log(`Licencia emitida: plan=${plan} email=${email} key=${key} session=${session.id} payment_intent=${paymentIntent}`);
     } catch (err) {
       console.error("Error emitiendo licencia:", err);
       return new Response("error issuing license", { status: 500 });
+    }
+  }
+
+  // FISC-1 — reembolso o disputa: revocar la licencia asociada, si la hay.
+  // Silencioso en el caso "not_found" (licencia emitida antes de este fix, sin
+  // payment_intent_id guardado, o ya revocada) — no es un error del webhook.
+  if (event?.type === "charge.refunded" || event?.type === "charge.dispute.created") {
+    const charge = event.data?.object ?? {};
+    const paymentIntent = typeof charge.payment_intent === "string" ? charge.payment_intent : (charge.payment_intent?.id ?? null);
+    if (paymentIntent) {
+      const result = await revokeLicense(paymentIntent);
+      console.log(`${event.type}: payment_intent=${paymentIntent} revoke_result=${JSON.stringify(result)}`);
+    } else {
+      console.warn(`${event.type} sin payment_intent en el payload — no se puede revocar automáticamente, charge=${charge.id}`);
     }
   }
 
