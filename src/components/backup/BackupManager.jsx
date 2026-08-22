@@ -161,6 +161,63 @@ export function BackupStatusBadge({ compact = false }) {
   )
 }
 
+// ── BACKUP REMINDER BANNER ────────────────────────────────────────────────────
+// A diferencia de BackupStatusBadge (pasivo, solo se ve si el usuario mira el nav
+// o entra a Ajustes), esto se muestra en el Dashboard cuando el respaldo está
+// viejo — con un botón que dispara la misma exportación de un clic, sin tener
+// que navegar a Ajustes. Sigue siendo un recordatorio, no un respaldo silencioso
+// real: un navegador no puede escribir un archivo en disco sin que el usuario lo
+// vea, así que esto es lo más automático que se puede hacer sin salir del modelo
+// local-only.
+export function BackupReminderBanner() {
+  const { settings, updateSettings, exportData, incomes, expenses, debts, goals } = useApp()
+  const [dismissed, setDismissed] = useState(false)
+  const [exporting, setExporting] = useState(false)
+  const lastBackup = settings.lastBackupAt
+  const days = daysSince(lastBackup)
+  const hasRealData = incomes.length > 0 || expenses.length > 0 || debts.length > 0 || goals.length > 0
+
+  // Datos ficticios de demo no necesitan respaldo — nunca mostrar acá.
+  const stale = !settings?.isDemo && hasRealData && (lastBackup === null || lastBackup === undefined || days > 14)
+  if (!stale || dismissed) return null
+
+  async function handleBackupNow() {
+    setExporting(true)
+    try {
+      await exportData()
+      await updateSettings({ ...settings, lastBackupAt: new Date().toISOString() })
+      setDismissed(true)
+    } catch { /* el botón vuelve a habilitarse solo, sin mensaje extra acá */ }
+    finally { setExporting(false) }
+  }
+
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap',
+      padding: '12px 16px', marginBottom: 16, borderRadius: 10,
+      background: !lastBackup ? '#faeeda' : '#faeeda',
+      border: '0.5px solid rgba(133,79,11,.25)',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+        <span style={{ fontSize: 18, flexShrink: 0 }}>⚠</span>
+        <div style={{ fontSize: 12, color: '#854f0b', fontFamily: 'var(--mono)', lineHeight: 1.5 }}>
+          {!lastBackup ? 'Todavía no tenés un respaldo de tus datos.' : `Tu último respaldo fue hace ${days} días.`}
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+        <button onClick={handleBackupNow} disabled={exporting} style={{
+          background: '#854f0b', color: '#fff', border: 'none', borderRadius: 6,
+          padding: '7px 14px', fontSize: 12, fontWeight: 600, cursor: exporting ? 'default' : 'pointer',
+          opacity: exporting ? 0.6 : 1,
+        }}>{exporting ? 'Creando…' : '↓ Crear respaldo ahora'}</button>
+        <button onClick={() => setDismissed(true)} aria-label="Cerrar aviso" style={{
+          background: 'none', border: 'none', color: '#854f0b', fontSize: 13, cursor: 'pointer', minWidth: 32, minHeight: 32,
+        }}>✕</button>
+      </div>
+    </div>
+  )
+}
+
 // ── MAIN BACKUP MANAGER ───────────────────────────────────────────────────────
 export default function BackupManager() {
   const { settings, updateSettings, exportData, importData, incomes, expenses, budgets, debts, goals } = useApp()
@@ -362,8 +419,8 @@ export default function BackupManager() {
             🔒 ¿Dónde viven tus datos?
           </div>
           <div style={{ fontSize: 11, color: 'var(--tm)', lineHeight: 1.7, fontFamily: 'var(--mono)' }}>
-            Tus datos se guardan en este navegador, en este dispositivo. FinanceOS no tiene servidor
-            — nada sale de tu dispositivo. Si borras el navegador, limpias la caché o cambias de
+            Tus datos se guardan en este navegador, en este dispositivo — el servidor nunca puede
+            leerlos en claro. Si borras el navegador, limpias la caché o cambias de
             dispositivo <strong style={{ color: 'var(--tx)' }}>sin un respaldo previo, los datos se perderán permanentemente</strong>.
             FinanceOS no puede recuperarlos.
           </div>

@@ -19,6 +19,7 @@ import MonthVerdict from './MonthVerdict.jsx'
 import CountryTool from './CountryTool.jsx'
 import { moneyLocale } from '../../utils/index.js'
 import { DEFAULT_USD_RATES } from '../shared/constants.js'
+import { BackupReminderBanner } from '../../components/backup/BackupManager.jsx'
 
 const fmt  = (n) => (Number(n) || 0).toLocaleString(moneyLocale(), { maximumFractionDigits: 0 })
 const pct  = (n) => ((Number(n) || 0) * 100).toFixed(1) + '%'
@@ -483,6 +484,7 @@ export default function Dashboard({ setPage }) {
   return (
     <div>
       <MonthlyCloseModal />
+      <BackupReminderBanner />
 
       {/* Header — título + toggle de vista */}
       <div style={{ marginBottom:16, display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:12, flexWrap:'wrap' }}>
