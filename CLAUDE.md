@@ -104,3 +104,13 @@ El commit `205228d` (17-ago) agregó conectar banco vía Plaid (solo EEUU). Una 
 
 - **Service worker cachea agresivamente**. Post-deploy, para verificar cambios: `navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()))` + `caches.keys().then(ks => ks.forEach(k => caches.delete(k)))` + hard reload.
 - **`~/Documents/.claude/launch.json`** es la config raíz de preview servers (fuera del repo). Si la ruta canónica del repo cambia, ese archivo también.
+
+## Android (TWA, 2026-08-22)
+
+Empaquetado con PWABuilder (Bubblewrap por debajo) a partir del manifest de producción, sin tocar código de la app — la PWA existente es el input. Paquete generado en `../android-twa/package/` (fuera de git, sibling de este repo): `FinanceOS.aab` (subir a Play Console), `FinanceOS.apk` (sideload de prueba), `signing.keystore` + `signing-key-info.txt` (alias `financeos-upload`, org "MAXNOVA & LUCI Global LLC").
+
+`public/.well-known/assetlinks.json` (commit `9ef882d`) verifica ese paquete contra el dominio — sin esto la app abre con barra de URL como cualquier PWA. Vite copia `public/` solo a `dist/app/`, así que `build.js` lo saca a mano a `dist/.well-known/` (raíz del dominio, no bajo `/app/`). Si se regenera el paquete con una clave nueva, hay que actualizar este archivo con el fingerprint nuevo y redeployar, o la verificación queda rota.
+
+**`signing.keystore` es irrecuperable si se pierde** — sin él no se puede subir nunca más una actualización bajo el mismo Package ID (`com.financeospro.app.twa`) en Play Store. Falta respaldarlo fuera de esta máquina (mismo criterio que las claves de backup de GastroCore).
+
+Pendiente de Walter, no delegable: crear la cuenta de Google Play Console (pago propio, US$25 único) y la publicación pública en sí — ver memoria `financeos_audit_plaid_valor_20260821` y el punto pendiente de marca en `STATE.md` antes de ese paso.
