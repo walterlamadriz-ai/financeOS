@@ -167,8 +167,8 @@ const config = {
   // ── ONBOARDING ─────────────────────────────────────────────────────────────
   onboarding: {
     enabled:       true,
-    welcomeTitle:  '¡Bienvenido a FinanceOS!',
-    welcomeText:   'Tus datos se guardan solo en este dispositivo. Sin servidores, sin suscripciones.',
+    welcomeTitle:  'Bienvenido a FinanceOS',
+    welcomeText:   'Tus datos se guardan en este dispositivo. Cifrado de extremo a extremo, sin suscripciones.',
     steps: [
       { id: 'currency',    title: 'Elige tu moneda',         desc: '¿Con qué moneda trabajas día a día?' },
       { id: 'income',      title: 'Tu ingreso principal',    desc: '¿Cuánto recibes este mes?' },
