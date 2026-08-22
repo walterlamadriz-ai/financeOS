@@ -332,6 +332,53 @@ export function detectDuplicates(validatedRows, existingRecords) {
   })
 }
 
+// ── Auto-sugerencia de categoría ─────────────────────────────────────────────
+// Heurística local, sin IA de servidor: busca en los movimientos YA categorizados
+// por el propio usuario si hay una descripción con la misma "palabra
+// significativa" (normalmente el nombre del comercio, ej. "COMPRA WALMART 1234"
+// -> "WALMART") y sugiere la categoría más frecuente que ese comercio tuvo.
+// Nunca sugiere 'Importado' (no es una categoría real, es el fallback de cuando
+// no hay sugerencia) ni categorías vacías.
+function normalizeForMatch(desc) {
+  return String(desc || '')
+    .toUpperCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '') // quita tildes
+    .replace(/[^A-Z0-9 ]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+// Prefijos genéricos de cartola bancaria (ES/EN/PT) que NO identifican al
+// comercio — sin filtrarlos, "COMPRA CAFE X" y "COMPRA DESCONOCIDA Y" matchean
+// entre sí por la palabra "COMPRA" y la sugerencia sale mal.
+const GENERIC_WORDS = new Set([
+  'COMPRA', 'PAGO', 'PAG', 'RETIRO', 'DEPOSITO', 'TRANSFERENCIA', 'TRANSF',
+  'ABONO', 'CARGO', 'DEBITO', 'CREDITO', 'COBRO', 'GIRO', 'COMISION',
+  'NACIONAL', 'INTERNACIONAL', 'TARJETA', 'TC',
+  'PURCHASE', 'PAYMENT', 'WITHDRAWAL', 'DEPOSIT', 'TRANSFER', 'CHARGE', 'FEE',
+])
+
+function significantToken(desc) {
+  const words = normalizeForMatch(desc).split(' ')
+    .filter(w => w.length >= 3 && !/^\d+$/.test(w) && !GENERIC_WORDS.has(w))
+  return words[0] || null
+}
+
+export function suggestCategory(description, existingRecords) {
+  const token = significantToken(description)
+  if (!token) return null
+  const counts = {}
+  for (const r of existingRecords || []) {
+    if (!r.category || r.category === 'Importado') continue
+    const rToken = significantToken(r.originalDescription || r.description || r.concept)
+    if (rToken === token) counts[r.category] = (counts[r.category] || 0) + 1
+  }
+  const entries = Object.entries(counts)
+  if (entries.length === 0) return null
+  entries.sort((a, b) => b[1] - a[1])
+  return entries[0][0]
+}
+
 export function createImportBatch(fileName, rows) {
   const imported = rows.filter(r => r._include && r.status === 'valid')
   return {

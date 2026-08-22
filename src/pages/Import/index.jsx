@@ -7,10 +7,10 @@ import { useApp } from '../../context/AppContext.jsx'
 import { markLocalChange } from '../../core/sync.js'
 import { useT } from '../../i18n/useT.js'
 import { dbGetAll, dbAdd } from '../../core/db/index.js'
-import { uid, moneyLocale } from '../../utils/index.js'
+import { uid, moneyLocale, getCategoriesExpense, getCategoriesIncome, catLabel } from '../../utils/index.js'
 import { detectBankTemplate, applyTemplate, BANK_TEMPLATES } from './bankTemplates.js'
 import {
-  parseFile, detectColumns, validateRows, detectDuplicates,
+  parseFile, detectColumns, validateRows, detectDuplicates, suggestCategory,
   createImportBatch, buildTransactions, MAX_ROWS,
 } from './fileParser.js'
 
@@ -79,6 +79,8 @@ export default function ImportMovements({ setPage } = {}) {
   const { t } = useT()
   const sym = { CLP:'$', USD:'US$', EUR:'€', VES:'Bs.', MXN:'$', ARS:'$', COP:'$' }[settings?.currency] || '$'
   const isDemo = !!settings?.isDemo
+  const categoriesExpense = useMemo(() => getCategoriesExpense(settings), [settings])
+  const categoriesIncome  = useMemo(() => getCategoriesIncome(settings), [settings])
 
   const [step, setStep] = useState(0)
   const [drag, setDrag] = useState(false)
@@ -162,10 +164,19 @@ export default function ImportMovements({ setPage } = {}) {
       existing = [...(inc || []), ...(exp || [])]
     }
     const withDupes = detectDuplicates(validated, existing)
+    // Auto-sugerencia de categoría (heurística local, ver fileParser.js): solo
+    // cuando la fila no trae categoría propia (no había columna mapeada). El
+    // usuario ve la sugerencia en la tabla de revisión y puede cambiarla antes
+    // de confirmar — nunca se aplica en silencio.
+    const withCategory = withDupes.map(r => {
+      if (r.category) return r
+      const suggested = suggestCategory(r.description, existing)
+      return suggested ? { ...r, category: suggested, categorySuggested: true } : r
+    })
     // Por defecto solo se incluyen los NUEVOS (status 'valid'). Duplicados y
     // posibles duplicados quedan desmarcados para no re-duplicar el mes; el
     // usuario puede incluirlos con un clic si quiere.
-    setRows(withDupes.map(r => ({ ...r, _include: r.status === 'valid' })))
+    setRows(withCategory.map(r => ({ ...r, _include: r.status === 'valid' })))
     setStep(2)
   }
 
@@ -495,7 +506,8 @@ export default function ImportMovements({ setPage } = {}) {
               <thead><tr>
                 <th style={{ ...s.th, width: 32 }}></th>
                 <th style={s.th}>{t('imp.review.thDate')}</th><th style={s.th}>{t('imp.review.thDesc')}</th>
-                <th style={s.th}>{t('imp.review.thAmount')}</th><th style={s.th}>{t('imp.review.thType')}</th><th style={s.th}>{t('imp.review.thStatus')}</th>
+                <th style={s.th}>{t('imp.review.thAmount')}</th><th style={s.th}>{t('imp.review.thType')}</th>
+                <th style={s.th}>{t('imp.review.thCategory')}</th><th style={s.th}>{t('imp.review.thStatus')}</th>
               </tr></thead>
               <tbody>{rows.map((row, i) => (
                 <tr key={i} style={{ opacity: row._include ? 1 : .45 }}>
@@ -504,6 +516,17 @@ export default function ImportMovements({ setPage } = {}) {
                   <td style={{ ...s.td, color: 'var(--tx)', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.description || '—'}</td>
                   <td style={{ ...s.td, color: row.type === 'income' ? 'var(--accent)' : 'var(--red)', fontWeight: 600 }}>{row.type === 'income' ? '+' : '−'}{sym}{fmt(row.amount)}</td>
                   <td style={{ ...s.td, color: 'var(--th)' }}>{row.type === 'income' ? t('imp.review.typeIncome') : t('imp.review.typeExpense')}</td>
+                  <td style={s.td}>
+                    <select
+                      value={row.category || ''}
+                      onChange={e => setRows(r => r.map((x, j) => j === i ? { ...x, category: e.target.value, categorySuggested: false } : x))}
+                      style={{ ...s.select, width: 'auto', minWidth: 120, padding: '4px 6px', fontSize: 11 }}
+                    >
+                      <option value="">{t('imp.review.noCategory')}</option>
+                      {(row.type === 'income' ? categoriesIncome : categoriesExpense).map(c => <option key={c} value={c}>{catLabel(c)}</option>)}
+                    </select>
+                    {row.categorySuggested && <div style={{ fontSize: 9, color: 'var(--accent)', fontFamily: 'var(--mono)', marginTop: 2 }}>{t('imp.review.suggested')}</div>}
+                  </td>
                   <td style={s.td}>
                     <span style={s.badge(row.status)}>{row.status === 'valid' ? t('imp.review.stValid') : row.status === 'duplicate' ? t('imp.review.stDup') : t('imp.review.stError')}</span>
                     {row.errors?.length > 0 && <div style={{ fontSize: 10, color: 'var(--red)', marginTop: 2 }}>{row.errors.join(', ')}</div>}
