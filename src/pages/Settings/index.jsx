@@ -236,12 +236,12 @@ export default function Settings() {
         </div>
       </Card>
       <Card>
-        <CardHeader title="¿Dónde se guardan tus datos?" />
+        <CardHeader title={t('settings.dataStorage.title')} />
         <div style={{fontSize:12,color:'var(--tm)',lineHeight:1.8,display:'flex',flexDirection:'column',gap:8}}>
-          <div><span style={{fontWeight:600,color:'var(--tx)'}}>IndexedDB del navegador</span> — todos tus ingresos, gastos, presupuestos, metas y deudas se guardan localmente en este dispositivo usando la base de datos interna del navegador.</div>
-          <div><span style={{fontWeight:600,color:'var(--tx)'}}>El servidor nunca puede leerlos</span> — no hay cuenta de usuario ni login. Si activás la sincronización opcional (sección "Sync" más arriba), tus datos se cifran en este dispositivo antes de salir: el servidor solo recibe un archivo cifrado, nunca montos ni categorías en claro.</div>
-          <div><span style={{fontWeight:600,color:'var(--tx)'}}>Respaldo</span> — con la sincronización activada, tus datos quedan respaldados cifrados en la nube. Sin ella, usa "Respaldo y restauración" para exportar e importar tu archivo JSON manualmente.</div>
-          <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',marginTop:4}}>🔒 Datos 100% privados · sin telemetría · sin cookies de seguimiento</div>
+          <div><span style={{fontWeight:600,color:'var(--tx)'}}>{t('settings.dataStorage.indexeddbLabel')}</span> — {t('settings.dataStorage.indexeddbDesc')}</div>
+          <div><span style={{fontWeight:600,color:'var(--tx)'}}>{t('settings.dataStorage.serverLabel')}</span> — {t('settings.dataStorage.serverDesc')}</div>
+          <div><span style={{fontWeight:600,color:'var(--tx)'}}>{t('settings.dataStorage.backupLabel')}</span> — {t('settings.dataStorage.backupDesc')}</div>
+          <div style={{fontSize:10,fontFamily:'var(--mono)',color:'var(--th)',marginTop:4}}>{t('settings.dataStorage.privacyBadge')}</div>
         </div>
       </Card>
       {(installPrompt || installed || (isIOS && !isStandalone)) && (
@@ -252,7 +252,7 @@ export default function Settings() {
               <div style={slbl}>{installed ? t('settings.install.installed.label') : t('settings.install.pending.label')}</div>
               <div style={ssub}>
                 {installed ? t('settings.install.installed.sub')
-                  : isIOS ? 'En Safari: toca el ícono de compartir ⬆ → "Añadir a pantalla de inicio".'
+                  : isIOS ? t('settings.install.iosInstructions')
                   : t('settings.install.pending.sub')}
               </div>
             </div>
