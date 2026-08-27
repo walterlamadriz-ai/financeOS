@@ -37,7 +37,13 @@ begin
   if p_key is null or p_endpoint is null or p_p256dh is null or p_auth is null then
     return jsonb_build_object('ok', false, 'error', 'bad_args');
   end if;
-  v_hash := encode(digest(upper(trim(p_key)), 'sha256'), 'hex');
+  -- fnos_resolve_hash (no digest() directo): el cliente manda el HASH de la
+  -- licencia, no la clave cruda (ver supabase-e2e-hardening.sql). Este archivo
+  -- hasheaba de nuevo un valor ya hasheado — el mismo bug que ya rompió
+  -- sync_push una vez (ver CLAUDE.md). Producción ya corría con el fix
+  -- aplicado a mano (verificado con pg_get_functiondef el 2026-08-27); este
+  -- archivo solo estaba desactualizado en el repo, no en vivo.
+  v_hash := public.fnos_resolve_hash(p_key);
   if not exists (select 1 from public.licenses where key_hash = v_hash and status = 'active'
                 and (expires_at is null or expires_at > now())) then
     return jsonb_build_object('ok', false, 'error', 'invalid_license');

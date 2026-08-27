@@ -76,6 +76,33 @@ async function issueLicense(key: string, plan: string, email: string | null, ses
   if (!res.ok) throw new Error(`issue_license failed: ${res.status} ${await res.text()}`);
 }
 
+// Auditoría 2026-08-27: issue_license NO era idempotente por sesión — un
+// reintento de Stripe (timeout, o sendKeyEmail fallando DESPUÉS de que la
+// licencia ya se insertó bien) generaba una clave nueva y chocaba contra la
+// constraint UNIQUE de stripe_session_id, sin capturar ese conflicto (el
+// "on conflict" de issue_license solo cubre key_hash). Postgres tiraba una
+// excepción no manejada, la RPC devolvía error, el webhook 500, y Stripe
+// reintentaba durante 3 días — un cliente que pagó nunca recibía su clave.
+// Fix: chequear ANTES si esta sesión ya se procesó. No se puede reenviar LA
+// MISMA clave (el servidor nunca guarda el texto plano, solo el hash — por
+// diseño, para que un breach del servidor no filtre claves reales), así que
+// un reintento detectado simplemente se reconoce como ya cubierto y no
+// vuelve a intentar emitir ni a chocar contra la constraint.
+async function sessionAlreadyProcessed(sessionId: string): Promise<boolean> {
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/licenses?stripe_session_id=eq.${encodeURIComponent(sessionId)}&select=key_hash&limit=1`,
+    { headers: { apikey: SERVICE_ROLE, Authorization: `Bearer ${SERVICE_ROLE}` } },
+  );
+  if (!res.ok) {
+    // Si el chequeo mismo falla, no bloqueamos la emisión por eso — issue_license
+    // sigue protegido por su propio conflict handling para el caso normal.
+    console.error(`sessionAlreadyProcessed check failed: ${res.status} ${await res.text()}`);
+    return false;
+  }
+  const rows = await res.json();
+  return Array.isArray(rows) && rows.length > 0;
+}
+
 // FISC-1 (auditoría 2026-08-21): revoca la licencia asociada a un payment_intent
 // cuando Stripe manda charge.refunded o charge.dispute.created. Antes de esto
 // ningún evento revocaba nada — ver supabase-license-revoke.sql para el
@@ -149,6 +176,14 @@ Deno.serve(async (req) => {
     if (session.payment_status !== "paid" || amount < 1900) {
       console.warn(`Checkout ignorado: payment_status=${session.payment_status} amount=${amount} session=${session.id}`);
       return new Response(JSON.stringify({ received: true, ignored: "unpaid_or_zero" }), {
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    // Idempotencia: si esta sesión ya generó una licencia (reintento de Stripe),
+    // no volver a intentarlo — ver sessionAlreadyProcessed().
+    if (session.id && await sessionAlreadyProcessed(session.id)) {
+      console.log(`Sesión ya procesada, reintento de Stripe ignorado: session=${session.id}`);
+      return new Response(JSON.stringify({ received: true, ignored: "already_processed" }), {
         headers: { "Content-Type": "application/json" },
       });
     }
