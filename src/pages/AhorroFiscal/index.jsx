@@ -4,6 +4,7 @@
 
 import { useState, useMemo } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
+import { useT } from '../../i18n/useT.js'
 import { Card, CardHeader, FormRow, FormGroup, ProgressBar, Alert, PageHeader } from '../../components/ui/index.jsx'
 import ProGate from '../../components/ui/ProGate.jsx'
 import { getAporteConfig, calcAporte } from '../../utils/aporteEngine.js'
@@ -14,6 +15,7 @@ import {
 
 export default function AhorroFiscal() {
   const { settings, incomes } = useApp()
+  const { t } = useT()
   const country = (settings.country || 'CL').toUpperCase()
   const config = getAporteConfig(country)
   const activeMonth = settings.activeMonth || new Date().toISOString().slice(0, 7)
@@ -47,7 +49,7 @@ export default function AhorroFiscal() {
   if (!config) {
     return (
       <div style={{ padding: 32, textAlign: 'center', color: 'var(--th)', fontFamily: 'var(--mono)', fontSize: 13 }}>
-        Este módulo está disponible para México 🇲🇽, Colombia 🇨🇴, USA 🇺🇸 y España 🇪🇸
+        {t('ahorroFiscal.notAvailable')}
       </div>
     )
   }
@@ -59,7 +61,7 @@ export default function AhorroFiscal() {
   const fmt = (n) => `${sym}${(Number(n) || 0).toLocaleString(locale, { maximumFractionDigits: 0 })}`
 
   return (
-    <ProGate feature="El proyector de ahorro fiscal">
+    <ProGate feature={t('ahorroFiscal.proGateFeature')}>
       <div className="stack">
         <PageHeader title={config.titulo} sub={config.subtitulo} />
 
@@ -68,7 +70,7 @@ export default function AhorroFiscal() {
         </Alert>
 
         <Card>
-          <CardHeader title="Tus datos del año" right={<span style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)' }}>{year}</span>} />
+          <CardHeader title={t('ahorroFiscal.card.yourYearData')} right={<span style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)' }}>{year}</span>} />
           <FormRow>
             <FormGroup label={config.ingresoLabel}>
               <input type="number" inputMode="decimal" min="0" value={ingreso} placeholder="0" onChange={e => setIngreso(e.target.value)} />
@@ -79,7 +81,7 @@ export default function AhorroFiscal() {
           </FormRow>
           {esUS && (
             <FormRow>
-              <FormGroup label="Your age (for catch-up limits)">
+              <FormGroup label={t('ahorroFiscal.usAgeLabel')}>
                 <input type="number" inputMode="decimal" min="0" max="100" value={edad} placeholder="e.g. 42" onChange={e => setEdad(e.target.value)} />
               </FormGroup>
             </FormRow>
@@ -100,58 +102,58 @@ export default function AhorroFiscal() {
           <div style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)', marginTop: 6 }}>
             {config.resumenTope}
           </div>
-          {esUS && <LimitesUSA edad={edad} fmt={fmt} />}
+          {esUS && <LimitesUSA edad={edad} fmt={fmt} t={t} />}
         </Card>
 
         {result && (
           <Card>
-            <CardHeader title="Ahorro fiscal estimado" />
+            <CardHeader title={t('ahorroFiscal.card.estimatedSavings')} />
             <div style={{ textAlign: 'center', padding: '8px 0 16px' }}>
               <div style={{ fontFamily: 'var(--mono)', fontSize: 34, fontWeight: 700, color: 'var(--accent)', lineHeight: 1 }}>
                 {fmt(result.ahorro)}
               </div>
               <div style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)', marginTop: 6 }}>
-                {result.resumen} · Tu tasa marginal: {Math.round(result.marginal * 100)}%
+                {t('ahorroFiscal.summarySub', { resumen: result.resumen, pct: Math.round(result.marginal * 100) })}
               </div>
             </div>
 
             {esUS && result.gravable != null && (
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--tm)', marginBottom: 12 }}>
-                <span>Taxable income (gross − standard deduction)</span>
+                <span>{t('ahorroFiscal.taxableIncomeLabel')}</span>
                 <span style={{ fontFamily: 'var(--mono)' }}>{fmt(result.gravable)}</span>
               </div>
             )}
 
             <div style={{ marginBottom: 6, display: 'flex', justifyContent: 'space-between', fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)' }}>
-              <span>Aprovechamiento del tope deducible</span>
+              <span>{t('ahorroFiscal.capUsageDeductible')}</span>
               <span>{Math.round(result.topePct)}%</span>
             </div>
             <ProgressBar value={result.topePct} max={100} color={result.topePct >= 100 ? 'green' : 'amber'} height={6} />
             {result.faltaParaTope > 0 ? (
               <div style={{ fontSize: 12, color: 'var(--tm)', marginTop: 10, lineHeight: 1.5 }}>
-                Puedes aportar <strong style={{ color: 'var(--accent)' }}>{fmt(result.faltaParaTope)}</strong> más este año con beneficio fiscal (tope: {fmt(result.tope)}).
+                {t('ahorroFiscal.canContributeMore', { amt: fmt(result.faltaParaTope), cap: fmt(result.tope) })}
               </div>
             ) : (
               <div style={{ fontSize: 12, color: 'var(--accent)', marginTop: 10, fontWeight: 600 }}>
-                ✓ Alcanzaste el tope deducible máximo.
+                {t('ahorroFiscal.capReached')}
               </div>
             )}
 
             <div style={{ marginTop: 16, borderTop: '.5px solid var(--brd)', paddingTop: 12, display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--tx)' }}>
-              <span>Monto deducible aplicado</span>
+              <span>{t('ahorroFiscal.deductibleAmountApplied')}</span>
               <span style={{ fontFamily: 'var(--mono)', fontWeight: 600 }}>{fmt(result.deducible)}</span>
             </div>
           </Card>
         )}
 
-        {esUS && <RothHSACard fmt={fmt} ingresoAnual={ingreso} edad={edad} />}
+        {esUS && <RothHSACard fmt={fmt} ingresoAnual={ingreso} edad={edad} t={t} />}
       </div>
     </ProGate>
   )
 }
 
 // Topes 2026 con catch-up aplicado según la edad declarada.
-function LimitesUSA({ edad, fmt }) {
+function LimitesUSA({ edad, fmt, t }) {
   const k = limite401k(edad)
   const ira = limiteIRA(edad)
   const e = Number(edad) || 0
@@ -172,7 +174,7 @@ function LimitesUSA({ edad, fmt }) {
       ))}
       {e >= 60 && e <= 63 && (
         <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', lineHeight: 1.5 }}>
-          Super catch-up 60–63 aplicado ({fmt(LIMITES_2026.catchUp401kSuper6063)} en vez de {fmt(LIMITES_2026.catchUp401k50)}).
+          {t('ahorroFiscal.limitsSuperCatchUp', { a: fmt(LIMITES_2026.catchUp401kSuper6063), b: fmt(LIMITES_2026.catchUp401k50) })}
         </div>
       )}
     </div>
@@ -182,7 +184,7 @@ function LimitesUSA({ edad, fmt }) {
 // Roth vs Traditional + HSA — solo USA. El 401(k) de arriba responde "cuánto
 // deduzco", esto responde las dos preguntas que de verdad generan duda:
 // ¿Roth o Traditional? y ¿vale la pena maximizar el HSA?
-function RothHSACard({ fmt, ingresoAnual, edad }) {
+function RothHSACard({ fmt, ingresoAnual, edad, t }) {
   // Los tramos van sobre taxable income, no sobre el bruto: hay que restar la
   // standard deduction antes de leer la tasa marginal.
   const [tasaHoy, setTasaHoy] = useState(() => Math.round(tasaMarginalDesdeBruto(Number(ingresoAnual) || 80000, 'single') * 100))
@@ -212,78 +214,72 @@ function RothHSACard({ fmt, ingresoAnual, edad }) {
   return (
     <>
       <Card>
-        <CardHeader title="Roth vs Traditional" />
+        <CardHeader title={t('ahorroFiscal.card.rothVsTraditional')} />
         <div style={{ fontSize: 12, color: 'var(--tm)', lineHeight: 1.6, marginBottom: 14 }}>
-          Mismo aporte nominal a cada cuenta, mismo crecimiento. En Traditional entra completo y tributas al retirarlo;
-          en Roth ya tributaste y sale libre. Lo que inclina la balanza es la deducción de hoy: si la inviertes, Traditional
-          gana cuando tu tasa de hoy es mayor que la del retiro.
+          {t('ahorroFiscal.rothVsTradIntro')}
         </div>
         <FormRow>
-          <FormGroup label="Aporte anual (USD)">
+          <FormGroup label={t('ahorroFiscal.form.annualContribUSD')}>
             <input type="number" inputMode="decimal" min="0" value={aporte} onChange={e => setAporte(e.target.value)} />
           </FormGroup>
-          <FormGroup label="Años hasta el retiro">
+          <FormGroup label={t('ahorroFiscal.form.yearsToRetirement')}>
             <input type="number" inputMode="decimal" min="0" value={anios} onChange={e => setAnios(e.target.value)} />
           </FormGroup>
         </FormRow>
         <FormRow>
-          <FormGroup label="Tu tasa marginal hoy (%)">
+          <FormGroup label={t('ahorroFiscal.form.marginalRateToday')}>
             <input type="number" inputMode="decimal" min="0" value={tasaHoy} onChange={e => setTasaHoy(e.target.value)} />
           </FormGroup>
-          <FormGroup label="Tasa marginal esperada al retirarte (%)">
+          <FormGroup label={t('ahorroFiscal.form.marginalRateRetirement')}>
             <input type="number" inputMode="decimal" min="0" value={tasaRetiro} onChange={e => setTasaRetiro(e.target.value)} />
           </FormGroup>
         </FormRow>
         <FormRow>
-          <FormGroup label="Retorno anual asumido (%)">
+          <FormGroup label={t('ahorroFiscal.form.assumedReturn')}>
             <input type="number" inputMode="decimal" min="0" step="0.5" value={retorno} onChange={e => setRetorno(e.target.value)} />
           </FormGroup>
         </FormRow>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 14 }}>
           <div style={{ background: rothVsTrad.convieneTraditional ? 'var(--grn-tint)' : 'var(--sur2)', border: rothVsTrad.convieneTraditional ? '.5px solid color-mix(in srgb, var(--grn) 35%, transparent)' : '.5px solid var(--brd)', borderRadius: 'var(--r)', padding: '12px 14px' }}>
-            <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--th)', marginBottom: 4 }}>TRADITIONAL — TOTAL NETO</div>
+            <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--th)', marginBottom: 4 }}>{t('ahorroFiscal.traditionalNetTotal')}</div>
             <div style={{ fontFamily: 'var(--mono)', fontSize: 18, fontWeight: 700, color: rothVsTrad.convieneTraditional ? 'var(--grn)' : 'var(--tx)' }}>{fmt(rothVsTrad.traditionalTotal)}</div>
             <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--th)', marginTop: 6, lineHeight: 1.5 }}>
-              cuenta {fmt(rothVsTrad.traditionalNeto)} + deducción invertida {fmt(rothVsTrad.ahorroInvertido)}
+              {t('ahorroFiscal.traditionalBreakdown', { acct: fmt(rothVsTrad.traditionalNeto), ded: fmt(rothVsTrad.ahorroInvertido) })}
             </div>
           </div>
           <div style={{ background: !rothVsTrad.convieneTraditional ? 'var(--grn-tint)' : 'var(--sur2)', border: !rothVsTrad.convieneTraditional ? '.5px solid color-mix(in srgb, var(--grn) 35%, transparent)' : '.5px solid var(--brd)', borderRadius: 'var(--r)', padding: '12px 14px' }}>
-            <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--th)', marginBottom: 4 }}>ROTH — VALOR FUTURO</div>
+            <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--th)', marginBottom: 4 }}>{t('ahorroFiscal.rothFutureValue')}</div>
             <div style={{ fontFamily: 'var(--mono)', fontSize: 18, fontWeight: 700, color: !rothVsTrad.convieneTraditional ? 'var(--grn)' : 'var(--tx)' }}>{fmt(rothVsTrad.rothFinal)}</div>
             <div style={{ fontSize: 10, fontFamily: 'var(--mono)', color: 'var(--th)', marginTop: 6, lineHeight: 1.5 }}>
-              sale libre de impuesto
+              {t('ahorroFiscal.rothTaxFree')}
             </div>
           </div>
         </div>
         <div style={{ fontSize: 12, color: 'var(--tm)', marginTop: 10, lineHeight: 1.5 }}>
-          {rothVsTrad.convieneTraditional
-            ? <>Con estos números, <strong style={{ color: 'var(--accent)' }}>Traditional</strong> te deja {fmt(rothVsTrad.diferencia)} más — tiene sentido si esperas pagar menos impuesto al retirarte que hoy.</>
-            : <><strong style={{ color: 'var(--accent)' }}>Roth</strong> te deja {fmt(rothVsTrad.diferencia)} más — tiene sentido si tu tasa de hoy es más baja que la que esperas pagar retirado.</>}
+          {t(rothVsTrad.convieneTraditional ? 'ahorroFiscal.traditionalWins' : 'ahorroFiscal.rothWins', { diff: fmt(rothVsTrad.diferencia) })}
         </div>
         <div style={{ fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)', lineHeight: 1.6, marginTop: 12, padding: '10px 12px', background: 'var(--sur2)', borderRadius: 8, border: '.5px solid var(--brd)' }}>
-          Asume que la deducción de hoy ({fmt(rothVsTrad.ahorroFiscalHoy)}) se invierte al mismo retorno y no paga impuesto sobre las ganancias.
-          Si te la gastas, o si ya topeas el límite legal en ambas cuentas, Roth gana siempre a igual aporte nominal.
+          {t('ahorroFiscal.assumesReinvest', { amt: fmt(rothVsTrad.ahorroFiscalHoy) })}
         </div>
       </Card>
 
       <Card>
-        <CardHeader title="HSA — la cuenta con triple ventaja fiscal" />
+        <CardHeader title={t('ahorroFiscal.card.hsa')} />
         <div style={{ fontSize: 12, color: 'var(--tm)', lineHeight: 1.6, marginBottom: 14 }}>
-          Deducible al aportar, crece libre de impuesto, sale libre de impuesto en gasto médico calificado.
-          Límites 2026: {fmt(LIMITES_2026.hsaSelfOnly)} individual / {fmt(LIMITES_2026.hsaFamily)} familiar
+          {t('ahorroFiscal.hsaIntro', { self: fmt(LIMITES_2026.hsaSelfOnly), family: fmt(LIMITES_2026.hsaFamily) })}
           {topeHsa.catchUp > 0
-            ? <> · catch-up 55+ aplicado (+{fmt(topeHsa.catchUp)}) → tu tope es <strong style={{ color: 'var(--accent)' }}>{fmt(topeHsa.total)}</strong>.</>
-            : <> · con 55 años o más suma {fmt(LIMITES_2026.hsaCatchUp55)} de catch-up (indica tu edad arriba).</>}
+            ? t('ahorroFiscal.hsaCatchUpApplied', { amt: fmt(topeHsa.catchUp), total: fmt(topeHsa.total) })
+            : t('ahorroFiscal.hsaCatchUpHint', { amt: fmt(LIMITES_2026.hsaCatchUp55) })}
         </div>
         <FormRow>
-          <FormGroup label="Cobertura">
+          <FormGroup label={t('ahorroFiscal.form.coverage')}>
             <select value={coverage} onChange={e => setCoverage(e.target.value)}>
-              <option value="self">Individual (self-only)</option>
-              <option value="family">Familiar</option>
+              <option value="self">{t('ahorroFiscal.coverage.self')}</option>
+              <option value="family">{t('ahorroFiscal.coverage.family')}</option>
             </select>
           </FormGroup>
-          <FormGroup label="Aporte anual planeado (USD)">
+          <FormGroup label={t('ahorroFiscal.form.plannedAnnualContribUSD')}>
             <input type="number" inputMode="decimal" min="0" value={aporteHsa} placeholder="0" onChange={e => setAporteHsa(e.target.value)} />
           </FormGroup>
         </FormRow>
@@ -291,16 +287,15 @@ function RothHSACard({ fmt, ingresoAnual, edad }) {
         <div style={{ textAlign: 'center', padding: '8px 0 16px' }}>
           <div style={{ fontFamily: 'var(--mono)', fontSize: 30, fontWeight: 700, color: 'var(--accent)', lineHeight: 1 }}>{fmt(hsa.ahorroFiscalHoy)}</div>
           <div style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)', marginTop: 6, lineHeight: 1.6 }}>
-            ahorro fiscal este año · aportando {fmt(hsa.aporte)} cada año durante {anios} años,
-            el saldo llega a {fmt(hsa.valorFuturo)} ({fmt(hsa.totalAportado)} aportados)
+            {t('ahorroFiscal.hsaSavingsSub', { contrib: fmt(hsa.aporte), years: anios, fv: fmt(hsa.valorFuturo), total: fmt(hsa.totalAportado) })}
           </div>
         </div>
         {hsa.faltaParaTope > 0 ? (
           <div style={{ fontSize: 12, color: 'var(--tm)', lineHeight: 1.5 }}>
-            Puedes aportar <strong style={{ color: 'var(--accent)' }}>{fmt(hsa.faltaParaTope)}</strong> más este año antes de tocar el límite ({fmt(hsa.limite)}).
+            {t('ahorroFiscal.hsaCanContributeMore', { amt: fmt(hsa.faltaParaTope), limit: fmt(hsa.limite) })}
           </div>
         ) : (
-          <div style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600 }}>✓ Alcanzaste el límite de aporte {coverage === 'family' ? 'familiar' : 'individual'}.</div>
+          <div style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600 }}>{t('ahorroFiscal.hsaLimitReached', { type: coverage === 'family' ? t('ahorroFiscal.coverageTypeFamily') : t('ahorroFiscal.coverageTypeSelf') })}</div>
         )}
       </Card>
     </>

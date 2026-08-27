@@ -4,6 +4,7 @@
 
 import { useState, useMemo } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
+import { useT } from '../../i18n/useT.js'
 import { Card, CardHeader, FormRow, FormGroup, Alert, PageHeader } from '../../components/ui/index.jsx'
 import ProGate from '../../components/ui/ProGate.jsx'
 import arConfig from '../../config/inflacion/ar.js'
@@ -12,6 +13,7 @@ const CONFIGS = { AR: arConfig }
 
 export default function Inflacion() {
   const { settings } = useApp()
+  const { t } = useT()
   const country = (settings.country || 'CL').toUpperCase()
   const config = CONFIGS[country]
 
@@ -32,7 +34,7 @@ export default function Inflacion() {
   if (!config) {
     return (
       <div style={{ padding: 32, textAlign: 'center', color: 'var(--th)', fontFamily: 'var(--mono)', fontSize: 13 }}>
-        Este módulo está disponible para Argentina 🇦🇷
+        {t('inflacion.notAvailable')}
       </div>
     )
   }
@@ -47,7 +49,7 @@ export default function Inflacion() {
   }
 
   return (
-    <ProGate feature="El ajuste por inflación">
+    <ProGate feature={t('inflacion.proGateFeature')}>
       <div className="stack">
         <PageHeader title={config.titulo} sub={config.subtitulo} />
 
@@ -56,44 +58,46 @@ export default function Inflacion() {
         </Alert>
 
         <Card>
-          <CardHeader title="¿Cuánto vale hoy el dinero de antes?" />
+          <CardHeader title={t('inflacion.card1.title')} />
           <FormRow>
-            <FormGroup label="Monto (ARS)">
+            <FormGroup label={t('inflacion.form.amount')}>
               <input type="number" inputMode="decimal" min="0" value={monto} placeholder="0" onChange={e => setMonto(e.target.value)} />
             </FormGroup>
           </FormRow>
           <FormRow>
-            <FormGroup label="Desde">
+            <FormGroup label={t('inflacion.form.from')}>
               <select value={desde} onChange={e => setDesde(e.target.value)}>
                 {config.meses.map(m => <option key={m} value={m}>{fmtMes(m)}</option>)}
               </select>
             </FormGroup>
-            <FormGroup label="Hasta">
+            <FormGroup label={t('inflacion.form.to')}>
               <select value={hasta} onChange={e => setHasta(e.target.value)}>
                 {config.meses.map(m => <option key={m} value={m}>{fmtMes(m)}</option>)}
               </select>
             </FormGroup>
           </FormRow>
           {desde > hasta && (
-            <div style={{ fontSize: 12, color: 'var(--red)', marginTop: 8 }}>El mes "desde" debe ser anterior a "hasta".</div>
+            <div style={{ fontSize: 12, color: 'var(--red)', marginTop: 8 }}>{t('inflacion.form.dateError')}</div>
           )}
         </Card>
 
         {result && Number(monto) > 0 && (
           <Card>
-            <CardHeader title={`Equivalencia ${fmtMes(desde)} → ${fmtMes(hasta)}`} />
+            <CardHeader title={t('inflacion.result.title', { from: fmtMes(desde), to: fmtMes(hasta) })} />
             <div style={{ textAlign: 'center', padding: '8px 0 16px' }}>
               <div style={{ fontFamily: 'var(--mono)', fontSize: 30, fontWeight: 700, color: 'var(--accent)', lineHeight: 1.1 }}>
                 {fmt(result.valorAjustado)}
               </div>
               <div style={{ fontSize: 12, color: 'var(--tm)', marginTop: 8, lineHeight: 1.5 }}>
-                {fmt(monto)} de {fmtMes(desde)} equivalen a <strong>{fmt(result.valorAjustado)}</strong> de {fmtMes(hasta)}.
+                {t('inflacion.result.equivalencePre', { amt: fmt(monto), from: fmtMes(desde) })}{' '}
+                <strong>{fmt(result.valorAjustado)}</strong>{' '}
+                {t('inflacion.result.equivalencePost', { to: fmtMes(hasta) })}
               </div>
             </div>
             <div style={{ borderTop: '.5px solid var(--brd)', paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <Row label="Inflación acumulada del período" value={`${result.inflacionAcumPct.toFixed(1)}%`} color="var(--red)" />
-              <Row label="Poder de compra perdido (si lo tuviste en efectivo)" value={`−${result.poderPerdidoPct.toFixed(1)}%`} color="var(--red)" />
-              <Row label="Tu efectivo hoy compra como" value={`${fmt(result.poderHoy)} de ${fmtMes(desde)}`} color="var(--th)" />
+              <Row label={t('inflacion.result.cumulativeInflation')} value={`${result.inflacionAcumPct.toFixed(1)}%`} color="var(--red)" />
+              <Row label={t('inflacion.result.purchasingPowerLost')} value={`−${result.poderPerdidoPct.toFixed(1)}%`} color="var(--red)" />
+              <Row label={t('inflacion.result.cashBuysLikePre')} value={`${fmt(result.poderHoy)} de ${fmtMes(desde)}`} color="var(--th)" />
             </div>
           </Card>
         )}

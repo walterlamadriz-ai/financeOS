@@ -1,9 +1,12 @@
 // src/pages/PPR/index.jsx
 // Módulo PPR Portugal (Plano Poupança Reforma) — simulador do benefício fiscal
 // Solo visible si settings.country === 'PT'.
-// DECISIÓN (Walter, 2026-07-10): los módulos fiscales por país van en el idioma
-// del país donde aparecen → esta página está escrita en portugués (como el APV
-// chileno está en español).
+// CORRECCIÓN 2026-08-27: la nota anterior decía "los módulos fiscales por país
+// van en el idioma del país donde aparecen (portugués fijo acá)" — desactualizada.
+// Steuer/IRPFEspana/ResicoMX/MultiDolarAR ya demostraron que la práctica actual
+// es respetar settings.language como el resto de la app (útil para, ej., un
+// emigrante brasileño con negocios en Portugal usando la app en portugués de
+// Brasil, o cualquiera en inglés). Migrado a useT() para ser consistente.
 //
 // Reglas (art. 21.º EBF, validadas 2026-07-10):
 //   - Dedução à coleta do IRS: 20% do valor aplicado no ano, com tetos por idade
@@ -15,20 +18,24 @@
 
 import { useState, useMemo } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
+import { useT } from '../../i18n/useT.js'
 import { Card, CardHeader, FormRow, FormGroup, Alert, PageHeader, KPI } from '../../components/ui/index.jsx'
 import ProGate from '../../components/ui/ProGate.jsx'
 
 const fmtEur = (n) => '€' + (Number(n) || 0).toLocaleString('pt-PT', { maximumFractionDigits: 0 })
 
-// Teto de dedução segundo a idade a 1 de janeiro (art. 21.º EBF)
+// Teto de dedução segundo a idade a 1 de janeiro (art. 21.º EBF). bracketKey se
+// traduce en el componente vía t('ppr.bracket.*') — acá queda como identificador
+// interno, no como texto visible.
 function deductionCap(age) {
-  if (age < 35) return { cap: 400, maxContribution: 2000, bracket: 'menos de 35 anos' }
-  if (age <= 50) return { cap: 350, maxContribution: 1750, bracket: '35 a 50 anos' }
-  return { cap: 300, maxContribution: 1500, bracket: 'mais de 50 anos' }
+  if (age < 35) return { cap: 400, maxContribution: 2000, bracketKey: 'under35' }
+  if (age <= 50) return { cap: 350, maxContribution: 1750, bracketKey: '35to50' }
+  return { cap: 300, maxContribution: 1500, bracketKey: 'over50' }
 }
 
 export default function PPRPage() {
   const { settings } = useApp()
+  const { t } = useT()
   const isDemo = typeof window !== 'undefined' && window.location.search.includes('demo=true')
 
   const [f, setF] = useState({
@@ -48,7 +55,7 @@ export default function PPRPage() {
     const ret = (Number(f.expectedReturn) || 0) / 100
     if (age <= 0) return null
 
-    const { cap, maxContribution, bracket } = deductionCap(age)
+    const { cap, maxContribution, bracketKey } = deductionCap(age)
     const benefit = Math.min(contrib * 0.20, cap)
     const benefitMaxed = contrib >= maxContribution
     const extraToMax = Math.max(0, maxContribution - contrib)
@@ -74,45 +81,43 @@ export default function PPRPage() {
     }
     const benefitAvg = years > 0 ? totalBenefits / years : 0
 
-    return { cap, maxContribution, bracket, benefit, benefitMaxed, extraToMax, extraBenefit,
+    return { cap, maxContribution, bracketKey, benefit, benefitMaxed, extraToMax, extraBenefit,
              years, projected, totalContrib, gains, exitTax,
              totalBenefits, benefitAvg }
   }, [f])
 
   return (
-    <ProGate feature="Simulador PPR">
+    <ProGate feature={t('ppr.proGateFeature')}>
     <div className="stack">
-      <PageHeader title="PPR — Plano Poupança Reforma 🇵🇹"
-        sub="Simule o benefício fiscal no IRS e a sua poupança até a reforma" />
+      <PageHeader title={t('ppr.title')} sub={t('ppr.sub')} />
       <p style={{ fontSize: 12, color: 'var(--th)', fontFamily: 'var(--mono)', marginTop: -4, marginBottom: 8, lineHeight: 1.6 }}>
-        Dedução à coleta do IRS: <strong>20% do valor aplicado no ano</strong>, com teto segundo a idade
-        (menos de 35 anos: €400 · 35-50: €350 · mais de 50: €300). Conta a idade a 1 de janeiro.
+        {t('ppr.intro')}
       </p>
 
       <Card>
-        <CardHeader title="Os seus dados" />
+        <CardHeader title={t('ppr.card.yourData')} />
         <FormRow>
-          <FormGroup label="Idade (a 1 de janeiro)">
+          <FormGroup label={t('ppr.form.age')}>
             <input type="number" inputMode="decimal" min="18" max="80" value={f.age} placeholder="ex. 32"
               onChange={e => set('age', e.target.value)} />
           </FormGroup>
-          <FormGroup label="Aporte anual ao PPR (€)">
+          <FormGroup label={t('ppr.form.annualContrib')}>
             <input type="number" inputMode="decimal" min="0" value={f.annualContrib} placeholder="ex. 1200"
               onChange={e => set('annualContrib', e.target.value)} />
           </FormGroup>
         </FormRow>
         <FormRow>
-          <FormGroup label="Saldo atual no PPR (€)">
+          <FormGroup label={t('ppr.form.currentBalance')}>
             <input type="number" inputMode="decimal" min="0" value={f.currentBalance} placeholder="0"
               onChange={e => set('currentBalance', e.target.value)} />
           </FormGroup>
-          <FormGroup label="Idade de reforma">
+          <FormGroup label={t('ppr.form.retireAge')}>
             <input type="number" inputMode="decimal" min="55" max="75" value={f.retireAge}
               onChange={e => set('retireAge', e.target.value)} />
           </FormGroup>
         </FormRow>
         <FormRow>
-          <FormGroup label="Retorno anual esperado (%)">
+          <FormGroup label={t('ppr.form.expectedReturn')}>
             <input type="number" inputMode="decimal" min="0" max="15" step="0.5" value={f.expectedReturn}
               onChange={e => set('expectedReturn', e.target.value)} />
           </FormGroup>
@@ -122,45 +127,40 @@ export default function PPRPage() {
       {r && (Number(f.annualContrib) > 0 || Number(f.currentBalance) > 0) && (
         <>
           <div className="kpi-row" style={{ gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))' }}>
-            <KPI label="Benefício fiscal deste ano" value={fmtEur(r.benefit)} color="green"
-              sub={`teto ${fmtEur(r.cap)} (${r.bracket})`} />
-            <KPI label="Poupança projetada" value={fmtEur(r.projected)}
-              sub={`aos ${f.retireAge} anos · ${r.years} anos de aportes`} />
-            <KPI label="Benefícios fiscais acumulados" value={fmtEur(r.totalBenefits)} color="green"
-              sub={`${r.years} anos, teto a descer com a idade · média ${fmtEur(r.benefitAvg)}/ano`} />
-            <KPI label="Rendimentos estimados" value={fmtEur(r.gains)}
-              sub={`IRS no resgate legal ≈ ${fmtEur(r.exitTax)} (8%)`} />
+            <KPI label={t('ppr.kpi.benefit')} value={fmtEur(r.benefit)} color="green"
+              sub={t('ppr.kpi.benefitSub', { cap: fmtEur(r.cap), bracket: t('ppr.bracket.' + r.bracketKey) })} />
+            <KPI label={t('ppr.kpi.projected')} value={fmtEur(r.projected)}
+              sub={t('ppr.kpi.projectedSub', { age: f.retireAge, years: r.years })} />
+            <KPI label={t('ppr.kpi.totalBenefits')} value={fmtEur(r.totalBenefits)} color="green"
+              sub={t('ppr.kpi.totalBenefitsSub', { years: r.years, avg: fmtEur(r.benefitAvg) })} />
+            <KPI label={t('ppr.kpi.gains')} value={fmtEur(r.gains)}
+              sub={t('ppr.kpi.gainsSub', { tax: fmtEur(r.exitTax) })} />
           </div>
 
           {!r.benefitMaxed && r.extraBenefit > 0 && (
             <Alert type="info">
-              💡 Aportando mais {fmtEur(r.extraToMax)} este ano (total {fmtEur(r.maxContribution)}),
-              o seu benefício fiscal sobe {fmtEur(r.extraBenefit)} até ao máximo de {fmtEur(r.cap)}.
+              {t('ppr.alert.notMaxed', { extra: fmtEur(r.extraToMax), max: fmtEur(r.maxContribution), extraBenefit: fmtEur(r.extraBenefit), cap: fmtEur(r.cap) })}
             </Alert>
           )}
           {r.benefitMaxed && (
             <Alert type="ok">
-              ✓ Já maximiza a dedução da sua faixa etária: {fmtEur(r.cap)} de benefício com
-              {' '}{fmtEur(r.maxContribution)} de aporte. Aportes acima disso continuam a crescer,
-              mas sem dedução adicional no IRS.
+              {t('ppr.alert.maxed', { cap: fmtEur(r.cap), contrib: fmtEur(r.maxContribution) })}
             </Alert>
           )}
 
           <Card>
-            <CardHeader title="Regras a ter em conta" />
+            <CardHeader title={t('ppr.card.rules')} />
             <ul style={{ fontSize: 12, color: 'var(--tm)', fontFamily: 'var(--mono)', lineHeight: 1.9, paddingLeft: 18, margin: 0 }}>
-              <li>A dedução entra nos <strong>limites globais de deduções à coleta</strong> do IRS segundo o escalão de rendimento (sem limite no 1.º escalão; €1.000 acima do último).</li>
-              <li>Casais: cada cônjuge com o seu próprio PPR tem o seu próprio benefício.</li>
-              <li>Após a passagem à reforma, os aportes deixam de ser dedutíveis.</li>
-              <li><strong>Resgate em condições legais</strong> (reforma, 60+ anos com 5 anos de permanência, desemprego de longa duração, doença grave, crédito habitação): IRS reduzido (~8% sobre o rendimento).</li>
-              <li><strong>Resgate fora das condições</strong>: devolução das deduções usufruídas, majoradas em 10% por cada ano decorrido.</li>
+              <li>{t('ppr.rule1')}</li>
+              <li>{t('ppr.rule2')}</li>
+              <li>{t('ppr.rule3')}</li>
+              <li>{t('ppr.rule4')}</li>
+              <li>{t('ppr.rule5')}</li>
             </ul>
           </Card>
 
           <div style={{ fontSize: 10, color: 'var(--th)', fontFamily: 'var(--mono)', lineHeight: 1.6, padding: '0 4px' }}>
-            Simulação orientativa baseada no art. 21.º do EBF (valores vigentes à data). Não considera
-            comissões do produto nem alterações legislativas futuras. Não constitui aconselhamento
-            financeiro nem fiscal — confirme com o seu contabilista ou na Autoridade Tributária.
+            {t('ppr.footer')}
           </div>
         </>
       )}

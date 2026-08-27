@@ -4,12 +4,14 @@
 
 import { useState, useMemo } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
+import { useT } from '../../i18n/useT.js'
 import { Card, CardHeader, FormRow, FormGroup, ProgressBar, Alert, PageHeader } from '../../components/ui/index.jsx'
 import ProGate from '../../components/ui/ProGate.jsx'
 import { getDeduccionesConfig, autofillGastos, calcDeducciones } from '../../utils/deduccionesEngine.js'
 
 export default function Deducciones() {
   const { settings, expenses, incomes } = useApp()
+  const { t } = useT()
   const country = (settings.country || 'CL').toUpperCase()
   const config = getDeduccionesConfig(country)
   const activeMonth = settings.activeMonth || new Date().toISOString().slice(0, 7)
@@ -54,7 +56,7 @@ export default function Deducciones() {
   if (!config) {
     return (
       <div style={{ padding: 32, textAlign: 'center', color: 'var(--th)', fontFamily: 'var(--mono)', fontSize: 13 }}>
-        Este módulo está disponible para Ecuador 🇪🇨 y Perú 🇵🇪
+        {t('deducciones.notAvailable')}
       </div>
     )
   }
@@ -64,7 +66,7 @@ export default function Deducciones() {
   const fmt = (n) => `${sym}${(Number(n) || 0).toLocaleString('es-' + (config.pais === 'EC' ? 'EC' : 'PE'), { maximumFractionDigits: 0 })}`
 
   return (
-    <ProGate feature="El optimizador de deducciones">
+    <ProGate feature={t('deducciones.proGateFeature')}>
       <div className="stack">
         <PageHeader title={config.titulo} sub={config.subtitulo} />
 
@@ -74,7 +76,7 @@ export default function Deducciones() {
 
         {/* Inputs */}
         <Card>
-          <CardHeader title="Tus datos del año" right={<span style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)' }}>{year}</span>} />
+          <CardHeader title={t('deducciones.card.yourYearData')} right={<span style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)' }}>{year}</span>} />
 
           {config.needsIngreso && (
             <FormRow>
@@ -103,7 +105,7 @@ export default function Deducciones() {
           )}
 
           <div style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.5px', margin: '12px 0 8px' }}>
-            Gastos deducibles (autollenados de tus registros — editables)
+            {t('deducciones.deductibleExpenses')}
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10 }}>
             {config.categorias.map(c => (
@@ -130,28 +132,26 @@ export default function Deducciones() {
 
             {/* Progreso al tope */}
             <div style={{ marginBottom: 6, display: 'flex', justifyContent: 'space-between', fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)' }}>
-              <span>Aprovechamiento del tope</span>
+              <span>{t('deducciones.capUsage')}</span>
               <span>{Math.round(result.topePct)}%</span>
             </div>
             <ProgressBar value={result.topePct} max={100} color={result.topePct >= 100 ? 'green' : 'amber'} height={6} />
             {result.faltaParaTope > 0 ? (
               <div style={{ fontSize: 12, color: 'var(--tm)', marginTop: 10, lineHeight: 1.5 }}>
-                {config.needsIngreso
-                  ? <>Te queda <strong style={{ color: 'var(--accent)' }}>{fmt(result.faltaParaTope)}</strong> de deducción adicional sin usar. Registra más gastos sustentados para maximizar tu devolución.</>
-                  : <>Te faltan <strong style={{ color: 'var(--accent)' }}>{fmt(result.faltaParaTope)}</strong> en gastos deducibles para llegar al tope y maximizar tu rebaja.</>}
+                {t(config.needsIngreso ? 'deducciones.remainingWithIncome' : 'deducciones.remainingNoIncome', { amt: fmt(result.faltaParaTope) })}
               </div>
             ) : (
               <div style={{ fontSize: 12, color: 'var(--accent)', marginTop: 10, fontWeight: 600 }}>
-                ✓ Alcanzaste el tope máximo de beneficio.
+                {t('deducciones.capReached')}
               </div>
             )}
 
             {/* Desglose */}
             <div style={{ marginTop: 16, borderTop: '.5px solid var(--brd)', paddingTop: 12 }}>
-              <div style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 8 }}>Desglose</div>
+              <div style={{ fontSize: 11, fontFamily: 'var(--mono)', color: 'var(--th)', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 8 }}>{t('deducciones.breakdown')}</div>
               {result.desglose.map((d, i) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '4px 0', color: 'var(--tx)' }}>
-                  <span>{d.label}{d.rate ? <span style={{ color: 'var(--th)', fontFamily: 'var(--mono)', fontSize: 11 }}> · {Math.round(d.rate * 100)}% deducible</span> : null}</span>
+                  <span>{d.label}{d.rate ? <span style={{ color: 'var(--th)', fontFamily: 'var(--mono)', fontSize: 11 }}> · {t('deducciones.deductiblePct', { pct: Math.round(d.rate * 100) })}</span> : null}</span>
                   <span style={{ fontFamily: 'var(--mono)' }}>
                     {fmt(d.monto)}{d.aporta != null ? <span style={{ color: 'var(--accent)' }}> → {fmt(d.aporta)}</span> : null}
                   </span>
