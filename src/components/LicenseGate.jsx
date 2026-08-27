@@ -1,23 +1,14 @@
 // src/components/LicenseGate.jsx
 import { useState } from 'react'
 import { validateLicense, setLicenseEmail } from '../utils/licenseValidator.js'
+import { useT } from '../i18n/useT.js'
 
-const PLANS = [
-  {
-    name: 'Personal',
-    price: 'US$19',
-    desc: 'Pago único · uso personal',
-    product: 'personal',
-    highlight: false,
-  },
-  {
-    name: 'Pro',
-    price: 'US$29',
-    desc: 'PDF · Asesor · APV · pago único',
-    product: 'pro',
-    highlight: true,
-  },
-]
+function usePlans(t) {
+  return [
+    { name: 'Personal', price: 'US$19', desc: t('licenseGate.planPersonalDesc'), product: 'personal', highlight: false },
+    { name: 'Pro',      price: 'US$29', desc: t('licenseGate.planProDesc'),      product: 'pro',      highlight: true },
+  ]
+}
 
 // Stripe Payment Links (Live) — Personal US$19 / Pro US$29
 const CHECKOUT_LINKS = {
@@ -31,6 +22,8 @@ async function startCheckout(product) {
 }
 
 export default function LicenseGate({ onActivate }) {
+  const { t } = useT()
+  const PLANS = usePlans(t)
   const [key, setKey]           = useState('')
   const [email, setEmail]       = useState('')
   const [loading, setLoading]   = useState(false)
@@ -50,11 +43,11 @@ export default function LicenseGate({ onActivate }) {
         if (email.trim()) setLicenseEmail(email).catch(() => {})
         onActivate()
       } else {
-        setError('Clave inválida. Verifica que la copiaste completa desde el email de confirmación.')
+        setError(t('licenseGate.errorInvalid'))
         setShowHelp(true)
       }
     } catch {
-      setError('Sin conexión. Verifica tu internet e intenta nuevamente.')
+      setError(t('licenseGate.errorOffline'))
     }
     setLoading(false)
   }
@@ -64,7 +57,7 @@ export default function LicenseGate({ onActivate }) {
     try {
       await startCheckout(product)
     } catch {
-      setError('Error al conectar con el servidor de pagos. Intenta de nuevo.')
+      setError(t('licenseGate.errorPayment'))
       setBuying(null)
     }
   }
@@ -105,21 +98,21 @@ export default function LicenseGate({ onActivate }) {
           </div>
           <div>
             <div style={{ fontFamily: 'var(--display)', fontSize: 17, fontWeight: 600, color: 'var(--tx)', letterSpacing: '-.3px' }}>FinanceOS</div>
-            <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--th)', marginTop: 1 }}>v1.5 · MAXNOVA & LUCI Global LLC</div>
+            <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--th)', marginTop: 1 }}>{t('licenseGate.version')}</div>
           </div>
         </div>
 
         {/* Activate */}
         <div style={{ marginBottom: 24 }}>
-          <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--tx)', marginBottom: 6, fontFamily: 'var(--display)' }}>Ingresa tu clave de acceso</div>
+          <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--tx)', marginBottom: 6, fontFamily: 'var(--display)' }}>{t('licenseGate.title')}</div>
           <div style={{ fontSize: 12, color: 'var(--tm)', lineHeight: 1.6, marginBottom: 14, fontFamily: 'var(--sans)' }}>
-            La encontrarás en el email de confirmación de tu compra, con formato{' '}
-            <span style={{ fontFamily: 'var(--mono)', background: 'var(--sur3)', padding: '1px 6px', borderRadius: 4 }}>FNOS-XXXX-XXXX-XXXX</span>
+            {t('licenseGate.subtitle')}{' '}
+            <span style={{ fontFamily: 'var(--mono)', background: 'var(--sur3)', padding: '1px 6px', borderRadius: 4 }}>{t('licenseGate.keyFormat')}</span>
           </div>
           <input
             style={{ width: '100%', padding: '12px 14px', border: '1px solid var(--brd)', borderRadius: 8, fontSize: 16, fontFamily: 'var(--mono)', background: 'var(--bg)', color: 'var(--tx)', letterSpacing: 1, marginBottom: 10, boxSizing: 'border-box', outline: 'none' }}
             type="text"
-            placeholder="FNOS-XXXX-XXXX-XXXX"
+            placeholder={t('licenseGate.keyFormat')}
             value={key}
             onChange={e => { setKey(e.target.value.toUpperCase()); setError('') }}
             onKeyDown={e => e.key === 'Enter' && handleActivate()}
@@ -131,14 +124,14 @@ export default function LicenseGate({ onActivate }) {
             style={{ width: '100%', padding: '12px 14px', border: '1px solid var(--brd)', borderRadius: 8, fontSize: 16, fontFamily: 'var(--sans)', background: 'var(--bg)', color: 'var(--tx)', marginBottom: 4, boxSizing: 'border-box', outline: 'none' }}
             type="email"
             inputMode="email"
-            placeholder="Tu email (opcional — avisos y soporte)"
+            placeholder={t('licenseGate.emailPlaceholder')}
             value={email}
             onChange={e => setEmail(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleActivate()}
             spellCheck={false}
           />
           <div style={{ fontSize: 12, color: 'var(--th)', fontFamily: 'var(--sans)', marginBottom: 10, lineHeight: 1.5 }}>
-            Solo para avisarte de novedades importantes o si necesitas soporte. Nunca vemos tus datos financieros.
+            {t('licenseGate.emailNote')}
           </div>
 
           {error && (
@@ -152,18 +145,18 @@ export default function LicenseGate({ onActivate }) {
             onClick={handleActivate}
             disabled={loading || !key.trim()}
           >
-            {loading ? 'Verificando…' : 'Activar FinanceOS →'}
+            {loading ? t('licenseGate.verifying') : t('licenseGate.activateBtn')}
           </button>
 
           {showHelp && (
             <div style={{ marginTop: 12, padding: '12px 14px', background: 'var(--sur2)', borderRadius: 8, fontSize: 11, color: 'var(--tm)', fontFamily: 'var(--mono)', lineHeight: 1.65 }}>
-              <strong style={{ color: 'var(--tx)' }}>¿Dónde está mi clave?</strong><br />
-              1. Abre el email de confirmación de tu compra<br />
-              2. Busca el campo "License Key" — formato FNOS-XXXX-XXXX-XXXX<br />
-              3. Cópiala completa y pégala arriba<br /><br />
-              ¿No encuentras el email?{' '}
+              <strong style={{ color: 'var(--tx)' }}>{t('licenseGate.helpTitle')}</strong><br />
+              1. {t('licenseGate.helpStep1')}<br />
+              2. {t('licenseGate.helpStep2')}<br />
+              3. {t('licenseGate.helpStep3')}<br /><br />
+              {t('licenseGate.helpNoEmail')}{' '}
               <a href="https://financeospro.com/activate.html" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--grn)' }}>
-                Ver instrucciones completas →
+                {t('licenseGate.helpLink')}
               </a>
             </div>
           )}
@@ -172,7 +165,7 @@ export default function LicenseGate({ onActivate }) {
         {/* Divider */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '24px 0' }}>
           <div style={{ flex: 1, height: '1px', background: 'var(--brd)' }} />
-          <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--th)', flexShrink: 0 }}>¿Aún no tienes licencia?</span>
+          <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--th)', flexShrink: 0 }}>{t('licenseGate.dividerNoLicense')}</span>
           <div style={{ flex: 1, height: '1px', background: 'var(--brd)' }} />
         </div>
 
@@ -201,7 +194,7 @@ export default function LicenseGate({ onActivate }) {
               <div style={{ fontFamily: 'var(--display)', fontSize: 20, fontWeight: 700, color: 'var(--tx)', marginBottom: 3 }}>{p.price}</div>
               <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--th)', lineHeight: 1.45 }}>{p.desc}</div>
               {buying === p.product && (
-                <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--grn)', marginTop: 6 }}>Redirigiendo…</div>
+                <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--grn)', marginTop: 6 }}>{t('licenseGate.redirecting')}</div>
               )}
             </button>
           ))}
@@ -210,7 +203,7 @@ export default function LicenseGate({ onActivate }) {
         {/* Demo link */}
         <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--th)', fontFamily: 'var(--mono)' }}>
           <a href="https://demo.financeospro.com/app/?demo=true" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--grn)', textDecoration: 'none' }}>
-            Explorar el demo gratis →
+            {t('licenseGate.demoLink')}
           </a>
         </div>
 

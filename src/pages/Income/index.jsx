@@ -3,14 +3,14 @@ import { useState, useMemo } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
 import { useT } from '../../i18n/useT.js'
 import { KPI, Card, CardHeader, TxRow, FormGroup, FormRow, Btn, Alert, PageHeader } from '../../components/ui/index.jsx'
-import { fmtMoney, CAT_COLORS, getCategoriesIncome, RECURRENCES, today, catLabel } from '../../utils/index.js'
+import { fmtMoney, CAT_COLORS, getCategoriesIncome, RECURRENCES, today, catLabel, recurrenceLabel } from '../../utils/index.js'
 import { CURRENCY_SYMBOLS, monthLabel } from '../shared/constants.js'
 import MonthSelector from '../shared/MonthSelector.jsx'
 import { parseTransactionText } from '../../utils/smsParser.js'
 
 export default function Income({ setPage }) {
   const { incomes, expenses, addIncome, delIncome, updateIncome, settings, deleteWithUndo } = useApp()
-  const { t } = useT()
+  const { t, lang } = useT()
   // Nombres de propiedades/proyectos ya usados (para autocompletar)
   const projectOptions = useMemo(() => [...new Set([...(incomes||[]), ...(expenses||[])].map(r => r?.project).filter(Boolean))], [incomes, expenses])
   const [f, setF]       = useState({ source: '', amount: '', date: today(), category: 'Salario', recurrence: 'Único', notes: '' })
@@ -123,8 +123,8 @@ export default function Income({ setPage }) {
             <FormGroup label={t('income.form.date')}><input type="date" value={f.date} onChange={e => setF(p => ({ ...p, date: e.target.value }))} /></FormGroup>
           </FormRow>
           <FormRow>
-            <FormGroup label={t('income.form.category')}><select value={f.category} onChange={e => setF(p => ({ ...p, category: e.target.value }))}>{categoriesIncome.map(c => <option key={c} value={c}>{catLabel(c)}</option>)}</select></FormGroup>
-            <FormGroup label={t('income.form.recurrence')}><select value={f.recurrence} onChange={e => setF(p => ({ ...p, recurrence: e.target.value }))}>{RECURRENCES.map(r => <option key={r}>{r}</option>)}</select></FormGroup>
+            <FormGroup label={t('income.form.category')}><select value={f.category} onChange={e => setF(p => ({ ...p, category: e.target.value }))}>{categoriesIncome.map(c => <option key={c} value={c}>{catLabel(c, lang)}</option>)}</select></FormGroup>
+            <FormGroup label={t('income.form.recurrence')}><select value={f.recurrence} onChange={e => setF(p => ({ ...p, recurrence: e.target.value }))}>{RECURRENCES.map(r => <option key={r} value={r}>{recurrenceLabel(r, lang)}</option>)}</select></FormGroup>
           </FormRow>
           <FormGroup label={t('income.form.notes')}><input type="text" value={f.notes} placeholder={t('income.form.notesPh')} onChange={e => setF(p => ({ ...p, notes: e.target.value }))} /></FormGroup>
           <label style={{ display:'flex', alignItems:'flex-start', gap:8, fontSize:12, color:'var(--tm)', cursor:'pointer', margin:'4px 0 10px', lineHeight:1.4 }}>
@@ -170,7 +170,7 @@ export default function Income({ setPage }) {
                         <div style={{fontSize:10,color:'var(--th)',fontFamily:'var(--mono)',marginBottom:3}}>{t('income.edit.category')}</div>
                         <select value={editForm.category||''} onChange={e=>setEditForm(f=>({...f,category:e.target.value}))}
                           style={{width:'100%',padding:'5px 8px',fontSize:12,borderRadius:5,border:'0.5px solid var(--brd)',background:'var(--bg)',color:'var(--tx)',boxSizing:'border-box'}}>
-                          {categoriesIncome.map(c=><option key={c} value={c}>{catLabel(c)}</option>)}
+                          {categoriesIncome.map(c=><option key={c} value={c}>{catLabel(c, lang)}</option>)}
                         </select>
                       </div>
                     </div>
@@ -182,7 +182,7 @@ export default function Income({ setPage }) {
                 ) : (
                   <div key={r.id}>
                     <TxRow dot={CAT_COLORS[r.category]||'#888'} name={`${r.inv?'💼 ':''}${r.source}`}
-                      meta={`${catLabel(r.category)} · ${r.date.slice(5).replace('-','/')}${r.recurrence!=='Único'?' · '+r.recurrence:''}${r.inv?' · '+t('income.row.investment'):''}`}
+                      meta={`${catLabel(r.category, lang)} · ${r.date.slice(5).replace('-','/')}${r.recurrence!=='Único'?' · '+recurrenceLabel(r.recurrence, lang):''}${r.inv?' · '+t('income.row.investment'):''}`}
                       amount={fmtMoney(r.amount,sym)} isIncome
                       onDelete={()=>deleteWithUndo('incomes', r, t('common.deleted'), t('common.undo'))}
                       onEdit={()=>{setEditingId(r.id);setEditForm({source:r.source,amount:r.amount,date:r.date,category:r.category,recurrence:r.recurrence,notes:r.notes||''})}} />

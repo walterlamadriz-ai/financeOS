@@ -1,5 +1,7 @@
 // src/utils/index.js
 
+import { translations } from '../i18n/translations.js'
+
 export const uid = () => Math.random().toString(36).slice(2, 10)
 
 export const today = () => new Date().toISOString().slice(0, 10)
@@ -89,8 +91,21 @@ export const CAT_EMOJIS = {
 }
 // Devuelve el emoji de la categoría (o '' si no tiene).
 export const catEmoji = (c) => CAT_EMOJIS[c] || ''
-// Devuelve "emoji nombre" (o solo el nombre si no hay emoji). Para options, listas y etiquetas.
-export const catLabel = (c) => { const e = CAT_EMOJIS[c]; return e ? `${e} ${c}` : (c || '') }
+
+// Traduce una categoría CANÓNICA (las de CATS_EXPENSE/CATS_INCOME + un puñado de
+// alias conocidos) al idioma activo. Una categoría que no tiene entrada 'cat.*'
+// en NINGÚN idioma es una categoría libre (agregada por una plantilla de perfil o
+// escrita a mano por el usuario) — esas se muestran tal cual se guardaron, no hay
+// forma de traducir texto arbitrario sin inventar contenido.
+function translateOrRaw(prefix, value, lang) {
+  const key = prefix + value
+  const translated = translations[lang]?.[key] ?? translations.es?.[key]
+  return translated ?? value ?? ''
+}
+// Devuelve "emoji nombre" (o solo el nombre si no hay emoji), traducido si `lang`
+// se pasa. Para options, listas y etiquetas. `lang` es opcional para no romper
+// callers que todavía no lo pasan (quedan en español, comportamiento previo).
+export const catLabel = (c, lang) => { const e = CAT_EMOJIS[c]; const label = lang ? translateOrRaw('cat.', c, lang) : (c || ''); return e ? `${e} ${label}` : label }
 
 // Categorías de SUSCRIPCIONES (distintas de las de gasto). Fallback: solo el nombre.
 export const SUB_EMOJIS = {
@@ -137,6 +152,11 @@ export function getCategoriesIncome(settings) {
 
 export const METHODS      = ['Débito', 'Crédito', 'Efectivo', 'Transferencia']
 export const RECURRENCES  = ['Único', 'Mensual', 'Quincenal', 'Semanal']
+// El VALOR guardado y comparado en código (r.recurrence !== 'Único', etc.) sigue
+// siendo siempre uno de los 4 strings en español de RECURRENCES — solo la
+// ETIQUETA que ve el usuario se traduce. Cambiar el valor guardado rompería
+// datos ya existentes en IndexedDB de usuarios actuales.
+export const recurrenceLabel = (r, lang) => (lang ? translateOrRaw('recurrence.', r, lang) : (r || ''))
 
 // Seed data para demo
 export const SEED_INCOMES = [

@@ -68,7 +68,7 @@ const FREQS    = [
 ]
 // ── Formulario Gasto ──────────────────────────────────────────────────────────
 function FormGasto({ onSave, onCancel, sym, projects = [], onImport, settings }) {
-  const { t } = useT()
+  const { t, lang } = useT()
   const [f, setF] = useState({
     description:'', amount:'', date:todayStr(),
     category:'Alimentación', subcategory:'', method:'Débito', type:'Necesidad', notes:'', project:''
@@ -169,7 +169,7 @@ function FormGasto({ onSave, onCancel, sym, projects = [], onImport, settings })
             onChange={e => set('date', e.target.value)}/></FormGroup>
         <FormGroup label={t('mov.form.category')}>
           <select style={inp} value={f.category} onChange={handleCatChange}>
-            {categoriesExpense.map(c => <option key={c} value={c}>{catLabel(c)}</option>)}
+            {categoriesExpense.map(c => <option key={c} value={c}>{catLabel(c, lang)}</option>)}
           </select>
         </FormGroup>
         {subcatOptions.length > 0 && (
@@ -290,7 +290,7 @@ function FormSub({ onSave, onCancel }) {
 // ── Componente principal ──────────────────────────────────────────────────────
 export default function Movements({ setPage }) {
   const ctx           = useApp() || {}
-  const { t }         = useT()
+  const { t, lang }   = useT()
   const incomes       = Array.isArray(ctx.incomes)       ? ctx.incomes       : []
   const expenses      = Array.isArray(ctx.expenses)      ? ctx.expenses      : []
   const subscriptions = Array.isArray(ctx.subscriptions) ? ctx.subscriptions : []
@@ -686,8 +686,8 @@ export default function Movements({ setPage }) {
                   </div>
                   <div style={{ fontSize:10, color:'var(--th)', fontFamily:'var(--mono)' }}>
                     {e.subcategory
-                      ? <><span style={{ color:'var(--accent)', opacity:.75 }}>{catLabel(e.category)}</span>{' › '}{e.subcategory}{' · '}{e.date?.slice(5)}</>
-                      : <>{catLabel(e.category)}{' · '}{e.date?.slice(5)}</>
+                      ? <><span style={{ color:'var(--accent)', opacity:.75 }}>{catLabel(e.category, lang)}</span>{' › '}{e.subcategory}{' · '}{e.date?.slice(5)}</>
+                      : <>{catLabel(e.category, lang)}{' · '}{e.date?.slice(5)}</>
                     }
                   </div>
                 </div>
@@ -698,12 +698,12 @@ export default function Movements({ setPage }) {
                 {updateExpense && (
                   <button onClick={()=>{setEditingId(e.id);setEditForm({description:e.description||'',amount:e.amount,date:e.date,category:e.category,subcategory:e.subcategory||''})}}
                     style={{background:'none',border:'none',color:'var(--th)',fontSize:11,cursor:'pointer',padding:0,minWidth:44,minHeight:44,display:'inline-flex',alignItems:'center',justifyContent:'center',flexShrink:0}}
-                    title={t('mov.edit.editTitle')} aria-label={`${t('mov.edit.editTitle')}: ${e.description || catLabel(e.category)}`}>✏️</button>
+                    title={t('mov.edit.editTitle')} aria-label={`${t('mov.edit.editTitle')}: ${e.description || catLabel(e.category, lang)}`}>✏️</button>
                 )}
                 {delExpense && (
                   <button onClick={()=>deleteWithUndo('expenses', e, t('common.deleted'), t('common.undo'))}
                     style={{background:'none',border:'none',color:'var(--th)',fontSize:10,cursor:'pointer',padding:0,minWidth:44,minHeight:44,display:'inline-flex',alignItems:'center',justifyContent:'center',flexShrink:0}}
-                    title={t('mov.edit.delTitle')} aria-label={`${t('mov.edit.delTitle')}: ${e.description || catLabel(e.category)}`}>✕</button>
+                    title={t('mov.edit.delTitle')} aria-label={`${t('mov.edit.delTitle')}: ${e.description || catLabel(e.category, lang)}`}>✕</button>
                 )}
               </div>
             ))}

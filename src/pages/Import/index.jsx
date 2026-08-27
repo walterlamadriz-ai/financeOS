@@ -76,7 +76,7 @@ const fmt = (n) => (n || 0).toLocaleString(moneyLocale(), { maximumFractionDigit
 
 export default function ImportMovements({ setPage } = {}) {
   const { settings, rehydrate } = useApp()
-  const { t } = useT()
+  const { t, lang } = useT()
   const sym = { CLP:'$', USD:'US$', EUR:'€', VES:'Bs.', MXN:'$', ARS:'$', COP:'$' }[settings?.currency] || '$'
   const isDemo = !!settings?.isDemo
   const categoriesExpense = useMemo(() => getCategoriesExpense(settings), [settings])
@@ -523,7 +523,7 @@ export default function ImportMovements({ setPage } = {}) {
                       style={{ ...s.select, width: 'auto', minWidth: 120, padding: '4px 6px', fontSize: 11 }}
                     >
                       <option value="">{t('imp.review.noCategory')}</option>
-                      {(row.type === 'income' ? categoriesIncome : categoriesExpense).map(c => <option key={c} value={c}>{catLabel(c)}</option>)}
+                      {(row.type === 'income' ? categoriesIncome : categoriesExpense).map(c => <option key={c} value={c}>{catLabel(c, lang)}</option>)}
                     </select>
                     {row.categorySuggested && <div style={{ fontSize: 9, color: 'var(--accent)', fontFamily: 'var(--mono)', marginTop: 2 }}>{t('imp.review.suggested')}</div>}
                   </td>
