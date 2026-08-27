@@ -122,6 +122,22 @@ function DemoBottomCTA() {
 function DemoInner() {
   const [page, setPage] = useState('dashboard')
 
+  // SEO (auditoría 2026-08-27): demo.financeospro.com comparte el mismo build
+  // que app.financeospro.com (sin valor SEO, ya bloqueado con X-Robots-Tag en
+  // vercel.json) pero SÍ está en el sitemap con priority 0.8 — necesitaba su
+  // propio title/canonical, no el genérico heredado de index.html.
+  useEffect(() => {
+    if (typeof window === 'undefined' || window.location.hostname !== 'demo.financeospro.com') return
+    document.title = 'Demo — FinanceOS · Prueba la app sin registrarte'
+    let link = document.querySelector('link[rel="canonical"]')
+    if (!link) {
+      link = document.createElement('link')
+      link.setAttribute('rel', 'canonical')
+      document.head.appendChild(link)
+    }
+    link.setAttribute('href', 'https://demo.financeospro.com/app/?demo=true')
+  }, [])
+
   function renderPage(page) {
     switch (page) {
       case 'dashboard':     return <Dashboard setPage={setPage}/>
