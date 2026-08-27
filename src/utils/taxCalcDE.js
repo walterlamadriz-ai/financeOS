@@ -46,6 +46,20 @@ export const SONDERAUSGABEN_PAUSCHBETRAG = 36 // € — §10c EStG
 const KV_ERMAESSIGT_EMPLEADO = 0.07
 const KV_KRANKENGELD_ABSCHLAG = 0.04
 
+// Auditoría 2026-08-27: a diferencia de UTM/UF de Chile (fetch en vivo contra
+// mindicador.cl), TODAS las cifras de este archivo — Beitragsbemessungsgrenzen,
+// tasas de Sozialversicherung, umbrales de Soli, tarifa §32a — son constantes
+// sin ninguna fuente en vivo (Alemania no publica un indicador público
+// equivalente). Envejecen en silencio cada Jahreswechsel si nadie vuelve acá.
+// Este chequeo no las actualiza, pero al menos avisa en consola en vez de
+// mostrar con total confianza cifras del año pasado.
+const DE_VIGENTE_DESDE_ANO = 2026
+if (new Date().getFullYear() > DE_VIGENTE_DESDE_ANO) {
+  console.warn(
+    `[FinanceOS] taxCalcDE.js está calibrado para ${DE_VIGENTE_DESDE_ANO} — revisar Beitragsbemessungsgrenzen/tarifa §32a contra bmf-steuerrechner.de y actualizar DE_VIGENTE_DESDE_ANO.`
+  )
+}
+
 /**
  * Parámetros de la tarifa del §32a EStG para 2026.
  * Se exportan porque la escala de tasa marginal (config/deducciones/de.js)

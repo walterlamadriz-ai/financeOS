@@ -29,6 +29,18 @@ export const FALLBACK = {
 export const TOPE_AFP_SALUD_UF = 90.0   // AFP + salud + ley de accidentes del trabajo
 export const TOPE_CESANTIA_UF  = 135.2  // seguro de cesantía
 
+// Auditoría 2026-08-27: estos dos topes (y COMISION_AFP_PROMEDIO_PCT abajo) no
+// tienen ninguna fuente en vivo — a diferencia de UTM/UF, envejecen en silencio
+// si nadie vuelve a este archivo cada enero. Este chequeo no los actualiza (no
+// hay forma de hacerlo automático sin una fuente pública), pero al menos deja
+// de ser silencioso: avisa en consola si el año corriente ya pasó el vigente.
+const TOPES_VIGENTES_DESDE_ANO = 2026
+if (new Date().getFullYear() > TOPES_VIGENTES_DESDE_ANO) {
+  console.warn(
+    `[FinanceOS] TOPE_AFP_SALUD_UF/TOPE_CESANTIA_UF/COMISION_AFP_PROMEDIO_PCT en indicadores.js están vigentes desde ${TOPES_VIGENTES_DESDE_ANO} — revisar contra spensiones.cl y actualizar TOPES_VIGENTES_DESDE_ANO.`
+  )
+}
+
 // Comisión de administración AFP, en % de la renta imponible. Es un PROMEDIO
 // de mercado, NO la comisión exacta de la AFP del usuario: el rango real va de
 // ~0,49% (AFP más barata) a ~1,45% (más cara). El formulario todavía no permite
