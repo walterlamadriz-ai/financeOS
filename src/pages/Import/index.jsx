@@ -511,7 +511,7 @@ export default function ImportMovements({ setPage } = {}) {
               </tr></thead>
               <tbody>{rows.map((row, i) => (
                 <tr key={i} style={{ opacity: row._include ? 1 : .45 }}>
-                  <td style={s.td}><input type="checkbox" checked={!!row._include} onChange={e => setRows(r => r.map((x, j) => j === i ? { ...x, _include: e.target.checked } : x))} /></td>
+                  <td style={s.td}><input type="checkbox" style={{width:16,height:16,flexShrink:0}} checked={!!row._include} onChange={e => setRows(r => r.map((x, j) => j === i ? { ...x, _include: e.target.checked } : x))} /></td>
                   <td style={{ ...s.td, color: 'var(--th)' }}>{row.date || '—'}</td>
                   <td style={{ ...s.td, color: 'var(--tx)', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.description || '—'}</td>
                   <td style={{ ...s.td, color: row.type === 'income' ? 'var(--accent)' : 'var(--red)', fontWeight: 600 }}>{row.type === 'income' ? '+' : '−'}{sym}{fmt(row.amount)}</td>

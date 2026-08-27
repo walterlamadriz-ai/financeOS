@@ -9,12 +9,11 @@ import { KPI, Card, CardHeader, Alert, Empty, ProgressBar, PageHeader } from '..
 import { fmtMoney, fmtPct, moneyLocale } from '../../utils/index.js'
 import { projectEndOfMonth } from '../../utils/projection.js'
 import { effectiveBudgetLimits } from '../../utils/budgets.js'
+import { CURRENCY_SYMBOLS } from '../shared/constants.js'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, ReferenceLine, ReferenceArea, Legend,
 } from 'recharts'
-
-const CURRENCY_SYMBOLS = { CLP: '$', USD: 'US$', EUR: '€', VES: 'Bs.', MXN: '$', ARS: '$', COP: '$' }
 
 const ChartTooltip = ({ active, payload, label, sym }) => {
   if (!active || !payload?.length) return null

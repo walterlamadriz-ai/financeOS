@@ -166,7 +166,7 @@ export default function QuickAdd({ open, defaultType = 'expense', onClose }) {
         {/* Toggle tipo */}
         <div style={{ display: 'flex', gap: 6, background: 'var(--sur3)', borderRadius: 10, padding: 4, marginBottom: 18 }}>
           {[['expense', t('qa.expense')], ['income', t('qa.income')]].map(([k, lb]) => (
-            <button key={k} type="button" onClick={() => setType(k)}
+            <button key={k} type="button" aria-pressed={type === k} onClick={() => setType(k)}
               style={{ flex: 1, padding: '9px 0', borderRadius: 7, border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 700, fontFamily: 'var(--sans)',
                 background: type === k ? 'var(--sur)' : 'transparent', color: type === k ? (k === 'expense' ? 'var(--neg)' : 'var(--pos)') : 'var(--tm)',
                 boxShadow: type === k ? 'var(--sh-1)' : 'none' }}>
@@ -233,7 +233,7 @@ export default function QuickAdd({ open, defaultType = 'expense', onClose }) {
           {chips.map(c => {
             const emoji = config.categoryEmojis?.[c]   // 1.3 · emoji opcional; fallback: solo el nombre
             return (
-            <button key={c} type="button" onClick={() => setCat(c)}
+            <button key={c} type="button" aria-pressed={cat === c} onClick={() => setCat(c)}
               style={{ padding: '7px 13px', borderRadius: 999, cursor: 'pointer', fontSize: 13, fontFamily: 'var(--sans)', fontWeight: 500,
                 border: `1px solid ${cat === c ? accent : 'var(--brd2)'}`,
                 background: cat === c ? `color-mix(in srgb, ${accent} 12%, transparent)` : 'var(--sur)',

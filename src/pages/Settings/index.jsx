@@ -79,7 +79,7 @@ export default function Settings() {
         <CardHeader title={t('settings.preferences')} />
         <div style={srow}>
           <div><div style={slbl}>{t('settings.currency.label')}</div><div style={ssub}>{t('settings.currency.sub')}</div></div>
-          <select style={{width:'auto'}} value={settings.currency||'CLP'} onChange={e=>{
+          <select aria-label={t('settings.currency.label')} style={{width:'auto'}} value={settings.currency||'CLP'} onChange={e=>{
             const nextCurrency = e.target.value
             if (nextCurrency === settings.currency) return
             if (!window.confirm('¿Cambiar de moneda?\n\nLos montos ya cargados NO se convierten — solo cambia el símbolo. Si tenías $1.000.000 en CLP, vas a ver $1.000.000 en ' + nextCurrency + ' sin ninguna conversión real.')) return
@@ -96,7 +96,7 @@ export default function Settings() {
         </div>
         <div style={srow}>
           <div><div style={slbl}>{t('settings.language.label')}</div><div style={ssub}>{t('settings.language.sub')}</div></div>
-          <select style={{width:'auto'}} value={settings.language||'es'} onChange={e=>updateSettings({...settings,language:e.target.value})}>
+          <select aria-label={t('settings.language.label')} style={{width:'auto'}} value={settings.language||'es'} onChange={e=>updateSettings({...settings,language:e.target.value})}>
             <option value="es">Español</option>
             <option value="en">English</option>
             <option value="pt">Português</option>
@@ -105,7 +105,7 @@ export default function Settings() {
         </div>
         <div style={srow}>
           <div><div style={slbl}>{t('settings.country.label')}</div><div style={ssub}>{t('settings.country.sub')}</div></div>
-          <select style={{width:'auto'}} value={settings.country||'CL'} onChange={e=>updateSettings({...settings,country:e.target.value})}>
+          <select aria-label={t('settings.country.label')} style={{width:'auto'}} value={settings.country||'CL'} onChange={e=>updateSettings({...settings,country:e.target.value})}>
             <option value="CL">🇨🇱 Chile</option>
             <option value="MX">🇲🇽 México</option>
             <option value="AR">🇦🇷 Argentina</option>
@@ -136,6 +136,9 @@ export default function Settings() {
             <div style={ssub}>{t('settings.dualCurrency.sub')}</div>
           </div>
           <button
+            role="switch"
+            aria-checked={!!settings.showDualCurrency}
+            aria-label={t('settings.dualCurrency.label')}
             onClick={() => {
               const next = !settings.showDualCurrency
               const rate = settings.usdRate || liveRate(settings.currency || 'CLP') || 1

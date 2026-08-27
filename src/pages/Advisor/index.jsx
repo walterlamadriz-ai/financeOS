@@ -17,8 +17,7 @@ import config from '../../config.js'
 import { calcNetWorth } from '../../utils/netWorth.js'
 import { countBudgetsExceeded } from '../../utils/budgets.js'
 import { personalDebtRatio, personalDebts } from '../../utils/personal.js'
-
-const CURRENCY_SYMBOLS = { CLP: '$', USD: 'US$', EUR: '€', VES: 'Bs.', MXN: '$', ARS: '$' }
+import { CURRENCY_SYMBOLS } from '../shared/constants.js'
 
 // ── SEMÁFORO — reglas de cálculo ─────────────────────────────────────────────
 // Verde:    condición saludable
