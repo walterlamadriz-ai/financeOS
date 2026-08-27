@@ -4,6 +4,9 @@ import { createRoot } from 'react-dom/client'
 import './styles/globals.css'
 import App from './App.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
+import { installGlobalErrorLog } from './utils/errorLog.js'
+
+installGlobalErrorLog()
 
 // REVERTIDO 2026-08-27: se probó Object.freeze(Object.prototype) acá como mitigación
 // de la vulnerabilidad de prototype pollution de xlsx@0.18.5 (GHSA-4r6h-8v6p-xvw6).
