@@ -7,10 +7,15 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 execSync('npx vite build', { stdio: 'inherit' })
 
 const dist = path.join(__dirname, 'dist')
-let landing = fs.readFileSync(path.join(__dirname, 'landing', 'index.html'), 'utf8')
-landing = landing.replace(/href="#demo"/g, 'href="/app"')
-landing = landing.replace(/onclick="window\.location\.href='#'"/g, "onclick=\"window.location.href='/app'\"")
-fs.writeFileSync(path.join(dist, 'index.html'), landing)
+// dist/index.html: vercel.json ya redirige "/" a financeos-landing (la única
+// landing real) — este archivo solo existe para que la ruta exacta /index.html
+// no quede vacía. NO usar landing/index.html acá: ese archivo tenía pricing de
+// un modelo de negocio ya abandonado y quedó sirviéndose en vivo sin que nadie
+// lo notara (ver auditoría 2026-08-27). Un redirect real, no HTML estático.
+fs.writeFileSync(path.join(dist, 'index.html'),
+  '<!doctype html><meta http-equiv="refresh" content="0; url=https://www.financeospro.com/">' +
+  '<link rel="canonical" href="https://www.financeospro.com/">'
+)
 fs.copyFileSync(path.join(__dirname, 'public', 'favicon.svg'), path.join(dist, 'favicon.svg'))
 
 // Digital Asset Links (TWA Android): tiene que quedar en la raíz del dominio,
