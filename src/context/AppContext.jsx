@@ -365,11 +365,16 @@ export function AppProvider({ children }) {
     try {
       await clearAllData()
       const seeds = {
-        incomes:  SEED_INCOMES.map(r  => ({ ...r,  id: uid() })),
-        expenses: SEED_EXPENSES.map(r => ({ ...r,  id: uid() })),
-        budgets:  SEED_BUDGETS.map(r  => ({ ...r,  id: uid() })),
-        debts:    SEED_DEBTS.map(r    => ({ ...r,  id: uid() })),
-        goals:    SEED_GOALS.map(r    => ({ ...r,  id: uid() })),
+        incomes:      SEED_INCOMES.map(r  => ({ ...r,  id: uid() })),
+        expenses:     SEED_EXPENSES.map(r => ({ ...r,  id: uid() })),
+        budgets:      SEED_BUDGETS.map(r  => ({ ...r,  id: uid() })),
+        debts:        SEED_DEBTS.map(r    => ({ ...r,  id: uid() })),
+        goals:        SEED_GOALS.map(r    => ({ ...r,  id: uid() })),
+        // clearAllData() ya vació subscriptions/importBatches en IndexedDB;
+        // sin limpiarlos también acá quedan huérfanos en el estado en memoria
+        // hasta el próximo reload.
+        subscriptions: [],
+        importBatches: [],
       }
       await Promise.all([
         ...seeds.incomes.map(r  => dbAdd('incomes',  r)),

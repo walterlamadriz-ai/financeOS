@@ -123,14 +123,24 @@ export async function exportAllData() {
 
 export async function importAllData(data) {
   if (!data || typeof data !== 'object') throw new Error('Formato inválido')
-  await clearAllData()
-  const db    = await getDB()
   const stores = ['incomes', 'expenses', 'budgets', 'debts', 'goals', 'subscriptions', 'importBatches']
-  for (const store of stores) {
-    if (!Array.isArray(data[store])) continue
-    if (!db) { lsSet(store, data[store]); continue }
-    const tx = db.transaction(store, 'readwrite')
-    for (const item of data[store]) await tx.store.put(item)
+  const db = await getDB()
+  if (!db) {
+    stores.forEach(lsClear)
+    for (const store of stores) if (Array.isArray(data[store])) lsSet(store, data[store])
+  } else {
+    // Clear + repoblado en UNA sola transacción que abarca las 7 stores: si algo
+    // falla a mitad de camino (item malformado, cuota llena, pestaña cerrada),
+    // IndexedDB aborta TODA la transacción y los datos reales quedan intactos.
+    // Antes cada store tenía su propia transacción separada, así que una falla
+    // a mitad de camino dejaba los datos reales ya borrados y solo parte de las
+    // stores repuestas — sin rollback.
+    const tx = db.transaction(stores, 'readwrite')
+    await Promise.all(stores.map(s => tx.objectStore(s).clear()))
+    for (const store of stores) {
+      if (!Array.isArray(data[store])) continue
+      for (const item of data[store]) await tx.objectStore(store).put(item)
+    }
     await tx.done
   }
   if (data.settings) await saveSettings(data.settings)

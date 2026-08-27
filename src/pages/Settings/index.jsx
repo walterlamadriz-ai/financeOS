@@ -54,6 +54,12 @@ export default function Settings() {
     }
   }
 
+  async function handleLoadDemo() {
+    if (window.confirm('¿Cargar datos demo?\n\nEsto BORRA todos tus datos financieros reales de este dispositivo y los reemplaza con datos de ejemplo. No se puede deshacer.')) {
+      await loadDemo()
+    }
+  }
+
   const isDemo = typeof window !== 'undefined' && window.location.search.includes('demo=true')
   function handleDeactivate() {
     if (window.confirm('¿Desactivar la licencia en este dispositivo?\n\nTendrás que volver a ingresar tu clave para entrar.\nTus datos financieros NO se borran.')) {
@@ -75,6 +81,8 @@ export default function Settings() {
           <div><div style={slbl}>{t('settings.currency.label')}</div><div style={ssub}>{t('settings.currency.sub')}</div></div>
           <select style={{width:'auto'}} value={settings.currency||'CLP'} onChange={e=>{
             const nextCurrency = e.target.value
+            if (nextCurrency === settings.currency) return
+            if (!window.confirm('¿Cambiar de moneda?\n\nLos montos ya cargados NO se convierten — solo cambia el símbolo. Si tenías $1.000.000 en CLP, vas a ver $1.000.000 en ' + nextCurrency + ' sin ninguna conversión real.')) return
             // La tasa vieja no sirve para la moneda nueva (bug ya arreglado una vez:
             // "usdRate carried over numerically across currency changes"). Pero
             // resetear a 0 sin más apaga la moneda dual en el Dashboard en silencio
@@ -218,7 +226,7 @@ export default function Settings() {
         </div>
         <div style={srow}>
           <div><div style={slbl}>{t('settings.loadDemo.label')}</div><div style={ssub}>{t('settings.loadDemo.sub')}</div></div>
-          <Btn variant="ghost" size="sm" onClick={loadDemo}>{t('settings.loadDemo.btn')}</Btn>
+          <Btn variant="danger" size="sm" onClick={handleLoadDemo}>{t('settings.loadDemo.btn')}</Btn>
         </div>
         <div style={srow}>
           <div><div style={slbl}>{t('settings.resetOnboarding.label')}</div><div style={ssub}>{t('settings.resetOnboarding.sub')}</div></div>
