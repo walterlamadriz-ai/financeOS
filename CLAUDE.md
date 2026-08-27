@@ -46,7 +46,9 @@ Ya pasó una vez: volver a correr `supabase-sync.sql` **pisó** esa versión bue
 
 **Antes de "arreglar" un .sql viejo, verificar contra producción.** El 2026-08-22 se encontró `supabase-license-email.sql` desactualizado en el repo respecto de la función real corriendo en Supabase (alguien la había parcheado a mano en el SQL Editor, sin actualizar el archivo). Verificar primero con `supabase db query --linked "select pg_get_functiondef(oid) from pg_proc where proname='...'"` — si production ya está bien, el fix es reescribir el archivo para que coincida, no pisar production con una reconstrucción propia.
 
-`supabase-license-revoke.sql` (2026-08-22): agrega `payment_intent_id` a `licenses` + `revoke_license()`, llamada desde `supabase/functions/stripe-webhook/index.ts` en `charge.refunded`/`charge.dispute.created`. Licencias emitidas antes de esa fecha tienen `payment_intent_id` NULL — un reembolso de una compra vieja no se revoca solo.
+`supabase-license-revoke.sql` (2026-08-22): agrega `payment_intent_id` a `licenses` + `revoke_license()`, llamada desde `supabase/functions/stripe-webhook/index.ts` en `charge.refunded`/`charge.dispute.created`. Licencias emitidas antes de esa fecha tienen `payment_intent_id` NULL — un reembolso de una compra vieja no se revoca solo. **`revoke_license()` no borra ninguna fila ni dato personal — solo cambia `status` a `'revoked'`** (verificado con `pg_get_functiondef`, 2026-08-27). El email y la licencia quedan en la base indefinidamente; no hay ningún job de retención/purga. Si en algún momento hace falta borrado real (pedido de un usuario, GDPR), es una decisión de Walter, no algo que se implementó a criterio propio.
+
+**Migraciones nuevas van en `supabase/migrations/`, no como archivo suelto en la raíz** (desde 2026-08-27, ver `supabase/migrations/README.md`). Los 7 `.sql` de la raíz siguen siendo la fuente de verdad del estado histórico — no se tocan.
 
 ## Sistema visual
 
