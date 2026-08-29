@@ -96,64 +96,88 @@ async function parsePDF(file) {
   }
 }
 
-async function parseXLSX(file) {
+// Convierte un valor de celda de exceljs a texto plano, mismo criterio que
+// XLSX.utils.sheet_to_json({raw:false, dateNF:'yyyy-mm-dd'}) tenía antes:
+// fechas como yyyy-mm-dd, celdas vacías como '', fórmulas resueltas a su
+// resultado, texto enriquecido aplanado a string simple.
+function excelCellToString(value) {
+  if (value === null || value === undefined) return ''
+  if (value instanceof Date) return value.toISOString().slice(0, 10)
+  if (typeof value === 'object') {
+    if (Array.isArray(value.richText)) return value.richText.map(rt => rt.text).join('')
+    if ('result' in value) return excelCellToString(value.result)
+    if ('text' in value) return String(value.text)
+    return ''
+  }
+  return String(value)
+}
+
+// Misma heurística de siempre, separada de la lectura del archivo para poder
+// testearla en Node sin FileReader: algunos bancos meten filas vacías o de
+// título antes del header real, así que se busca la primera fila con ≥3
+// celdas no vacías en vez de asumir que el header está en la fila 0.
+export function rowsFromMatrix(jsonRows, sourceType, sheetName) {
+  if (!jsonRows || jsonRows.length < 2) {
+    throw new Error('El archivo Excel no contiene filas válidas.')
+  }
+  let headerRowIdx = 0
+  for (let i = 0; i < Math.min(10, jsonRows.length); i++) {
+    const row = jsonRows[i]
+    const nonEmpty = row.filter(c => c && String(c).trim())
+    if (nonEmpty.length >= 3) { headerRowIdx = i; break }
+  }
+  const headers = jsonRows[headerRowIdx]
+    .map(h => String(h || '').trim())
+    .filter(h => h)
+  const dataRows = []
+  for (let i = headerRowIdx + 1; i < jsonRows.length; i++) {
+    const cells = jsonRows[i]
+    if (!cells || cells.every(c => !c || !String(c).trim())) continue
+    const row = { _rowIndex: i }
+    headers.forEach((h, idx) => { row[h] = String(cells[idx] || '').trim() })
+    dataRows.push(row)
+  }
+  return {
+    headers,
+    rows: dataRows.slice(0, MAX_ROWS),
+    totalLines: dataRows.length,
+    sourceType,
+    sheetName,
+  }
+}
+
+// Lee un ArrayBuffer .xlsx/.xls con exceljs y lo reduce a la misma matriz
+// header:1 que producía XLSX.utils.sheet_to_json, para reusar rowsFromMatrix
+// sin cambiar el resto del pipeline. Separada de parseXLSX (que depende de
+// FileReader, solo disponible en el navegador) para poder testearla en Node.
+export async function parseWorkbookBuffer(arrayBuffer) {
   // Carga bajo demanda (dynamic import) — mismo criterio que pdfjs-dist en
   // extractPdfLines(): un CSV no necesita esta librería en absoluto, así que
   // no debería bajar en el chunk de Import solo por abrir la página.
-  const XLSX = await import('xlsx')
-  return new Promise((res, rej) => {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      try {
-        const data = new Uint8Array(e.target.result)
-        const workbook = XLSX.read(data, { type: 'array', cellDates: true })
-        // Usar la primera hoja
-        const sheetName = workbook.SheetNames[0]
-        const sheet = workbook.Sheets[sheetName]
-        // Convertir a JSON — primera fila como headers
-        const jsonRows = XLSX.utils.sheet_to_json(sheet, {
-          header: 1,
-          raw: false,
-          dateNF: 'yyyy-mm-dd',
-          defval: '',
-        })
-        if (!jsonRows || jsonRows.length < 2) {
-          rej(new Error('El archivo Excel no contiene filas válidas.'))
-          return
-        }
-        // Buscar la primera fila con contenido real como headers
-        // Algunos bancos tienen filas vacías o de título al inicio
-        let headerRowIdx = 0
-        for (let i = 0; i < Math.min(10, jsonRows.length); i++) {
-          const row = jsonRows[i]
-          const nonEmpty = row.filter(c => c && String(c).trim())
-          if (nonEmpty.length >= 3) { headerRowIdx = i; break }
-        }
-        const headers = jsonRows[headerRowIdx]
-          .map(h => String(h || '').trim())
-          .filter(h => h)
-        const dataRows = []
-        for (let i = headerRowIdx + 1; i < jsonRows.length; i++) {
-          const cells = jsonRows[i]
-          if (!cells || cells.every(c => !c || !String(c).trim())) continue
-          const row = { _rowIndex: i }
-          headers.forEach((h, idx) => { row[h] = String(cells[idx] || '').trim() })
-          dataRows.push(row)
-        }
-        res({
-          headers,
-          rows: dataRows.slice(0, MAX_ROWS),
-          totalLines: dataRows.length,
-          sourceType: 'xlsx',
-          sheetName,
-        })
-      } catch (err) {
-        rej(new Error('Error al leer el Excel: ' + err.message))
-      }
-    }
-    reader.onerror = () => rej(new Error('No se pudo leer el archivo Excel'))
-    reader.readAsArrayBuffer(file)
+  const ExcelJS = (await import('exceljs')).default
+  const workbook = new ExcelJS.Workbook()
+  await workbook.xlsx.load(arrayBuffer)
+  const worksheet = workbook.worksheets[0]
+  if (!worksheet) throw new Error('El archivo Excel no contiene hojas.')
+  const jsonRows = []
+  worksheet.eachRow({ includeEmpty: true }, (row) => {
+    jsonRows.push(row.values.slice(1).map(excelCellToString))
   })
+  return rowsFromMatrix(jsonRows, 'xlsx', worksheet.name)
+}
+
+async function parseXLSX(file) {
+  let buffer
+  try {
+    buffer = await file.arrayBuffer()
+  } catch {
+    throw new Error('No se pudo leer el archivo Excel')
+  }
+  try {
+    return await parseWorkbookBuffer(buffer)
+  } catch (err) {
+    throw new Error(err.message.startsWith('El archivo Excel') ? err.message : 'Error al leer el Excel: ' + err.message)
+  }
 }
 
 function readAsText(file) {

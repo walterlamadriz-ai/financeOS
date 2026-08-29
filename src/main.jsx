@@ -14,8 +14,9 @@ installGlobalErrorLog()
 // sobre Object.prototype en su propio código interno, y con el prototype congelado
 // tira "Cannot assign to read only property 'constructor'" — el Dashboard entero caía
 // al ErrorBoundary. Verificado en vivo en demo.financeospro.com antes de revertir.
-// La mitigación real de esa CVE queda pendiente (migrar a exceljs, con tests nuevos
-// para no romper el import de extractos bancarios sin red de seguridad) — ver memoria.
+// RESUELTO DE VERDAD 2026-08-29: xlsx reemplazado por exceljs en
+// src/pages/Import/fileParser.js (sin ese CVE), con tests nuevos que cubren el
+// parseo real (header en fila arbitraria, fechas, filas vacías) — ver memoria.
 
 // ── Recuperación automática de pantalla en blanco tras un deploy ────────────
 // Si un chunk lazy falla al cargar (la versión desplegada cambió y el archivo

@@ -11,12 +11,12 @@
   },
   "dependencies": {
     "@react-pdf/renderer": "^3.4.4",
+    "exceljs": "^4.4.0",
     "idb": "^8.0.0",
     "pdfjs-dist": "^4.7.76",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "recharts": "^2.10.0",
-    "xlsx": "^0.18.5"
+    "recharts": "^2.10.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.0",

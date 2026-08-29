@@ -13,7 +13,7 @@ export default defineConfig({
           charts:  ['recharts'],
           pdf:     ['@react-pdf/renderer'],
           idb:     ['idb'],
-          xlsx:    ['xlsx'],
+          exceljs: ['exceljs'],
         }
       }
     }
@@ -49,13 +49,13 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         // El precache por defecto trae TODOS los chunks en la primera visita, sin
         // importar qué página use el usuario — el motor de PDF (@react-pdf/renderer,
-        // usado solo en Reports/Advisor) y xlsx (usado solo si se sube un .xlsx en
+        // usado solo en Reports/Advisor) y exceljs (usado solo si se sube un .xlsx en
         // Import) no deberían bajar solo por abrir el Dashboard. Quedan afuera del
         // precache inicial; la regla runtimeCaching de /app/assets/.* de abajo los
         // cachea igual, recién la primera vez que la página que los usa se visita
         // de verdad. pdf.worker (pdfjs-dist) ya queda afuera por su extensión .mjs,
         // que no matchea los globPatterns por defecto — mismo resultado, sin listarlo acá.
-        globIgnores: ['**/pdf-*.js', '**/xlsx-*.js'],
+        globIgnores: ['**/pdf-*.js', '**/exceljs-*.js'],
         runtimeCaching: [
           {
             // Fuentes de Google Fonts — cache-first, 1 año
