@@ -30,7 +30,7 @@ const initialState = {
   toast:    null, // { msg, type } — 'ok' | 'error'
 }
 
-function reducer(state, action) {
+export function reducer(state, action) {
   switch (action.type) {
     case 'HYDRATE':      return { ...state, ...action.payload, loading: false }
     case 'ADD_INCOME':   return { ...state, incomes:  [action.item, ...state.incomes] }
