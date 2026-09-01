@@ -162,14 +162,24 @@ Deno.serve(async (req) => {
 
   // Blindaje: solo eventos LIVE reales emiten licencia. Un evento de TEST (o un
   // endpoint de test todavía conectado) NO debe mintear una clave real en producción.
-  if (event?.type === "checkout.session.completed" && event?.livemode !== true) {
-    console.warn(`Evento de TEST ignorado (no se emite licencia): session=${event?.data?.object?.id}`);
+  // Cubre los dos tipos que pueden emitir licencia (ver bloque de abajo) — quedó
+  // desincronizado una vez ya (ver auditoría 2026-09-01), verificar los dos juntos.
+  const CHECKOUT_EVENT_TYPES = ["checkout.session.completed", "checkout.session.async_payment_succeeded"];
+  if (CHECKOUT_EVENT_TYPES.includes(event?.type) && event?.livemode !== true) {
+    console.warn(`Evento de TEST ignorado (no se emite licencia): type=${event?.type} session=${event?.data?.object?.id}`);
     return new Response(JSON.stringify({ received: true, ignored: "test_event" }), {
       headers: { "Content-Type": "application/json" },
     });
   }
 
-  if (event?.type === "checkout.session.completed") {
+  // Auditoría externa 2026-09-01: faltaba "checkout.session.async_payment_succeeded".
+  // Un Payment Link con OXXO/boleto/SEPA débito habilitado (métodos recomendados por
+  // Stripe para LATAM/Alemania) dispara primero "completed" con payment_status:'unpaid'
+  // (se ignora abajo, correcto) y solo emite la licencia cuando compensa el pago async
+  // días después — evento que este webhook nunca escuchaba. El cliente pagaba y nunca
+  // recibía su clave, sin ningún error visible. sessionAlreadyProcessed() ya protege
+  // contra procesar dos veces si algún evento llegara duplicado.
+  if (CHECKOUT_EVENT_TYPES.includes(event?.type)) {
     const session = event.data?.object ?? {};
     // Solo checkouts realmente pagados y con un monto válido (evita $0 / pruebas).
     const amount = session.amount_total ?? 0;
