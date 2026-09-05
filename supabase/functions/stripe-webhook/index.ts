@@ -124,10 +124,16 @@ async function revokeLicense(paymentIntent: string): Promise<{ ok: boolean; erro
   return await res.json();
 }
 
-async function sendKeyEmail(to: string, key: string, plan: string) {
+// Devuelve true solo si Resend aceptó el envío. La clave NUNCA se imprime en
+// logs: de ella se deriva la llave AES-GCM del sync (ver utils/syncCrypto.js,
+// deriveKey = SHA-256('fnos-sync:'+clave)), así que un log con la clave permite
+// descifrar el blob de synced_data de ese usuario y rompe la promesa E2E que
+// declara la política de privacidad. Para correlacionar con la fila alcanza
+// stripe_session_id, que es UNIQUE en licenses.
+async function sendKeyEmail(to: string, key: string, plan: string, sessionRef: string | null): Promise<boolean> {
   if (!RESEND_API_KEY) {
-    console.warn(`RESEND_API_KEY no configurada — clave generada NO enviada por email: ${key}`);
-    return;
+    console.error(`CRITICO: RESEND_API_KEY no configurada — el cliente pago y NO recibio su clave. session=${sessionRef}`);
+    return false;
   }
   const appUrl = "https://app.financeospro.com/app/";
   const html = `
@@ -145,7 +151,11 @@ async function sendKeyEmail(to: string, key: string, plan: string) {
     headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({ from: FROM_EMAIL, to, subject: "Tu licencia de FinanceOS 🔑", html }),
   });
-  if (!res.ok) console.error("Resend error:", res.status, await res.text());
+  if (!res.ok) {
+    console.error(`Resend error: ${res.status} ${await res.text()} session=${sessionRef}`);
+    return false;
+  }
+  return true;
 }
 
 Deno.serve(async (req) => {
@@ -206,9 +216,15 @@ Deno.serve(async (req) => {
     const paymentIntent = typeof session.payment_intent === "string" ? session.payment_intent : (session.payment_intent?.id ?? null);
     try {
       await issueLicense(key, plan, email, session.id ?? null, paymentIntent);
-      if (email) await sendKeyEmail(email, key, plan);
-      // Log siempre la clave (para test/retiro manual aunque no haya email)
-      console.log(`Licencia emitida: plan=${plan} email=${email} key=${key} session=${session.id} payment_intent=${paymentIntent}`);
+      const emailSent = email ? await sendKeyEmail(email, key, plan, session.id ?? null) : false;
+      // Sin `key` a propósito — ver el comentario de sendKeyEmail(). session.id
+      // identifica la fila igual de bien y no es material criptografico.
+      console.log(`Licencia emitida: plan=${plan} email=${email ?? "(sin email)"} session=${session.id} payment_intent=${paymentIntent} email_enviado=${emailSent}`);
+      if (!emailSent) {
+        // Antes esto era invisible: la licencia quedaba emitida, el webhook
+        // devolvia 200 y nadie se enteraba de que el cliente no tenia su clave.
+        console.error(`CRITICO: licencia emitida pero el cliente NO recibio su clave. session=${session.id} email=${email ?? "(sin email)"} payment_intent=${paymentIntent} — la clave original NO es recuperable (el servidor solo guarda su hash): resolver reemitiendo una licencia nueva.`);
+      }
     } catch (err) {
       console.error("Error emitiendo licencia:", err);
       return new Response("error issuing license", { status: 500 });
