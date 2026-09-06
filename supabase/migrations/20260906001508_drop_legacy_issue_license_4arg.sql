@@ -1,0 +1,19 @@
+-- Elimina el overload viejo de issue_license (4 args, sin payment_intent_id).
+--
+-- Contexto (PLAN_REMEDIACION_TECNICA_CARLOS_FINANCEOS.md, punto 2): el webhook
+-- de Stripe llama siempre a issue_license(text,text,text,text,text) — el
+-- overload de 5 args con p_payment_intent (ver supabase-license-revoke.sql).
+-- El overload viejo de 4 args (supabase-licenses.sql) sigue vivo en
+-- producción, verificado el 2026-09-05 con:
+--   select pg_get_functiondef(oid) from pg_proc where proname='issue_license'
+-- Confirmado que hoy coexisten AMBAS firmas, y que ningún código del repo
+-- llama a la de 4 args — es un footgun puro: cualquier llamada manual a la
+-- RPC que omita p_payment_intent (SQL Editor, un script viejo, un curl a
+-- mano) cae en este overload por resolución de PostgREST y crea una licencia
+-- con payment_intent_id NULL, es decir no-revocable ante un reembolso o
+-- disputa real (mismo problema que las 19 licencias del backfill pendiente,
+-- pero hacia adelante en vez de hacia atrás).
+--
+-- grants explícitos porque el overload viejo (supabase-licenses.sql) los
+-- otorgaba a service_role — no hace falta revocarlos aparte, se van con la función.
+drop function if exists public.issue_license(text, text, text, text);

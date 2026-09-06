@@ -12,7 +12,11 @@ npm test         # vitest run — src/**/*.test.js y api/**/*.test.js (desde 202
 
 ## Deploy
 
-Push a git **no** actualiza el dominio. Deploy por CLI y alias a mano:
+Push a git **no** actualiza el dominio.
+
+**`./deploy.sh`** (desde 2026-09-06): tests + build local (gate) + deploy + los DOS alias + smoke test de `curl` a `/app/` en ambos dominios. Aborta si algo falla en cualquier paso — no llega a aliasear con una build rota. Es el camino recomendado; reemplaza la secuencia manual de abajo.
+
+Manual, si hace falta un paso suelto:
 
 ```bash
 npx vercel --prod --yes
@@ -32,7 +36,7 @@ El navegador integrado tiene bloqueado `*.financeospro.com` por política: verif
 
 **Paridad i18n.** `src/i18n/translations.js` tiene `es`, `en`, `pt` y `de` (1161 claves por idioma al 2026-08-14). Toda clave nueva va en los CUATRO. Una clave que falta no rompe el build pero cae al fallback español (ver `useT.js`) — el usuario alemán ve una isla en su UI. Antes de escribir el texto de una clave nueva, ver `../branding/voz-de-producto.md` — nunca exclamaciones/emoji de entusiasmo fabricado, nunca personificar la app, y los 4 idiomas tienen que sonar igual de secos entre sí, no solo decir lo mismo.
 
-**`DB_VERSION` en `src/core/db/index.js`.** Está en 2. Subirlo obliga a escribir la migración; cambiarlo sin migración deja a los usuarios existentes con la base rota. No tocar a la ligera.
+**Migraciones de IndexedDB en `src/core/db/migrations.js`** (desde 2026-09-05). `DB_VERSION` ya no es una constante manual — se deriva de `Math.max(...MIGRATIONS.map(m => m.version))`, así que agregar un paso a `MIGRATIONS` bumpea la versión solo. Para cambiar la forma de datos ya guardados (no solo agregar un store), agregar un paso NUEVO al array con `migrate(db, transaction, oldVersion)`: `transaction` cubre todos los stores y sirve para leer/transformar registros existentes (ver el ejemplo de "Data migration during upgrade" en la doc de `idb`). Nunca editar un paso ya shippeado — quien ya pasó por esa versión no la vuelve a correr. `migrations.test.js` prueba el motor con fake-indexeddb, incluyendo que un paso que falla a mitad de camino aborta atómicamente (la base queda en `oldVersion`, sin datos a medio migrar) — correr ese archivo antes de tocar esto.
 
 **Nada de datos financieros al servidor sin cifrar.** El sync empuja blobs cifrados con AES-GCM en el cliente. El servidor nunca ve montos ni categorías.
 
@@ -61,21 +65,25 @@ Tokens en `src/styles/globals.css`.
 
 Si el sistema visual cambia aquí, cambia también en `../financeos-landing` (comparten display y ejes).
 
+**Fuentes autohospedadas** (desde 2026-09-06, RGPD): antes se cargaban desde `fonts.googleapis.com`, lo que transmite la IP del visitante a Google — litigio real por esto en Alemania (LG München, 2022), mercado activo del producto. Ahora `public/fonts.css` + `public/fonts/*.woff2` (subsets latin + latin-ext, cubren es/en/pt/de). Si se agrega un peso o familia nueva, no volver a apuntar a Google: descargar el `.woff2` real (`curl` al CSS de `fonts.googleapis.com` con un User-Agent de navegador moderno da URLs `fonts.gstatic.com` con `format('woff2')`) y sumarlo a `fonts.css` + `public/fonts/`.
+
+**Gotcha de rutas con `base: '/app/'` en `index.html`:** escribir una ruta ya con el prefijo a mano (`/app/algo`) se duplica a `/app/app/algo` en `npm run dev` (Vite le antepone `base` de nuevo) — silencioso porque el recurso simplemente no carga y cae a un fallback invisible o a un 404 que nadie mira. La forma correcta es escribir la ruta SIN el prefijo (`/algo`) y dejar que Vite anteponga `base` una sola vez; funciona igual en dev y en build. `favicon.png`/`apple-touch-icon.png` (líneas 14-15) siguen con el prefijo a mano y por eso están rotos en `npm run dev` (no en producción — el build no vuelve a tocar esos `href` literales) — no se tocó porque cae fuera de esta tarea, pero es la próxima vez que alguien mire por qué el ícono de pestaña no aparece en dev.
+
 ## Archivos delicados
 
-- `src/core/db/index.js` — `DB_VERSION` y migraciones
+- `src/core/db/migrations.js` — `DB_VERSION` y los pasos de esquema versionados (fuente de verdad; `index.js` solo hace wiring)
 - `src/utils/licenseValidator.js` — formato `FNOS-XXXX-XXXX-XXXX`
 - `src/utils/taxCalcCL.js` — UTM de Chile hardcodeada, se queda vieja
 - `src/utils/taxCalcDE.js` — Beitragsbemessungsgrenze DE + Grundfreibetrag hardcodeados
 - `src/utils/apvCalc.js` — fórmula de valor futuro
 - `src/utils/taxIdValidation.js` — checksums de ID fiscal (6 países), tiene tests en `taxIdValidation.test.js`
 - `src/pages/Import/fileParser.js` — `GENERIC_WORDS` en `suggestCategory()`: sin esa lista de exclusión, palabras de cartola como "COMPRA"/"PAGO" generan falsos positivos en la sugerencia de categoría (bug real, atrapado por `fileParser.test.js` antes de llegar a producción)
-- `supabase/functions/stripe-webhook/index.ts` — el branch de `checkout.session.completed` es lo único que emite licencias pagas; cualquier cambio ahí se prueba con cuidado, un error rompe la entrega de licencias a clientes nuevos
+- `supabase/functions/stripe-webhook/` — el branch de `checkout.session.completed` es lo único que emite licencias pagas. Desde 2026-09-05 la lógica vive en `webhookLogic.ts` (firma, guards, `planFromAmount`, llamadas a Supabase/Resend), con 37 tests vía vitest (`webhookLogic.test.ts`, fetch mockeado) — `index.ts` es solo wiring y NO se testea (lee `Deno.env.get()`, no importable desde Node). Correr `npm test` antes de deployar; un error acá rompe la entrega de licencias a clientes nuevos. `CHECKOUT_EVENT_TYPES` vive una sola vez en `webhookLogic.ts` — no volver a hardcodear la lista de eventos en `index.ts` (así se desincronizó una vez, ver auditoría 2026-09-01 más abajo)
 - `docs/novedades.html` — histórico, preservar
 
 ## Testing (desde 2026-08-22)
 
-`npm test` corre vitest sobre `src/**/*.test.js` y `api/**/*.test.js`. Antes de esa fecha no había ningún test en el repo. `vitest.config.js` está separado de `vite.config.js` a propósito (no carga el plugin de React ni VitePWA, innecesario para funciones puras). Cobertura actual: `api/fixer.js` (cross-rate), `taxIdValidation.js` (6 países), `apvCalc.js`, `fileParser.js` (dedup + sugerencia de categoría), `Subscriptions/generateAlerts` (suba de precio). **No** cubre `taxCalcCL.js`/`taxCalcDE.js` (ya verificados contra fuentes oficiales, menor prioridad) ni nada que toque DOM/IndexedDB directo.
+`npm test` corre vitest sobre `src/**/*.test.js` y `api/**/*.test.js` (127 tests en 10 archivos al 2026-09-05). Antes del 2026-08-22 no había ningún test en el repo. `vitest.config.js` está separado de `vite.config.js` a propósito (no carga el plugin de React ni VitePWA, innecesario para funciones puras) y corre en `environment: 'node'`. Cobertura actual: `api/fixer.js` (cross-rate), `taxIdValidation.js` (6 países), `apvCalc.js`, `taxCalcCL.js`/`taxCalcDE.js` (regresión contra los cálculos reales), `fileParser.js` (dedup + sugerencia de categoría), `Subscriptions/generateAlerts` (suba de precio), `AppContext.jsx` (reducer, 36 tests por dominio), `core/db/migrations.js` (motor de migraciones de IndexedDB vía `fake-indexeddb`, ver sección de arriba). **No** cubre nada que toque DOM real ni las acciones async de `AppContext` (dependen de `document`/`Blob`/`FileReader`, fuera del alcance de este `environment: 'node'` a propósito).
 
 ## Historial: Plaid se probó y se retiró (2026-08-22)
 

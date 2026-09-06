@@ -1,9 +1,10 @@
-// src/core/db/index.js — v1.2 (+ subscriptions store)
+// src/core/db/index.js — wiring de IndexedDB. Los pasos de esquema versionados
+// viven en ./migrations.js (ver ahí antes de tocar DB_VERSION).
 
 import { openDB } from 'idb'
+import { DB_VERSION, runMigrations } from './migrations.js'
 
-const DB_NAME    = 'financeos'
-const DB_VERSION = 2          // ← bump para agregar subscriptions
+const DB_NAME = 'financeos'
 let _db = null
 let _useLocalStorage = false
 
@@ -20,23 +21,8 @@ export async function getDB() {
   if (_db) return _db
   try {
     _db = await openDB(DB_NAME, DB_VERSION, {
-      upgrade(db, oldVersion) {
-        // v1 stores — crear si no existen
-        if (!db.objectStoreNames.contains('incomes')) {
-          const s = db.createObjectStore('incomes', { keyPath: 'id' })
-          s.createIndex('date', 'date'); s.createIndex('category', 'category')
-        }
-        if (!db.objectStoreNames.contains('expenses')) {
-          const s = db.createObjectStore('expenses', { keyPath: 'id' })
-          s.createIndex('date', 'date'); s.createIndex('category', 'category')
-        }
-        if (!db.objectStoreNames.contains('budgets'))       db.createObjectStore('budgets',       { keyPath: 'id' })
-        if (!db.objectStoreNames.contains('debts'))         db.createObjectStore('debts',         { keyPath: 'id' })
-        if (!db.objectStoreNames.contains('goals'))         db.createObjectStore('goals',         { keyPath: 'id' })
-        if (!db.objectStoreNames.contains('settings'))      db.createObjectStore('settings')
-        // v2 — subscriptions
-        if (!db.objectStoreNames.contains('subscriptions')) db.createObjectStore('subscriptions', { keyPath: 'id' })
-        if (!db.objectStoreNames.contains('importBatches')) db.createObjectStore('importBatches', { keyPath: 'id' })
+      upgrade(db, oldVersion, newVersion, transaction) {
+        runMigrations(db, oldVersion, newVersion, transaction)
       },
       blocked()    { _db?.close(); _db = null },
       blocking()   { _db?.close(); _db = null },
